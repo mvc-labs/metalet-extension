@@ -1,0 +1,145 @@
+<script lang="ts" setup>
+import { ref, computed, Ref, inject, toRaw } from 'vue'
+import { useRoute } from 'vue-router'
+import browser from 'webextension-polyfill'
+import { Wallet } from 'meta-contract'
+
+import { useBalanceQuery } from '../../queries/balance'
+import { prettierBalance, sleep } from '../../lib/helpers'
+import { getAddress } from '../../lib/account'
+import Modal from '../../components/Modal.vue'
+import assets from '../../data/assets'
+
+const route = useRoute()
+const symbol: Ref<string> = ref(route.query.symbol as string)
+const asset = computed(() => assets.find((asset) => asset.symbol === symbol.value))
+
+const address = ref('')
+getAddress().then((addr) => {
+  address.value = addr!
+})
+
+// form
+const amount = ref('')
+const amountInSats = computed(() => {
+  const _amount = Number(amount.value)
+  if (Number.isNaN(amount)) return 0
+  return _amount * 1e8
+})
+const recipient = ref('')
+
+const isOpenConfirmModal = ref(false)
+const popConfirm = () => {
+  isOpenConfirmModal.value = true
+}
+
+const enabled = computed(() => !!address.value)
+const { isLoading, data: balance, error } = useBalanceQuery(address, 'MVC', { enabled })
+const wallet = inject<Ref<Wallet>>('wallet')!
+
+const notifying = inject<Ref<boolean>>('notifying')!
+const notificationTitle = ref('')
+const notificationContent = ref('')
+const notificationType = ref<'success' | 'error'>('success')
+
+const operationLock = ref(false)
+async function send() {
+  if (operationLock.value) return
+
+  operationLock.value = true
+  const walletInstance = toRaw(wallet.value)
+  const txId = await walletInstance.send(recipient.value, amountInSats.value).catch((err) => {
+    browser.runtime.sendMessage({ err })
+    isOpenConfirmModal.value = false
+    notificationTitle.value = 'Transaction Failed'
+    notificationContent.value = err.message
+    notificationType.value = 'error'
+    notifying.value = true
+  })
+  if (txId) {
+    browser.runtime.sendMessage({ txId })
+    isOpenConfirmModal.value = false
+    notificationTitle.value = 'Transaction Sent'
+    notificationContent.value = `${amount.value} SPACE`
+    notifying.value = true
+  }
+
+  operationLock.value = false
+}
+</script>
+
+<template>
+  <div class="mt-8 flex flex-col items-center gap-y-8">
+    <Notification :title="notificationTitle" :content="notificationContent" :type="notificationType" />
+    <img :src="asset!.logo" alt="" class="h-16 w-16 rounded-xl" />
+
+    <div class="space-y-3 self-stretch">
+      <!-- address input -->
+      <input class="main-input w-full !rounded-xl !p-4 text-sm" placeholder="Recipient's address" v-model="recipient" />
+
+      <!-- amount input -->
+      <div class="relative">
+        <input class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 text-sm" placeholder="Amount" v-model="amount" />
+        <!-- unit -->
+        <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500">
+          <div class="border-l border-solid border-gray-500 px-4 py-1">SPACE</div>
+        </div>
+      </div>
+
+      <!-- balance -->
+      <div class="flex items-center gap-x-2 text-xs text-gray-500">
+        <div class="">Your Balance:</div>
+        <div class="" v-if="isLoading">--</div>
+        <div class="" v-else-if="error">Error</div>
+        <div class="" v-else-if="balance">{{ prettierBalance(balance) }}</div>
+      </div>
+    </div>
+
+    <!-- send -->
+    <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="popConfirm">Send</button>
+
+    <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
+      <template #title>Confirm Transaction</template>
+
+      <template #body>
+        <div class="mt-4 space-y-4">
+          <div class="space-y-1">
+            <div class="label">Amount</div>
+            <div class="value">{{ amount }} SPACE</div>
+          </div>
+          <div class="space-y-1">
+            <div class="label">Recipient Address</div>
+            <div class="value break-all text-sm">{{ recipient }}</div>
+          </div>
+          <!-- <div class="space-y-1">
+            <div class="label">Network Fee</div>
+            <div class="value">100 SPACE</div>
+          </div> -->
+        </div>
+      </template>
+
+      <template #control>
+        <div class="" v-if="operationLock">
+          <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Operating...</div>
+        </div>
+        <div class="grid grid-cols-2 gap-x-4" v-else>
+          <button
+            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
+            @click="isOpenConfirmModal = false"
+          >
+            Cancel
+          </button>
+          <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="send">
+            Confirm
+          </button>
+        </div>
+      </template>
+    </Modal>
+  </div>
+</template>
+
+<style lang="css" scoped>
+.label {
+  @apply text-sm text-gray-500;
+}
+</style>
