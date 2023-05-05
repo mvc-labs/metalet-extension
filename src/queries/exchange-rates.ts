@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/vue-query'
 import axios from 'axios'
 import { ComputedRef, Ref } from 'vue'
 
-import { SHOW_API_HOST } from '../data/hosts'
+import { MVC_API_HOST } from '../data/hosts'
 
 export type Rate = {
   symbol: string
@@ -15,7 +15,7 @@ export type Rate = {
 }
 
 export const fetchExchangeRates = async (): Promise<Rate[]> => {
-  const response = await axios.get(`${SHOW_API_HOST}/metaid-base/v1/exchange/rates`)
+  const response = await axios.get(`${MVC_API_HOST}/metaid-base/v1/exchange/rates`)
 
   return response.data.result.rates
 }

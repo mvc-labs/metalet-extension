@@ -2,7 +2,7 @@ import { API_NET, API_TARGET, FtManager } from 'meta-contract'
 import { getNetwork } from '../network'
 import { getCurrentAccount, privateKey } from '../account'
 import { FEEB } from '../../data/config'
-import { PROXY_HOST, PROXY_TESTNET_HOST } from '../../data/hosts'
+import { METASV_HOST, METASV_TESTNET_HOST } from '../../data/hosts'
 
 export async function process({
   codehash,
@@ -18,7 +18,7 @@ export async function process({
 }) {
   const network: API_NET = (await getNetwork()) as API_NET
   const purse = await getCurrentAccount().then((account) => privateKey.value)
-  const apiHost = network === API_NET.MAIN ? PROXY_HOST : PROXY_TESTNET_HOST
+  const apiHost = network === API_NET.MAIN ? METASV_HOST : METASV_TESTNET_HOST
 
   const ftManager = new FtManager({
     network,
@@ -51,7 +51,7 @@ export async function estimate({
 }) {
   const network: API_NET = (await getNetwork()) as API_NET
   const purse = await getCurrentAccount().then((account) => privateKey.value)
-  const apiHost = network === API_NET.MAIN ? PROXY_HOST : PROXY_TESTNET_HOST
+  const apiHost = network === API_NET.MAIN ? METASV_HOST : METASV_TESTNET_HOST
 
   const ftManager = new FtManager({
     network,

@@ -1,11 +1,11 @@
 import * as TransferToken from '../lib/actions/transfer-token'
 import * as Transfer from '../lib/actions/transfer'
-import * as SignTx from '../lib/actions/sign-tx'
 import * as Connect from '../lib/actions/connect'
 import * as Disconnect from '../lib/actions/disconnect'
 import * as SwitchNetwork from '../lib/actions/switch-network'
 import * as EciesEncrypt from '../lib/actions/ecies-encrypt'
 import * as EciesDecrypt from '../lib/actions/ecies-decrypt'
+import * as SignTransaction from '../lib/actions/sign-transaction'
 import * as Merge from '../lib/actions/merge'
 
 function doNothing() {}
@@ -13,7 +13,7 @@ function doNothing() {}
 type AuthorizeAction = {
   name: string
   title: string
-  description: string
+  description: string | string[]
   process: Function
   estimate: Function
   closeAfterProcess: boolean
@@ -71,11 +71,11 @@ export default {
     estimate: doNothing,
     closeAfterProcess: false,
   },
-  SignTx: {
-    name: 'Sign Tx',
-    title: 'Sign Tx',
-    description: 'Transfer tokens from my wallet to another',
-    process: SignTx.process,
+  SignTransaction: {
+    name: 'Sign a Transaction',
+    title: 'Sign a Transaction',
+    description: ['Sign a transaction with my wallet'],
+    process: SignTransaction.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },
@@ -91,7 +91,7 @@ export default {
   EciesDecrypt: {
     name: 'ECIES Decrypt',
     title: 'ECIES Decrypt',
-    description: 'Decrypt an encrypted message with ECIES algorithm',
+    description: ['Decrypt an encrypted message with ECIES algorithm'],
     process: EciesDecrypt.process,
     estimate: doNothing,
     closeAfterProcess: true,

@@ -144,7 +144,7 @@ export async function process({ tasks, broadcast = true }: { tasks: TransferTask
 // }) {
 //   const network: API_NET = await getNetwork()
 //   const purse = await getCurrentAccount().then((account) => account.privateKey.toString())
-//   const apiHost = network === API_NET.MAIN ? PROXY_HOST : PROXY_TESTNET_HOST
+//   const apiHost = network === API_NET.MAIN ? METASV_HOST : METASV_TESTNET_HOST
 
 //   const ftManager = new FtManager({
 //     network,

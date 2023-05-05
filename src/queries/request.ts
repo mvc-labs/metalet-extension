@@ -1,4 +1,4 @@
-import { METASV_TESTNET_HOST, METASV_HOST, SHOW_API_HOST, SHOW_API_TESTNET_HOST } from '../data/hosts'
+import { METASV_TESTNET_HOST, METASV_HOST } from '../data/hosts'
 import { network } from '../lib/network'
 
 async function request(url: string, options = {}) {
@@ -26,14 +26,6 @@ export const metasvApi = (path: string) => {
   return {
     get: (params?: any) => request(`${metasvHost}${path}`, { method: 'GET', params }),
     post: (data?: any) => request(`${metasvHost}${path}`, { method: 'POST', data }),
-  }
-}
-
-export const showApi = (path: string) => {
-  const showHost = network.value === 'mainnet' ? SHOW_API_HOST : SHOW_API_TESTNET_HOST
-  return {
-    get: (params?: any) => request(`${showHost}${path}`, { method: 'GET', params }),
-    post: (data?: any) => request(`${showHost}${path}`, { method: 'POST', data }),
   }
 }
 

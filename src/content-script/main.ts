@@ -12,15 +12,11 @@ import {
   switchNetwork,
   eciesEncrypt,
   eciesDecrypt,
-  // transferAll,
-  // signTransaction,
-  // signTx,
+  signTransaction,
 } from './actions'
 
 type Metalet = {
-  // signTransaction: any
   //   signMessage: any
-  // signTx: any
   connect: any
   disconnect: any
   isConnected: any
@@ -30,6 +26,7 @@ type Metalet = {
   getPublicKey: any
   getBalance: any
   merge: any
+  signTransaction: any
   //   getUtxos: any
   //   getActivities: any
   transfer: any
@@ -71,10 +68,10 @@ const metalet: Metalet = {
   getBalance,
   transfer,
   merge,
+  signTransaction,
 
   eciesEncrypt,
   eciesDecrypt,
-  // signTx,
   // signTransaction,
   // transferAll,
   token: {

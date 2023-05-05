@@ -14,7 +14,7 @@ import Disconnect from './Disconnect.vue'
 import SwitchNetwork from './SwitchNetwork.vue'
 import EciesEncrypt from './EciesEncrypt.vue'
 import EciesDecrypt from './EciesDecrypt.vue'
-import SignTx from './SignTx.vue'
+import SignTransaction from './SignTransaction.vue'
 import Merge from './Merge.vue'
 import { getBrowserHost } from '../../lib/host'
 import { LinkIcon } from '@heroicons/vue/20/solid'
@@ -97,6 +97,30 @@ const runAction = async () => {
     exit()
   }
 }
+
+const cancelAction = async () => {
+  // 发送消息给 content-script-tab
+  const tab = (
+    await chrome.tabs.query({
+      active: true,
+      windowType: 'normal',
+    })
+  ).find((tab) => tab.id === Number(tabId))
+  if (tab?.id) {
+    const response = {
+      nonce,
+      channel: 'from-metaidwallet',
+      action: `respond-${actionName}`,
+      host: host as string,
+      res: {
+        status: 'canceled',
+      },
+    }
+    chrome.tabs.sendMessage(tab.id, response)
+  }
+
+  exit()
+}
 </script>
 
 <template>
@@ -153,14 +177,14 @@ const runAction = async () => {
       <SwitchNetwork v-if="actionName === 'SwitchNetwork'" />
       <EciesEncrypt v-if="actionName === 'EciesEncrypt'" :params="params" />
       <EciesDecrypt v-if="actionName === 'EciesDecrypt'" :params="params" />
-      <SignTx v-if="actionName === 'SignTx'" :params="params" />
+      <SignTransaction v-if="actionName === 'SignTransaction'" :params="params" />
     </div>
 
     <!-- buttons -->
     <div class="mt-8 grid grid-cols-2 gap-x-4 self-stretch">
       <button
         class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-500"
-        @click="exit"
+        @click="cancelAction"
       >
         Cancel
       </button>

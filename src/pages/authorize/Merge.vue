@@ -6,7 +6,7 @@ const action = actions.Merge
 </script>
 
 <template>
-  <ul class="h-64 space-y-4 overflow-y-auto rounded-lg bg-gray-100 p-4 text-sm">
+  <ul class="h-48 space-y-4 overflow-y-auto rounded-lg bg-gray-100 p-4 text-sm">
     <h3 class="text-base font-bold">{{ action.title }}</h3>
 
     <div class="mt-4 flex items-start gap-x-2">

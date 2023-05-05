@@ -1,11 +1,12 @@
 import browser from 'webextension-polyfill'
 import actions from './data/query-actions'
 import { getNetwork } from './lib/network'
+import { NOTIFICATION_HEIGHT, NOTIFICATION_WIDTH } from './data/config'
 type ActionType = keyof typeof actions
 
 getNetwork()
 
-browser.runtime.onMessage.addListener((msg, sender, response) => {
+browser.runtime.onMessage.addListener(async (msg, sender, response) => {
   console.log({ msg })
   // 授权请求
   if (msg.action?.startsWith('authorize')) {
@@ -27,11 +28,48 @@ browser.runtime.onMessage.addListener((msg, sender, response) => {
 
     let popupUrl = browser.runtime.getURL(rawUrl)
     popupUrl += `?${params.toString()}`
+
+    let top = 0
+    let left = 0
+    const lastFocused = await browser.windows.getLastFocused()
+    top = lastFocused.top!
+    left = lastFocused.left! + lastFocused.width! - NOTIFICATION_WIDTH
     // 创建浏览器窗口打开 popup 页面
-    browser.windows.create({
+    const popupWindow = await browser.windows.create({
       url: popupUrl,
       type: 'popup',
+      width: NOTIFICATION_WIDTH,
+      height: NOTIFICATION_HEIGHT,
+      top,
+      left,
     })
+
+    if (popupWindow.id) {
+      // 给弹出窗口的关闭事件添加监听，如果用户关闭了弹窗，则返回取消
+      browser.windows.onRemoved.addListener(async (windowId) => {
+        if (windowId === popupWindow.id) {
+          // 发送消息给 content-script-tab
+          const tab = (
+            await chrome.tabs.query({
+              active: true,
+              windowType: 'normal',
+            })
+          ).find((tab) => tab.id === Number(sender.tab?.id))
+          if (tab?.id) {
+            const response = {
+              nonce: msg.nonce,
+              channel: 'from-metaidwallet',
+              action: `respond-${actionName}`,
+              host: msg.host as string,
+              res: {
+                status: 'canceled',
+              },
+            }
+            chrome.tabs.sendMessage(tab.id, response)
+          }
+        }
+      })
+    }
 
     return true
   }

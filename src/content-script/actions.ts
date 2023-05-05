@@ -93,6 +93,18 @@ export async function eciesDecrypt(params: { encrypted: string }) {
   return await createAction('EciesDecrypt', 'authorize', params)
 }
 
+type SigningTransaction = {
+  txHex: string
+  address: string
+  inputIndex: number
+  scryptHex: string
+  satoshis: number
+  sigtype: number
+}
+export async function signTransaction(params: { transaction: SigningTransaction }) {
+  return await createAction('SignTransaction', 'authorize', params)
+}
+
 type TransferTask = {
   genesis?: string
   codehash?: string
@@ -117,30 +129,6 @@ export async function merge(params: any) {
 // }) {
 //   return await createAction('Transfer', 'authorize', params)
 // }
-
-export async function signTransaction(params: {
-  transaction: {
-    to: string
-    value: string
-    data: string
-    chainId: number
-  }
-}) {
-  return await createAction('SignTransaction', 'authorize', params)
-}
-
-export async function signTx(params: {
-  list: {
-    txHex: string
-    address: string
-    inputIndex: number
-    scriptHex: string
-    satoshis: number
-    sigtype: number
-  }
-}) {
-  return await createAction('SignTx', 'authorize', params)
-}
 
 // tokens-related
 export async function getTokenBalance(params?: { genesis: string; codehash: string }) {
