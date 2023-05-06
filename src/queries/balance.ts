@@ -28,7 +28,7 @@ export const useBalanceQuery = (address: Ref, symbol: string, options: { enabled
     queryKey: ['balance', { address: address.value, symbol }],
     queryFn: () => {
       switch (symbol) {
-        case 'MVC':
+        case 'SPACE':
           return fetchSpaceBalance(address.value)
         default:
           return doNothing()

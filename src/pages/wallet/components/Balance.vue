@@ -17,7 +17,7 @@ getAddress().then((add) => {
 
 const enabled = computed(() => !!address.value)
 
-const { isLoading, data: balance } = useBalanceQuery(address, 'MVC', { enabled })
+const { isLoading, data: balance } = useBalanceQuery(address, 'SPACE', { enabled })
 const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled })
 
 const exchange = computed(() => {

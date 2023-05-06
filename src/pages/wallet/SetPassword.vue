@@ -121,6 +121,12 @@ const next = async () => {
 
           <div class="w-20 text-right text-sm">{{ securityLevel }}</div>
         </div>
+
+        <!-- security level tip -->
+        <p class="mt-4 text-xs text-gray-400">
+          Passwords must be at least 8 characters in length and contain at least one uppercase letter, one lowercase
+          letter, one number, and one special character.
+        </p>
       </template>
 
       <template v-if="phase === 2">

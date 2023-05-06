@@ -30,6 +30,10 @@ export async function lock() {
   await storageManager.set('locked', true)
 }
 
+export async function isLocked() {
+  return await storageManager.get('locked', false)
+}
+
 export async function unlock(password: string) {
   const isCorrect = await checkPassword(password)
   if (!isCorrect) {
@@ -46,6 +50,7 @@ type PasswordManager = {
   set: (password: string) => Promise<void>
   lock: () => Promise<void>
   unlock: (password: string) => Promise<boolean>
+  isLocked: () => Promise<boolean>
   check: (credential: string) => Promise<boolean>
 }
 const passwordManager = {} as PasswordManager
@@ -54,6 +59,7 @@ passwordManager.get = getPassword
 passwordManager.set = setPassword
 passwordManager.lock = lock
 passwordManager.unlock = unlock
+passwordManager.isLocked = isLocked
 passwordManager.check = checkPassword
 
 export default passwordManager

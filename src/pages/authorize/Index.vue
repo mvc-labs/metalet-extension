@@ -168,7 +168,7 @@ const cancelAction = async () => {
     <div class="mt-4 text-sm text-gray-500">{{ host }} would like to:</div>
 
     <!-- details -->
-    <div class="mt-4 grow self-stretch">
+    <div class="my-4 grow self-stretch overflow-y-auto rounded-lg bg-gray-50 px-4 py-6 text-sm">
       <TransferToken v-if="actionName === 'TokenTransfer'" :params="params" />
       <Transfer v-if="actionName === 'Transfer'" :params="params" />
       <Connect v-if="actionName === 'Connect'" />

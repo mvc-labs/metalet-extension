@@ -27,7 +27,7 @@ export default [
   //   decimal: 8,
   // },
   {
-    symbol: 'MVC',
+    symbol: 'SPACE',
     logo: SpaceLogoImg,
     tokenName: 'SPACE',
     isNative: true,

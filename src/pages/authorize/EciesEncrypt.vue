@@ -14,20 +14,18 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="space-y-6 rounded-lg bg-gray-100 p-4 text-sm">
-    <h3 class="text-base font-bold">{{ action.title }}</h3>
+  <h3 class="text-base font-bold">{{ action.title }}</h3>
 
-    <ul class="space-y-4">
-      <li v-for="access in accesses" class="flex items-start gap-x-2">
-        <CheckBadgeIcon class="h-6 w-6 text-primary-blue" />
-        <div class="text-sm text-gray-700">{{ access }}</div>
-      </li>
-    </ul>
+  <ul class="mt-6 space-y-4">
+    <li v-for="access in accesses" class="flex items-start gap-x-2">
+      <CheckBadgeIcon class="h-6 w-6 text-primary-blue" />
+      <div class="text-sm text-gray-700">{{ access }}</div>
+    </li>
+  </ul>
 
-    <!-- message -->
-    <div class="space-y-2">
-      <div class="label">message</div>
-      <div class="value">{{ params.message }}</div>
-    </div>
+  <!-- message -->
+  <div class="mt-4 space-y-2">
+    <div class="label">message</div>
+    <div class="value">{{ params.message }}</div>
   </div>
 </template>

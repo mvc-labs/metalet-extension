@@ -16,9 +16,10 @@ const symbol = route.params.symbol as string
 const asset = computed(() => assets.find((asset) => asset.symbol === symbol))
 
 const enabled = computed(() => !!address.value && asset.value!.queryable)
-
 const { isLoading, data: balance } = useBalanceQuery(address, symbol, { enabled })
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(symbol)
+
+const rateEnabled = computed(() => !!address.value && asset.value?.symbol === 'SPACE')
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled: rateEnabled })
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
@@ -60,7 +61,7 @@ const toReceive = () => {
           <button class="secondary-btn col-span-1 py-3" @click="toReceive">Receive</button>
         </div>
 
-        <Activities class="mt-8 self-stretch" />
+        <Activities class="mt-8 self-stretch" :asset="asset" />
       </template>
 
       <div class="text-gray-500" v-else>No Service for {{ asset?.symbol }} yet.</div>

@@ -30,6 +30,10 @@ export const prettifyAddress = (address: string) => {
   return `${address.slice(0, 6)}...${address.slice(-6)}`
 }
 
+export const shortestAddress = (address: string) => {
+  return `${address.slice(0, 4)}...${address.slice(-4)}`
+}
+
 export const toTx = async (txid: string, browserHost: string) => {
   window.open(`${browserHost}/tx/${txid}`, '_blank')
 }

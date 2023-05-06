@@ -14,7 +14,7 @@ getAddress().then((add) => {
 const enabled = computed(() => !!address.value)
 
 const props = defineProps<{
-  asset?: Token
+  asset?: Token | any
 }>()
 
 const { isLoading, isError, data, error } = useActivitiesQuery(address, { asset: props.asset }, { enabled })
@@ -31,7 +31,13 @@ const { isLoading, isError, data, error } = useActivitiesQuery(address, { asset:
     <div v-else-if="isError" class="py-4 text-center">Error: {{ error }}</div>
 
     <div v-else-if="data" class="space-y-2">
-      <ActivityItem v-if="data.length" v-for="activity in data" :key="activity.txid" :activity="activity" />
+      <ActivityItem
+        v-if="data.length"
+        v-for="activity in data"
+        :key="activity.txid"
+        :activity="activity"
+        :asset="asset"
+      />
 
       <div v-else class="flex flex-col items-center justify-center gap-y-2 pt-8 pb-4 text-center">
         <InboxIcon class="h-8 w-8 text-gray-300" />

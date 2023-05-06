@@ -18,9 +18,10 @@ getAddress().then((add) => {
 })
 
 const enabled = computed(() => !!address.value && props.asset.queryable)
+const rateEnabled = computed(() => !!address.value && props.asset.symbol === 'SPACE')
 
 const { isLoading, data: balance } = useBalanceQuery(address, props.asset.symbol, { enabled })
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(props.asset.symbol)
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled: rateEnabled })
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {

@@ -3,9 +3,11 @@ import type { Activity } from '../../../queries/activities'
 import { formatTimestamp, formatTxId, toTx } from '../../../lib/helpers'
 import { computed } from 'vue'
 import { getBrowserHost } from '../../../lib/host'
+import type { Token } from '../../../queries/tokens'
 
 const props = defineProps<{
   activity: Activity
+  asset: Token
 }>()
 
 const isConfirmed = computed(() => {
@@ -15,14 +17,16 @@ const isConfirmed = computed(() => {
 const difference = computed(() => {
   // 通过outcome和income来判断是收入还是支出
   const { outcome, income } = props.activity
+  const { symbol, decimal } = props.asset
   let display
   let displayClass
+
   if (outcome > income) {
-    display = `-${outcome - income}`
-    displayClass = 'text-red-500'
+    display = `-${(outcome - income) / 10 ** decimal} ${symbol}`
+    displayClass = 'text-red-700'
   } else if (outcome < income) {
-    display = `+${income - outcome}`
-    displayClass = 'text-green-500'
+    display = `+${(income - outcome) / 10 ** decimal} ${symbol}`
+    displayClass = 'text-green-700'
   } else {
     display = '-'
     displayClass = 'text-gray-500'
@@ -39,6 +43,7 @@ const toActivityTx = async () => {
   const host = await getBrowserHost()
   toTx(txid, host as string)
 }
+console.log({ asset: props.asset })
 </script>
 
 <template>
@@ -56,11 +61,10 @@ const toActivityTx = async () => {
       <div :class="['text-sm text-gray-500']">{{ formatTimestamp(activity.time) }}</div>
     </div>
 
-    <div :class="[difference.displayClass, 'text-right  text-lg font-bold']">{{ difference.display }} sats</div>
+    <div :class="[difference.displayClass, 'text-right  text-lg font-bold']">{{ difference.display }}</div>
 
     <div class="flex items-center justify-end gap-x-2">
-      <div class="gradient-bg rounded px-2 py-0.5 text-xs text-white">TX</div>
-      <div class="cursor-pointer text-xs text-gray-300 hover:underline" @click="toActivityTx">
+      <div class="cursor-pointer text-xs text-gray-400 hover:underline" @click="toActivityTx">
         {{ formatTxId(activity.txid) }}
       </div>
     </div>

@@ -43,7 +43,7 @@ const saveAccount = async (backup: boolean) => {
       mainnetAddress,
       testnetPrivateKey: testnetPrivateKey.toString(),
       testnetAddress,
-      assetsDisplay: ['MVC'],
+      assetsDisplay: ['SPACE'],
     }
 
     await addAccount(account)

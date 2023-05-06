@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import { Ref, ref } from 'vue'
-
 import actions from '../../data/authorize-actions'
 import type { TransferTask } from '../../lib/actions/transfer'
+import TransferRow from './components/TransferRow.vue'
 
 const action = actions.Transfer
 
@@ -14,24 +13,33 @@ const props = defineProps<{
 </script>
 
 <template>
-  <ul class="h-64 space-y-4 overflow-y-auto rounded-lg bg-gray-100 p-4 text-sm">
-    <h3 class="text-base font-bold">Transfer</h3>
-    <div class="space-y-4" v-for="(task, index) in params.tasks" :key="index">
-      <div class="space-y-2" v-for="receiver in task.receivers">
-        <div class="">
-          <div class="label">receiver address</div>
-          <div class="value" :title="receiver.address">
-            {{ receiver.address }}
-          </div>
-        </div>
+  <h3 class="text-base font-bold">Transfer</h3>
 
-        <div class="">
-          <div class="label">amount</div>
-          <div class="value">
-            {{ receiver.amount }}
-          </div>
-        </div>
-      </div>
-    </div>
-  </ul>
+  <div class="mt-4">
+    <table class="w-full border-collapse rounded-lg text-center">
+      <thead class="">
+        <tr>
+          <th class="th-cell">Asset</th>
+          <th class="th-cell">Amount</th>
+          <th class="th-cell">Receiver</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template v-for="(task, taskIndex) in params.tasks" :key="taskIndex">
+          <TransferRow
+            v-for="(receiver, receiverIndex) in task.receivers"
+            :task="task"
+            :receiver="receiver"
+            :key="receiverIndex"
+          />
+        </template>
+      </tbody>
+    </table>
+  </div>
 </template>
+
+<style scoped>
+.th-cell {
+  @apply border border-gray-200 py-2 px-4 font-bold text-gray-500;
+}
+</style>

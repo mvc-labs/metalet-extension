@@ -4,13 +4,14 @@ import { getAddress, privateKey } from '../account'
 import { FEEB } from '../../data/config'
 import { getApiHost } from '../host'
 
+export type Receiver = {
+  address: string
+  amount: string
+}
 export type TransferTask = {
   genesis?: string
   codehash?: string
-  receivers: {
-    address: string
-    amount: string
-  }[]
+  receivers: Receiver[]
 }
 export async function process({ tasks, broadcast = true }: { tasks: TransferTask[]; broadcast?: boolean }) {
   console.log('here')

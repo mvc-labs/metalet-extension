@@ -34,7 +34,7 @@ const popConfirm = () => {
 }
 
 const enabled = computed(() => !!address.value)
-const { isLoading, data: balance, error } = useBalanceQuery(address, 'MVC', { enabled })
+const { isLoading, data: balance, error } = useBalanceQuery(address, 'SPACE', { enabled })
 const wallet = inject<Ref<Wallet>>('wallet')!
 
 const notifying = inject<Ref<boolean>>('notifying')!

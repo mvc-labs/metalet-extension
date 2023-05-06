@@ -38,7 +38,7 @@ export const useActivitiesQuery = (address: Ref, params: any, options?: { enable
   useQuery({
     queryKey: ['activities', address],
     queryFn: () => {
-      if (params.asset) {
+      if (params.asset && params.asset.genesis) {
         return fetchTokenActivities(address.value, params.asset)
       }
 
