@@ -17,33 +17,29 @@ const password = ref('')
 const confirmPassword = ref('')
 const isExact = ref(true)
 
-enum SecurityLevel {
-  TooWeak = 'Too weak',
-  Weak = 'Weak',
-  Medium = 'Medium',
-  Strong = 'Strong',
-}
-const barLength = computed(() => {
-  switch (securityLevel.value) {
-    case SecurityLevel.TooWeak:
-      return 10
-    case SecurityLevel.Weak:
-      return 33
-    case SecurityLevel.Medium:
-      return 66
-    case SecurityLevel.Strong:
-      return 100
-  }
-})
-const securityLevel = computed(() => {
-  return passwordStrength(password.value).value as SecurityLevel
-})
+// enum SecurityLevel {
+//   TooWeak = 'Too weak',
+//   Weak = 'Weak',
+//   Medium = 'Medium',
+//   Strong = 'Strong',
+// }
+// const barLength = computed(() => {
+//   switch (securityLevel.value) {
+//     case SecurityLevel.TooWeak:
+//       return 10
+//     case SecurityLevel.Weak:
+//       return 33
+//     case SecurityLevel.Medium:
+//       return 66
+//     case SecurityLevel.Strong:
+//       return 100
+//   }
+// })
+// const securityLevel = computed(() => {
+//   return passwordStrength(password.value).value as SecurityLevel
+// })
 const canPass = computed(() => {
-  return (
-    securityLevel.value !== SecurityLevel.TooWeak &&
-    password.value.length > 0 &&
-    securityLevel.value !== SecurityLevel.Weak
-  )
+  return password.value.length >= 8
 })
 
 // 按钮
@@ -99,10 +95,9 @@ const next = async () => {
         </div>
 
         <!-- securityLevel -->
-        <div class="mt-4 flex items-center justify-between">
+        <!-- <div class="mt-4 flex items-center justify-between">
           <div class="flex grow items-center justify-start gap-x-4">
             <span class="text-sm text-gray-500">Security level</span>
-            <!-- bar -->
             <div class="relative h-2 grow rounded-full bg-gray-200">
               <div
                 :class="[
@@ -120,13 +115,10 @@ const next = async () => {
           </div>
 
           <div class="w-20 text-right text-sm">{{ securityLevel }}</div>
-        </div>
+        </div> -->
 
         <!-- security level tip -->
-        <p class="mt-4 text-xs text-gray-400">
-          Passwords must be at least 8 characters in length and contain at least one uppercase letter, one lowercase
-          letter, one number, and one special character.
-        </p>
+        <p class="mt-4 text-xs text-gray-400">Passwords must be at least 8 characters in length.</p>
       </template>
 
       <template v-if="phase === 2">
