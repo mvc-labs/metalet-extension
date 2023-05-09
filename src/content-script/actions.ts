@@ -81,6 +81,10 @@ export async function getPublicKey() {
   return await createAction('GetPublicKey', 'query')
 }
 
+export async function getXPublicKey() {
+  return await createAction('GetXPublicKey', 'query')
+}
+
 export async function getBalance() {
   return await createAction('GetBalance', 'query')
 }

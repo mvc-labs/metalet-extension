@@ -4,6 +4,7 @@ import {
   disconnect,
   getAddress,
   getPublicKey,
+  getXPublicKey,
   getBalance,
   getTokenBalance,
   transfer,
@@ -24,6 +25,7 @@ type Metalet = {
   switchNetwork: any
   getAddress: any
   getPublicKey: any
+  getXPublicKey: any
   getBalance: any
   merge: any
   signTransaction: any
@@ -65,6 +67,7 @@ const metalet: Metalet = {
   switchNetwork,
   getAddress,
   getPublicKey,
+  getXPublicKey,
   getBalance,
   transfer,
   merge,

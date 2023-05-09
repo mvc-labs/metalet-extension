@@ -3,6 +3,7 @@ import { fetchSpaceBalance } from '../queries/balance'
 import { getStorage, setStorage } from './storage'
 import { generateRandomString } from './helpers'
 import { getNetwork } from './network'
+import { mvc } from 'meta-contract'
 
 export type Account = {
   id: string
@@ -148,11 +149,27 @@ export async function getPublicKey() {
     return null
   }
 
-  return 'not implemented yet'
+  const network = await getNetwork()
+  const privateKey = mvc.PrivateKey.fromString(
+    network === 'mainnet' ? account.mainnetPrivateKey : account.testnetPrivateKey
+  )
 
-  // const privateKey = PrivateKey.fromString(account.privateKey)
+  return privateKey.toPublicKey().toString()
+}
 
-  // return privateKey.toPublicKey().toString()
+export async function getXPublicKey() {
+  console.log('hi')
+  const account = await getCurrentAccount()
+  if (!account) {
+    return null
+  }
+
+  const network = await getNetwork()
+  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+  const xPublicKey = mneObj.toHDPrivateKey('', network).xpubkey.toString()
+  console.log('xPublicKey', xPublicKey)
+
+  return xPublicKey
 }
 
 export async function getBalance() {
@@ -175,6 +192,7 @@ type AccountManager = {
   connect: (accountId: string) => Promise<boolean>
   getAddress: () => Promise<string | null>
   getPublicKey: () => Promise<string | null>
+  getXPublicKey: () => Promise<string | null>
   getBalance: () => Promise<Awaited<ReturnType<typeof fetchSpaceBalance>> | null>
 }
 
@@ -187,6 +205,7 @@ accountManager.add = addAccount
 accountManager.connect = connectAccount
 accountManager.getAddress = getAddress
 accountManager.getPublicKey = getPublicKey
+accountManager.getXPublicKey = getXPublicKey
 accountManager.getBalance = getBalance
 accountManager.removeCurrent = removeCurrentAccount
 
