@@ -128,7 +128,7 @@ export async function addAccount(account: Omit<Account, 'id' | 'name'>) {
   }
 }
 
-export async function getAddress() {
+export async function getAddress(params?: { path?: string }): Promise<any> {
   const account = await getCurrentAccount()
   if (!account) {
     return null
@@ -138,23 +138,56 @@ export async function getAddress() {
 
   address.value = network === 'mainnet' ? account.mainnetAddress : account.testnetAddress
   privateKey.value = network === 'mainnet' ? account.mainnetPrivateKey : account.testnetPrivateKey
-  // address.value = 'mtvbChgf3b3sxZkBhwtbJxB1zFmoi79Ytx'
 
-  return address.value
+  if (!(params && params.path)) {
+    return address.value
+  }
+
+  // 根据路径导出
+  try {
+    const path = account.path
+    const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+    const hdpk = mneObj.toHDPrivateKey('', network)
+    const privateKey = hdpk.deriveChild(`m/44'/${path}'/0'/${params.path}`).privateKey
+
+    return privateKey.toAddress(network).toString()
+  } catch (e: any) {
+    return {
+      message: e.message,
+      status: 'failed',
+    }
+  }
 }
 
-export async function getPublicKey() {
+export async function getPublicKey(params?: { path?: string }) {
   const account = await getCurrentAccount()
   if (!account) {
     return null
   }
 
   const network = await getNetwork()
-  const privateKey = mvc.PrivateKey.fromString(
-    network === 'mainnet' ? account.mainnetPrivateKey : account.testnetPrivateKey
-  )
 
-  return privateKey.toPublicKey().toString()
+  if (!(params && params.path)) {
+    const privateKey = mvc.PrivateKey.fromString(
+      network === 'mainnet' ? account.mainnetPrivateKey : account.testnetPrivateKey
+    )
+
+    return privateKey.toPublicKey().toString()
+  }
+
+  // 根据路径导出
+  try {
+    const path = account.path
+    const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+    const hdpk = mneObj.toHDPrivateKey('', network)
+    const privateKey = hdpk.deriveChild(`m/44'/${path}'/0'/${params.path}`).privateKey
+    return privateKey.toPublicKey().toString()
+  } catch (e: any) {
+    return {
+      message: e.message,
+      status: 'failed',
+    }
+  }
 }
 
 export async function getXPublicKey() {
@@ -190,8 +223,15 @@ type AccountManager = {
   set: (account: Account) => Promise<void>
   add: (account: Omit<Account, 'id'>) => Promise<void>
   connect: (accountId: string) => Promise<boolean>
-  getAddress: () => Promise<string | null>
-  getPublicKey: () => Promise<string | null>
+  getAddress: ({ path }: { path?: string }) => Promise<any>
+  getPublicKey: ({ path }: { path?: string }) => Promise<
+    | string
+    | null
+    | {
+        message: string
+        status: string
+      }
+  >
   getXPublicKey: () => Promise<string | null>
   getBalance: () => Promise<Awaited<ReturnType<typeof fetchSpaceBalance>> | null>
 }

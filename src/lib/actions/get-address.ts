@@ -2,7 +2,7 @@ import accountManager from '../account'
 import connector from '../connector'
 
 export async function process(params: any, host: string) {
-  const address = await accountManager.getAddress()
+  const address = await accountManager.getAddress(params)
 
   // 检查连接状态
   if (!address) {

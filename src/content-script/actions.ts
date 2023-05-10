@@ -73,12 +73,12 @@ export async function switchNetwork() {
   return await createAction('SwitchNetwork')
 }
 
-export async function getAddress() {
-  return await createAction('GetAddress', 'query')
+export async function getAddress(params?: { path: string }) {
+  return await createAction('GetAddress', 'query', params)
 }
 
-export async function getPublicKey() {
-  return await createAction('GetPublicKey', 'query')
+export async function getPublicKey(params?: { path: string }) {
+  return await createAction('GetPublicKey', 'query', params)
 }
 
 export async function getXPublicKey() {
