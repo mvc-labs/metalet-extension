@@ -15,7 +15,7 @@ function handleClick() {
   <!-- main -->
   <div class="-mt-4">
     <!-- 账号信息 -->
-    <AccountItem :account="account" v-if="account" />
+    <AccountItem :account="account" v-if="account" :show-network="true" />
 
     <Balance />
 

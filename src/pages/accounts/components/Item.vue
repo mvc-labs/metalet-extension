@@ -11,6 +11,7 @@ const router = useRouter()
 const props = defineProps<{
   account: Account
   showConnectButton?: boolean
+  showNetwork?: boolean
 }>()
 
 const isCopied = ref(false)
@@ -67,9 +68,17 @@ const isCurrent = computed(() => {
 
       <!-- info -->
       <div class="flex flex-col">
-        <div class="text-sm font-bold" :class="isCurrent && showConnectButton && 'text-blue-500'">
-          {{ account.name }}
+        <div class="flex gap-x-2">
+          <div class="text-sm font-bold" :class="isCurrent && showConnectButton && 'text-blue-500'">
+            {{ account.name }}
+          </div>
+          <span
+            class="text-xs bg-gray-100 rounded-sm text-gray-500 px-2 py-0.5"
+            v-if="showNetwork && network === 'testnet'"
+            >{{ network }}</span
+          >
         </div>
+
         <div class="flex items-center gap-x-1">
           <div class="text-sm text-gray-500">{{ prettifyAddress(address) }}</div>
           <ClipboardDocumentCheckIcon class="h-4 w-4 text-blue-500" v-if="isCopied" />

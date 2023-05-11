@@ -49,15 +49,6 @@ export const sign = (
   ).toString('hex')
 
   let privateKey = mvc.PrivateKey.fromWIF(wif)
-  // if (address) {
-  //   if (walletManager.checkBsvAddress(address)) {
-  //     if (address !== walletManager.getMainAddress()) {
-  //       throw new Error('unsupported address in inputInfos')
-  //     } else privateKey = bsv156.PrivateKey.fromWIF(wif)
-  //   } //传了address却不是地址，则视为path去衍生
-  //   else privateKey = bsv156.PrivateKey.fromWIF(walletManager.getWif(address)) //address :比如 /0/0
-  // } else privateKey = bsv156.PrivateKey.fromWIF(wif)
-
   let publicKey = privateKey.toPublicKey().toString()
 
   let sig = mvc.crypto.ECDSA.sign(Buffer.from(sighash, 'hex'), privateKey, 'little')
@@ -67,5 +58,6 @@ export const sign = (
     r: sig.r.toString('hex'),
     s: sig.s.toString('hex'),
     sig: sig.set({ nhashtype: sigtype }).toTxFormat().toString('hex'),
+    sigtype,
   }
 }
