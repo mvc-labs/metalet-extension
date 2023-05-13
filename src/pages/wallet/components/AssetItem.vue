@@ -68,7 +68,7 @@ const exchange = computed(() => {
 
         <template v-else-if="asset.total">
           <div class="whitespace-nowrap">
-            {{ prettifyTokenBalance(asset.total, asset.decimal) }}
+            {{ prettifyTokenBalance(asset.total, asset.decimal) + ' ' + asset.symbol }}
           </div>
         </template>
 

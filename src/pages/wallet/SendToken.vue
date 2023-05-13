@@ -1,22 +1,23 @@
 <script lang="ts" setup>
 import { ref, computed, Ref, inject, toRaw } from 'vue'
 import { useRoute } from 'vue-router'
-import browser from 'webextension-polyfill'
-import { Wallet } from 'meta-contract'
+import { API_NET, FtManager } from 'meta-contract'
 
-import { useBalanceQuery } from '../../queries/balance'
-import { prettierBalance, sleep } from '../../lib/helpers'
-import { getAddress } from '../../lib/account'
+import { prettierBalance, prettifyTokenBalance, sleep } from '../../lib/helpers'
+import { getAddress, getCurrentAccount, privateKey } from '../../lib/account'
 import Modal from '../../components/Modal.vue'
 import assets from '../../data/assets'
+import { useTokenQuery } from '../../queries/tokens'
+import { CircleStackIcon } from '@heroicons/vue/24/solid'
+import { network } from '../../lib/network'
 import { useQueryClient } from '@tanstack/vue-query'
 
 const route = useRoute()
 const symbol: Ref<string> = ref(route.query.symbol as string)
-const asset = computed(() => assets.find((asset) => asset.symbol === symbol.value))
 const queryClient = useQueryClient()
 
 const address = ref('')
+getCurrentAccount()
 getAddress().then((addr) => {
   address.value = addr!
 })
@@ -26,7 +27,7 @@ const amount = ref('')
 const amountInSats = computed(() => {
   const _amount = Number(amount.value)
   if (Number.isNaN(amount)) return 0
-  return _amount * 1e8
+  return _amount * 10 ** token.value!.decimal
 })
 const recipient = ref('')
 
@@ -36,8 +37,8 @@ const popConfirm = () => {
 }
 
 const enabled = computed(() => !!address.value)
-const { isLoading, data: balance, error } = useBalanceQuery(address, 'SPACE', { enabled })
-const wallet = inject<Ref<Wallet>>('wallet')!
+// 用户拥有的代币资产
+const { isLoading, data: token } = useTokenQuery(address, symbol.value, { enabled })
 
 const notifying = inject<Ref<boolean>>('notifying')!
 const notificationTitle = ref('')
@@ -49,23 +50,41 @@ async function send() {
   if (operationLock.value) return
 
   operationLock.value = true
-  const walletInstance = toRaw(wallet.value)
-  const txId = await walletInstance.send(recipient.value, amountInSats.value).catch((err) => {
-    isOpenConfirmModal.value = false
-    notificationTitle.value = 'Transaction Failed'
-    notificationContent.value = err.message
-    notificationType.value = 'error'
-    notifying.value = true
+
+  const ftManager = new FtManager({
+    network: network.value as API_NET,
+    purse: privateKey.value!,
   })
-  if (txId) {
+
+  const { txid } = await ftManager
+    .transfer({
+      codehash: token.value?.codehash!,
+      genesis: token.value?.genesis!,
+      senderWif: privateKey.value,
+      receivers: [
+        {
+          address: recipient.value,
+          amount: amountInSats.value.toString(),
+        },
+      ],
+    })
+    .catch((err) => {
+      isOpenConfirmModal.value = false
+      notificationTitle.value = 'Transaction Failed'
+      notificationContent.value = err.message
+      notificationType.value = 'error'
+      notifying.value = true
+    })
+  console.log({ txid })
+  if (txid) {
     isOpenConfirmModal.value = false
     notificationTitle.value = 'Transaction Sent'
-    notificationContent.value = `${amount.value} SPACE`
+    notificationContent.value = `${amount.value} ${token.value?.symbol}`
     notifying.value = true
 
     // 刷新query
-    queryClient.invalidateQueries({ 
-      queryKey: ['balance', { address: address.value, symbol: 'SPACE' }] 
+    queryClient.invalidateQueries({
+      queryKey: ['tokens', { address: address.value }],
     })
   }
 
@@ -76,7 +95,8 @@ async function send() {
 <template>
   <div class="mt-8 flex flex-col items-center gap-y-8">
     <Notification :title="notificationTitle" :content="notificationContent" :type="notificationType" />
-    <img :src="asset!.logo" alt="" class="h-16 w-16 rounded-xl" />
+    <img :src="token?.logo" alt="" class="h-16 w-16 rounded-xl" v-if="token?.logo" />
+    <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
 
     <div class="space-y-3 self-stretch">
       <!-- address input -->
@@ -86,8 +106,11 @@ async function send() {
       <div class="relative">
         <input class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 text-sm" placeholder="Amount" v-model="amount" />
         <!-- unit -->
-        <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500">
-          <div class="border-l border-solid border-gray-500 px-4 py-1">SPACE</div>
+        <div
+          class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500"
+          v-if="token?.symbol"
+        >
+          <div class="border-l border-solid border-gray-500 px-4 py-1">{{ token.symbol }}</div>
         </div>
       </div>
 
@@ -95,8 +118,9 @@ async function send() {
       <div class="flex items-center gap-x-2 text-xs text-gray-500">
         <div class="">Your Balance:</div>
         <div class="" v-if="isLoading">--</div>
-        <div class="" v-else-if="error">Error</div>
-        <div class="" v-else-if="balance">{{ prettierBalance(balance) }}</div>
+        <div class="" v-else-if="token">
+          {{ prettifyTokenBalance(token.total, token.decimal) + ' ' + token.symbol }}
+        </div>
       </div>
     </div>
 
@@ -110,7 +134,7 @@ async function send() {
         <div class="mt-4 space-y-4">
           <div class="space-y-1">
             <div class="label">Amount</div>
-            <div class="value">{{ amount }} SPACE</div>
+            <div class="value">{{ amount }} {{ token?.symbol }}</div>
           </div>
           <div class="space-y-1">
             <div class="label">Recipient Address</div>

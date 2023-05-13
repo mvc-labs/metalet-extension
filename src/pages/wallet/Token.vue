@@ -22,7 +22,7 @@ const enabled = computed(() => !!address.value)
 const { isLoading, data: token } = useTokenQuery(address, symbol, { enabled })
 
 const toSend = () => {
-  router.push(`/wallet/send?symbol=${symbol}`)
+  router.push(`/wallet/send-token?symbol=${symbol}`)
 }
 const toReceive = () => {
   router.push(`/wallet/receive?chain=${token.value!.chain}`)

@@ -53,7 +53,7 @@ function toAsset(asset: Asset) {
 </script>
 
 <template>
-  <div class="mt-8 space-y-3 text-black">
+  <div class="mt-8 space-y-2 text-black">
     <!-- Add More -->
     <div class="flex items-center justify-end">
       <button class="hover-gradient-text group flex items-center gap-x-2 text-sm" @click="toManageAssets">

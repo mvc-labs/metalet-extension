@@ -2,6 +2,7 @@ import * as VueRouter from 'vue-router'
 import Wallet from './pages/wallet/Index.vue'
 import WalletReceive from './pages/wallet/Receive.vue'
 import WalletSend from './pages/wallet/Send.vue'
+import WalletSendToken from './pages/wallet/SendToken.vue'
 import WalletImport from './pages/wallet/Import.vue'
 import Tokens from './pages/tokens/Index.vue'
 import NftCollections from './pages/nfts/Index.vue'
@@ -98,6 +99,16 @@ const routes = [
     meta: {
       secondaryHeader: true,
       headerTitle: 'Send',
+      noFooter: true,
+    },
+  },
+
+  {
+    path: '/wallet/send-token',
+    component: WalletSendToken,
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Send Token',
       noFooter: true,
     },
   },

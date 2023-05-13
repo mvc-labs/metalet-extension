@@ -120,7 +120,7 @@ const showResetModal = ref(false)
         </div>
         <div class="setting-item">
           <div class="text-gray-500">Version</div>
-          <div class="">1.5.0 (Alpha)</div>
+          <div class="">1.5.3 (Alpha)</div>
         </div>
       </div>
     </div>
@@ -131,7 +131,7 @@ const showResetModal = ref(false)
 
 <style lang="css" scoped>
 .setting-item {
-  @apply -mx-2 flex items-center justify-between py-4 px-2 transition-all duration-200 ease-in-out hover:bg-gray-300/20;
+  @apply -mx-2 flex items-center justify-between px-2 py-4 transition-all duration-200 ease-in-out hover:bg-gray-300/20;
 }
 
 .link-icon {

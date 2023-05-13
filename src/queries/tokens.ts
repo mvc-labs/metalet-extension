@@ -1,20 +1,8 @@
 import { useQuery } from '@tanstack/vue-query'
 import { metasvApi } from './request'
 import { ComputedRef, Ref } from 'vue'
-
-export type Token = {
-  codehash: string
-  genesis: string
-  name: string
-  symbol: string
-  decimal: number
-  sensibleId: string
-  utxoCount: number
-  confirmed: number
-  confirmedString: string
-  unconfirmed: number
-  unconfirmedString: string
-}
+import type { Token } from '../data/tokens'
+import tokens from '../data/tokens'
 
 export const fetchTokens = async (address: string): Promise<Token[]> => {
   const tokens: any = await metasvApi(`/contract/ft/address/${address}/balance`).get()
@@ -33,9 +21,11 @@ export const useTokensQuery = (address: Ref, options: { enabled: ComputedRef<boo
     queryFn: () => fetchTokens(address.value),
     select: (data: Token[]) => {
       return data.map((token) => {
+        // 查找token的图标
+        const tokenInfo = tokens.find((item) => item.genesis === token.genesis)
         return {
           ...token,
-          logo: '',
+          logo: tokenInfo?.logo || '',
           tokenName: token.name,
           isNative: false,
           color: 'bg-blue-100',
@@ -55,10 +45,12 @@ export const useTokenQuery = (address: Ref, symbol: string, options: { enabled: 
     queryFn: () => fetchTokens(address.value),
     select: (data: Token[]) => {
       const token = data.find((token) => token.symbol === symbol) as Token
+      // 查找token的图标
+      const tokenInfo = tokens.find((item) => item.genesis === token.genesis)
 
       return {
         ...token,
-        logo: '',
+        logo: tokenInfo?.logo || '',
         tokenName: token!.name,
         isNative: false,
         color: 'bg-blue-100',
