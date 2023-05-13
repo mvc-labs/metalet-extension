@@ -1,8 +1,21 @@
 import { useQuery } from '@tanstack/vue-query'
 import { metasvApi } from './request'
 import { ComputedRef, Ref } from 'vue'
-import type { Token } from '../data/tokens'
 import tokens from '../data/tokens'
+
+export type Token = {
+  codehash: string
+  genesis: string
+  name: string
+  symbol: string
+  decimal: number
+  sensibleId: string
+  utxoCount: number
+  confirmed: number
+  confirmedString: string
+  unconfirmed: number
+  unconfirmedString: string
+}
 
 export const fetchTokens = async (address: string): Promise<Token[]> => {
   const tokens: any = await metasvApi(`/contract/ft/address/${address}/balance`).get()

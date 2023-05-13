@@ -56,7 +56,7 @@ async function send() {
     purse: privateKey.value!,
   })
 
-  const { txid } = await ftManager
+  const transferRes = await ftManager
     .transfer({
       codehash: token.value?.codehash!,
       genesis: token.value?.genesis!,
@@ -75,8 +75,7 @@ async function send() {
       notificationType.value = 'error'
       notifying.value = true
     })
-  console.log({ txid })
-  if (txid) {
+  if (transferRes && transferRes.txid) {
     isOpenConfirmModal.value = false
     notificationTitle.value = 'Transaction Sent'
     notificationContent.value = `${amount.value} ${token.value?.symbol}`
