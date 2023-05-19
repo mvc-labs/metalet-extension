@@ -120,7 +120,7 @@ const showResetModal = ref(false)
         </div>
         <div class="setting-item">
           <div class="text-gray-500">Version</div>
-          <div class="">1.5.3 (Alpha)</div>
+          <div class="">1.5.4 (Alpha)</div>
         </div>
       </div>
     </div>

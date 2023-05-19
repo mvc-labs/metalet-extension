@@ -8,11 +8,14 @@ module.exports = {
         'primary-blue': '#171AFF',
         'btn-blue': '#1E2BFF',
       },
+      borderRadius: {
+        inherit: 'inherit',
+      },
       spacing: {
         90: '22.5rem',
         150: '37.5rem',
       },
     },
   },
-  plugins: [],
+  plugins: [require('@headlessui/tailwindcss')],
 }

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 // import WalletIcon from '../../assets/icons/wallet.svg?component'
 import NftIcon from '../../assets/icons/nft.svg?component'
+// import NftIcon from '../../assets/icons/nft.svg?url'
 // import ExchangeIcon from '../../assets/icons/exchange.svg?component'
 // import SettingsIcon from '../../assets/icons/settings.svg?component'
 import { WalletIcon, Cog6ToothIcon, ArrowsRightLeftIcon, CircleStackIcon } from '@heroicons/vue/24/solid'
@@ -14,9 +15,9 @@ import { WalletIcon, Cog6ToothIcon, ArrowsRightLeftIcon, CircleStackIcon } from 
       <router-link class="link" active-class="!text-blue-600" to="/wallet">
         <WalletIcon class="icon" />
       </router-link>
-      <!-- <router-link class="link" to="/collections" active-class="!text-blue-600">
-        <NftIcon class="h-6 w-8" />
-      </router-link> -->
+      <!-- <router-link class="link font-bold tracking-tighter" to="/collections" active-class="!text-blue-600"
+        >NFT</router-link
+      > -->
 
       <!-- <router-link class="link" to="tokens">
         <ArrowsRightLeftIcon class="icon" />

@@ -15,7 +15,7 @@
 }
 
 .secondary-btn {
-  @apply rounded-md bg-primary-blue text-center text-sm text-sky-50;
+  @apply rounded-md bg-btn-blue text-center text-sm text-sky-50;
 }
 
 .main-btn-bg {
