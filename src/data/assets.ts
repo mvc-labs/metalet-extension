@@ -13,6 +13,7 @@ export type Asset = {
   queryable: boolean
   decimal: number
   total?: number
+  genesis?: string
 }
 
 export default [

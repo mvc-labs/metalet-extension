@@ -3,8 +3,9 @@ import { computed, ref } from 'vue'
 import accountManager from '../../../lib/account'
 import type { Account } from '../../../lib/account'
 import { network } from '../../../lib/network'
-import { ClipboardDocumentCheckIcon, ClipboardDocumentListIcon } from '@heroicons/vue/24/solid'
+import { ClipboardDocumentCheckIcon, ClipboardDocumentListIcon, PencilSquareIcon } from '@heroicons/vue/24/solid'
 import { useRouter } from 'vue-router'
+import EditName from './EditName.vue'
 
 const router = useRouter()
 
@@ -58,22 +59,34 @@ const connect = async () => {
 const isCurrent = computed(() => {
   return props.account.id === accountManager.current.value?.id
 })
+
+const openEditNameModal = ref(false)
 </script>
 
 <template>
   <div class="flex items-center justify-between border-b border-gray-100">
+    <!-- edit name modal -->
+    <EditName v-model:open="openEditNameModal" :account="props.account" />
+
     <div class="flex items-center justify-start gap-x-2 py-4" :key="account.id">
       <!-- avatar -->
       <div :class="['h-12 w-12 rounded-full bg-gradient-to-br', randomColor(account.mainnetAddress)]"></div>
 
       <!-- info -->
-      <div class="flex flex-col">
-        <div class="flex gap-x-2">
+      <div class="group flex flex-col">
+        <div class="flex items-center gap-x-2">
           <div class="text-sm font-bold" :class="isCurrent && showConnectButton && 'text-blue-500'">
             {{ account.name }}
           </div>
+
+          <PencilSquareIcon
+            class="hidden h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-500 group-hover:inline"
+            @click="openEditNameModal = true"
+            v-if="!showConnectButton"
+          />
+
           <span
-            class="text-xs bg-gray-100 rounded-sm text-gray-500 px-2 py-0.5"
+            class="rounded-sm bg-gray-100 px-2 py-0.5 text-xs text-gray-500"
             v-if="showNetwork && network === 'testnet'"
             >{{ network }}</span
           >
@@ -93,7 +106,7 @@ const isCurrent = computed(() => {
     <template v-if="showConnectButton">
       <span v-if="isCurrent" class="text-sm text-gray-500">active</span>
       <button
-        class="rounded-md bg-blue-100 py-1 px-2 text-sm text-blue-700 transition hover:bg-blue-200"
+        class="rounded-md bg-blue-100 px-2 py-1 text-sm text-blue-700 transition hover:bg-blue-200"
         @click="connect"
         v-else
       >

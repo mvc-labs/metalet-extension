@@ -1,10 +1,13 @@
 <script lang="ts" setup>
+import { ref } from 'vue'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
-import SelectNetwork from './components/SelectNetwork.vue'
 import { ChevronRightIcon } from '@heroicons/vue/20/solid'
 import { useRouter } from 'vue-router'
+
 import passwordManager from '../../lib/password'
-import { ref } from 'vue'
+import { VERSION } from '../../data/config'
+
+import SelectNetwork from './components/SelectNetwork.vue'
 import ResetModal from '../../components/ResetModal.vue'
 
 const router = useRouter()
@@ -16,6 +19,10 @@ passwordManager.has().then((has) => {
 
 const toDiscord = () => {
   window.open('https://discord.gg/4FDEq8cJHj', '_blank')
+}
+
+const toGithub = () => {
+  window.open('https://github.com/mvc-labs/metalet-extension', '_blank')
 }
 
 const toTerms = () => {
@@ -118,9 +125,16 @@ const showResetModal = ref(false)
             <ArrowTopRightOnSquareIcon class="link-icon" />
           </div>
         </div>
+        <div class="setting-item group cursor-pointer" @click="toGithub">
+          <div class="text-gray-500 group-hover:underline">Source Code at Github</div>
+          <div class="">
+            <ArrowTopRightOnSquareIcon class="link-icon" />
+          </div>
+        </div>
+
         <div class="setting-item">
           <div class="text-gray-500">Version</div>
-          <div class="">1.5.4 (Alpha)</div>
+          <div class="">{{ VERSION }} (Alpha)</div>
         </div>
       </div>
     </div>

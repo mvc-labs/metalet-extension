@@ -1,5 +1,6 @@
 import { fetchTokens } from '../queries/tokens'
 import { address, getCurrentAccount, setAccount } from './account'
+import tokens from '../data/tokens'
 
 export async function getAssetsDisplay() {
   const account = await getCurrentAccount()
@@ -9,6 +10,10 @@ export async function getAssetsDisplay() {
   const assetsDisplay = account.assetsDisplay || []
 
   return assetsDisplay
+}
+
+export function isOfficialToken(genesis: string) {
+  return tokens.some((token) => token.genesis === genesis)
 }
 
 // add

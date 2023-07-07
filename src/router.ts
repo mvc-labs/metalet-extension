@@ -104,8 +104,9 @@ const routes = [
   },
 
   {
-    path: '/wallet/send-token',
+    path: '/wallet/send-token/:symbol/:genesis',
     component: WalletSendToken,
+    name: 'send-token',
     meta: {
       secondaryHeader: true,
       headerTitle: 'Send Token',
@@ -116,7 +117,7 @@ const routes = [
     path: '/wallet/select-asset',
     component: () => import('./pages/wallet/SelectAsset.vue'),
     props: (route: any) => ({ purpose: route.query.purpose }),
-    name: 'SelectAsset',
+    name: 'select-asset',
     meta: {
       secondaryHeader: true,
       headerTitle: 'Select Asset',
@@ -151,7 +152,7 @@ const routes = [
     },
   },
   {
-    path: '/wallet/tokens/:symbol',
+    path: '/wallet/tokens/:symbol/:genesis',
     component: () => import('./pages/wallet/Token.vue'),
     name: 'token',
     meta: {
@@ -243,6 +244,10 @@ router.beforeEach(async (to, from) => {
 router.beforeEach((to, from) => {
   if (['asset', 'token'].includes(to.name as string)) {
     to.meta.headerTitle = to.params.symbol
+  }
+
+  if (to.name === 'send-token') {
+    to.meta.headerTitle = `Send ${to.params.symbol}`
   }
 })
 

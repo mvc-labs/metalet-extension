@@ -52,12 +52,12 @@ export const useTokensQuery = (address: Ref, options: { enabled: ComputedRef<boo
   })
 }
 
-export const useTokenQuery = (address: Ref, symbol: string, options: { enabled: ComputedRef<boolean> }) => {
+export const useTokenQuery = (address: Ref, genesis: string, options: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
     queryKey: ['tokens', { address: address.value }],
     queryFn: () => fetchTokens(address.value),
     select: (data: Token[]) => {
-      const token = data.find((token) => token.symbol === symbol) as Token
+      const token = data.find((token) => token.genesis === genesis) as Token
       // 查找token的图标
       const tokenInfo = tokens.find((item) => item.genesis === token.genesis)
 

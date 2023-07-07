@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
+
 import MetaletLogoImg from '../../assets/images/metalet-logo.png?url'
 import MetaletWordImg from '../../assets/images/metalet-word.svg?url'
 import AccountMenu from './AccountMenu.vue'
+import { VERSION } from '../../data/config'
 
 const route = useRoute()
 </script>
@@ -15,7 +17,7 @@ const route = useRoute()
         <img class="h-4" :src="MetaletWordImg" alt="metalet" />
       </div>
 
-      <span class="text-sm">V1.5</span>
+      <span class="text-sm">V{{ VERSION }}</span>
     </div>
 
     <div class="">

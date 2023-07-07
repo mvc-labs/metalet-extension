@@ -2,18 +2,19 @@
 import { ref, computed, Ref, inject, toRaw } from 'vue'
 import { useRoute } from 'vue-router'
 import { API_NET, FtManager } from 'meta-contract'
-
-import { prettierBalance, prettifyTokenBalance, sleep } from '../../lib/helpers'
-import { getAddress, getCurrentAccount, privateKey } from '../../lib/account'
-import Modal from '../../components/Modal.vue'
-import assets from '../../data/assets'
-import { useTokenQuery } from '../../queries/tokens'
 import { CircleStackIcon } from '@heroicons/vue/24/solid'
-import { network } from '../../lib/network'
 import { useQueryClient } from '@tanstack/vue-query'
 
+import { prettifyTokenBalance } from '../../lib/helpers'
+import { getAddress, getCurrentAccount, privateKey } from '../../lib/account'
+import { useTokenQuery } from '../../queries/tokens'
+import { network } from '../../lib/network'
+
+import Modal from '../../components/Modal.vue'
+
 const route = useRoute()
-const symbol: Ref<string> = ref(route.query.symbol as string)
+const genesis = route.params.genesis as string
+
 const queryClient = useQueryClient()
 
 const address = ref('')
@@ -38,7 +39,7 @@ const popConfirm = () => {
 
 const enabled = computed(() => !!address.value)
 // 用户拥有的代币资产
-const { isLoading, data: token } = useTokenQuery(address, symbol.value, { enabled })
+const { isLoading, data: token } = useTokenQuery(address, genesis, { enabled })
 
 const notifying = inject<Ref<boolean>>('notifying')!
 const notificationTitle = ref('')

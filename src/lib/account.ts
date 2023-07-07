@@ -215,6 +215,16 @@ export async function getBalance() {
   return balance
 }
 
+export async function updateName(name: string) {
+  const account = await getCurrentAccount()
+  if (!account) {
+    return
+  }
+
+  account.name = name
+  await setAccount(account)
+}
+
 type AccountManager = {
   all: () => Promise<any>
   current: Ref<Account | null>
@@ -234,6 +244,7 @@ type AccountManager = {
   >
   getXPublicKey: () => Promise<string | null>
   getBalance: () => Promise<Awaited<ReturnType<typeof fetchSpaceBalance>> | null>
+  updateName: (name: string) => Promise<void>
 }
 
 const accountManager = {} as AccountManager
@@ -248,5 +259,6 @@ accountManager.getPublicKey = getPublicKey
 accountManager.getXPublicKey = getXPublicKey
 accountManager.getBalance = getBalance
 accountManager.removeCurrent = removeCurrentAccount
+accountManager.updateName = updateName
 
 export default accountManager

@@ -9,11 +9,6 @@ getAddress()
       <div class="label">Address</div>
       <div class="value">{{ address }}</div>
     </div>
-    <!-- 
-    <div class="">
-      <div class="label">Mnemonic (Seedphrase)</div>
-      <div class="value">{{ account?.mnemonic }}</div>
-    </div> -->
 
     <div class="">
       <div class="label">Path</div>
@@ -28,6 +23,6 @@ getAddress()
 }
 
 .value {
-  @apply text-base text-gray-700;
+  @apply text-sm text-gray-700;
 }
 </style>

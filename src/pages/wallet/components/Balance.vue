@@ -35,7 +35,7 @@ const exchange = computed(() => {
 
 function toSelectAsset(purpose: 'receive' | 'send') {
   const selectAssetRoute = {
-    name: 'SelectAsset',
+    name: 'select-asset',
     query: {
       purpose,
     },

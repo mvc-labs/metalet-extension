@@ -23,7 +23,8 @@ const enabled = computed(() => !!address.value)
 const listedAssets = ref(assetsList)
 
 // 用户拥有的代币资产
-const { isLoading, data: userOwnedAssets } = useTokensQuery(address, { enabled })
+const { isLoading, data: userOwnedTokens } = useTokensQuery(address, { enabled })
+type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
 
 const assetsDisplay: Ref<string[]> = ref([])
 getAssetsDisplay().then((display) => {
@@ -37,18 +38,18 @@ function toManageAssets() {
   router.push('/wallet/manage-assets')
 }
 
-function toAsset(asset: Asset) {
-  if (asset.isNative) {
-    router.push({
-      name: 'asset',
-      params: { symbol: asset.symbol },
-    })
-  } else {
-    router.push({
-      name: 'token',
-      params: { symbol: asset.symbol },
-    })
-  }
+function toNative(asset: Asset) {
+  router.push({
+    name: 'asset',
+    params: { symbol: asset.symbol },
+  })
+}
+
+function toToken(token: UserOwnedToken) {
+  router.push({
+    name: 'token',
+    params: { genesis: token.genesis, symbol: token.symbol },
+  })
 }
 </script>
 
@@ -62,9 +63,9 @@ function toAsset(asset: Asset) {
       </button>
     </div>
 
-    <AssetItem v-for="asset in displayingAssets" :key="asset.symbol" :asset="asset" @click="toAsset(asset)" />
+    <AssetItem v-for="asset in displayingAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)" />
 
-    <AssetItem v-for="asset in userOwnedAssets" :key="asset.symbol" :asset="asset" @click="toAsset(asset)" />
+    <AssetItem v-for="token in userOwnedTokens" :key="token.genesis" :asset="token" @click="toToken(token)" />
 
     <!-- 拥有的FT资产 -->
   </div>

@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import { ref, computed, Ref } from 'vue'
+import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
 import { useBalanceQuery } from '../../../queries/balance'
 import { getAddress } from '../../../lib/account'
+import { isOfficialToken } from '../../../lib/assets'
 import { prettierBalance, prettifyTokenBalance } from '../../../lib/helpers'
 import type { Asset } from '../../../data/assets'
 import { useExchangeRatesQuery } from '../../../queries/exchange-rates'
-import { CircleStackIcon } from '@heroicons/vue/24/solid'
 
 const props = defineProps<{
   asset: Asset
@@ -45,10 +46,14 @@ const exchange = computed(() => {
         <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
         <div class="flex flex-col">
           <div
-            :class="['w-24 truncate whitespace-nowrap ', asset.isNative ? 'text-lg' : 'text-sm']"
+            :class="[
+              'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
+              asset.isNative ? 'text-lg' : 'text-sm',
+            ]"
             :title="asset.tokenName"
           >
             {{ asset.tokenName }}
+            <CheckBadgeIcon class="h-4 w-4 text-blue-500" v-if="asset?.genesis && isOfficialToken(asset.genesis)" />
           </div>
           <div class="text-xs text-gray-500">{{ asset.symbol }}</div>
         </div>

@@ -68,7 +68,7 @@ const toAccountList = () => {
       </MenuItem>
 
       <MenuItem>
-        <button class="menu-item" @click="toAccountList">Switch Account</button>
+        <button class="menu-item" @click="toAccountList">Add / Switch Account</button>
       </MenuItem>
 
       <!-- disconnect button -->
@@ -83,7 +83,7 @@ const toAccountList = () => {
 
 <style scoped lang="css">
 .menu-item {
-  @apply rounded-inherit w-full whitespace-nowrap p-4 text-left capitalize hover:bg-gray-50 hover:text-blue-500;
+  @apply w-full whitespace-nowrap rounded-inherit p-4 text-left capitalize hover:bg-gray-50 hover:text-blue-500;
 }
 
 .reset-button {

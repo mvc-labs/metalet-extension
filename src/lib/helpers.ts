@@ -23,7 +23,14 @@ export const prettifyTokenBalance = (balance: number, decimal: number): string =
   // 小数点多于8位，则只显示约等于4位小数
   if (decimal > 8) return `≈ ${(balance / 10 ** decimal).toFixed(4)}`
 
+  // If every decimal is 0, then do not show decimal
+  if (balance % 10 ** decimal === 0) return `${balance / 10 ** decimal}`
+
   return `${(balance / 10 ** decimal).toFixed(decimal)}`
+}
+
+export const prettifyTokenGenesis = (genesis: string) => {
+  return `${genesis.slice(0, 6)}...${genesis.slice(-6)}`
 }
 
 export const prettifyAddress = (address: string) => {
