@@ -13,6 +13,7 @@ import accountManager, { getCurrentAccount } from './lib/account'
 
 const routes = [
   { path: '/', redirect: '/wallet' },
+  // { path: '/', redirect: '/wallet/send?symbol=SPACE' },
   {
     path: '/welcome',
     component: () => import('./pages/welcome/Index.vue'),

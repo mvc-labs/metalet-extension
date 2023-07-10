@@ -3,10 +3,10 @@ import { ref, computed, Ref, watch } from 'vue'
 import { mvc } from 'meta-contract'
 import { addAccount } from '../../lib/account'
 import { useRouter } from 'vue-router'
-import { RadioGroup, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue'
+import { RadioGroup, RadioGroupOption, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
+import { ChevronDownIcon, ChevronRightIcon, TrashIcon } from '@heroicons/vue/24/solid'
 
 import MetaletLogoImg from '../../assets/images/metalet-logo.png?url'
-import { TrashIcon } from '@heroicons/vue/20/solid'
 
 const router = useRouter()
 
@@ -38,8 +38,7 @@ const onPasteWords = (e: ClipboardEvent) => {
   }
 }
 
-const paths = ['10001', '236']
-const selectedPath = ref('10001')
+const path = ref('10001')
 
 const finished = computed(() => words.value.every((word) => word.length > 0))
 
@@ -55,17 +54,17 @@ const onSubmit = async () => {
     const mneObj = mvc.Mnemonic.fromString(mnemonicStr)
     // const hdpk = mneObj.toHDPrivateKey('', network)
     const mainnetHdpk = mneObj.toHDPrivateKey('', 'mainnet')
-    const mainnetPrivateKey = mainnetHdpk.deriveChild(`m/44'/${selectedPath.value}'/0'/0/0`).privateKey
+    const mainnetPrivateKey = mainnetHdpk.deriveChild(`m/44'/${path.value}'/0'/0/0`).privateKey
     const mainnetAddress = mainnetPrivateKey.toAddress('mainnet').toString()
 
     const testnetHdpk = mneObj.toHDPrivateKey('', 'testnet')
-    const testnetPrivateKey = testnetHdpk.deriveChild(`m/44'/${selectedPath.value}'/0'/0/0`).privateKey
+    const testnetPrivateKey = testnetHdpk.deriveChild(`m/44'/${path.value}'/0'/0/0`).privateKey
     const testnetAddress = testnetPrivateKey.toAddress('testnet').toString()
 
     // 保存账号信息：助记词、私钥、地址；以地址为key，value为对象
     const account = {
       mnemonic: mnemonicStr,
-      path: selectedPath.value,
+      path: path.value,
       mainnetPrivateKey: mainnetPrivateKey.toString(),
       mainnetAddress,
       testnetPrivateKey: testnetPrivateKey.toString(),
@@ -113,7 +112,7 @@ const onSubmit = async () => {
               <div
                 :class="[
                   checked ? 'bg-blue-100 text-blue-500' : 'text-gray-500',
-                  'rounded-inherit w-full cursor-pointer py-0.5 px-2 text-center text-xs',
+                  'w-full cursor-pointer rounded-inherit px-2 py-0.5 text-center text-xs',
                 ]"
               >
                 {{ `${length} words` }}
@@ -138,22 +137,36 @@ const onSubmit = async () => {
     </div>
 
     <!-- 使用路径 -->
-    <div class="mt-4">
-      <RadioGroup v-model="selectedPath">
-        <RadioGroupLabel class="mb-2 text-xs text-gray-500">PATH</RadioGroupLabel>
-        <div class="flex items-center gap-x-2">
-          <RadioGroupOption v-slot="{ checked }" :value="path" v-for="path of paths" class="w-24 rounded">
-            <div
-              :class="[
-                checked ? 'bg-blue-100 text-blue-500' : 'text-gray-500',
-                'rounded-inherit w-full cursor-pointer py-0.5 text-center',
-              ]"
-            >
-              {{ path }}
-            </div>
-          </RadioGroupOption>
-        </div>
-      </RadioGroup>
+    <div class="mt-6">
+      <Disclosure v-slot="{ open }">
+        <DisclosureButton class="flex items-center gap-1">
+          <span class="text-xs text-gray-500">PATH</span>
+          <ChevronRightIcon :class="['h-4 w-4 text-gray-400 transition duration-200', open && 'rotate-90 transform']" />
+        </DisclosureButton>
+
+        <transition
+          enter-active-class="transition duration-100 ease-out"
+          enter-from-class="transform scale-95 opacity-0"
+          enter-to-class="transform scale-100 opacity-100"
+          leave-active-class="transition duration-75 ease-out"
+          leave-from-class="transform scale-100 opacity-100"
+          leave-to-class="transform scale-95 opacity-0"
+        >
+          <DisclosurePanel class="mt-1 space-y-2 rounded-lg bg-gray-100 p-4 text-sm text-gray-500 shadow-inner">
+            <h3 class="text-sm font-bold text-gray-900">What is a derivation path?</h3>
+            <p class="">
+              A derivation path is used to generate your wallet address. You can use the default path or customize it.
+            </p>
+            <p>The default path used by Metalet is <span class="font-bold">m/44'/10001'/0'</span></p>
+          </DisclosurePanel>
+        </transition>
+      </Disclosure>
+
+      <div class="mt-2 text-sm tracking-wide text-black">
+        <span class="">m/44'/</span>
+        <input type="text" placeholder="10001" class="pit-input mx-2 w-16" :value="path" />
+        <span class="">'/0'</span>
+      </div>
     </div>
 
     <!-- ok -->

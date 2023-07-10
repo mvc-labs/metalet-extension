@@ -1,15 +1,16 @@
 <script lang="ts" setup>
 import { ref, computed, Ref, inject, toRaw } from 'vue'
 import { useRoute } from 'vue-router'
-import browser from 'webextension-polyfill'
 import { Wallet } from 'meta-contract'
+import { useQueryClient } from '@tanstack/vue-query'
 
 import { useBalanceQuery } from '../../queries/balance'
 import { prettierBalance, sleep } from '../../lib/helpers'
 import { getAddress } from '../../lib/account'
-import Modal from '../../components/Modal.vue'
 import assets from '../../data/assets'
-import { useQueryClient } from '@tanstack/vue-query'
+
+import Modal from '../../components/Modal.vue'
+import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
 const symbol: Ref<string> = ref(route.query.symbol as string)
@@ -29,20 +30,18 @@ const amountInSats = computed(() => {
   return _amount * 1e8
 })
 const recipient = ref('')
+const transactionResult: Ref<undefined | TransactionResult> = ref()
 
 const isOpenConfirmModal = ref(false)
 const popConfirm = () => {
   isOpenConfirmModal.value = true
 }
 
+const isOpenResultModal = ref(false)
+
 const enabled = computed(() => !!address.value)
 const { isLoading, data: balance, error } = useBalanceQuery(address, 'SPACE', { enabled })
 const wallet = inject<Ref<Wallet>>('wallet')!
-
-const notifying = inject<Ref<boolean>>('notifying')!
-const notificationTitle = ref('')
-const notificationContent = ref('')
-const notificationType = ref<'success' | 'error'>('success')
 
 const operationLock = ref(false)
 async function send() {
@@ -50,22 +49,34 @@ async function send() {
 
   operationLock.value = true
   const walletInstance = toRaw(wallet.value)
-  const txId = await walletInstance.send(recipient.value, amountInSats.value).catch((err) => {
+  const sentRes = await walletInstance.send(recipient.value, amountInSats.value).catch((err) => {
     isOpenConfirmModal.value = false
-    notificationTitle.value = 'Transaction Failed'
-    notificationContent.value = err.message
-    notificationType.value = 'error'
-    notifying.value = true
+    transactionResult.value = {
+      status: 'failed',
+      message: err.message,
+    }
+
+    isOpenResultModal.value = true
   })
-  if (txId) {
+
+  if (sentRes) {
     isOpenConfirmModal.value = false
-    notificationTitle.value = 'Transaction Sent'
-    notificationContent.value = `${amount.value} SPACE`
-    notifying.value = true
+    transactionResult.value = {
+      status: 'success',
+      txId: sentRes.txId,
+      recipient: recipient.value,
+      amount: amountInSats.value,
+      token: {
+        symbol: 'SPACE',
+        decimal: 8,
+      }
+    }
+
+    isOpenResultModal.value = true
 
     // 刷新query
-    queryClient.invalidateQueries({ 
-      queryKey: ['balance', { address: address.value, symbol: 'SPACE' }] 
+    queryClient.invalidateQueries({
+      queryKey: ['balance', { address: address.value, symbol: 'SPACE' }],
     })
   }
 
@@ -75,12 +86,16 @@ async function send() {
 
 <template>
   <div class="mt-8 flex flex-col items-center gap-y-8">
-    <Notification :title="notificationTitle" :content="notificationContent" :type="notificationType" />
+    <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
     <img :src="asset!.logo" alt="" class="h-16 w-16 rounded-xl" />
 
     <div class="space-y-3 self-stretch">
       <!-- address input -->
-      <input class="main-input w-full !rounded-xl !p-4 text-sm" placeholder="Recipient's address" v-model="recipient" />
+      <input
+        class="main-input w-full !rounded-xl !p-4 !text-xs"
+        placeholder="Recipient's address"
+        v-model="recipient"
+      />
 
       <!-- amount input -->
       <div class="relative">

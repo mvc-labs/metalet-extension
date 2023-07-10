@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, Ref, inject, toRaw } from 'vue'
+import { ref, computed, Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { API_NET, FtManager } from 'meta-contract'
 import { CircleStackIcon } from '@heroicons/vue/24/solid'
@@ -11,6 +11,7 @@ import { useTokenQuery } from '../../queries/tokens'
 import { network } from '../../lib/network'
 
 import Modal from '../../components/Modal.vue'
+import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
 const genesis = route.params.genesis as string
@@ -36,15 +37,12 @@ const isOpenConfirmModal = ref(false)
 const popConfirm = () => {
   isOpenConfirmModal.value = true
 }
+const isOpenResultModal = ref(false)
+const transactionResult: Ref<undefined | TransactionResult> = ref()
 
 const enabled = computed(() => !!address.value)
 // 用户拥有的代币资产
 const { isLoading, data: token } = useTokenQuery(address, genesis, { enabled })
-
-const notifying = inject<Ref<boolean>>('notifying')!
-const notificationTitle = ref('')
-const notificationContent = ref('')
-const notificationType = ref<'success' | 'error'>('success')
 
 const operationLock = ref(false)
 async function send() {
@@ -57,6 +55,23 @@ async function send() {
     purse: privateKey.value!,
   })
 
+  // Pick the largest utxo from wallet to pay the transaction
+  const largestUtxo = await ftManager.api
+    .getUnspents(address.value)
+    .then((utxos) => {
+      return utxos.reduce((prev, curr) => {
+        if (curr.satoshis > prev.satoshis) return curr
+        return prev
+      })
+    })
+    .then((utxo) => {
+      // add wif to utxo
+      return {
+        ...utxo,
+        wif: privateKey.value!,
+      }
+    })
+
   const transferRes = await ftManager
     .transfer({
       codehash: token.value?.codehash!,
@@ -68,19 +83,31 @@ async function send() {
           amount: amountInSats.value.toString(),
         },
       ],
+      utxos: [largestUtxo],
     })
     .catch((err) => {
       isOpenConfirmModal.value = false
-      notificationTitle.value = 'Transaction Failed'
-      notificationContent.value = err.message
-      notificationType.value = 'error'
-      notifying.value = true
+      transactionResult.value = {
+        status: 'failed',
+        message: err.message,
+      }
+
+      isOpenResultModal.value = true
     })
   if (transferRes && transferRes.txid) {
     isOpenConfirmModal.value = false
-    notificationTitle.value = 'Transaction Sent'
-    notificationContent.value = `${amount.value} ${token.value?.symbol}`
-    notifying.value = true
+    transactionResult.value = {
+      status: 'success',
+      txId: transferRes.txid,
+      recipient: recipient.value,
+      amount: amountInSats.value,
+      token: {
+        symbol: token.value!.symbol,
+        decimal: token.value!.decimal,
+      }
+    }
+
+    isOpenResultModal.value = true
 
     // 刷新query
     queryClient.invalidateQueries({
@@ -94,7 +121,7 @@ async function send() {
 
 <template>
   <div class="mt-8 flex flex-col items-center gap-y-8">
-    <Notification :title="notificationTitle" :content="notificationContent" :type="notificationType" />
+    <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
     <img :src="token?.logo" alt="" class="h-16 w-16 rounded-xl" v-if="token?.logo" />
     <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
 

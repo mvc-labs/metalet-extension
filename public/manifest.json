@@ -1,7 +1,7 @@
 {
   "name": "Metalet",
   "description": "An MVC Crypto Wallet Extension",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "manifest_version": 3,
   "action": {
     "default_popup": "popup.html",
