@@ -4,7 +4,7 @@ import { mvc } from 'meta-contract'
 import { addAccount } from '../../lib/account'
 import { useRouter } from 'vue-router'
 import { RadioGroup, RadioGroupOption, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
-import { ChevronDownIcon, ChevronRightIcon, TrashIcon } from '@heroicons/vue/24/solid'
+import { ChevronRightIcon, TrashIcon } from '@heroicons/vue/24/solid'
 
 import MetaletLogoImg from '../../assets/images/metalet-logo.png?url'
 
@@ -22,7 +22,6 @@ watch(
 )
 const words: Ref<string[]> = ref(Array(selectedWordsLength.value).fill(''))
 
-const wordsDisplay = computed(() => words.value.join(' '))
 const clearWords = () => {
   words.value = Array(selectedWordsLength.value).fill('')
 }
@@ -164,7 +163,7 @@ const onSubmit = async () => {
 
       <div class="mt-2 text-sm tracking-wide text-black">
         <span class="">m/44'/</span>
-        <input type="text" placeholder="10001" class="pit-input mx-2 w-16" :value="path" />
+        <input type="text" placeholder="10001" class="pit-input mx-2 w-16" v-model="path" />
         <span class="">'/0'</span>
       </div>
     </div>

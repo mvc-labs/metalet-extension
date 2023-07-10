@@ -12,7 +12,7 @@ getAddress()
 
     <div class="">
       <div class="label">Path</div>
-      <div class="value">{{ account?.path }}</div>
+      <div class="value">{{ `m/44'/${account?.path}'/0'` }}</div>
     </div>
   </div>
 </template>
