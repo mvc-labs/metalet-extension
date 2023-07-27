@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import { NftCollection, useNftsQuery } from '../../../queries/nfts'
-import { address } from '../../../lib/account'
-import { ref, computed, Ref } from 'vue'
 import { ChevronRightIcon } from '@heroicons/vue/20/solid'
 import { useRouter } from 'vue-router'
+
+import { NftCollection, useNftsQuery } from '../../../queries/nfts'
 import { useCollectionInfoQuery } from '../../../queries/metadata'
+import { address } from '../../../lib/account'
+
 import NftItem from './NftItem.vue'
 
 const props = defineProps<{

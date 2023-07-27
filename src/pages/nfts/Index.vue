@@ -11,29 +11,31 @@ import { account } from '../../lib/account'
 
 <template>
   <!-- 账号信息 -->
-  <AccountItem :account="account" v-if="account" :show-network="true" class="mb-8" />
+  <AccountItem :account="account" v-if="account" :show-network="true" class="mb-4" />
+
+  <MvcCollectionPanel />
 
   <!-- 链切换标签 -->
-  <TabGroup>
+  <!-- <TabGroup>
     <TabList class="mx-auto flex w-5/6 rounded-md bg-gray-100">
-      <Tab class="tab">
-        <img :src="BtcLogoImg" />
-        <span>BTC</span>
-      </Tab>
       <Tab class="tab">
         <img :src="SpaceLogoImg" class="h-6 w-6" />
         <span>MVC</span>
       </Tab>
+      <Tab class="tab" disabled>
+        <img :src="BtcLogoImg" />
+        <span>BTC</span>
+      </Tab>
     </TabList>
     <TabPanels class="mt-8">
       <TabPanel>
-        <BtcCollectionPanel />
-      </TabPanel>
-      <TabPanel>
         <MvcCollectionPanel />
       </TabPanel>
+      <TabPanel>
+        <BtcCollectionPanel />
+      </TabPanel>
     </TabPanels>
-  </TabGroup>
+  </TabGroup> -->
 </template>
 
 <style scoped lang="scss">

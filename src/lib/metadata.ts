@@ -1,5 +1,28 @@
 import { mvc } from 'meta-contract'
 import { metasvApi } from '../queries/request'
+import { METAFILE_API_HOST } from '../data/hosts'
+
+export function parseMetaFile(metaFileUri: string): string {
+  // remove prefix: metafile://, then replace .jpeg with .jpg
+  const metaFile = metaFileUri.split('metafile://')[1].replace('.jpeg', '.jpg')
+
+  // if there is no extension name in metaFile, add .png
+  if (!metaFile.includes('.')) {
+    return `${METAFILE_API_HOST}/metaFile/original/${metaFile}.png`
+  }
+
+  return `${METAFILE_API_HOST}/metaFile/original/${metaFile}`
+}
+
+export function getResizeQuery(long: number): string {
+  return `?x-oss-process=image/resize,l_${long}`
+}
+
+export function metaFileToThumbnail(metaFileUri: string, long = 100): string {
+  const metaFile = parseMetaFile(metaFileUri)
+
+  return `${metaFile}${getResizeQuery(long)}`
+}
 
 export async function parseCollectionInfo(
   txid: string,
@@ -32,7 +55,19 @@ export async function parseNftInfo(
   address: string
   icon: string
 }> {
+  console.log('what?')
+  // if txid is only consisted of 0, return empty string
+  if (txid.replace(/0/g, '') === '') {
+    return {
+      name: '',
+      address: '',
+      icon: '',
+    }
+  }
+
+  console.log('here')
   const nftMetaData = await parseMetaData(txid, outputIndex)
+  console.log({ nftMetaData })
 
   return {
     name: nftMetaData.name || '',
@@ -42,7 +77,13 @@ export async function parseNftInfo(
 }
 
 export async function parseMetaData(txid: string, outputIndex: number): Promise<any> {
+  // if txid is only consisted of 0, return empty string
+  if (txid.replace(/0/g, '') === '') {
+    return {}
+  }
+
   const messages = await parse(txid, outputIndex)
+  console.log({ messages })
   const infoIndex = 5
   const metaData = JSON.parse(messages[infoIndex])
   chrome.runtime.sendMessage(metaData)

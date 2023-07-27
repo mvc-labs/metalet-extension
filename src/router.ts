@@ -13,7 +13,7 @@ import accountManager, { getCurrentAccount } from './lib/account'
 
 const routes = [
   { path: '/', redirect: '/wallet' },
-  // { path: '/', redirect: '/wallet/send?symbol=SPACE' },
+  // { path: '/', redirect: '/collections' },
   {
     path: '/welcome',
     component: () => import('./pages/welcome/Index.vue'),
@@ -171,7 +171,35 @@ const routes = [
       headerTitle: 'NFT Collection',
     },
   },
-  { path: '/collections', component: NftCollections },
+  { path: '/collections', component: NftCollections, name: 'collections' },
+  {
+    path: '/nfts/transfer-nft/:codehash/:genesis/:tokenIndex',
+    component: () => import('./pages/nfts/Transfer.vue'),
+    name: 'transfer-nft',
+    props: (route: any) => ({
+      codehash: route.params.codehash,
+      genesis: route.params.genesis,
+      tokenIndex: Number(route.params.tokenIndex),
+    }),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Transfer NFT',
+    },
+  },
+  {
+    path: '/nfts/:codehash/:genesis/:tokenIndex',
+    component: () => import('./pages/nfts/Detail.vue'),
+    name: 'nft-detail',
+    props: (route: any) => ({
+      codehash: route.params.codehash,
+      genesis: route.params.genesis,
+      tokenIndex: Number(route.params.tokenIndex),
+    }),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'NFT',
+    },
+  },
 
   { path: '/tokens', component: Tokens },
 

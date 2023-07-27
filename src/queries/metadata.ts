@@ -1,4 +1,4 @@
-import { ComputedRef } from 'vue'
+import { ComputedRef, Ref } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { parseCollectionInfo, parseNftInfo } from '../lib/metadata'
 
@@ -18,13 +18,15 @@ export const useCollectionInfoQuery = (
   })
 }
 
-export const useNftInfoQuery = (txid: string, outputIndex: number, options?: { enabled: ComputedRef<boolean> }) => {
+export const useNftInfoQuery = (
+  txid: Ref<string> | ComputedRef<string>,
+  outputIndex: Ref<number> | ComputedRef<number>,
+  options?: { enabled: ComputedRef<boolean> }
+) => {
+  console.log({ txid })
   return useQuery({
     queryKey: ['metadata', { txid, outputIndex, type: 'nftInfo' }],
-    queryFn: () => parseNftInfo(txid, outputIndex),
-    select: (metaData) => {
-      return metaData
-    },
+    queryFn: () => parseNftInfo(txid.value, outputIndex.value),
     ...options,
     staleTime: 1000 * 60 * 60 * 24 * 30,
   })

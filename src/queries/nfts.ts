@@ -68,11 +68,24 @@ export const fetchNfts = async (
   const nfts: any = await metasvApi(path).get()
 
   return nfts.map((nft: any) => {
-    // 将codeHash改为小写
+    // codeHash to codehash
     nft.codehash = nft.codeHash
     delete nft.codeHash
     return nft
   })
+}
+
+export const fetchOneNft = async (params: { codehash: string; genesis: string; tokenIndex: number }): Promise<Nft> => {
+  let path = `/contract/nft/genesis/${params.codehash}/${params.genesis}/utxo?tokenIndex=${params.tokenIndex}`
+
+  const nft: any = await metasvApi(path)
+    .get()
+    .then((nfts: any) => nfts[0])
+  // codeHash to codehash
+  nft.codehash = nft.codeHash
+  delete nft.codeHash
+
+  return nft
 }
 
 export const useNftCollectionsQuery = (address: Ref, options: { enabled: ComputedRef<boolean> }) => {
@@ -127,19 +140,11 @@ export const useNftsQuery = (
   })
 }
 
-// export const useNftQuery = (address: Ref, symbol: string, options: { enabled: ComputedRef<boolean> }) => {
-//   return useQuery({
-//     queryKey: ['nfts', { address: address.value }],
-//     queryFn: () => fetchNfts(address.value),
-//     select: (data: Nft[]) => {
-//       const nft = data.find((nft) => nft.symbol === symbol) as Nft
-
-//       return {
-//         ...nft,
-//       }
-//     },
-//     ...options,
-//   })
-// }
+export const useOneNftQuery = (params: { codehash: string; genesis: string; tokenIndex: number }) => {
+  return useQuery({
+    queryKey: ['nft', { ...params }],
+    queryFn: () => fetchOneNft(params),
+  })
+}
 
 export default useNftsQuery

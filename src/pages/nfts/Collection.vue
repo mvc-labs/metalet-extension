@@ -1,7 +1,11 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
-import { useOneNftCollectionQuery } from '../../queries/nfts'
+
+import useNftsQuery, { useOneNftCollectionQuery } from '../../queries/nfts'
 import { useCollectionInfoQuery } from '../../queries/metadata'
+import { address } from '../../lib/account'
+
+import NftItem from './components/NftItem.vue'
 
 const route = useRoute()
 const { codehash, genesis } = route.params as {
@@ -12,10 +16,13 @@ const { meta_txid: txid, meta_output_index: outputIndex } = route.query as {
   meta_txid: string
   meta_output_index: string
 }
-
-const { isLoading: isLoadingCollection, data: collection } = useOneNftCollectionQuery(codehash, genesis)
-
 const { isLoading: isLoadingCollectionInfo, data: collectionInfo } = useCollectionInfoQuery(txid, Number(outputIndex))
+
+const { isLoading, data: nfts } = useNftsQuery(address, {
+  codehash,
+  genesis,
+  limit: 10,
+})
 </script>
 
 <template>
@@ -27,4 +34,7 @@ const { isLoading: isLoadingCollectionInfo, data: collectionInfo } = useCollecti
   </div>
 
   <!-- list -->
+  <div class="grid grid-cols-3 gap-x-2">
+    <NftItem v-for="nft in nfts" :nft="nft" />
+  </div>
 </template>
