@@ -8,9 +8,7 @@ import { WalletIcon, Cog6ToothIcon, ArrowsRightLeftIcon, CircleStackIcon } from 
 </script>
 
 <template>
-  <footer
-    class="fixed bottom-0 left-0 right-0 h-14 border-t border-gray-200 bg-white backdrop-blur-sm sm:absolute sm:rounded-b-lg"
-  >
+  <footer class="fixed bottom-0 left-0 right-0 h-14 border-t border-gray-200 bg-white backdrop-blur-sm">
     <div class="grid h-full grid-cols-3 items-stretch justify-center">
       <router-link class="link" active-class="!text-blue-600" to="/wallet">
         <WalletIcon class="icon" />

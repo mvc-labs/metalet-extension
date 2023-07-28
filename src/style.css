@@ -41,6 +41,14 @@
   box-shadow: 8px 8px 16px #e5e6e7, -8px -8px 16px #ffffff;
 }
 
+.label {
+  @apply text-sm text-gray-500;
+}
+
+.value {
+  @apply text-sm text-gray-800;
+}
+
 @layer utilities {
   .rounded-inherit {
     border-radius: inherit;

@@ -23,7 +23,6 @@ export const useNftInfoQuery = (
   outputIndex: Ref<number> | ComputedRef<number>,
   options?: { enabled: ComputedRef<boolean> }
 ) => {
-  console.log({ txid })
   return useQuery({
     queryKey: ['metadata', { txid, outputIndex, type: 'nftInfo' }],
     queryFn: () => parseNftInfo(txid.value, outputIndex.value),

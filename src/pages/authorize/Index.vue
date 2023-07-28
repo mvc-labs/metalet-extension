@@ -2,7 +2,6 @@
 import { useRoute } from 'vue-router'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
-import browser from 'webextension-polyfill'
 
 import { sendMsg, toTx } from '../../lib/helpers'
 import MetaletLogoImg from '../../assets/images/metalet-logo.png?url'

@@ -6,7 +6,7 @@ export async function setStorage(key: string, value: any) {
     value = JSON.stringify(value)
   }
 
-  return browser.storage.local.set({ [key]: value })
+  return chrome.storage.local.set({ [key]: value })
 }
 
 export async function getStorage(key: string, defaultValue?: any) {

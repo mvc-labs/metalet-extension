@@ -58,7 +58,7 @@ const secondaryHeaderTitle = computed(() => {
 
       <!-- bg -->
       <div
-        class="bg-hue fixed top-0 left-0 isolate z-[-1] hidden h-1/2 w-full select-none bg-cover bg-center bg-no-repeat sm:block"
+        class="bg-hue fixed left-0 top-0 isolate z-[-1] hidden h-1/2 w-full select-none bg-cover bg-center bg-no-repeat sm:block"
       >
         <img class="z-[-1] h-full w-full select-none opacity-100" :src="BgHueImg" alt="bg-hue" />
       </div>

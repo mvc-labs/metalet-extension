@@ -54,36 +54,30 @@ export async function parseNftInfo(
   name: string
   address: string
   icon: string
-}> {
-  console.log('what?')
-  // if txid is only consisted of 0, return empty string
-  if (txid.replace(/0/g, '') === '') {
-    return {
-      name: '',
-      address: '',
-      icon: '',
-    }
-  }
-
-  console.log('here')
+  description: string
+  creator: string
+  website: string
+} | null> {
   const nftMetaData = await parseMetaData(txid, outputIndex)
-  console.log({ nftMetaData })
+  if (!nftMetaData) return null
 
   return {
     name: nftMetaData.name || '',
     address: nftMetaData.receiverAddress || '',
     icon: nftMetaData.icon || '',
+    description: nftMetaData.desc || '',
+    creator: nftMetaData.issuerName || '',
+    website: nftMetaData.website || '',
   }
 }
 
 export async function parseMetaData(txid: string, outputIndex: number): Promise<any> {
   // if txid is only consisted of 0, return empty string
   if (txid.replace(/0/g, '') === '') {
-    return {}
+    return null
   }
 
   const messages = await parse(txid, outputIndex)
-  console.log({ messages })
   const infoIndex = 5
   const metaData = JSON.parse(messages[infoIndex])
   chrome.runtime.sendMessage(metaData)

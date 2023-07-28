@@ -151,7 +151,8 @@ async function transfer() {
 
     <div class="mt-4">
       <button
-        class="main-btn-bg w-full rounded-md py-3 text-center text-base text-white"
+        class="main-btn-bg w-full rounded-md py-3 text-center text-base text-white disabled:opacity-50"
+        :disabled="!recipient || !recipient.length"
         @click="isOpenConfirmModal = true"
       >
         Confirm

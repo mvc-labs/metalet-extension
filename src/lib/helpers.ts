@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 
 export const formatTimestamp = (timestamp: number, format = 'YYYY-MM-DD HH:mm:ss') => {
+  console.log({ timestamp })
   return dayjs(timestamp).format(format)
 }
 

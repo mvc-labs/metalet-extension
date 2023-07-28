@@ -12,8 +12,8 @@ import { getStorage } from './lib/storage'
 import accountManager, { getCurrentAccount } from './lib/account'
 
 const routes = [
-  { path: '/', redirect: '/wallet' },
-  // { path: '/', redirect: '/collections' },
+  // { path: '/', redirect: '/wallet' },
+  { path: '/', redirect: '/collections' },
   {
     path: '/welcome',
     component: () => import('./pages/welcome/Index.vue'),
