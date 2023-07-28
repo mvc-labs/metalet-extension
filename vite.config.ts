@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'url'
 import vue from '@vitejs/plugin-vue'
 import svgLoader from 'vite-svg-loader'
-import path from 'path'
 import alias from '@rollup/plugin-alias'
 import nodePolyfills from 'rollup-plugin-polyfill-node'
 

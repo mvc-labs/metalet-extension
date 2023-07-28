@@ -1,6 +1,7 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'url'
 
 export default defineConfig({
   plugins: [
@@ -14,6 +15,11 @@ export default defineConfig({
   ],
   define: {
     'process.env': {},
+  },
+  resolve: {
+    alias: {
+      '@/': fileURLToPath(new URL('./src/', import.meta.url)),
+    },
   },
   build: {
     emptyOutDir: false,
