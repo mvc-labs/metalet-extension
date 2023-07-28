@@ -1,8 +1,8 @@
 import { API_NET, API_TARGET, FtManager } from 'meta-contract'
 import { getNetwork } from '../network'
 import { getCurrentAccount, privateKey } from '../account'
-import { FEEB } from '../../data/config'
-import { METASV_HOST, METASV_TESTNET_HOST } from '../../data/hosts'
+import { FEEB } from '@/data/config'
+import { METASV_HOST, METASV_TESTNET_HOST } from '@/data/hosts'
 
 export async function process({
   codehash,

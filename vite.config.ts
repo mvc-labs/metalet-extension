@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import { fileURLToPath, URL } from 'url'
 import vue from '@vitejs/plugin-vue'
 import svgLoader from 'vite-svg-loader'
 import path from 'path'
@@ -10,7 +11,7 @@ export default defineConfig({
   plugins: [alias(), vue(), svgLoader()],
   resolve: {
     alias: {
-      // '@/': path.resolve(__dirname, './src/'),
+      '@/': fileURLToPath(new URL('./src/', import.meta.url)),
     },
   },
   build: {

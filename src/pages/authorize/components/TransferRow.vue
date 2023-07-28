@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { TransferTask, Receiver } from '../../../lib/actions/transfer'
-import { shortestAddress } from '../../../lib/helpers'
+import type { TransferTask, Receiver } from '@/lib/actions/transfer'
+import { shortestAddress } from '@/lib/helpers'
 
 const props = defineProps<{
   task: TransferTask
@@ -27,6 +27,6 @@ function prettyAmount(task: TransferTask, receiver: Receiver) {
 
 <style scoped>
 .td-cell {
-  @apply border border-gray-200 py-2 px-4 text-xs text-gray-700;
+  @apply border border-gray-200 px-4 py-2 text-xs text-gray-700;
 }
 </style>

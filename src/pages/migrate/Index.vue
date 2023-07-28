@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { sendMsg } from '../../lib/helpers'
-import MetaletLogoImg from '../../assets/images/metalet-logo.png?url'
-import accountManager from '../../lib/account'
-import type { Account } from '../../lib/account'
+import { sendMsg } from '@/lib/helpers'
+import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
+import accountManager from '@/lib/account'
+import type { Account } from '@/lib/account'
 import { mvc } from 'meta-contract'
-import { setNetwork } from '../../lib/network'
+import { setNetwork } from '@/lib/network'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 

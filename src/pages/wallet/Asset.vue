@@ -2,12 +2,12 @@
 import { computed, ref, Ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import assets from '../../data/assets'
-import { useBalanceQuery } from '../../queries/balance'
-import { address } from '../../lib/account'
-import { prettierBalance } from '../../lib/helpers'
+import assets from '@/data/assets'
+import { useBalanceQuery } from '@/queries/balance'
+import { address } from '@/lib/account'
+import { prettifyBalance } from '@/lib/helpers'
 import Activities from './components/Activities.vue'
-import { useExchangeRatesQuery } from '../../queries/exchange-rates'
+import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 
 const route = useRoute()
 const router = useRouter()
@@ -50,7 +50,7 @@ const toReceive = () => {
       <template v-if="asset?.queryable">
         <div class="" v-if="isLoading">--</div>
         <div class="mb-1 text-center text-xl" v-else-if="balance">
-          {{ prettierBalance(balance) }}
+          {{ prettifyBalance(balance) }}
         </div>
         <div class="text-sm text-gray-500" v-if="isExchangeRateLoading">--</div>
         <div class="text-sm text-gray-500" v-else>{{ exchange }}</div>

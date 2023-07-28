@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'
-import MetaletLogoImg from '../../assets/images/metalet-logo.png?url'
+import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
 import { ref } from 'vue'
-import accountManager from '../../lib/account'
+import accountManager from '@/lib/account'
 
 const router = useRouter()
 

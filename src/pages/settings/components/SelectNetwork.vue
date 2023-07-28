@@ -2,7 +2,7 @@
 import { ref, Ref } from 'vue'
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
 import { ChevronRightIcon } from '@heroicons/vue/20/solid'
-import { getNetwork, setNetwork } from '../../../lib/network'
+import { getNetwork, setNetwork } from '@/lib/network'
 
 type Network = {
   id: number

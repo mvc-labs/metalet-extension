@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import accountManager, { address, account } from '../../lib/account'
-import password from '../../lib/password'
+import accountManager, { address, account } from '@/lib/account'
+import password from '@/lib/password'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import MoreIcon from '../../assets/icons/more.svg?component'
+import MoreIcon from '@/assets/icons/more.svg?component'
 import ResetModal from '../ResetModal.vue'
 
 const router = useRouter()

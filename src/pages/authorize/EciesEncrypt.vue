@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
-import actions from '../../data/authorize-actions'
+import actions from '@/data/authorize-actions'
 const action = actions.EciesEncrypt
 
 const accesses = ['Encrypt a message with ECIES algorithm.']

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
-import actions from '../../data/authorize-actions'
+import actions from '@/data/authorize-actions'
 const action = actions.Connect
 
 const accesses = ['View your wallet address, balance and activity', 'Request approval for transactions']

@@ -3,8 +3,8 @@ import { Ref, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowDownLeftIcon } from '@heroicons/vue/20/solid'
 
-import { getAddress } from '../../../lib/account'
-import { useNftCollectionsQuery } from '../../../queries/nfts'
+import { getAddress } from '@/lib/account'
+import { useNftCollectionsQuery } from '@/queries/nfts'
 
 import NftCollectionItem from './CollectionItem.vue'
 

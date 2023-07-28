@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import type { Activity } from '../../../queries/activities'
-import { formatTimestamp, formatTxId, toTx } from '../../../lib/helpers'
+import type { Activity } from '@/queries/activities'
+import { prettifyTimestamp, prettifyTxId, toTx } from '@/lib/helpers'
 import { computed } from 'vue'
-import { getBrowserHost } from '../../../lib/host'
-import type { Token } from '../../../queries/tokens'
+import { getBrowserHost } from '@/lib/host'
+import type { Token } from '@/queries/tokens'
 
 const props = defineProps<{
   activity: Activity
@@ -47,7 +47,7 @@ console.log({ asset: props.asset })
 </script>
 
 <template>
-  <div class="-mx-2 space-y-3 rounded-md bg-gray-100 py-4 px-2">
+  <div class="-mx-2 space-y-3 rounded-md bg-gray-100 px-2 py-4">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-x-2 text-green-500" v-if="isConfirmed">
         <div class="h-2 w-2 rounded-full bg-green-500"></div>
@@ -58,14 +58,14 @@ console.log({ asset: props.asset })
         <div class="h-2 w-2 rounded-full bg-red-500"></div>
         <div>Unconfirmed</div>
       </div>
-      <div :class="['text-sm text-gray-500']">{{ formatTimestamp(activity.time) }}</div>
+      <div :class="['text-sm text-gray-500']">{{ prettifyTimestamp(activity.time) }}</div>
     </div>
 
     <div :class="[difference.displayClass, 'text-right  text-lg font-bold']">{{ difference.display }}</div>
 
     <div class="flex items-center justify-end gap-x-2">
       <div class="cursor-pointer text-xs text-gray-400 hover:underline" @click="toActivityTx">
-        {{ formatTxId(activity.txid) }}
+        {{ prettifyTxId(activity.txid) }}
       </div>
     </div>
   </div>

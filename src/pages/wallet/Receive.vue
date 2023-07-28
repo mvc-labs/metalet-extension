@@ -2,8 +2,8 @@
 import { ref, computed, Ref } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { getAddress, address } from '../../lib/account'
-import assets from '../../data/assets'
+import { getAddress, address } from '@/lib/account'
+import assets from '@/data/assets'
 
 const route = useRoute()
 const chain: Ref<'btc' | 'mvc'> = ref(route.query.chain as 'btc' | 'mvc')

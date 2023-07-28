@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import MetaletLogoImg from '../../assets/images/metalet-logo.png?url'
+import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/solid'
-import passwordManager from '../../lib/password'
+import passwordManager from '@/lib/password'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()

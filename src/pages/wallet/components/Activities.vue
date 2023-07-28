@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { Ref, ref, computed } from 'vue'
 
-import { getAddress } from '../../../lib/account'
-import { useActivitiesQuery } from '../../../queries/activities'
+import { getAddress } from '@/lib/account'
+import { useActivitiesQuery } from '@/queries/activities'
 import ActivityItem from './ActivityItem.vue'
-import type { Token } from '../../../queries/tokens'
+import type { Token } from '@/queries/tokens'
 import { InboxIcon } from '@heroicons/vue/24/solid'
 
 const address: Ref<string> = ref('')
@@ -39,7 +39,7 @@ const { isLoading, isError, data, error } = useActivitiesQuery(address, { asset:
         :asset="asset"
       />
 
-      <div v-else class="flex flex-col items-center justify-center gap-y-2 pt-8 pb-4 text-center">
+      <div v-else class="flex flex-col items-center justify-center gap-y-2 pb-4 pt-8 text-center">
         <InboxIcon class="h-8 w-8 text-gray-300" />
         <div class="text-gray-500">No activities</div>
       </div>

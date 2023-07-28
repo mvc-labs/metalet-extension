@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
 
-import useNftsQuery, { useOneNftCollectionQuery } from '../../queries/nfts'
-import { useCollectionInfoQuery } from '../../queries/metadata'
-import { address } from '../../lib/account'
+import useNftsQuery, { useOneNftCollectionQuery } from '@/queries/nfts'
+import { useCollectionInfoQuery } from '@/queries/metadata'
+import { address } from '@/lib/account'
 
 import NftItem from './components/NftItem.vue'
 

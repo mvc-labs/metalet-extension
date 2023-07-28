@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useNftInfoQuery } from '../../../queries/metadata'
-import { parseMetaFile, getResizeQuery } from '../../../lib/metadata'
-import type { Nft } from '../../../queries/nfts'
+import { useNftInfoQuery } from '@/queries/metadata'
+import { parseMetaFile, getResizeQuery } from '@/lib/metadata'
+import type { Nft } from '@/queries/nfts'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -39,6 +39,6 @@ const toNftDetail = () => {
     </div>
 
     <div class="mt-1 text-center text-xs text-gray-400">{{ '# ' + nft.tokenIndex }}</div>
-    <div class="text-center text-xs text-gray-500" v-if="nftInfo">{{ nftInfo.name }}</div>
+    <div class="shrink-0 truncate text-center text-xs text-gray-500" v-if="nftInfo">{{ nftInfo.name }}</div>
   </div>
 </template>

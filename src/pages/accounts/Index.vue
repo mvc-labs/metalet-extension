@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import accountManager from '../../lib/account'
+import accountManager from '@/lib/account'
 
 import AccountItem from './components/Item.vue'
 import { PlusIcon } from '@heroicons/vue/20/solid'
@@ -9,7 +9,6 @@ const accounts = ref()
 accountManager.all().then((res) => {
   accounts.value = res
 })
-
 </script>
 
 <template>
@@ -18,7 +17,7 @@ accountManager.all().then((res) => {
 
     <!-- create -->
     <div
-      class="group group -mx-2 flex cursor-pointer items-center justify-start gap-x-2 rounded-md py-4 px-2 transition hover:bg-blue-100"
+      class="group group -mx-2 flex cursor-pointer items-center justify-start gap-x-2 rounded-md px-2 py-4 transition hover:bg-blue-100"
       @click="() => $router.push('/welcome')"
     >
       <!-- icon -->

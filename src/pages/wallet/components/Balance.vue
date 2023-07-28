@@ -2,10 +2,10 @@
 import { useRouter } from 'vue-router'
 import { computed, ref, Ref } from 'vue'
 
-import { useBalanceQuery } from '../../../queries/balance'
-import { useExchangeRatesQuery } from '../../../queries/exchange-rates'
-import { prettierBalance } from '../../../lib/helpers'
-import { getAddress } from '../../../lib/account'
+import { useBalanceQuery } from '@/queries/balance'
+import { useExchangeRatesQuery } from '@/queries/exchange-rates'
+import { prettifyBalance } from '@/lib/helpers'
+import { getAddress } from '@/lib/account'
 import { ArrowDownRightIcon, ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
 
 const router = useRouter()

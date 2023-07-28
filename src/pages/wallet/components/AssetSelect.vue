@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 import { Switch } from '@headlessui/vue'
 
-import { addAssetsDisplay, getAssetsDisplay, removeAssetsDisplay } from '../../../lib/assets'
+import { addAssetsDisplay, getAssetsDisplay, removeAssetsDisplay } from '@/lib/assets'
 
 const props = defineProps<{
   asset: {
@@ -34,12 +34,12 @@ watch(enabled, async (value) => {
 </script>
 
 <template>
-  <div class="flex items-center justify-between px-4 py-6 rounded">
+  <div class="flex items-center justify-between rounded px-4 py-6">
     <div class="flex items-center gap-x-3">
-      <img class="w-10 h-10 rounded-full" :src="asset.logo" />
+      <img class="h-10 w-10 rounded-full" :src="asset.logo" />
       <div class="flex flex-col">
         <div class="text-base">{{ asset.tokenName }}</div>
-        <div class="text-gray-500 text-xs">{{ asset.symbol }}</div>
+        <div class="text-xs text-gray-500">{{ asset.symbol }}</div>
       </div>
     </div>
 

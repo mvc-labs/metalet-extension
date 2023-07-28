@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import accountManager from '../../../lib/account'
-import type { Account } from '../../../lib/account'
-import { network } from '../../../lib/network'
+import accountManager from '@/lib/account'
+import type { Account } from '@/lib/account'
+import { network } from '@/lib/network'
 import { ClipboardDocumentCheckIcon, ClipboardDocumentListIcon, PencilSquareIcon } from '@heroicons/vue/24/solid'
 import { useRouter } from 'vue-router'
 import EditName from './EditName.vue'

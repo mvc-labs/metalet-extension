@@ -1,6 +1,6 @@
-import { fetchTokens } from '../queries/tokens'
+import { fetchTokens } from '@/queries/tokens'
 import { address, getCurrentAccount, setAccount } from './account'
-import tokens from '../data/tokens'
+import tokens from '@/data/tokens'
 
 export async function getAssetsDisplay() {
   const account = await getCurrentAccount()

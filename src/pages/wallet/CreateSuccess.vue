@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { CheckIcon } from '@heroicons/vue/20/solid'
-import passwordManager from '../../lib/password'
+import passwordManager from '@/lib/password'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -14,7 +14,7 @@ const goOn = async () => {
 </script>
 
 <template>
-  <div class="flex mt-32 flex-col items-center justify-center">
+  <div class="mt-32 flex flex-col items-center justify-center">
     <div class="gradient-bg flex h-16 w-16 items-center justify-center rounded-full !bg-gradient-to-br">
       <CheckIcon class="h-8 w-8 text-white" />
     </div>
@@ -24,7 +24,7 @@ const goOn = async () => {
       Your new wallet has been created successfully, you can now connect to your wallet.
     </p>
 
-    <div class="flex mt-32 self-stretch">
+    <div class="mt-32 flex self-stretch">
       <button class="main-btn-bg grow rounded-md py-4 text-center leading-none text-white" @click="goOn">OK</button>
     </div>
   </div>

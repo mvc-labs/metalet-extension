@@ -4,11 +4,11 @@ import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 import { ChevronRightIcon } from '@heroicons/vue/20/solid'
 import { useRouter } from 'vue-router'
 
-import passwordManager from '../../lib/password'
-import { VERSION } from '../../data/config'
+import passwordManager from '@/lib/password'
+import { VERSION } from '@/data/config'
 
 import SelectNetwork from './components/SelectNetwork.vue'
-import ResetModal from '../../components/ResetModal.vue'
+import ResetModal from '@/components/ResetModal.vue'
 
 const router = useRouter()
 

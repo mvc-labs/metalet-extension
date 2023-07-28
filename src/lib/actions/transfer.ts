@@ -1,7 +1,7 @@
 import { API_NET, API_TARGET, FtManager, TxDecoder, Wallet, mvc } from 'meta-contract'
 import { getNetwork } from '../network'
 import { getAddress, privateKey } from '../account'
-import { FEEB } from '../../data/config'
+import { FEEB } from '@/data/config'
 import { getApiHost } from '../host'
 
 export type Receiver = {

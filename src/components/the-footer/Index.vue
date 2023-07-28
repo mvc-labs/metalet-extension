@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-// import WalletIcon from '../../assets/icons/wallet.svg?component'
-import NftIcon from '../../assets/icons/nft.svg?component'
-// import NftIcon from '../../assets/icons/nft.svg?url'
-// import ExchangeIcon from '../../assets/icons/exchange.svg?component'
-// import SettingsIcon from '../../assets/icons/settings.svg?component'
+// import WalletIcon from '@/assets/icons/wallet.svg?component'
+import NftIcon from '@/assets/icons/nft.svg?component'
+// import NftIcon from '@/assets/icons/nft.svg?url'
+// import ExchangeIcon from '@/assets/icons/exchange.svg?component'
+// import SettingsIcon from '@/assets/icons/settings.svg?component'
 import { WalletIcon, Cog6ToothIcon, ArrowsRightLeftIcon, CircleStackIcon } from '@heroicons/vue/24/solid'
 </script>
 

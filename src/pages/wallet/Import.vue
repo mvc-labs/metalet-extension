@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import { ref, computed, Ref, watch } from 'vue'
 import { mvc } from 'meta-contract'
-import { addAccount } from '../../lib/account'
+import { addAccount } from '@/lib/account'
 import { useRouter } from 'vue-router'
 import { RadioGroup, RadioGroupOption, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import { ChevronRightIcon, TrashIcon } from '@heroicons/vue/24/solid'
 
-import MetaletLogoImg from '../../assets/images/metalet-logo.png?url'
+import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
 
 const router = useRouter()
 

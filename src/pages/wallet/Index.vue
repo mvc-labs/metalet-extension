@@ -2,7 +2,7 @@
 import Balance from './components/Balance.vue'
 import AccountItem from '../accounts/components/Item.vue'
 import AssetList from './components/AssetList.vue'
-import { account } from '../../lib/account'
+import { account } from '@/lib/account'
 </script>
 
 <template>

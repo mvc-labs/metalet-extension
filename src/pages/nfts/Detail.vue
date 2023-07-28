@@ -8,13 +8,13 @@ import {
   ArrowTopRightOnSquareIcon,
 } from '@heroicons/vue/24/solid'
 
-import { useOneNftQuery } from '../../queries/nfts'
-import { useNftInfoQuery } from '../../queries/metadata'
-import { useOneActivityQuery } from '../../queries/activities'
-import { parseMetaFile, getResizeQuery } from '../../lib/metadata'
-import { formatTimestamp, formatTxId, prettifyTokenGenesis, toTx } from '../../lib/helpers'
-import { isOfficialNft } from '../../lib/nft'
-import { getBrowserHost } from '../../lib/host'
+import { useOneNftQuery } from '@/queries/nfts'
+import { useNftInfoQuery } from '@/queries/metadata'
+import { useOneActivityQuery } from '@/queries/activities'
+import { parseMetaFile } from '@/lib/metadata'
+import { prettifyTimestamp, prettifyTxId, prettifyTokenGenesis, toTx } from '@/lib/helpers'
+import { isOfficialNft } from '@/lib/nft'
+import { getBrowserHost } from '@/lib/host'
 
 const router = useRouter()
 const { codehash, genesis, tokenIndex } = defineProps<{
@@ -111,7 +111,7 @@ const toTransferNft = () => {
       <div class="row">
         <div class="label">Last Activity</div>
         <div class="value flex items-center">
-          <div class="">{{ formatTxId(nft.txid) }}</div>
+          <div class="">{{ prettifyTxId(nft.txid) }}</div>
 
           <button class="ml-2 text-gray-500 hover:text-blue-500" @click.stop="toActivityTx" type="button">
             <ArrowTopRightOnSquareIcon class="h-4 w-4" />
@@ -125,7 +125,7 @@ const toTransferNft = () => {
         <div class="value" v-if="isLoadingActivity">
           <div class="text-gray-500">...</div>
         </div>
-        <div class="value" v-else-if="activity">{{ formatTimestamp(activity.time) }}</div>
+        <div class="value" v-else-if="activity">{{ prettifyTimestamp(activity.time) }}</div>
       </div>
     </div>
 

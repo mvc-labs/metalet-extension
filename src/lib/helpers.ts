@@ -1,15 +1,14 @@
 import dayjs from 'dayjs'
 
-export const formatTimestamp = (timestamp: number, format = 'YYYY-MM-DD HH:mm:ss') => {
-  console.log({ timestamp })
+export const prettifyTimestamp = (timestamp: number, format = 'YYYY-MM-DD HH:mm:ss') => {
   return dayjs(timestamp).format(format)
 }
 
-export const formatTxId = (txId: string) => {
+export const prettifyTxId = (txId: string) => {
   return `${txId.slice(0, 6)}...${txId.slice(-6)}`
 }
 
-export const prettierBalance = (balance: number): string => {
+export const prettifyBalance = (balance: number): string => {
   if (!balance) return '--'
   const total = balance
 

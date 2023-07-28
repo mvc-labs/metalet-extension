@@ -8,11 +8,11 @@ import {
   ClipboardDocumentListIcon,
 } from '@heroicons/vue/24/solid'
 
-import { getAddress } from '../../lib/account'
-import { prettifyTokenBalance, prettifyTokenGenesis } from '../../lib/helpers'
+import { getAddress } from '@/lib/account'
+import { prettifyTokenBalance, prettifyTokenGenesis } from '@/lib/helpers'
 import Activities from './components/Activities.vue'
-import { useTokenQuery } from '../../queries/tokens'
-import { isOfficialToken } from '../../lib/assets'
+import { useTokenQuery } from '@/queries/tokens'
+import { isOfficialToken } from '@/lib/assets'
 
 const route = useRoute()
 const router = useRouter()

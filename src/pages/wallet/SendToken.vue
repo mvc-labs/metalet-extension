@@ -5,12 +5,12 @@ import { API_NET, FtManager } from 'meta-contract'
 import { CircleStackIcon } from '@heroicons/vue/24/solid'
 import { useQueryClient } from '@tanstack/vue-query'
 
-import { prettifyTokenBalance } from '../../lib/helpers'
-import { getAddress, getCurrentAccount, privateKey } from '../../lib/account'
-import { useTokenQuery } from '../../queries/tokens'
-import { network } from '../../lib/network'
+import { prettifyTokenBalance } from '@/lib/helpers'
+import { getAddress, getCurrentAccount, privateKey } from '@/lib/account'
+import { useTokenQuery } from '@/queries/tokens'
+import { network } from '@/lib/network'
 
-import Modal from '../../components/Modal.vue'
+import Modal from '@/components/Modal.vue'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
@@ -104,7 +104,7 @@ async function send() {
       token: {
         symbol: token.value!.symbol,
         decimal: token.value!.decimal,
-      }
+      },
     }
 
     isOpenResultModal.value = true

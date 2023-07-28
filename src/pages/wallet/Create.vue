@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { Ref, computed, ref } from 'vue'
 import { mvc } from 'meta-contract'
-import LockIcon from '../../assets/icons/lock.svg?component'
+import LockIcon from '@/assets/icons/lock.svg?component'
 import { EyeIcon } from '@heroicons/vue/24/solid'
 import { useRouter } from 'vue-router'
-import { addAccount } from '../../lib/account'
-import passwordManager from '../../lib/password'
+import { addAccount } from '@/lib/account'
+import passwordManager from '@/lib/password'
 
 const router = useRouter()
 

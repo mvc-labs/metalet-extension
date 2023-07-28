@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
-import actions from '../../data/authorize-actions'
+import actions from '@/data/authorize-actions'
 const action = actions.SwitchNetwork
 
 const accesses = ['Switch the network state of Metalet.']

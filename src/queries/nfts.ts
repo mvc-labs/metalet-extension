@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/vue-query'
 import { metasvApi } from './request'
 import { ComputedRef, Ref } from 'vue'
+import { bannedCollections } from '../data/nfts'
 
 export type NftCollection = {
   codehash: string
@@ -29,11 +30,17 @@ export const fetchNftCollections = async (address: string): Promise<NftCollectio
 
   return nftCollections
     .filter((nftCollection: any) => {
-      // 只接受新合约的nft（codehash为 e205939ad9956673ce7da9fbd40514b30f66dc35）
+      // only accept new contract nft（codehash: e205939ad9956673ce7da9fbd40514b30f66dc35）
       return nftCollection.codeHash === 'e205939ad9956673ce7da9fbd40514b30f66dc35'
     })
+    .filter((collection: any) => {
+      // filter banned collections
+      return bannedCollections.every((bannedCollectionGenesis) => {
+        return collection.genesis !== bannedCollectionGenesis
+      })
+    })
     .map((nftCollection: any) => {
-      // 将codeHash改为小写
+      // codeHash to lowercase
       nftCollection.codehash = nftCollection.codeHash
       delete nftCollection.codeHash
       return nftCollection
@@ -43,7 +50,7 @@ export const fetchNftCollections = async (address: string): Promise<NftCollectio
 export const fetchOneNftCollection = async (codehash: string, genesis: string): Promise<NftCollection> => {
   const nftCollection: any = await metasvApi(`/contract/nft/genesis/${codehash}/${genesis}/summary`).get()
 
-  // 将codeHash改为小写
+  // codeHash to lowercase
   nftCollection.codehash = nftCollection.codeHash
   delete nftCollection.codeHash
 
@@ -92,15 +99,6 @@ export const useNftCollectionsQuery = (address: Ref, options: { enabled: Compute
   return useQuery({
     queryKey: ['nftCollections', { address: address.value }],
     queryFn: () => fetchNftCollections(address.value),
-    select: (data: NftCollection[]) => {
-      const collections = data.map((nftCollection) => {
-        return {
-          ...nftCollection,
-        }
-      })
-
-      return collections
-    },
     ...options,
   })
 }

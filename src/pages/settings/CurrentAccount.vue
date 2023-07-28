@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { account, getAddress, address } from '../../lib/account'
+import { account, getAddress, address } from '@/lib/account'
 getAddress()
 </script>
 

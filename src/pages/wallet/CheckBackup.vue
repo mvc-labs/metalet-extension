@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { account } from '../../lib/account'
-import passwordManager from '../../lib/password'
+import { account } from '@/lib/account'
+import passwordManager from '@/lib/password'
 
 const router = useRouter()
 

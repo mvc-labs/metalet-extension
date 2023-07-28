@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/solid'
-import PasswordImg from '../../assets/images/password.svg?url'
+import PasswordImg from '@/assets/images/password.svg?url'
 import { Ref, computed, ref } from 'vue'
 import { passwordStrength } from 'check-password-strength'
 import { useRouter } from 'vue-router'
-import accountManager from '../../lib/account'
-import passwordManager from '../../lib/password'
+import accountManager from '@/lib/account'
+import passwordManager from '@/lib/password'
 
 const router = useRouter()
 

@@ -2,9 +2,9 @@
 import { ref, computed, Ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import assetsList from '../../data/assets'
+import assetsList from '@/data/assets'
 import AssetItem from './components/AssetItem.vue'
-import { getAssetsDisplay } from '../../lib/assets'
+import { getAssetsDisplay } from '@/lib/assets'
 
 const props = defineProps<{
   purpose: 'receive' | 'send'

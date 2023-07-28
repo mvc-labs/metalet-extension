@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import actions from '../../data/authorize-actions'
+import actions from '@/data/authorize-actions'
 import { CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
 const action = actions.Merge

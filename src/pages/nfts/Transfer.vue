@@ -3,13 +3,13 @@ import { ComputedRef, computed, ref, Ref } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import { API_NET, API_TARGET, NftManager } from 'meta-contract'
 
-import { getAddress, getCurrentAccount, privateKey } from '../../lib/account'
-import { parseMetaFile, getResizeQuery } from '../../lib/metadata'
-import { useOneNftQuery } from '../../queries/nfts'
-import { useNftInfoQuery } from '../../queries/metadata'
-import { network } from '../../lib/network'
+import { getAddress, getCurrentAccount, privateKey } from '@/lib/account'
+import { parseMetaFile, getResizeQuery } from '@/lib/metadata'
+import { useOneNftQuery } from '@/queries/nfts'
+import { useNftInfoQuery } from '@/queries/metadata'
+import { network } from '@/lib/network'
 
-import Modal from '../../components/Modal.vue'
+import Modal from '@/components/Modal.vue'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const queryClient = useQueryClient()

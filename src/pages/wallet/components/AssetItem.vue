@@ -2,12 +2,12 @@
 import { ref, computed, Ref } from 'vue'
 import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
-import { useBalanceQuery } from '../../../queries/balance'
-import { getAddress } from '../../../lib/account'
-import { isOfficialToken } from '../../../lib/assets'
-import { prettierBalance, prettifyTokenBalance } from '../../../lib/helpers'
-import type { Asset } from '../../../data/assets'
-import { useExchangeRatesQuery } from '../../../queries/exchange-rates'
+import { useBalanceQuery } from '@/queries/balance'
+import { getAddress } from '@/lib/account'
+import { isOfficialToken } from '@/lib/assets'
+import { prettifyBalance, prettifyTokenBalance } from '@/lib/helpers'
+import type { Asset } from '@/data/assets'
+import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 
 const props = defineProps<{
   asset: Asset
@@ -64,7 +64,7 @@ const exchange = computed(() => {
         <template v-if="asset.queryable">
           <div class="" v-if="isLoading">--</div>
           <div class="" v-else-if="balance">
-            {{ prettierBalance(balance) }}
+            {{ prettifyBalance(balance) }}
           </div>
 
           <div class="text-xs text-gray-500" v-if="isExchangeRateLoading">--</div>

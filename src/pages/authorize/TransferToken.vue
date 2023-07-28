@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { Ref, ref } from 'vue'
 
-import actions from '../../data/authorize-actions'
+import actions from '@/data/authorize-actions'
 
 const action = actions.TokenTransfer
 

@@ -4,12 +4,12 @@ import { useRoute } from 'vue-router'
 import { Wallet } from 'meta-contract'
 import { useQueryClient } from '@tanstack/vue-query'
 
-import { useBalanceQuery } from '../../queries/balance'
-import { prettierBalance, sleep } from '../../lib/helpers'
-import { getAddress } from '../../lib/account'
-import assets from '../../data/assets'
+import { useBalanceQuery } from '@/queries/balance'
+import { prettifyBalance } from '@/lib/helpers'
+import { getAddress } from '@/lib/account'
+import assets from '@/data/assets'
 
-import Modal from '../../components/Modal.vue'
+import Modal from '@/components/Modal.vue'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
@@ -69,7 +69,7 @@ async function send() {
       token: {
         symbol: 'SPACE',
         decimal: 8,
-      }
+      },
     }
 
     isOpenResultModal.value = true
@@ -111,7 +111,7 @@ async function send() {
         <div class="">Your Balance:</div>
         <div class="" v-if="isLoading">--</div>
         <div class="" v-else-if="error">Error</div>
-        <div class="" v-else-if="balance">{{ prettierBalance(balance) }}</div>
+        <div class="" v-else-if="balance">{{ prettifyBalance(balance) }}</div>
       </div>
     </div>
 

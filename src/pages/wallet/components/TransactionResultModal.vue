@@ -2,10 +2,10 @@
 import { PropType } from 'vue'
 import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
 
-import { prettifyTokenBalance, toTx } from '../../../lib/helpers'
-import { getBrowserHost } from '../../../lib/host'
+import { prettifyTokenBalance, toTx } from '@/lib/helpers'
+import { getBrowserHost } from '@/lib/host'
 
-import Modal from '../../../components/Modal.vue'
+import Modal from '@/components/Modal.vue'
 
 type SuccessResult = {
   status: 'success'

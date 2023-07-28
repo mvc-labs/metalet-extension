@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import Modal from '../../../components/Modal.vue'
-import accountManager from '../../../lib/account'
+import Modal from '@/components/Modal.vue'
+import accountManager from '@/lib/account'
 
 defineProps(['open'])
 const emit = defineEmits(['update:open'])
