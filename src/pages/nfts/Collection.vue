@@ -35,6 +35,13 @@ const { isLoading, data: nfts } = useNftsQuery(address, {
 
   <!-- list -->
   <div class="grid grid-cols-3 gap-x-2">
-    <NftItem v-for="nft in nfts" :nft="nft" />
+    <NftItem
+      v-for="nft in nfts"
+      :nft="nft"
+      :collection-meta-info="{
+        metaTxid: txid,
+        metaOutputIndex: Number(outputIndex),
+      }"
+    />
   </div>
 </template>

@@ -2,13 +2,17 @@
 import { computed } from 'vue'
 import { useNftInfoQuery } from '@/queries/metadata'
 import { parseMetaFile, getResizeQuery } from '@/lib/metadata'
-import type { Nft } from '@/queries/nfts'
+import type { Nft, NftCollection } from '@/queries/nfts'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
 const props = defineProps<{
   nft: Nft
+  collectionMetaInfo: {
+    metaTxid: string
+    metaOutputIndex: number
+  }
 }>()
 
 const { data: nftInfo } = useNftInfoQuery(
@@ -23,7 +27,9 @@ const iconUrl = computed(() => {
 })
 
 const toNftDetail = () => {
-  router.push(`/nfts/${props.nft.codehash}/${props.nft.genesis}/${props.nft.tokenIndex}`)
+  router.push(
+    `/nfts/${props.nft.codehash}/${props.nft.genesis}/${props.nft.tokenIndex}?meta_txid=${props.collectionMetaInfo.metaTxid}&meta_output_index=${props.collectionMetaInfo.metaOutputIndex}`
+  )
 }
 </script>
 

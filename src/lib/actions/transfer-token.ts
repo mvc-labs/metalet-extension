@@ -1,6 +1,6 @@
 import { API_NET, API_TARGET, FtManager } from 'meta-contract'
 import { getNetwork } from '../network'
-import { getCurrentAccount, privateKey } from '../account'
+import { getCurrentAccount, privateKey, getAddress } from '../account'
 import { FEEB } from '@/data/config'
 import { METASV_HOST, METASV_TESTNET_HOST } from '@/data/hosts'
 
@@ -27,11 +27,30 @@ export async function process({
     feeb: FEEB,
     apiHost,
   })
+  // Pick the largest utxo from wallet to pay the transaction
+  const selfAddress = await getAddress()
+  const largestUtxo = await ftManager.api
+    .getUnspents(selfAddress)
+    .then((utxos) => {
+      return utxos.reduce((prev, curr) => {
+        if (curr.satoshis > prev.satoshis) return curr
+        return prev
+      })
+    })
+    .then((utxo) => {
+      // add wif to utxo
+      return {
+        ...utxo,
+        wif: privateKey.value!,
+      }
+    })
+
   const { txid } = await ftManager.transfer({
     codehash,
     genesis,
     receivers,
     senderWif: purse,
+    utxos: [largestUtxo],
   })
 
   return { txids: [txid] }

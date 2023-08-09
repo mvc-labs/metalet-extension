@@ -10,9 +10,6 @@ export const useCollectionInfoQuery = (
   return useQuery({
     queryKey: ['metadata', { txid, outputIndex, type: 'collectionInfo' }],
     queryFn: () => parseCollectionInfo(txid, outputIndex),
-    select: (metaData) => {
-      return metaData
-    },
     ...options,
     staleTime: 1000 * 60 * 60 * 24 * 30,
   })
@@ -26,6 +23,9 @@ export const useNftInfoQuery = (
   return useQuery({
     queryKey: ['metadata', { txid, outputIndex, type: 'nftInfo' }],
     queryFn: () => parseNftInfo(txid.value, outputIndex.value),
+    select: (nftInfo) => {
+      return nftInfo
+    },
     ...options,
     staleTime: 1000 * 60 * 60 * 24 * 30,
   })

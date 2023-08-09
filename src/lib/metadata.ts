@@ -57,9 +57,11 @@ export async function parseNftInfo(
   description: string
   creator: string
   website: string
+  genesisTxid: string
 } | null> {
   const nftMetaData = await parseMetaData(txid, outputIndex)
   if (!nftMetaData) return null
+  console.log({ nftMetaData })
 
   return {
     name: nftMetaData.name || '',
@@ -68,6 +70,7 @@ export async function parseNftInfo(
     description: nftMetaData.desc || '',
     creator: nftMetaData.issuerName || '',
     website: nftMetaData.website || '',
+    genesisTxid: nftMetaData.genesisTxid || '',
   }
 }
 
