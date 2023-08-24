@@ -47,13 +47,16 @@ const exchange = computed(() => {
         <div class="flex flex-col">
           <div
             :class="[
-              'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
+              'flex w-32 items-center gap-x-0.5 truncate whitespace-nowrap',
               asset.isNative ? 'text-lg' : 'text-sm',
             ]"
             :title="asset.tokenName"
           >
             {{ asset.tokenName }}
-            <CheckBadgeIcon class="h-4 w-4 text-blue-500" v-if="asset?.genesis && isOfficialToken(asset.genesis)" />
+            <CheckBadgeIcon
+              class="h-4 w-4 shrink-0 text-blue-500"
+              v-if="asset?.genesis && isOfficialToken(asset.genesis)"
+            />
           </div>
           <div class="text-xs text-gray-500">{{ asset.symbol }}</div>
         </div>
