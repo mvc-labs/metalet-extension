@@ -10,6 +10,10 @@ import { VERSION } from '@/data/config'
 import SelectNetwork from './components/SelectNetwork.vue'
 import ResetModal from '@/components/ResetModal.vue'
 
+function openWindowMode() {
+  window.open(window.location.href, '_blank')
+}
+
 const router = useRouter()
 
 const hasPassword = ref(false)
@@ -61,6 +65,13 @@ const showResetModal = ref(false)
 
         <div class="setting-item group cursor-pointer" @click="toCurrentAccount">
           <div class="text-gray-500 group-hover:underline">Current Account</div>
+          <div class="">
+            <ChevronRightIcon class="link-icon" />
+          </div>
+        </div>
+
+        <div class="setting-item group cursor-pointer" @click="openWindowMode">
+          <div class="text-gray-500 group-hover:underline">Open in Window Mode</div>
           <div class="">
             <ChevronRightIcon class="link-icon" />
           </div>

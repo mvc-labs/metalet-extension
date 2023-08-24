@@ -1,10 +1,12 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import accountManager from '@/lib/account'
-import type { Account } from '@/lib/account'
-import { network } from '@/lib/network'
 import { ClipboardDocumentCheckIcon, ClipboardDocumentListIcon, PencilSquareIcon } from '@heroicons/vue/24/solid'
 import { useRouter } from 'vue-router'
+
+import accountManager, { deriveAddress, type Account } from '@/lib/account'
+import { network } from '@/lib/network'
+import { shortestAddress } from '@/lib/helpers'
+
 import EditName from './EditName.vue'
 
 const router = useRouter()
@@ -14,6 +16,11 @@ const props = defineProps<{
   showConnectButton?: boolean
   showNetwork?: boolean
 }>()
+
+const mvcAddress = ref('')
+deriveAddress({ chain: 'mvc' }).then((address) => (mvcAddress.value = address))
+const btcAddress = ref('')
+deriveAddress({ chain: 'btc' }).then((address) => (btcAddress.value = address))
 
 const isCopied = ref(false)
 const copyAddress = () => {
@@ -28,10 +35,6 @@ const address = computed(() => {
   }
   return props.account.mainnetAddress
 })
-
-const prettifyAddress = (address: string) => {
-  return `${address.slice(0, 6)}...${address.slice(-6)}`
-}
 
 const randomColor = (key: string) => {
   const colors = [
@@ -92,8 +95,24 @@ const openEditNameModal = ref(false)
           >
         </div>
 
+        <div class="mt-1 flex items-center gap-x-1">
+          <div class="flex items-center gap-2">
+            <div class="text-xs text-gray-400">MVC Address</div>
+            <div class="text-sm text-gray-500">{{ shortestAddress(mvcAddress) }}</div>
+          </div>
+
+          <ClipboardDocumentCheckIcon class="h-4 w-4 text-blue-500" v-if="isCopied" />
+          <button class="text-gray-400 hover:text-gray-500" @click.stop="copyAddress" type="button" v-else>
+            <ClipboardDocumentListIcon class="h-4 w-4" />
+          </button>
+        </div>
+
         <div class="flex items-center gap-x-1">
-          <div class="text-sm text-gray-500">{{ prettifyAddress(address) }}</div>
+          <div class="flex items-center gap-2">
+            <div class="text-xs text-gray-400">BTC Address</div>
+            <div class="text-sm text-gray-500">{{ shortestAddress(btcAddress) }}</div>
+          </div>
+
           <ClipboardDocumentCheckIcon class="h-4 w-4 text-blue-500" v-if="isCopied" />
           <button class="text-gray-400 hover:text-gray-500" @click.stop="copyAddress" type="button" v-else>
             <ClipboardDocumentListIcon class="h-4 w-4" />

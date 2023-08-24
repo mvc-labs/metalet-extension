@@ -1,7 +1,7 @@
 import { Ref, ref } from 'vue'
 import { fetchSpaceBalance } from '../queries/balance'
 import { getStorage, setStorage } from './storage'
-import { generateRandomString } from './helpers'
+import { generateRandomString, raise } from './helpers'
 import { getNetwork } from './network'
 import { mvc } from 'meta-contract'
 
@@ -9,6 +9,7 @@ export type Account = {
   id: string
   mnemonic: string
   path: string
+  btcPath: string
   mainnetPrivateKey: string
   mainnetAddress: string
   testnetPrivateKey: string
@@ -44,6 +45,8 @@ export async function getCurrentAccount(): Promise<Account | null> {
     return null
   }
 
+  await fixCompatibility(current)
+
   // 保存当前账户的地址和私钥
   const network = await getNetwork()
   address.value = network === 'mainnet' ? current.mainnetAddress : current.testnetAddress
@@ -52,6 +55,34 @@ export async function getCurrentAccount(): Promise<Account | null> {
   account.value = current
 
   return current
+}
+
+export async function getAccountInstance(accountId: string): Promise<AccountCls | null> {
+  const accounts = await getStorage('accounts')
+  if (!accounts) {
+    return null
+  }
+  const current = accounts[accountId]
+  if (!current) {
+    return null
+  }
+
+  await fixCompatibility(current)
+
+  const network = await getNetwork()
+  const mneObj = mvc.Mnemonic.fromString(current.mnemonic)
+
+  return new AccountCls(current.mnemonic)
+}
+
+async function fixCompatibility(account: Account) {
+  // if old account has no btcPath, set it to default value the same as path
+  if (!account.btcPath) {
+    account.btcPath = `m/44'/${account.path}'/0'/0/0`
+
+    // save to storage
+    await setAccount(account)
+  }
 }
 
 export async function removeCurrentAccount(): Promise<boolean> {
@@ -125,6 +156,29 @@ export async function addAccount(account: Omit<Account, 'id' | 'name'>) {
   } else {
     // 保存最新登录账号id
     await connectAccount(exist.id)
+  }
+}
+
+export async function deriveAddress({ chain }: { chain: 'btc' | 'mvc' }) {
+  const account = (await getCurrentAccount()) ?? raise('No account')
+
+  const network = await getNetwork()
+
+  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+  const hdpk = mneObj.toHDPrivateKey('', network)
+  if (chain === 'btc') {
+    console.log('account.btcPath', account.btcPath)
+    const privateKey = hdpk.deriveChild(account.btcPath).privateKey
+    return privateKey.toAddress(network).toString()
+  } else {
+    try {
+      const pathDepth = account.path
+      const privateKey = hdpk.deriveChild(`m/44'/${pathDepth}'/0'/0/0`).privateKey
+
+      return privateKey.toAddress(network).toString()
+    } catch (e: any) {
+      throw new Error(e.message)
+    }
   }
 }
 
@@ -229,6 +283,7 @@ type AccountManager = {
   all: () => Promise<any>
   current: Ref<Account | null>
   getCurrent: () => Promise<Account | null>
+  getAccountInstance: (accountId: string) => Promise<AccountCls | null>
   removeCurrent: () => Promise<boolean>
   set: (account: Account) => Promise<void>
   add: (account: Omit<Account, 'id'>) => Promise<void>
@@ -251,6 +306,7 @@ const accountManager = {} as AccountManager
 accountManager.all = getAll
 accountManager.current = account
 accountManager.getCurrent = getCurrentAccount
+accountManager.getAccountInstance = getAccountInstance
 accountManager.set = setAccount
 accountManager.add = addAccount
 accountManager.connect = connectAccount
@@ -262,3 +318,62 @@ accountManager.removeCurrent = removeCurrentAccount
 accountManager.updateName = updateName
 
 export default accountManager
+
+// Class
+class AccountCls {
+  mnemonic: string
+  constructor(mnemonic: string) {
+    this.mnemonic = mnemonic
+  }
+
+  async getAddress({ path }: { path?: string }) {
+    const network = await getNetwork()
+    const mneObj = mvc.Mnemonic.fromString(this.mnemonic)
+    const hdpk = mneObj.toHDPrivateKey('', network)
+    if (!(path && path.length)) {
+      const privateKey = hdpk.deriveChild(`m/44'/0'/0'/0/0`).privateKey
+      return privateKey.toAddress(network).toString()
+    }
+
+    // 根据路径导出
+    try {
+      const privateKey = hdpk.deriveChild(`m/44'/0'/0'/${path}`).privateKey
+      return privateKey.toAddress(network).toString()
+    } catch (e: any) {
+      return {
+        message: e.message,
+        status: 'failed',
+      }
+    }
+  }
+
+  async getPublicKey({ path }: { path?: string }) {
+    const network = await getNetwork()
+    const mneObj = mvc.Mnemonic.fromString(this.mnemonic)
+    const hdpk = mneObj.toHDPrivateKey('', network)
+    if (!(path && path.length)) {
+      const privateKey = hdpk.deriveChild(`m/44'/0'/0'/0/0`).privateKey
+      return privateKey.toPublicKey().toString()
+    }
+
+    // 根据路径导出
+    try {
+      const privateKey = hdpk.deriveChild(`m/44'/0'/0'/${path}`).privateKey
+      return privateKey.toPublicKey().toString()
+    } catch (e: any) {
+      return {
+        message: e.message,
+        status: 'failed',
+      }
+    }
+  }
+
+  async getXPublicKey() {
+    const network = await getNetwork()
+    const mneObj = mvc.Mnemonic.fromString(this.mnemonic)
+    const xPublicKey = mneObj.toHDPrivateKey('', network).xpubkey.toString()
+    console.log('xPublicKey', xPublicKey)
+
+    return xPublicKey
+  }
+}

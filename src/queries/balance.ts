@@ -15,6 +15,13 @@ export const fetchSpaceBalance = async (address: string): Promise<Balance> => {
   return balance
 }
 
+export const fetchBtcBalance = async (address: string): Promise<Balance> => {
+  const balance: any = await metasvApi(`/address/${address}/balance`).get()
+  balance.total = balance.confirmed + balance.unconfirmed
+
+  return balance
+}
+
 export const doNothing = async (): Promise<Balance> => {
   return {
     address: '',
@@ -30,6 +37,8 @@ export const useBalanceQuery = (address: Ref, symbol: string, options: { enabled
       switch (symbol) {
         case 'SPACE':
           return fetchSpaceBalance(address.value)
+        case 'BTC':
+          return fetchBtcBalance(address.value)
         default:
           return doNothing()
       }

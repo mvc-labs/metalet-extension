@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'url'
 import vue from '@vitejs/plugin-vue'
@@ -7,6 +8,10 @@ import nodePolyfills from 'rollup-plugin-polyfill-node'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  test: {
+    globals: true,
+  },
+
   plugins: [alias(), vue(), svgLoader()],
   resolve: {
     alias: {

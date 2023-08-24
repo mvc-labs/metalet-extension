@@ -1,5 +1,9 @@
 import dayjs from 'dayjs'
 
+export const raise = (msg: string) => {
+  throw new Error(msg)
+}
+
 export const prettifyTimestamp = (timestamp: number, format = 'YYYY-MM-DD HH:mm:ss') => {
   return dayjs(timestamp).format(format)
 }

@@ -4,15 +4,20 @@ getAddress()
 </script>
 
 <template>
-  <div class="flex flex-col gap-y-8 py-8">
+  <div class="flex flex-col gap-y-8 py-8" v-if="account">
     <div class="">
       <div class="label">Address</div>
       <div class="value">{{ address }}</div>
     </div>
 
     <div class="">
-      <div class="label">Path</div>
-      <div class="value">{{ `m/44'/${account?.path}'/0'` }}</div>
+      <div class="label">MVC Path</div>
+      <div class="value">{{ `m/44'/${account?.path}'/0'/0/0` }}</div>
+    </div>
+
+    <div class="" v-if="account.btcPath">
+      <div class="label">BTC Path</div>
+      <div class="value">{{ account.btcPath }}</div>
     </div>
   </div>
 </template>

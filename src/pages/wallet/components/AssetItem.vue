@@ -55,7 +55,10 @@ const exchange = computed(() => {
             {{ asset.tokenName }}
             <CheckBadgeIcon class="h-4 w-4 text-blue-500" v-if="asset?.genesis && isOfficialToken(asset.genesis)" />
           </div>
-          <div class="text-xs text-gray-500">{{ asset.symbol }}</div>
+          <div class="text-xs uppercase text-gray-500" v-if="asset.isNative">
+            {{ asset.chain }}
+          </div>
+          <div class="text-xs text-gray-500" v-else>{{ asset.symbol }}</div>
         </div>
       </div>
 

@@ -1,7 +1,14 @@
+const defaultTheme = require('tailwindcss/defaultTheme')
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./index.html', './popup.html', './src/**/*.{vue,js,ts}'],
   theme: {
+    screens: {
+      xs: '360px',
+      ...defaultTheme.screens,
+    },
+
     extend: {
       colors: {
         'primary-teal': '#72F5F6',

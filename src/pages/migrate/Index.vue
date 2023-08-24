@@ -59,6 +59,7 @@ const importWallet = async () => {
         const account = {
           mnemonic: mnemonicStr,
           path: usingPath,
+          btcPath: `m/86'/0'/0'/0/0`,
           mainnetPrivateKey: mainnetPrivateKey.toString(),
           mainnetAddress,
           testnetPrivateKey: testnetPrivateKey.toString(),

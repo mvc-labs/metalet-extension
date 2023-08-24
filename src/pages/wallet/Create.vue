@@ -26,6 +26,9 @@ const isCover = ref(true)
 const saveAccount = async (backup: boolean) => {
   const mnemonicStr = words.value.join(' ')
   try {
+    const pathDepth = '10001'
+    const fullPath = `m/44'/${pathDepth}'/0'/0/0`
+    const btcPath = `m/86'/0'/0'/0/0`
     const mneObj = mvc.Mnemonic.fromString(mnemonicStr)
     const mainnetHdpk = mneObj.toHDPrivateKey('', 'mainnet')
     const mainnetPrivateKey = mainnetHdpk.deriveChild(`m/44'/10001'/0'/0/0`).privateKey
@@ -38,12 +41,13 @@ const saveAccount = async (backup: boolean) => {
     // 保存账号信息：助记词、私钥、地址；以地址为key，value为对象
     const account = {
       mnemonic: mnemonicStr,
-      path: '10001',
+      path: pathDepth,
+      btcPath,
       mainnetPrivateKey: mainnetPrivateKey.toString(),
       mainnetAddress,
       testnetPrivateKey: testnetPrivateKey.toString(),
       testnetAddress,
-      assetsDisplay: ['SPACE'],
+      assetsDisplay: ['SPACE', 'BTC'],
     }
 
     await addAccount(account)

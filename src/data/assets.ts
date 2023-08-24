@@ -17,16 +17,6 @@ export type Asset = {
 }
 
 export default [
-  // {
-  //   symbol: 'BTC',
-  //   logo: BtcLogoImg,
-  //   tokenName: 'BTC',
-  //   isNative: true,
-  //   color: 'bg-orange-100',
-  //   chain: 'btc',
-  //   queryable: false,
-  //   decimal: 8,
-  // },
   {
     symbol: 'SPACE',
     logo: SpaceLogoImg,
@@ -34,6 +24,16 @@ export default [
     isNative: true,
     color: 'bg-blue-100',
     chain: 'mvc',
+    queryable: true,
+    decimal: 8,
+  },
+  {
+    symbol: 'BTC',
+    logo: BtcLogoImg,
+    tokenName: 'BTC',
+    isNative: true,
+    color: 'bg-orange-100',
+    chain: 'btc',
     queryable: true,
     decimal: 8,
   },

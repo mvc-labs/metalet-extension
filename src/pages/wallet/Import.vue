@@ -37,7 +37,7 @@ const onPasteWords = (e: ClipboardEvent) => {
   }
 }
 
-const path = ref('10001')
+const pathDepth = ref('10001')
 
 const finished = computed(() => words.value.every((word) => word.length > 0))
 
@@ -50,25 +50,28 @@ const onSubmit = async () => {
 
   // 转化成私钥
   try {
+    const fullPath = `m/44'/${pathDepth.value}'/0'/0/0`
+    const btcPath = `m/86'/0'/0'/0/0`
     const mneObj = mvc.Mnemonic.fromString(mnemonicStr)
     // const hdpk = mneObj.toHDPrivateKey('', network)
     const mainnetHdpk = mneObj.toHDPrivateKey('', 'mainnet')
-    const mainnetPrivateKey = mainnetHdpk.deriveChild(`m/44'/${path.value}'/0'/0/0`).privateKey
+    const mainnetPrivateKey = mainnetHdpk.deriveChild(fullPath).privateKey
     const mainnetAddress = mainnetPrivateKey.toAddress('mainnet').toString()
 
     const testnetHdpk = mneObj.toHDPrivateKey('', 'testnet')
-    const testnetPrivateKey = testnetHdpk.deriveChild(`m/44'/${path.value}'/0'/0/0`).privateKey
+    const testnetPrivateKey = testnetHdpk.deriveChild(fullPath).privateKey
     const testnetAddress = testnetPrivateKey.toAddress('testnet').toString()
 
     // 保存账号信息：助记词、私钥、地址；以地址为key，value为对象
     const account = {
       mnemonic: mnemonicStr,
-      path: path.value,
+      path: pathDepth.value,
+      btcPath,
       mainnetPrivateKey: mainnetPrivateKey.toString(),
       mainnetAddress,
       testnetPrivateKey: testnetPrivateKey.toString(),
       testnetAddress,
-      assetsDisplay: ['SPACE'],
+      assetsDisplay: ['SPACE', 'BTC'],
     }
 
     await addAccount(account)
@@ -163,7 +166,7 @@ const onSubmit = async () => {
 
       <div class="mt-2 text-sm tracking-wide text-black">
         <span class="">m/44'/</span>
-        <input type="text" placeholder="10001" class="pit-input mx-2 w-16" v-model="path" />
+        <input type="text" placeholder="10001" class="pit-input mx-2 w-16" v-model="pathDepth" />
         <span class="">'/0'</span>
       </div>
     </div>

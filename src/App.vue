@@ -42,10 +42,10 @@ const secondaryHeaderTitle = computed(() => {
 <template>
   <div
     id="app"
-    class="ext-app relative flex h-150 w-90 items-center justify-center overflow-y-auto sm:h-screen sm:w-screen sm:bg-gray-200/10"
+    class="ext-app relative flex h-150 w-90 items-center justify-center overflow-y-auto xs:h-screen xs:w-screen xs:bg-gray-200/10"
   >
     <div
-      class="ext-app flex h-full w-full flex-col overflow-y-auto sm:relative sm:aspect-[1/2] sm:h-3/4 sm:w-auto sm:min-w-[25rem] sm:rounded-lg sm:border sm:border-gray-100 sm:bg-white sm:shadow-lg"
+      class="ext-app flex h-full w-full flex-col overflow-y-auto xs:relative xs:aspect-[1/2] xs:h-3/4 xs:w-auto xs:min-w-[25rem] xs:rounded-lg xs:border xs:border-gray-100 xs:bg-white xs:shadow-lg"
     >
       <!-- Header -->
       <SecondaryHeader v-if="route.meta.secondaryHeader">
@@ -58,7 +58,7 @@ const secondaryHeaderTitle = computed(() => {
 
       <!-- bg -->
       <div
-        class="bg-hue fixed left-0 top-0 isolate z-[-1] hidden h-1/2 w-full select-none bg-cover bg-center bg-no-repeat sm:block"
+        class="bg-hue fixed left-0 top-0 isolate z-[-1] hidden h-1/2 w-full select-none bg-cover bg-center bg-no-repeat xs:block"
       >
         <img class="z-[-1] h-full w-full select-none opacity-100" :src="BgHueImg" alt="bg-hue" />
       </div>
