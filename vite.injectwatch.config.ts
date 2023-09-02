@@ -17,9 +17,10 @@ export default defineConfig({
     'process.env': {},
   },
   resolve: {
-    alias: {
-      '@/': fileURLToPath(new URL('./src/', import.meta.url)),
-    },
+    // alias: {
+    //   '@/': fileURLToPath(new URL('./src/', import.meta.url)),
+    // },
+    alias: [{ find: '@', replacement: '/src' }],
   },
   build: {
     emptyOutDir: false,

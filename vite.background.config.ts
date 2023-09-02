@@ -7,9 +7,10 @@ import nodePolyfills from 'rollup-plugin-polyfill-node'
 export default defineConfig({
   plugins: [vue()],
   resolve: {
-    alias: {
-      '@/': fileURLToPath(new URL('./src/', import.meta.url)),
-    },
+    // alias: {
+    //   '@/': fileURLToPath(new URL('./src/', import.meta.url)),
+    // },
+    alias: [{ find: '@', replacement: '/src' }],
   },
   build: {
     emptyOutDir: false,
