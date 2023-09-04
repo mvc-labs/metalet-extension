@@ -4,6 +4,12 @@ import { getStorage, setStorage } from './storage'
 import { generateRandomString, raise } from './helpers'
 import { getNetwork } from './network'
 import { mvc } from 'meta-contract'
+import { bip32, networks, payments } from 'bitcoinjs-lib'
+import bip39 from 'bip39'
+// import BIP32Factory from 'bip32'
+// import * as ecc from 'tiny-secp256k1'
+
+// const bip32 = BIP32Factory(ecc)
 
 export type Account = {
   id: string
@@ -161,13 +167,34 @@ export async function addAccount(account: Omit<Account, 'id' | 'name'>) {
 
 export async function deriveAddress({ chain }: { chain: 'btc' | 'mvc' }) {
   const account = (await getCurrentAccount()) ?? raise('No account')
+  console.log('account', account)
 
   const network = await getNetwork()
 
   const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
   const hdpk = mneObj.toHDPrivateKey('', network)
   if (chain === 'btc') {
-    console.log('account.btcPath', account.btcPath)
+    console.log('validateMnemonic', bip39.validateMnemonic(account.mnemonic))
+    if (!bip39.validateMnemonic(account.mnemonic)) {
+      return ''
+    }
+    console.log("account.mnemonic",account.mnemonic)
+
+    const seed = bip39.mnemonicToSeedSync(account.mnemonic)
+    // const seed = Mnemonic.toSeed(account.mnemonic)
+    console.log('seed', seed)
+    // console.log('bitcoin', bitcoin)
+    // console.log('bip32', bip32)
+    const btcNetwork = network === 'mainnet' ? networks.bitcoin : networks.testnet
+    const root = bip32.fromSeed(seed, btcNetwork)
+    // console.log('account.btcPath', account.btcPath)
+    // const child = root.derivePath(account.btcPath)
+    // const paymentAddress = bitcoin.payments.p2pkh({
+    //   pubkey: child.publicKey,
+    //   network: btcNetwork,
+    // })
+    // console.log('paymentAddress', paymentAddress.address)
+
     const privateKey = hdpk.deriveChild(account.btcPath).privateKey
     return privateKey.toAddress(network).toString()
   } else {
