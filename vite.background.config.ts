@@ -2,6 +2,8 @@ import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import baseConfig from './vite.base.config'
 
+import wasm from 'vite-plugin-wasm'
+
 export default defineConfig({
   ...baseConfig,
   build: {
@@ -10,6 +12,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/background.ts'),
       name: 'Metalet',
+      formats: ['es'],
     },
     rollupOptions: {
       output: {
@@ -17,5 +20,10 @@ export default defineConfig({
         extend: true,
       },
     },
+  },
+  worker: {
+    // Not needed with vite-plugin-top-level-await >= 1.3.0
+    // format: "es",
+    plugins: [wasm()],
   },
 })
