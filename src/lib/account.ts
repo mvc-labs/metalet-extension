@@ -4,12 +4,12 @@ import { getStorage, setStorage } from './storage'
 import { generateRandomString, raise } from './helpers'
 import { getNetwork } from './network'
 import { mvc } from 'meta-contract'
-import { bip32, networks, payments } from 'bitcoinjs-lib'
+import { networks, payments } from 'bitcoinjs-lib'
 import bip39 from 'bip39'
-// import BIP32Factory from 'bip32'
-// import * as ecc from 'tiny-secp256k1'
+import BIP32Factory from 'bip32'
+import * as ecc from 'tiny-secp256k1'
 
-// const bip32 = BIP32Factory(ecc)
+const bip32 = BIP32Factory(ecc)
 
 export type Account = {
   id: string
@@ -178,7 +178,7 @@ export async function deriveAddress({ chain }: { chain: 'btc' | 'mvc' }) {
     if (!bip39.validateMnemonic(account.mnemonic)) {
       return ''
     }
-    console.log("account.mnemonic",account.mnemonic)
+    console.log('account.mnemonic', account.mnemonic)
 
     const seed = bip39.mnemonicToSeedSync(account.mnemonic)
     // const seed = Mnemonic.toSeed(account.mnemonic)

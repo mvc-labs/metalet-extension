@@ -3,7 +3,6 @@ import Wallet from './pages/wallet/Index.vue'
 import WalletReceive from './pages/wallet/Receive.vue'
 import WalletSend from './pages/wallet/Send.vue'
 import WalletSendToken from './pages/wallet/SendToken.vue'
-import WalletImport from './pages/wallet/Import.vue'
 import Tokens from './pages/tokens/Index.vue'
 import NftCollections from './pages/nfts/Index.vue'
 import NftCollection from './pages/nfts/Collection.vue'
@@ -134,7 +133,7 @@ const routes = [
   },
   {
     path: '/wallet/import',
-    component: WalletImport,
+    component: () => import('./pages/wallet/Import.vue'),
     meta: {
       noFooter: true,
       secondaryHeader: true,
