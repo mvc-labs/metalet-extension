@@ -7,7 +7,7 @@ import { mvc } from 'meta-contract'
 import { networks, payments } from 'bitcoinjs-lib'
 import bip39 from 'bip39'
 import BIP32Factory from 'bip32'
-import * as ecc from 'tiny-secp256k1'
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 
 const bip32 = BIP32Factory(ecc)
 
@@ -188,15 +188,12 @@ export async function deriveAddress({ chain }: { chain: 'btc' | 'mvc' }) {
     const btcNetwork = network === 'mainnet' ? networks.bitcoin : networks.testnet
     const root = bip32.fromSeed(seed, btcNetwork)
     // console.log('account.btcPath', account.btcPath)
-    // const child = root.derivePath(account.btcPath)
-    // const paymentAddress = bitcoin.payments.p2pkh({
-    //   pubkey: child.publicKey,
-    //   network: btcNetwork,
-    // })
-    // console.log('paymentAddress', paymentAddress.address)
-
-    const privateKey = hdpk.deriveChild(account.btcPath).privateKey
-    return privateKey.toAddress(network).toString()
+    const child = root.derivePath(account.btcPath)
+    const paymentAddress = payments.p2wpkh({
+      pubkey: child.publicKey,
+    })
+    console.log('paymentAddress', paymentAddress.address)
+    return paymentAddress.address
   } else {
     try {
       const pathDepth = account.path
