@@ -361,8 +361,8 @@
   resolved "https://registry.npmjs.org/@vitest/expect/-/expect-0.34.2.tgz"
   integrity sha512-EZm2dMNlLyIfDMha17QHSQcg2KjeAZaXd65fpPzXY5bvnfx10Lcaz3N55uEe8PhF+w4pw+hmrlHLLlRn9vkBJg==
   dependencies:
-    "@vitest/spy" "0.34.2"
-    "@vitest/utils" "0.34.2"
+    "@vitest/spy" "0.34.3"
+    "@vitest/utils" "0.34.3"
     chai "^4.3.7"
 
 "@vitest/runner@0.34.2":
@@ -370,7 +370,7 @@
   resolved "https://registry.npmjs.org/@vitest/runner/-/runner-0.34.2.tgz"
   integrity sha512-8ydGPACVX5tK3Dl0SUwxfdg02h+togDNeQX3iXVFYgzF5odxvaou7HnquALFZkyVuYskoaHUOqOyOLpOEj5XTA==
   dependencies:
-    "@vitest/utils" "0.34.2"
+    "@vitest/utils" "0.34.3"
     p-limit "^4.0.0"
     pathe "^1.1.1"
 
@@ -407,6 +407,15 @@
   version "0.34.2"
   resolved "https://registry.npmjs.org/@vitest/utils/-/utils-0.34.2.tgz"
   integrity sha512-Lzw+kAsTPubhoQDp1uVAOP6DhNia1GMDsI9jgB0yMn+/nDaPieYQ88lKqz/gGjSHL4zwOItvpehec9OY+rS73w==
+  dependencies:
+    diff-sequences "^29.4.3"
+    loupe "^2.3.6"
+    pretty-format "^29.5.0"
+
+"@vitest/utils@0.34.3":
+  version "0.34.3"
+  resolved "https://registry.yarnpkg.com/@vitest/utils/-/utils-0.34.3.tgz#6e243189a358b736b9fc0216e6b6979bc857e897"
+  integrity sha512-kiSnzLG6m/tiT0XEl4U2H8JDBjFtwVlaE8I3QfGiMFR0QvnRDfYfdP3YvTBWM/6iJDAyaPY6yVQiCTUc7ZzTHA==
   dependencies:
     diff-sequences "^29.4.3"
     loupe "^2.3.6"
@@ -3521,11 +3530,11 @@ vitest@^0.34.2:
     "@types/chai" "^4.3.5"
     "@types/chai-subset" "^1.3.3"
     "@types/node" "*"
-    "@vitest/expect" "0.34.2"
-    "@vitest/runner" "0.34.2"
-    "@vitest/snapshot" "0.34.2"
-    "@vitest/spy" "0.34.2"
-    "@vitest/utils" "0.34.2"
+    "@vitest/expect" "0.34.3"
+    "@vitest/runner" "0.34.3"
+    "@vitest/snapshot" "0.34.3"
+    "@vitest/spy" "0.34.3"
+    "@vitest/utils" "0.34.3"
     acorn "^8.9.0"
     acorn-walk "^8.2.0"
     cac "^6.7.14"
@@ -3540,7 +3549,7 @@ vitest@^0.34.2:
     tinybench "^2.5.0"
     tinypool "^0.7.0"
     vite "^3.0.0 || ^4.0.0"
-    vite-node "0.34.2"
+    vite-node "0.34.3"
     why-is-node-running "^2.2.2"
 
 vm-browserify@^1.0.1:

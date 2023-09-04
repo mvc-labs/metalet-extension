@@ -61,7 +61,6 @@ export async function parseNftInfo(
 } | null> {
   const nftMetaData = await parseMetaData(txid, outputIndex)
   if (!nftMetaData) return null
-  console.log({ nftMetaData })
 
   return {
     name: nftMetaData.name || '',
@@ -83,7 +82,6 @@ export async function parseMetaData(txid: string, outputIndex: number): Promise<
   const messages = await parse(txid, outputIndex)
   const infoIndex = 5
   const metaData = JSON.parse(messages[infoIndex])
-  chrome.runtime.sendMessage(metaData)
 
   return metaData
 }
