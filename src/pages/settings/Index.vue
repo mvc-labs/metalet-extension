@@ -41,6 +41,10 @@ const toCurrentAccount = () => {
   router.push('/settings/current-account')
 }
 
+const toAddressType = () => {
+  router.push('/settings/address-type')
+}
+
 const setPassword = () => {
   router.push('/wallet/set-password')
 }
@@ -65,6 +69,13 @@ const showResetModal = ref(false)
 
         <div class="setting-item group cursor-pointer" @click="toCurrentAccount">
           <div class="text-gray-500 group-hover:underline">Current Account</div>
+          <div class="">
+            <ChevronRightIcon class="link-icon" />
+          </div>
+        </div>
+
+        <div class="setting-item group cursor-pointer" @click="toAddressType">
+          <div class="text-gray-500 group-hover:underline">BTC Address Type</div>
           <div class="">
             <ChevronRightIcon class="link-icon" />
           </div>

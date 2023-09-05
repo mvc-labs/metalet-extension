@@ -221,6 +221,16 @@ const routes = [
       noFooter: true,
     },
   },
+
+  {
+    path: '/settings/address-type',
+    component: () => import('./pages/settings/AddressType.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'BTC Address Type',
+      noFooter: true,
+    },
+  },
 ]
 
 const router = VueRouter.createRouter({

@@ -4,18 +4,22 @@ import { getStorage, setStorage } from './storage'
 import { generateRandomString, raise } from './helpers'
 import { getNetwork } from './network'
 import { mvc } from 'meta-contract'
-import { networks, payments } from 'bitcoinjs-lib'
+import bitcoin, { networks, payments } from 'bitcoinjs-lib'
 import bip39 from 'bip39'
 import BIP32Factory from 'bip32'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 
+bitcoin.initEccLib(ecc)
 const bip32 = BIP32Factory(ecc)
+
+export type AddressType = 'P2WPKH' | 'P2SH-P2WPKH' | 'P2TR' | 'P2PKH'
 
 export type Account = {
   id: string
   mnemonic: string
   path: string
   btcPath: string
+  btcType?: AddressType
   mainnetPrivateKey: string
   mainnetAddress: string
   testnetPrivateKey: string
@@ -174,24 +178,45 @@ export async function deriveAddress({ chain }: { chain: 'btc' | 'mvc' }) {
   const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
   const hdpk = mneObj.toHDPrivateKey('', network)
   if (chain === 'btc') {
-    console.log('validateMnemonic', bip39.validateMnemonic(account.mnemonic))
     bip39.validateMnemonic(account.mnemonic) ?? raise('Invalid mnemonic')
-    console.log('account.mnemonic', account.mnemonic)
-
     const seed = bip39.mnemonicToSeedSync(account.mnemonic)
-    // const seed = Mnemonic.toSeed(account.mnemonic)
-    console.log('seed', seed)
-    // console.log('bitcoin', bitcoin)
-    // console.log('bip32', bip32)
     const btcNetwork = network === 'mainnet' ? networks.bitcoin : networks.testnet
     const root = bip32.fromSeed(seed, btcNetwork)
-    // console.log('account.btcPath', account.btcPath)
     const child = root.derivePath(account.btcPath)
-    const paymentAddress = payments.p2wpkh({
-      pubkey: child.publicKey,
-    })
-    console.log('paymentAddress', paymentAddress.address)
-    return paymentAddress.address as string
+    switch (account.btcType) {
+      case 'P2WPKH':
+        return payments.p2wpkh({
+          pubkey: child.publicKey,
+          network: btcNetwork,
+        }).address
+
+      case 'P2SH-P2WPKH':
+        const redeemScript = payments.p2wpkh({ pubkey: child.publicKey }).output
+        return payments.p2sh({
+          redeem: {
+            output: redeemScript,
+            network: btcNetwork,
+          },
+        }).address
+
+      case 'P2TR':
+        return payments.p2tr({
+          pubkey: child.publicKey.subarray(1),
+          network: btcNetwork,
+        }).address
+
+      case 'P2PKH':
+        return payments.p2pkh({
+          pubkey: child.publicKey,
+          network: btcNetwork,
+        }).address
+
+      default:
+        return payments.p2pkh({
+          pubkey: child.publicKey,
+          network: btcNetwork,
+        }).address
+    }
   } else {
     try {
       const pathDepth = account.path
@@ -298,6 +323,16 @@ export async function updateName(name: string) {
   }
 
   account.name = name
+  await setAccount(account)
+}
+
+export async function updateBTCType(btcType: AddressType) {
+  const account = await getCurrentAccount()
+  if (!account) {
+    return
+  }
+
+  account.btcType = btcType
   await setAccount(account)
 }
 

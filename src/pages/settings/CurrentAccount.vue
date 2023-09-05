@@ -19,6 +19,11 @@ getAddress()
       <div class="label">BTC Path</div>
       <div class="value">{{ account.btcPath }}</div>
     </div>
+
+    <div class="">
+      <div class="label">BTC Address Type</div>
+      <div class="value">{{ account?.btcType || "Legacy(P2PKH)(m/44'/0'/0')" }}</div>
+    </div>
   </div>
 </template>
 
