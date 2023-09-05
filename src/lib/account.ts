@@ -175,9 +175,7 @@ export async function deriveAddress({ chain }: { chain: 'btc' | 'mvc' }) {
   const hdpk = mneObj.toHDPrivateKey('', network)
   if (chain === 'btc') {
     console.log('validateMnemonic', bip39.validateMnemonic(account.mnemonic))
-    if (!bip39.validateMnemonic(account.mnemonic)) {
-      return ''
-    }
+    bip39.validateMnemonic(account.mnemonic) ?? raise('Invalid mnemonic')
     console.log('account.mnemonic', account.mnemonic)
 
     const seed = bip39.mnemonicToSeedSync(account.mnemonic)
@@ -193,7 +191,7 @@ export async function deriveAddress({ chain }: { chain: 'btc' | 'mvc' }) {
       pubkey: child.publicKey,
     })
     console.log('paymentAddress', paymentAddress.address)
-    return paymentAddress.address
+    return paymentAddress.address as string
   } else {
     try {
       const pathDepth = account.path
