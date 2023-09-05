@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue'
 import svgLoader from 'vite-svg-loader'
 import alias from '@rollup/plugin-alias'
 import nodePolyfills from 'rollup-plugin-polyfill-node'
+import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
