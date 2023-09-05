@@ -38,7 +38,6 @@
     "meta-contract": "0.3.29",
     "mvc-std-lib": "^1.1.4",
     "object-hash": "^3.0.0",
-    "tiny-secp256k1": "^2.2.3",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },

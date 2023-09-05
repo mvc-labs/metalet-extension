@@ -1440,7 +1440,7 @@ domutils@^3.0.1:
 
 ecpair@^2.1.0:
   version "2.1.0"
-  resolved "https://registry.npmjs.org/ecpair/-/ecpair-2.1.0.tgz"
+  resolved "https://registry.npmjs.org/ecpair/-/ecpair-2.1.0.tgz#673f826b1d80d5eb091b8e2010c6b588e8d2cb45"
   integrity sha512-cL/mh3MtJutFOvFc27GPZE2pWL3a3k4YvzUWEOvilnfZVlH3Jwgx/7d6tlD7/75tNk8TG2m+7Kgtz0SI1tWcqw==
   dependencies:
     randombytes "^2.1.0"
@@ -3342,13 +3342,6 @@ timers-browserify@^2.0.4:
   integrity sha512-9phl76Cqm6FhSX9Xe1ZUAMLtm1BLkKj2Qd5ApyWkXzsMRaA7dgr81kf4wJmQf/hAvg8EEyJxDo3du/0KlhPiKQ==
   dependencies:
     setimmediate "^1.0.4"
-
-tiny-secp256k1@^2.2.3:
-  version "2.2.3"
-  resolved "https://registry.npmjs.org/tiny-secp256k1/-/tiny-secp256k1-2.2.3.tgz"
-  integrity sha512-SGcL07SxcPN2nGKHTCvRMkQLYPSoeFcvArUSCYtjVARiFAWU44cCIqYS0mYAU6nY7XfvwURuTIGo2Omt3ZQr0Q==
-  dependencies:
-    uint8array-tools "0.0.7"
 
 tinybench@^2.5.0:
   version "2.5.0"
