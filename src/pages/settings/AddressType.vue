@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref } from "vue"
-import { account, updateBTCType, type AddressType } from '@/lib/account'
+import { account, updateBTCType, scripts } from '@/lib/account'
 import {
   RadioGroup,
   RadioGroupLabel,
@@ -8,32 +8,6 @@ import {
   RadioGroupOption,
 } from '@headlessui/vue'
 console.log("account", account)
-const scripts: {
-  name: string,
-  addressType: AddressType,
-  path: string
-}[] = [
-    {
-      "name": "Native Segwit",
-      "addressType": "P2WPKH",
-      "path": "m/84'/0'/0'"
-    },
-    {
-      "name": "Nested Segwit",
-      "addressType": "P2SH-P2WPKH",
-      "path": "m/49'/0'/0'"
-    },
-    {
-      "name": "Taproot",
-      "addressType": "P2TR",
-      "path": "m/86'/0'/0'"
-    },
-    {
-      "name": "Legacy",
-      "addressType": "P2PKH",
-      "path": "m/44'/0'/0'"
-    }
-  ]
 
 const index = scripts.findIndex(script => script.addressType === (account.value?.btcType || "P2PKH"))
 

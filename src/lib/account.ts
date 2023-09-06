@@ -14,6 +14,33 @@ const bip32 = BIP32Factory(ecc)
 
 export type AddressType = 'P2WPKH' | 'P2SH-P2WPKH' | 'P2TR' | 'P2PKH'
 
+export const scripts: {
+  name: string,
+  addressType: AddressType,
+  path: string
+}[] = [
+    {
+      "name": "Native Segwit",
+      "addressType": "P2WPKH",
+      "path": "m/84'/0'/0'"
+    },
+    {
+      "name": "Nested Segwit",
+      "addressType": "P2SH-P2WPKH",
+      "path": "m/49'/0'/0'"
+    },
+    {
+      "name": "Taproot",
+      "addressType": "P2TR",
+      "path": "m/86'/0'/0'"
+    },
+    {
+      "name": "Legacy",
+      "addressType": "P2PKH",
+      "path": "m/44'/0'/0'"
+    }
+  ]
+
 export type Account = {
   id: string
   mnemonic: string
