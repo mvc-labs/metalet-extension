@@ -38,7 +38,7 @@ const toReceive = () => {
 <template>
   <div class="space-y-4">
     <div class="space-y-1">
-      <div class="text-sm text-gray-500">collectables</div>
+      <div class="text-sm text-gray-500">collectibles</div>
       <div class="text-xl font-bold">{{ nftsCountDisplay }}</div>
     </div>
 

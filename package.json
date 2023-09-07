@@ -4,7 +4,7 @@
   "version": "1.7.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --config vite.dev.config.ts",
     "build:content": "vite build --config vite.content.config.ts",
     "build:inject": "vite build --config vite.inject.config.ts",
     "build:injectWatch": "vite build --config vite.injectwatch.config.ts",
@@ -26,6 +26,7 @@
     "@rollup/plugin-alias": "^4.0.3",
     "@tanstack/vue-query": "^4.26.1",
     "@vueuse/core": "^10.3.0",
+    "@vueuse/integrations": "^10.4.1",
     "axios": "0.27.2",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
@@ -38,6 +39,7 @@
     "meta-contract": "0.3.29",
     "mvc-std-lib": "^1.1.4",
     "object-hash": "^3.0.0",
+    "qrcode": "^1.5.3",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },
