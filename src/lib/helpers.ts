@@ -23,7 +23,15 @@ export const prettifyBalance = (balance: number): string => {
   return `${(total / 1e8).toFixed(8)} SPACE`
 }
 
-export const prettifyTokenBalance = (balance: number, decimal: number): string => {
+export const prettifyTokenBalance = (balance: number, decimal: number, useRound = false): string => {
+  // If useRound is true, then round the balance
+  if (useRound) {
+    const roundedBalance = Math.round(balance / 10 ** decimal)
+    if (roundedBalance === 0) return '< 1'
+
+    return `≈ ${roundedBalance}`
+  }
+
   // 小数点多于8位，则只显示约等于4位小数
   if (decimal > 8) return `≈ ${(balance / 10 ** decimal).toFixed(4)}`
 
@@ -62,12 +70,4 @@ export const generateRandomString = (length: number = 32) => {
 
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-export const sendMsg = async (msg: any) => {
-  // 发送消息给 content-script-tab
-  const [tab] = await chrome.tabs.query({ active: true, windowType: 'normal' })
-  if (tab?.id) {
-    chrome.tabs.sendMessage(tab.id, msg)
-  }
 }

@@ -3,7 +3,7 @@ import { useRoute } from 'vue-router'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
 
-import { sendMsg, toTx } from '@/lib/helpers'
+import { toTx } from '@/lib/helpers'
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
 import actions from '@/data/authorize-actions'
 import TransferToken from './TransferToken.vue'
