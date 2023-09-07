@@ -1,12 +1,11 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'
 import { computed, ref, Ref } from 'vue'
+import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
 
 import { useBalanceQuery } from '@/queries/balance'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
-import { prettifyBalance } from '@/lib/helpers'
 import { getAddress } from '@/lib/account'
-import { ArrowDownRightIcon, ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
 
 const router = useRouter()
 

@@ -9,10 +9,11 @@ import {
 } from '@heroicons/vue/24/solid'
 
 import { getAddress } from '@/lib/account'
-import { prettifyTokenBalance, prettifyTokenGenesis } from '@/lib/helpers'
-import Activities from './components/Activities.vue'
+import { prettifyTokenBalance, prettifyTokenGenesis } from '@/lib/formatters'
 import { useTokenQuery } from '@/queries/tokens'
 import { isOfficialToken } from '@/lib/assets'
+
+import Activities from './components/Activities.vue'
 
 const route = useRoute()
 const router = useRouter()

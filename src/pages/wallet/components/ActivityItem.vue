@@ -1,7 +1,9 @@
 <script lang="ts" setup>
-import type { Activity } from '@/queries/activities'
-import { prettifyTimestamp, prettifyTxId, toTx } from '@/lib/helpers'
 import { computed } from 'vue'
+
+import type { Activity } from '@/queries/activities'
+import { prettifyTimestamp, prettifyTxId } from '@/lib/formatters'
+import { toTx } from '@/lib/helpers'
 import { getBrowserHost } from '@/lib/host'
 import type { Token } from '@/queries/tokens'
 

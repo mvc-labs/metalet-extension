@@ -5,7 +5,7 @@ import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 import { useBalanceQuery } from '@/queries/balance'
 import { getAddress } from '@/lib/account'
 import { isOfficialToken } from '@/lib/assets'
-import { prettifyBalance, prettifyTokenBalance } from '@/lib/helpers'
+import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import type { Asset } from '@/data/assets'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 
