@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { sendMsg } from '@/lib/helpers'
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
 import accountManager from '@/lib/account'
 import type { Account } from '@/lib/account'

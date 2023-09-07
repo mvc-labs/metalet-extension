@@ -58,7 +58,6 @@ const exchange = computed(() => {
           <div class="text-xs uppercase text-gray-500" v-if="asset.isNative">
             {{ asset.chain }}
           </div>
-          <div class="text-xs text-gray-500" v-else>{{ asset.symbol }}</div>
         </div>
       </div>
 
@@ -76,7 +75,7 @@ const exchange = computed(() => {
 
         <template v-else-if="asset.total">
           <div class="whitespace-nowrap">
-            {{ prettifyTokenBalance(asset.total, asset.decimal) + ' ' + asset.symbol }}
+            {{ prettifyTokenBalance(asset.total, asset.decimal, true) + ' ' + asset.symbol }}
           </div>
         </template>
 
