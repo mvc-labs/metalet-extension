@@ -59,6 +59,7 @@ export type Account = {
 }
 
 export const address = ref('')
+export const btcAddress = ref('bc1pv3efxdwc2nkck5kg8updw62kxqt8mclshk3a2ywlazqa6n225n9qvd2v93')
 export const privateKey = ref('')
 export const account = ref<Account | null>(null)
 
