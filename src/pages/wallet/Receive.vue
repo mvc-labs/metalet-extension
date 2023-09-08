@@ -3,11 +3,11 @@ import { ref, computed, Ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { getAddress, address } from '@/lib/account'
-import assets from '@/data/assets'
+import { MVCAssets } from '@/data/assets'
 
 const route = useRoute()
 const chain: Ref<'btc' | 'mvc'> = ref(route.query.chain as 'btc' | 'mvc')
-const asset = computed(() => assets.find((asset) => asset.chain === chain.value))
+const asset = computed(() => MVCAssets.find((asset) => asset.chain === chain.value))
 
 const isCopied = ref(false)
 function copyAddress() {
@@ -28,10 +28,7 @@ function copyAddress() {
       <!-- copy button -->
       <button
         class="w-20 shrink-0 rounded-lg bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 py-3 text-xs font-bold text-sky-100 transition-all hover:saturate-150"
-        :class="{ 'opacity-50 hover:!saturate-100': isCopied }"
-        @click="copyAddress"
-        :disabled="isCopied"
-      >
+        :class="{ 'opacity-50 hover:!saturate-100': isCopied }" @click="copyAddress" :disabled="isCopied">
         {{ isCopied ? 'Copied' : 'Copy' }}
       </button>
     </div>

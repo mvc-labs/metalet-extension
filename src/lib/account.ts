@@ -12,34 +12,37 @@ import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 bitcoin.initEccLib(ecc)
 const bip32 = BIP32Factory(ecc)
 
+const ACCOUNT_STORAGE_HISTORY_KEYS = ['accounts']
+const ACCOUNT_STORAGE_CURRENT_KEY = 'accounts_v2'
+
 export type AddressType = 'P2WPKH' | 'P2SH-P2WPKH' | 'P2TR' | 'P2PKH'
 
 export const scripts: {
-  name: string,
-  addressType: AddressType,
+  name: string
   path: string
+  addressType: AddressType
 }[] = [
-    {
-      "name": "Native Segwit",
-      "addressType": "P2WPKH",
-      "path": "m/84'/0'/0'"
-    },
-    {
-      "name": "Nested Segwit",
-      "addressType": "P2SH-P2WPKH",
-      "path": "m/49'/0'/0'"
-    },
-    {
-      "name": "Taproot",
-      "addressType": "P2TR",
-      "path": "m/86'/0'/0'"
-    },
-    {
-      "name": "Legacy",
-      "addressType": "P2PKH",
-      "path": "m/44'/0'/0'"
-    }
-  ]
+  {
+    name: 'Native Segwit',
+    addressType: 'P2WPKH',
+    path: "m/84'/0'/0'",
+  },
+  {
+    name: 'Nested Segwit',
+    addressType: 'P2SH-P2WPKH',
+    path: "m/49'/0'/0'",
+  },
+  {
+    name: 'Taproot',
+    addressType: 'P2TR',
+    path: "m/86'/0'/0'",
+  },
+  {
+    name: 'Legacy',
+    addressType: 'P2PKH',
+    path: "m/44'/0'/0'",
+  },
+]
 
 export type Account = {
   id: string
@@ -115,6 +118,7 @@ export async function getAccountInstance(accountId: string): Promise<AccountCls 
 async function fixCompatibility(account: Account) {
   // if old account has no btcPath, set it to default value the same as path
   if (!account.btcPath) {
+    console.log('fixCompatibility get path', account.path)
     account.btcPath = `m/44'/${account.path}'/0'/0/0`
 
     // save to storage
@@ -198,12 +202,7 @@ export async function addAccount(account: Omit<Account, 'id' | 'name'>) {
 
 export async function deriveAddress({ chain }: { chain: 'btc' | 'mvc' }) {
   const account = (await getCurrentAccount()) ?? raise('No account')
-  console.log('account', account)
-
   const network = await getNetwork()
-
-  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
-  const hdpk = mneObj.toHDPrivateKey('', network)
   if (chain === 'btc') {
     bip39.validateMnemonic(account.mnemonic) ?? raise('Invalid mnemonic')
     const seed = bip39.mnemonicToSeedSync(account.mnemonic)
@@ -246,6 +245,8 @@ export async function deriveAddress({ chain }: { chain: 'btc' | 'mvc' }) {
     }
   } else {
     try {
+      const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+      const hdpk = mneObj.toHDPrivateKey('', network)
       const pathDepth = account.path
       const privateKey = hdpk.deriveChild(`m/44'/${pathDepth}'/0'/0/0`).privateKey
 
