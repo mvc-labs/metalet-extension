@@ -5,8 +5,6 @@ export type Network = 'mainnet' | 'testnet'
 
 export const network = ref<Network>((await storage.get('network')) || 'mainnet')
 
-console.log('load network')
-
 export async function setNetwork(_network: Network) {
   await storage.set('network', _network)
   network.value = _network
