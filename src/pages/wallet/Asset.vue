@@ -2,7 +2,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { MVCAssets } from '@/data/assets'
+import { allAssets } from '@/data/assets'
 import { useBalanceQuery } from '@/queries/balance'
 import { getAddress } from '@/lib/account'
 import { prettifyBalance } from '@/lib/formatters'
@@ -19,7 +19,7 @@ onMounted(async () => {
 })
 
 const symbol = route.params.symbol as string
-const asset = computed(() => MVCAssets.find((asset) => asset.symbol === symbol))
+const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol))
 
 const enabled = computed(() => !!address.value && asset.value!.queryable)
 const { isLoading, data: balance } = useBalanceQuery(address, symbol, { enabled })

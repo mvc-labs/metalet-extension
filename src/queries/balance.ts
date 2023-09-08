@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/vue-query'
-import { metasvApi } from './request'
+import { metaletApi, metasvApi } from './request'
 import { ComputedRef, Ref } from 'vue'
 
 export type Balance = {
@@ -16,7 +16,8 @@ export const fetchSpaceBalance = async (address: string): Promise<Balance> => {
 }
 
 export const fetchBtcBalance = async (address: string): Promise<Balance> => {
-  const balance: any = await metasvApi(`/address/${address}/balance`).get()
+  const balance: any = await metaletApi(`/address/balance`).get({ address, chain: 'btc' })
+  console.log({ balance })
   balance.total = balance.confirmed + balance.unconfirmed
 
   return balance
