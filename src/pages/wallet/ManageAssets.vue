@@ -2,9 +2,9 @@
 import { ref } from 'vue'
 
 import AssetSelect from './components/AssetSelect.vue'
-import assetsList from '@/data/assets'
+import {MVCAssets} from '@/data/assets'
 
-const assets = ref(assetsList)
+const assets = ref(MVCAssets)
 </script>
 
 <template>

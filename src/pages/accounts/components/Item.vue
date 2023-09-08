@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref } from 'vue'
 import { ClipboardDocumentCheckIcon, ClipboardDocumentListIcon, PencilSquareIcon } from '@heroicons/vue/24/solid'
 import { useRouter } from 'vue-router'
 
@@ -8,7 +8,6 @@ import { network } from '@/lib/network'
 import { shortestAddress } from '@/lib/helpers'
 
 import EditName from './EditName.vue'
-import { onUnmounted } from 'vue'
 
 const router = useRouter()
 

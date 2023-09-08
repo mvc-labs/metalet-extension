@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { computed, ref, Ref } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import assets from '@/data/assets'
+import { MVCAssets } from '@/data/assets'
 import { useBalanceQuery } from '@/queries/balance'
 import { address } from '@/lib/account'
 import { prettifyBalance } from '@/lib/helpers'
@@ -13,7 +13,7 @@ const route = useRoute()
 const router = useRouter()
 
 const symbol = route.params.symbol as string
-const asset = computed(() => assets.find((asset) => asset.symbol === symbol))
+const asset = computed(() => MVCAssets.find((asset) => asset.symbol === symbol))
 
 const enabled = computed(() => !!address.value && asset.value!.queryable)
 const { isLoading, data: balance } = useBalanceQuery(address, symbol, { enabled })

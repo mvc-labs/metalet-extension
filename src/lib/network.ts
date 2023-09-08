@@ -1,20 +1,17 @@
-import { ref, Ref } from 'vue'
+import { ref } from 'vue'
 import storage from './storage'
 
-export const network: Ref<'testnet' | 'mainnet'> = ref('mainnet')
+export type Network = 'mainnet' | 'testnet'
 
-export async function setNetwork(_network: 'mainnet' | 'testnet') {
+export const network = ref<Network>((await storage.get('network')) || 'mainnet')
+
+console.log('load network')
+
+export async function setNetwork(_network: Network) {
   await storage.set('network', _network)
   network.value = _network
 }
 
-export async function getNetwork(): Promise<'mainnet' | 'testnet'> {
-  const res = await storage.get('network')
-  if (!res) {
-    await setNetwork('mainnet')
-    return 'mainnet'
-  }
-
-  network.value = res
+export async function getNetwork(): Promise<Network> {
   return network.value
 }

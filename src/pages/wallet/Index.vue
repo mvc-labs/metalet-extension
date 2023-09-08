@@ -14,6 +14,6 @@ import { account } from '@/lib/account'
     <Balance />
 
     <!-- 资产列表 -->
-    <AssetList class="mt-4" />
+    <AssetList />
   </div>
 </template>

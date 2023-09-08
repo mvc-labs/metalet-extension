@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { ref, computed, Ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
 
-import assetsList from '@/data/assets'
+import { BTCAssets, MVCAssets } from '@/data/assets'
 import type { Asset } from '@/data/assets'
 import AssetItem from './AssetItem.vue'
 import { getAssetsDisplay } from '@/lib/assets'
@@ -12,7 +12,7 @@ import { getAddress } from '@/lib/account'
 
 const router = useRouter()
 
-const address: Ref<string> = ref('')
+const address = ref<string>('')
 getAddress().then((add) => {
   if (!add) return router.push('/welcome')
 
@@ -20,13 +20,14 @@ getAddress().then((add) => {
 })
 const enabled = computed(() => !!address.value)
 
-const listedAssets = ref(assetsList)
+const btcAssets = ref(BTCAssets)
+const listedAssets = ref(MVCAssets)
 
 // 用户拥有的代币资产
 const { isLoading, data: userOwnedTokens } = useTokensQuery(address, { enabled })
 type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
 
-const assetsDisplay: Ref<string[]> = ref([])
+const assetsDisplay = ref<string[]>([])
 getAssetsDisplay().then((display) => {
   assetsDisplay.value = display
 })
@@ -54,7 +55,7 @@ function toToken(token: UserOwnedToken) {
 </script>
 
 <template>
-  <div class="mt-8 space-y-2 text-black">
+  <div class="mt-4 space-y-5 text-black">
     <!-- Add More -->
     <div class="flex items-center justify-end">
       <button class="hover-gradient-text group flex items-center gap-x-2 text-sm" @click="toManageAssets">
@@ -63,7 +64,16 @@ function toToken(token: UserOwnedToken) {
       </button>
     </div>
 
-    <AssetItem v-for="asset in displayingAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)" />
+    <div>
+      <div class="ext-lg text-[#141416]">BTC</div>
+      <AssetItem v-for="asset in btcAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)" class="mt-1.5" />
+    </div>
+
+    <div>
+      <div class="text-lg text-[#141416]">MVC</div>
+      <AssetItem v-for="asset in displayingAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)"
+        class="mt-1.5" />
+    </div>
 
     <AssetItem v-for="token in userOwnedTokens" :key="token.genesis" :asset="token" @click="toToken(token)" />
 
