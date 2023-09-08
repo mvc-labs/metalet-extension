@@ -1,4 +1,4 @@
-import { METASV_TESTNET_HOST, METASV_HOST } from '../data/hosts'
+import { METASV_TESTNET_HOST, METASV_HOST, METALET_HOST } from '../data/hosts'
 import { network } from '../lib/network'
 
 async function request(url: string, options = {}) {
@@ -26,6 +26,14 @@ export const metasvApi = (path: string) => {
   return {
     get: (params?: any) => request(`${metasvHost}${path}`, { method: 'GET', params }),
     post: (data?: any) => request(`${metasvHost}${path}`, { method: 'POST', data }),
+  }
+}
+
+export const metaletApi = (path: string) => {
+  const metaletHost = METALET_HOST + '/wallet-api/v1'
+  return {
+    get: (params?: any) => request(`${metaletHost}${path}`, { method: 'GET', params }),
+    post: (data?: any) => request(`${metaletHost}${path}`, { method: 'POST', data }),
   }
 }
 
