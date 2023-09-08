@@ -1,10 +1,10 @@
-import { getAddress, getCurrentAccount, privateKey } from '../account'
+import { getAddress, getCurrentAccount, getPrivateKey } from '../account'
 import connector from '../connector'
 import { sign } from '../crypto'
 import { sleep } from '../helpers'
 
 export async function process(params: any, host: string) {
-  const wif = await getCurrentAccount().then((account) => privateKey.value)
+  const wif = await getPrivateKey("mvc")
 
   // let sigList = []
   // for (let i = 0; i < params.list.length; i++) {

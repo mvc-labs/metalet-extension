@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/solid'
 import PasswordImg from '@/assets/images/password.svg?url'
 import passwordManager from '@/lib/password'
-import { account } from '@/lib/account'
+import { currentAccount as account } from '@/lib/account'
 
 const router = useRouter()
 
@@ -110,7 +110,7 @@ const next = async () => {
         <div class="mt-8" v-if="account">
           <h4>Derivation Path</h4>
           <div class="mt-2">
-            <div class="rounded-lg bg-gray-100 px-3 py-2 text-sm leading-loose">{{ `m/44'/${account.path}'/0'` }}</div>
+            <div class="rounded-lg bg-gray-100 px-3 py-2 text-sm leading-loose">{{ `m/44'/${account.mvcIndex}'/0'` }}</div>
           </div>
         </div>
       </template>

@@ -1,8 +1,8 @@
 import { Ref, ref } from 'vue'
 import { fetchSpaceBalance } from '../queries/balance'
-import { getStorage, setStorage } from './storage'
+import { getStorage, setStorage, deleteStorage } from './storage'
 import { generateRandomString, raise } from './helpers'
-import { getNetwork } from './network'
+import { getNetwork, Network } from './network'
 import { mvc } from 'meta-contract'
 import bitcoin, { networks, payments } from 'bitcoinjs-lib'
 import bip39 from 'bip39'
@@ -12,8 +12,13 @@ import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 bitcoin.initEccLib(ecc)
 const bip32 = BIP32Factory(ecc)
 
+const CURRENT_ACCOUNT_ID = 'currentAccountId'
 const ACCOUNT_STORAGE_HISTORY_KEYS = ['accounts']
 const ACCOUNT_STORAGE_CURRENT_KEY = 'accounts_v2'
+
+export const currentAccount = ref<Account | null>(null)
+
+export type Chain = 'btc' | 'mvc'
 
 export type AddressType = 'P2WPKH' | 'P2SH-P2WPKH' | 'P2TR' | 'P2PKH'
 
@@ -44,163 +49,161 @@ export const scripts: {
   },
 ]
 
+interface ChainInfoDetail {
+  address: string
+  publicKey: string
+  privateKey: string
+}
+
+type ChainInfo = {
+  [chain in Chain]: ChainInfoDetail
+}
+
 export type Account = {
   id: string
-  mnemonic: string
-  path: string
-  btcPath: string
-  btcType?: AddressType
-  mainnetPrivateKey: string
-  mainnetAddress: string
-  testnetPrivateKey: string
-  testnetAddress: string
   name?: string
+  mvcIndex: string
+  mvcPath: string
+  btcPath: string
+  mnemonic: string
+  btcType?: AddressType
   assetsDisplay?: string[]
+  mainnet: ChainInfo
+  testnet: ChainInfo
 }
 
-export const address = ref('')
-export const privateKey = ref('')
-export const account = ref<Account | null>(null)
-
-export async function getAll(): Promise<Account[]> {
-  const accounts = await getStorage('accounts')
-  return accounts || []
+function stringify(map: Map<string, Account>) {
+  return JSON.stringify(map, (key, value) => {
+    if (value instanceof Map) {
+      return {
+        dataType: 'Map',
+        value: Array.from(value.entries()),
+      }
+    }
+    return value
+  })
 }
 
-// accounts以uuid为key
+// JSON反序列化
+function parse(json: string) {
+  console.log('json', json)
+
+  return JSON.parse(json, (key, value) => {
+    if (value && value.dataType === 'Map') {
+      return new Map(value.value)
+    }
+
+    if (typeof value === 'object') {
+      return parse(JSON.stringify(value)) // 递归处理对象
+    }
+
+    return value
+  })
+}
+
+export async function getAccounts(): Promise<Map<string, Account>> {
+  ACCOUNT_STORAGE_HISTORY_KEYS.forEach((key) => {
+    deleteStorage(key)
+  })
+
+  // const accounts = await getStorage(ACCOUNT_STORAGE_CURRENT_KEY)||new Map()
+  // if(accounts){
+  //   return new Map([...Object.entries(accounts)])
+  // }
+  const accounts = parse(await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: {}, isParse: false }))
+  console.log('getAccounts accounts', accounts)
+
+  return accounts
+}
+
+export async function getAccount(accountId: string): Promise<Account | null> {
+  const accounts = await getAccounts()
+  if (accounts.size === 0) {
+    return null
+  }
+
+  console.log('accounts', accounts)
+  console.log('accountId', accountId)
+
+  const account = accounts.get(accountId)
+  if (!account) {
+    return null
+  }
+
+  return account
+}
+
 export async function getCurrentAccount(): Promise<Account | null> {
-  // 先获取当前账户
-  const currentAccountId = await getStorage('currentAccountId')
+  const currentAccountId = await getStorage(CURRENT_ACCOUNT_ID)
   if (!currentAccountId) {
     return null
   }
 
-  // 再获取当前账户的信息
-  const accounts = await getStorage('accounts')
-  if (!accounts) {
-    return null
-  }
-  const current = accounts[currentAccountId]
-  if (!current) {
-    return null
-  }
+  currentAccount.value = await getAccount(currentAccountId)
 
-  await fixCompatibility(current)
-
-  // 保存当前账户的地址和私钥
-  const network = await getNetwork()
-  address.value = network === 'mainnet' ? current.mainnetAddress : current.testnetAddress
-  privateKey.value = network === 'mainnet' ? current.mainnetPrivateKey : current.testnetPrivateKey
-
-  account.value = current
-
-  return current
-}
-
-export async function getAccountInstance(accountId: string): Promise<AccountCls | null> {
-  const accounts = await getStorage('accounts')
-  if (!accounts) {
-    return null
-  }
-  const current = accounts[accountId]
-  if (!current) {
-    return null
-  }
-
-  await fixCompatibility(current)
-
-  const network = await getNetwork()
-  const mneObj = mvc.Mnemonic.fromString(current.mnemonic)
-
-  return new AccountCls(current.mnemonic)
-}
-
-async function fixCompatibility(account: Account) {
-  // if old account has no btcPath, set it to default value the same as path
-  if (!account.btcPath) {
-    console.log('fixCompatibility get path', account.path)
-    account.btcPath = `m/44'/${account.path}'/0'/0/0`
-
-    // save to storage
-    await setAccount(account)
-  }
+  return currentAccount.value
 }
 
 export async function removeCurrentAccount(): Promise<boolean> {
-  // 从accounts中删除
-  const accounts = (await getStorage('accounts')) || {}
-  const currentAccountId = await getStorage('currentAccountId')
-  if (currentAccountId) {
-    delete accounts[currentAccountId]
+  const accounts = await getAccounts()
+  if (accounts.size === 0) {
+    return false
   }
-  await setStorage('accounts', accounts)
 
-  // 删除当前账户id
-  await setStorage('currentAccountId', '')
+  const currentAccountId = await getStorage(CURRENT_ACCOUNT_ID)
+  const currentAccount = accounts.get(currentAccountId)
+  if (!currentAccount) {
+    return false
+  }
 
-  // 删除当前账户的地址和私钥
-  address.value = ''
-  privateKey.value = ''
-  account.value = null
-
+  accounts.delete(currentAccountId)
+  await setStorage(CURRENT_ACCOUNT_ID, '')
+  await setStorage(ACCOUNT_STORAGE_CURRENT_KEY, accounts)
   return true
 }
 
 export async function connectAccount(accountId: string) {
-  const accounts = (await getStorage('accounts')) || {}
-  const current = accounts[accountId]
-  if (!current) {
+  const currentAccount = await getAccount(accountId)
+  if (!currentAccount) {
     return false
   }
 
-  // 保存当前账户id
-  await setStorage('currentAccountId', accountId)
-
-  // 保存当前账户的地址和私钥
-  const network = await getNetwork()
-  address.value = network === 'mainnet' ? current.mainnetAddress : current.testnetAddress
-  privateKey.value = network === 'mainnet' ? current.mainnetPrivateKey : current.testnetPrivateKey
-  account.value = current
+  await setStorage(CURRENT_ACCOUNT_ID, accountId)
 
   return true
 }
 
 export async function setAccount(account: Account) {
-  const accounts = (await getStorage('accounts')) || {}
-
-  const exist = accounts[account.id]
-  if (!exist) {
-    account.name = account.name || `Account ${accounts.length + 1}`
-    accounts.push(account)
-  } else {
-    // 更新
-    accounts[account.id] = account
-  }
-  await setStorage('accounts', accounts)
+  const accounts = await getAccounts()
+  console.log('accounts', accounts)
+  console.log('account', account)
+  accounts.set(account.id, account)
+  console.log('accounts', accounts)
+  await setStorage(ACCOUNT_STORAGE_CURRENT_KEY, stringify(accounts))
 }
 
-export async function addAccount(account: Omit<Account, 'id' | 'name'>) {
-  const accounts = (await getStorage('accounts')) || {}
-  // 如果已经存在，不再保存
-  const exist = (Object.keys(accounts).length &&
-    Object.values(accounts).find((item: any) => item.mnemonic === account.mnemonic)) as Account | null
-  if (!exist) {
-    const newAccount: Account = {
-      ...account,
-      id: generateRandomString(32),
-      name: `Account ${Object.keys(accounts).length + 1}`,
-    }
-    accounts[newAccount.id] = newAccount
-    await setStorage('accounts', accounts)
+export async function addAccount(newAccount: Omit<Account, 'id' | 'name'>) {
+  const accounts = await getAccounts()
+  console.log('addAccount accounts', accounts)
 
-    await connectAccount(newAccount.id)
+  const { mnemonic } = newAccount
+  let connectId = ''
+  let account = [...accounts.values()].find((account) => account.mnemonic === mnemonic)
+
+  if (!account) {
+    connectId = generateRandomString(32)
+    await setAccount({
+      ...newAccount,
+      id: connectId,
+      name: `Account ${accounts.size + 1}`,
+    })
   } else {
-    // 保存最新登录账号id
-    await connectAccount(exist.id)
+    connectId = account.id
   }
+  // await connectAccount(connectId)
 }
 
-export async function deriveAddress({ chain }: { chain: 'btc' | 'mvc' }) {
+export async function deriveAddress({ chain }: { chain: Chain }) {
   const account = (await getCurrentAccount()) ?? raise('No account')
   const network = await getNetwork()
   if (chain === 'btc') {
@@ -247,9 +250,8 @@ export async function deriveAddress({ chain }: { chain: 'btc' | 'mvc' }) {
     try {
       const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
       const hdpk = mneObj.toHDPrivateKey('', network)
-      const pathDepth = account.path
+      const pathDepth = account?.mvcIndex || 10001
       const privateKey = hdpk.deriveChild(`m/44'/${pathDepth}'/0'/0/0`).privateKey
-
       return privateKey.toAddress(network).toString()
     } catch (e: any) {
       throw new Error(e.message)
@@ -257,73 +259,126 @@ export async function deriveAddress({ chain }: { chain: 'btc' | 'mvc' }) {
   }
 }
 
-export async function getAddress(params?: { path?: string }): Promise<any> {
-  const account = await getCurrentAccount()
-  if (!account) {
-    return null
-  }
+function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: string): ChainInfoDetail {
+  bip39.validateMnemonic(mnemonic) ?? raise('Invalid mnemonic')
+  const seed = bip39.mnemonicToSeedSync(mnemonic)
+  const root = bip32.fromSeed(seed, network)
+  switch (btcType) {
+    case 'P2WPKH': {
+      const { publicKey, privateKey } = root.derivePath("m/84'/0'/0'")
+      const { address = '' } = payments.p2wpkh({
+        pubkey: publicKey,
+        network: network,
+      })
+      return {
+        address,
+        publicKey: publicKey.toString('hex'),
+        privateKey: privateKey?.toString('hex') || '',
+      }
+    }
 
-  const network = await getNetwork()
+    case 'P2SH-P2WPKH': {
+      const { publicKey, privateKey } = root.derivePath("m/49'/0'/0'")
+      const { address = '' } = payments.p2sh({
+        pubkey: publicKey,
+        network: network,
+      })
+      return {
+        address,
+        publicKey: publicKey.toString('hex'),
+        privateKey: privateKey?.toString('hex') || '',
+      }
+    }
 
-  address.value = network === 'mainnet' ? account.mainnetAddress : account.testnetAddress
-  privateKey.value = network === 'mainnet' ? account.mainnetPrivateKey : account.testnetPrivateKey
+    case 'P2TR': {
+      const { publicKey, privateKey } = root.derivePath("m/86'/0'/0'")
+      const { address = '' } = payments.p2tr({
+        pubkey: publicKey,
+        network: network,
+      })
+      return {
+        address,
+        publicKey: publicKey.toString('hex'),
+        privateKey: privateKey?.toString('hex') || '',
+      }
+    }
 
-  if (!(params && params.path)) {
-    return address.value
-  }
+    case 'P2PKH': {
+      const { publicKey, privateKey } = root.derivePath("m/44'/0'/0'")
+      const { address = '' } = payments.p2pkh({
+        pubkey: publicKey,
+        network: network,
+      })
+      return {
+        address,
+        publicKey: publicKey.toString('hex'),
+        privateKey: privateKey?.toString('hex') || '',
+      }
+    }
 
-  // 根据路径导出
-  try {
-    const path = account.path
-    const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
-    const hdpk = mneObj.toHDPrivateKey('', network)
-    const privateKey = hdpk.deriveChild(`m/44'/${path}'/0'/${params.path}`).privateKey
-
-    return privateKey.toAddress(network).toString()
-  } catch (e: any) {
-    return {
-      message: e.message,
-      status: 'failed',
+    default: {
+      const { publicKey, privateKey } = root.derivePath("m/44'/0'/0'")
+      const { address = '' } = payments.p2pkh({
+        pubkey: publicKey,
+        network: network,
+      })
+      return {
+        address,
+        publicKey: publicKey.toString('hex'),
+        privateKey: privateKey?.toString('hex') || '',
+      }
     }
   }
 }
 
-export async function getPublicKey(params?: { path?: string }) {
-  const account = await getCurrentAccount()
-  if (!account) {
-    return null
-  }
-
-  const network = await getNetwork()
-
-  if (!(params && params.path)) {
-    const privateKey = mvc.PrivateKey.fromString(
-      network === 'mainnet' ? account.mainnetPrivateKey : account.testnetPrivateKey
-    )
-
-    return privateKey.toPublicKey().toString()
-  }
-
-  // 根据路径导出
-  try {
-    const path = account.path
-    const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
-    const hdpk = mneObj.toHDPrivateKey('', network)
-    const privateKey = hdpk.deriveChild(`m/44'/${path}'/0'/${params.path}`).privateKey
-    return privateKey.toPublicKey().toString()
-  } catch (e: any) {
-    return {
-      message: e.message,
-      status: 'failed',
-    }
+export function deriveBTCInfo(
+  mnemonic: string,
+  btcType?: string
+): {
+  [network in Network]: ChainInfoDetail
+} {
+  return {
+    mainnet: getBTCInfo(mnemonic, networks.bitcoin, btcType),
+    testnet: getBTCInfo(mnemonic, networks.testnet, btcType),
   }
 }
 
-export async function getXPublicKey() {
+export async function getInfo(key: keyof Account): Promise<any> {
+  const account = await getCurrentAccount()
+  if (!account) {
+    return ''
+  }
+
+  return account[key]
+}
+
+export async function getChainInfo(chain: Chain, key: keyof ChainInfo[Chain]): Promise<string> {
+  const account = await getCurrentAccount()
+  if (!account) {
+    return ''
+  }
+
+  const network = await getNetwork()
+  return account[network][chain][key]
+}
+
+export async function getAddress(chain: Chain = 'mvc'): Promise<string> {
+  return getChainInfo(chain, 'address')
+}
+
+export async function getPrivateKey(chain: Chain = 'mvc'): Promise<string> {
+  return getChainInfo(chain, 'privateKey')
+}
+
+export async function getPublicKey(chain: Chain = 'mvc'): Promise<string> {
+  return getChainInfo(chain, 'publicKey')
+}
+
+export async function getXPublicKey(chain: Chain = 'mvc'): Promise<string> {
   console.log('hi')
   const account = await getCurrentAccount()
   if (!account) {
-    return null
+    return ''
   }
 
   const network = await getNetwork()
@@ -334,12 +389,12 @@ export async function getXPublicKey() {
   return xPublicKey
 }
 
-export async function getBalance() {
+export async function getBalance(address: string) {
   const account = await getCurrentAccount()
   if (!account) {
     return null
   }
-  const balance = await fetchSpaceBalance(address.value)
+  const balance = await fetchSpaceBalance(address)
 
   return balance
 }
@@ -373,25 +428,18 @@ type AccountManager = {
   set: (account: Account) => Promise<void>
   add: (account: Omit<Account, 'id'>) => Promise<void>
   connect: (accountId: string) => Promise<boolean>
-  getAddress: ({ path }: { path?: string }) => Promise<any>
-  getPublicKey: ({ path }: { path?: string }) => Promise<
-    | string
-    | null
-    | {
-        message: string
-        status: string
-      }
-  >
-  getXPublicKey: () => Promise<string | null>
-  getBalance: () => Promise<Awaited<ReturnType<typeof fetchSpaceBalance>> | null>
+  getAddress: (chain: Chain) => Promise<string>
+  getPublicKey: (chain: Chain) => Promise<string>
+  getXPublicKey: (chain: Chain) => Promise<string>
+  getBalance: (address: string) => Promise<Awaited<ReturnType<typeof fetchSpaceBalance>> | null>
   updateName: (name: string) => Promise<void>
 }
 
 const accountManager = {} as AccountManager
-accountManager.all = getAll
-accountManager.current = account
+accountManager.all = getAccounts
+// accountManager.current = account
 accountManager.getCurrent = getCurrentAccount
-accountManager.getAccountInstance = getAccountInstance
+// accountManager.getAccountInstance = getAccountInstance
 accountManager.set = setAccount
 accountManager.add = addAccount
 accountManager.connect = connectAccount

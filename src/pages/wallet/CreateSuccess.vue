@@ -3,6 +3,8 @@ import { CheckIcon } from '@heroicons/vue/20/solid'
 import passwordManager from '@/lib/password'
 import { useRouter } from 'vue-router'
 
+console.log("load create success");
+
 const router = useRouter()
 
 const goOn = async () => {

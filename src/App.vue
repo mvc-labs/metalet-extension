@@ -20,7 +20,7 @@ getCurrentAccount().then(async (account) => {
 
     const network = await getNetwork()
 
-    const wif = network === 'mainnet' ? account.mainnetPrivateKey.toString() : account.testnetPrivateKey.toString()
+    const wif = network === 'mainnet' ? account.mainnet.mvc.privateKey.toString() : account.testnet.mvc.privateKey.toString()
 
     wallet.value = new Wallet(wif, network as API_NET, FEEB, API_TARGET.MVC)
   }
@@ -36,10 +36,8 @@ const secondaryHeaderTitle = computed(() => {
 </script>
 
 <template>
-  <div
-    id="app"
-    class="ext-app relative flex h-150 w-90 items-center justify-center overflow-y-auto font-sans xs:h-screen xs:w-screen xs:bg-gray-200/10"
-  >
+  <div id="app"
+    class="ext-app relative flex h-150 w-90 items-center justify-center overflow-y-auto font-sans xs:h-screen xs:w-screen xs:bg-gray-200/10">
     <div
       class="ext-app flex h-full w-full flex-col overflow-y-auto xs:relative xs:aspect-[1/2] xs:h-3/4 xs:w-auto xs:min-w-[25rem] xs:rounded-lg xs:border xs:border-gray-100 xs:bg-white xs:shadow-lg">
       <!-- Header -->

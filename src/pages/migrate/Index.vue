@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
-import accountManager from '@/lib/account'
+import accountManager, { deriveBTCInfo } from '@/lib/account'
 import type { Account } from '@/lib/account'
 import { mvc } from 'meta-contract'
 import { setNetwork } from '@/lib/network'
@@ -54,17 +54,43 @@ const importWallet = async () => {
         const testnetPrivateKey = testnetHdpk.deriveChild(`m/44'/${usingPath}'/0'/0/0`).privateKey
         const testnetAddress = testnetPrivateKey.toAddress('testnet').toString()
 
-        // 保存账号信息：助记词、私钥、地址；以地址为key，value为对象
+        const { mainnet: btcMainnet, testnet: btcTestnet } = deriveBTCInfo(mnemonicStr)
+
         const account = {
           mnemonic: mnemonicStr,
-          path: usingPath,
+          mvcIndex: usingPath,
+          mvcPath: `m/44'/${usingPath}'/0'/0/0`,
           btcPath: `m/86'/0'/0'/0/0`,
-          mainnetPrivateKey: mainnetPrivateKey.toString(),
-          mainnetAddress,
-          testnetPrivateKey: testnetPrivateKey.toString(),
-          testnetAddress,
-          assetsDisplay: ['SPACE'],
+          mainnet: {
+            btc: btcMainnet,
+            mvc: {
+              address: mainnetAddress,
+              privateKey: mainnetPrivateKey.toString(),
+              publicKey: ""
+            }
+          },
+          testnet: {
+            btc: btcTestnet,
+            mvc: {
+              address: testnetAddress,
+              privateKey: testnetPrivateKey.toString(),
+              publicKey: ""
+            }
+          },
+          assetsDisplay: ['SPACE', 'BTC'],
         }
+
+        // 保存账号信息：助记词、私钥、地址；以地址为key，value为对象
+        // const account = {
+        //   mnemonic: mnemonicStr,
+        //   path: usingPath,
+        //   btcPath: `m/86'/0'/0'/0/0`,
+        //   mainnetPrivateKey: mainnetPrivateKey.toString(),
+        //   mainnetAddress,
+        //   testnetPrivateKey: testnetPrivateKey.toString(),
+        //   testnetAddress,
+        //   assetsDisplay: ['SPACE'],
+        // }
 
         await accountManager.add(account)
 
@@ -100,10 +126,8 @@ const importWallet = async () => {
 
     <div class="flex flex-col items-stretch pb-4">
       <p class="mb-2 text-sm text-red-500" v-if="error">{{ error }}</p>
-      <button
-        class="gradient-bg rounded-md py-4 text-base font-bold leading-none tracking-wide text-blue-50"
-        @click="importWallet"
-      >
+      <button class="gradient-bg rounded-md py-4 text-base font-bold leading-none tracking-wide text-blue-50"
+        @click="importWallet">
         OK
       </button>
     </div>

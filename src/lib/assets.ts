@@ -1,6 +1,13 @@
 import { fetchTokens } from '@/queries/tokens'
-import { address, getCurrentAccount, setAccount } from './account'
+import { getCurrentAccount, setAccount, getAddress } from './account'
 import tokens from '@/data/tokens'
+import { ref, onMounted } from 'vue'
+
+const address = ref<string>('')
+
+onMounted(async () => {
+  address.value = await getAddress('mvc')
+})
 
 export async function getAssetsDisplay() {
   const account = await getCurrentAccount()

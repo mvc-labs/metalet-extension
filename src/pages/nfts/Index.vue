@@ -6,7 +6,7 @@ import BtcLogoImg from '@/assets/images/btc-logo.svg?url'
 import MvcCollectionPanel from './components/MvcCollectionPanel.vue'
 import BtcCollectionPanel from './components/BtcCollectionPanel.vue'
 import AccountItem from '../accounts/components/Item.vue'
-import { account } from '@/lib/account'
+import { currentAccount as account } from '@/lib/account'
 </script>
 
 <template>

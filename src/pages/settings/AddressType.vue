@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref } from "vue"
-import { account, updateBTCType, scripts } from '@/lib/account'
+import { currentAccount as account, updateBTCType, scripts } from '@/lib/account'
 import {
   RadioGroup,
   RadioGroupLabel,

@@ -1,6 +1,11 @@
 <script lang="ts" setup>
-import { account, getAddress, address } from '@/lib/account'
-getAddress()
+import { ref,onMounted } from "vue"
+import { currentAccount as account, getAddress } from '@/lib/account'
+const address = ref<string>("")
+
+onMounted(async () => {
+  address.value = await getAddress()
+})
 </script>
 
 <template>
@@ -12,7 +17,7 @@ getAddress()
 
     <div class="">
       <div class="label">MVC Path</div>
-      <div class="value">{{ `m/44'/${account?.path}'/0'/0/0` }}</div>
+      <div class="value">{{ `m/44'/${account?.mvcIndex}'/0'/0/0` }}</div>
     </div>
 
     <div class="" v-if="account.btcPath">
