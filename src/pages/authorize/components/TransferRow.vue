@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TransferTask, Receiver } from '@/lib/actions/transfer'
-import { shortestAddress } from '@/lib/helpers'
+import { shortestAddress } from '@/lib/formatters'
 
 const props = defineProps<{
   task: TransferTask

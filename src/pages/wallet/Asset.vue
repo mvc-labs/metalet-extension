@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { MVCAssets } from '@/data/assets'
 import { useBalanceQuery } from '@/queries/balance'
 import { address } from '@/lib/account'
-import { prettifyBalance } from '@/lib/helpers'
+import { prettifyBalance } from '@/lib/formatters'
 import Activities from './components/Activities.vue'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 

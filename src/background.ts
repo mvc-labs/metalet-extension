@@ -43,7 +43,7 @@ browser.runtime.onMessage.addListener(async (msg, sender, response) => {
   // 授权请求
   if (msg.action?.startsWith('authorize')) {
     const icon = sender.tab?.favIconUrl || msg.icon || ''
-    const rawUrl = 'popup.html#authorize'
+    const rawUrl = 'index.html#authorize'
     // 拼接授权页的参数
     const params = new URLSearchParams()
     params.append('host', msg.host)

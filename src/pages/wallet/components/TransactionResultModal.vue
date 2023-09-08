@@ -2,7 +2,8 @@
 import { PropType } from 'vue'
 import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
 
-import { prettifyTokenBalance, toTx } from '@/lib/helpers'
+import { toTx } from '@/lib/helpers'
+import { prettifyTokenBalance } from '@/lib/formatters'
 import { getBrowserHost } from '@/lib/host'
 
 import Modal from '@/components/Modal.vue'

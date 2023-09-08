@@ -1,12 +1,5 @@
 import * as VueRouter from 'vue-router'
 import Wallet from './pages/wallet/Index.vue'
-import WalletReceive from './pages/wallet/Receive.vue'
-import WalletSend from './pages/wallet/Send.vue'
-import WalletSendToken from './pages/wallet/SendToken.vue'
-import Tokens from './pages/tokens/Index.vue'
-import NftCollections from './pages/nfts/Index.vue'
-import NftCollection from './pages/nfts/Collection.vue'
-import Settings from './pages/settings/Index.vue'
 import { getStorage } from './lib/storage'
 import accountManager, { getCurrentAccount } from './lib/account'
 
@@ -85,7 +78,7 @@ const routes = [
   },
   {
     path: '/wallet/receive',
-    component: WalletReceive,
+    component: () => import('./pages/wallet/Receive.vue'),
     meta: {
       secondaryHeader: true,
       headerTitle: 'Receive',
@@ -94,7 +87,7 @@ const routes = [
   },
   {
     path: '/wallet/send',
-    component: WalletSend,
+    component: () => import('./pages/wallet/Send.vue'),
     meta: {
       secondaryHeader: true,
       headerTitle: 'Send',
@@ -104,7 +97,7 @@ const routes = [
 
   {
     path: '/wallet/send-token/:symbol/:genesis',
-    component: WalletSendToken,
+    component: () => import('./pages/wallet/SendToken.vue'),
     name: 'send-token',
     meta: {
       secondaryHeader: true,
@@ -163,13 +156,13 @@ const routes = [
 
   {
     path: '/collections/:codehash/:genesis',
-    component: NftCollection,
+    component: () => import('./pages/nfts/Collection.vue'),
     meta: {
       secondaryHeader: true,
       headerTitle: 'NFT Collection',
     },
   },
-  { path: '/collections', component: NftCollections, name: 'collections' },
+  { path: '/collections', component: () => import('./pages/nfts/Index.vue'), name: 'collections' },
   {
     path: '/nfts/transfer-nft/:codehash/:genesis/:tokenIndex',
     component: () => import('./pages/nfts/Transfer.vue'),
@@ -199,9 +192,9 @@ const routes = [
     },
   },
 
-  { path: '/tokens', component: Tokens },
+  { path: '/tokens', component: () => import('./pages/tokens/Index.vue') },
 
-  { path: '/settings', component: Settings },
+  { path: '/settings', component: () => import('./pages/settings/Index.vue') },
   {
     path: '/accounts',
     component: () => import('./pages/accounts/Index.vue'),

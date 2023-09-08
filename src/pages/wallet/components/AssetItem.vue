@@ -5,7 +5,7 @@ import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 import { useBalanceQuery } from '@/queries/balance'
 import { getAddress, deriveAddress } from '@/lib/account'
 import { isOfficialToken } from '@/lib/assets'
-import { prettifyBalance, prettifyTokenBalance } from '@/lib/helpers'
+import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import type { Asset } from '@/data/assets'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 import { getTagInfo } from '@/data/assets'
@@ -80,7 +80,7 @@ const exchange = computed(() => {
 
         <template v-else-if="asset.total">
           <div class="whitespace-nowrap">
-            {{ prettifyTokenBalance(asset.total, asset.decimal) + ' ' + asset.symbol }}
+            {{ prettifyTokenBalance(asset.total, asset.decimal, true) + ' ' + asset.symbol }}
           </div>
         </template>
 

@@ -5,7 +5,7 @@ import { Wallet } from 'meta-contract'
 import { useQueryClient } from '@tanstack/vue-query'
 
 import { useBalanceQuery } from '@/queries/balance'
-import { prettifyBalance } from '@/lib/helpers'
+import { prettifyBalance } from '@/lib/formatters'
 import { getAddress } from '@/lib/account'
 import { MVCAssets } from '@/data/assets'
 

@@ -7,7 +7,6 @@ import {
   RadioGroupDescription,
   RadioGroupOption,
 } from '@headlessui/vue'
-console.log("account", account)
 
 const index = scripts.findIndex(script => script.addressType === (account.value?.btcType || "P2PKH"))
 
