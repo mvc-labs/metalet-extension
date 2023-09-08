@@ -12,6 +12,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/background.ts'),
       name: 'Metalet',
+      formats: ['es'],
     },
     rollupOptions: {
       output: {
