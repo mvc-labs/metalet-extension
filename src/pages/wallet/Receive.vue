@@ -1,15 +1,17 @@
 <script lang="ts" setup>
-import { ref, computed, Ref } from 'vue'
+import { ref, computed, Ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQRCode } from '@vueuse/integrations/useQRCode'
 
-import { getAddress, address } from '@/lib/account'
+import { getAddress } from '@/lib/account'
 import { MVCAssets } from '@/data/assets'
 
 // init
 const route = useRoute()
 const chain: Ref<'btc' | 'mvc'> = ref(route.query.chain as 'btc' | 'mvc')
 const asset = computed(() => MVCAssets.find((asset) => asset.chain === chain.value))
+
+const address = ref<string>("")
 
 // copy
 const isCopied = ref(false)
@@ -19,8 +21,11 @@ function copyAddress() {
 }
 
 // QRCode
-console.log({ address })
 const qrcode = useQRCode(address)
+
+onMounted(async () => {
+  address.value = await getAddress("mvc")
+})
 </script>
 
 <template>

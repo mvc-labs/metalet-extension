@@ -6,7 +6,7 @@ import { CircleStackIcon } from '@heroicons/vue/24/solid'
 import { useQueryClient } from '@tanstack/vue-query'
 
 import { prettifyTokenBalance } from '@/lib/formatters'
-import { getAddress, getCurrentAccount, privateKey } from '@/lib/account'
+import { getAddress, getCurrentAccount, getPrivateKey } from '@/lib/account'
 import { useTokenQuery } from '@/queries/tokens'
 import { network } from '@/lib/network'
 
@@ -50,9 +50,11 @@ async function send() {
 
   operationLock.value = true
 
+  const privateKey = await getPrivateKey("mvc")
+
   const ftManager = new FtManager({
     network: network.value as API_NET,
-    purse: privateKey.value!,
+    purse: privateKey,
   })
 
   // Pick the largest utxo from wallet to pay the transaction
@@ -68,7 +70,7 @@ async function send() {
       // add wif to utxo
       return {
         ...utxo,
-        wif: privateKey.value!,
+        wif: privateKey,
       }
     })
 
@@ -76,7 +78,7 @@ async function send() {
     .transfer({
       codehash: token.value?.codehash!,
       genesis: token.value?.genesis!,
-      senderWif: privateKey.value,
+      senderWif: privateKey,
       receivers: [
         {
           address: recipient.value,
@@ -133,10 +135,8 @@ async function send() {
       <div class="relative">
         <input class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 text-sm" placeholder="Amount" v-model="amount" />
         <!-- unit -->
-        <div
-          class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500"
-          v-if="token?.symbol"
-        >
+        <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500"
+          v-if="token?.symbol">
           <div class="border-l border-solid border-gray-500 px-4 py-1">{{ token.symbol }}</div>
         </div>
       </div>
@@ -179,10 +179,8 @@ async function send() {
           <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Operating...</div>
         </div>
         <div class="grid grid-cols-2 gap-x-4" v-else>
-          <button
-            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
-            @click="isOpenConfirmModal = false"
-          >
+          <button class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
+            @click="isOpenConfirmModal = false">
             Cancel
           </button>
           <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="send">

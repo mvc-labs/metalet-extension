@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import accountManager, { address, account } from '@/lib/account'
+import { currentAccount } from '@/lib/account'
 import password from '@/lib/password'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -9,13 +9,12 @@ import ResetModal from '../ResetModal.vue'
 
 const router = useRouter()
 
-accountManager.getCurrent()
-
-const isCopied = ref(false)
-const copyAddress = () => {
-  navigator.clipboard.writeText(address.value)
-  isCopied.value = true
-}
+// const isCopied = ref(false)
+// const copyAddress = () => {
+//   const address = ""
+//   navigator.clipboard.writeText(address)
+//   isCopied.value = true
+// }
 
 const hasPassword = ref(false)
 password.has().then((has) => {
@@ -40,7 +39,7 @@ const toAccountList = () => {
 </script>
 
 <template>
-  <Menu as="div" class="relative z-[1] transition-all duration-200" v-if="account">
+  <Menu as="div" class="relative z-[1] transition-all duration-200" v-if="currentAccount">
     <MenuButton class="relative flex items-center gap-x-0.5 py-1 hover:text-blue-700">
       <MoreIcon class="h-6 w-6 text-gray-500" />
     </MenuButton>
@@ -63,17 +62,17 @@ const toAccountList = () => {
       </MenuItem> -->
 
       <MenuItem>
-        <button class="menu-item" @click="lock" v-if="hasPassword">Lock</button>
-        <button class="menu-item" @click="setPassword" v-else>Set Password</button>
+      <button class="menu-item" @click="lock" v-if="hasPassword">Lock</button>
+      <button class="menu-item" @click="setPassword" v-else>Set Password</button>
       </MenuItem>
 
       <MenuItem>
-        <button class="menu-item" @click="toAccountList">Add / Switch Account</button>
+      <button class="menu-item" @click="toAccountList">Add / Switch Account</button>
       </MenuItem>
 
       <!-- disconnect button -->
       <MenuItem v-if="hasPassword">
-        <button class="menu-item" @click="showResetModal = true">Reset Account</button>
+      <button class="menu-item" @click="showResetModal = true">Reset Account</button>
       </MenuItem>
     </MenuItems>
   </Menu>

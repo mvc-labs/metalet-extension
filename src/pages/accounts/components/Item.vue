@@ -31,9 +31,9 @@ const copyAddress = () => {
 // 根据当前网络环境获取地址
 const address = computed(() => {
   if (network.value === 'testnet') {
-    return props.account.testnetAddress
+    return props.account.testnet.mvc.address
   }
-  return props.account.mainnetAddress
+  return props.account.mainnet.mvc.address
 })
 
 const randomColor = (key: string) => {
@@ -73,7 +73,7 @@ const openEditNameModal = ref(false)
 
     <div class="flex items-center justify-start gap-x-2 py-4" :key="account.id">
       <!-- avatar -->
-      <div :class="['h-12 w-12 rounded-full bg-gradient-to-br', randomColor(account.mainnetAddress)]"></div>
+      <div :class="['h-12 w-12 rounded-full bg-gradient-to-br', randomColor(account.mainnet.mvc.address)]"></div>
 
       <!-- info -->
       <div class="group flex flex-col">

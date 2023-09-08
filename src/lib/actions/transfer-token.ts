@@ -1,6 +1,6 @@
 import { API_NET, API_TARGET, FtManager } from 'meta-contract'
 import { getNetwork } from '../network'
-import { getCurrentAccount, privateKey, getAddress } from '../account'
+import { getCurrentAccount, getAddress, getPrivateKey } from '../account'
 import { FEEB } from '@/data/config'
 import { METASV_HOST, METASV_TESTNET_HOST } from '@/data/hosts'
 
@@ -17,7 +17,7 @@ export async function process({
   }[]
 }) {
   const network: API_NET = (await getNetwork()) as API_NET
-  const purse = await getCurrentAccount().then((account) => privateKey.value)
+  const purse = await getPrivateKey()
   const apiHost = network === API_NET.MAIN ? METASV_HOST : METASV_TESTNET_HOST
 
   const ftManager = new FtManager({
@@ -41,7 +41,7 @@ export async function process({
       // add wif to utxo
       return {
         ...utxo,
-        wif: privateKey.value!,
+        wif: purse,
       }
     })
 
@@ -69,7 +69,7 @@ export async function estimate({
   }[]
 }) {
   const network: API_NET = (await getNetwork()) as API_NET
-  const purse = await getCurrentAccount().then((account) => privateKey.value)
+  const purse = await getPrivateKey()
   const apiHost = network === API_NET.MAIN ? METASV_HOST : METASV_TESTNET_HOST
 
   const ftManager = new FtManager({

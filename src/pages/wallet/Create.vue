@@ -4,7 +4,7 @@ import { mvc } from 'meta-contract'
 import LockIcon from '@/assets/icons/lock.svg?component'
 import { EyeIcon } from '@heroicons/vue/24/solid'
 import { useRouter } from 'vue-router'
-import { addAccount } from '@/lib/account'
+import { addAccount, deriveBTCInfo } from '@/lib/account'
 import passwordManager from '@/lib/password'
 
 const router = useRouter()
@@ -27,8 +27,7 @@ const saveAccount = async (backup: boolean) => {
   const mnemonicStr = words.value.join(' ')
   try {
     const pathDepth = '10001'
-    const fullPath = `m/44'/${pathDepth}'/0'/0/0`
-    const btcPath = `m/86'/0'/0'/0/0`
+    const btcPath = `m/44'/0'/0'/0/0`
     const mneObj = mvc.Mnemonic.fromString(mnemonicStr)
     const mainnetHdpk = mneObj.toHDPrivateKey('', 'mainnet')
     const mainnetPrivateKey = mainnetHdpk.deriveChild(`m/44'/10001'/0'/0/0`).privateKey
@@ -38,21 +37,40 @@ const saveAccount = async (backup: boolean) => {
     const testnetPrivateKey = testnetHdpk.deriveChild(`m/44'/10001'/0'/0/0`).privateKey
     const testnetAddress = testnetPrivateKey.toAddress('testnet').toString()
 
-    // 保存账号信息：助记词、私钥、地址；以地址为key，value为对象
+    const { mainnet: btcMainnet, testnet: btcTestnet } = deriveBTCInfo(mnemonicStr)
+
     const account = {
       mnemonic: mnemonicStr,
-      path: pathDepth,
+      mvcIndex: pathDepth,
+      mvcPath: `m/44'/${pathDepth}'/0'/0/0`,
       btcPath,
-      mainnetPrivateKey: mainnetPrivateKey.toString(),
-      mainnetAddress,
-      testnetPrivateKey: testnetPrivateKey.toString(),
-      testnetAddress,
+      mainnet: {
+        btc: btcMainnet,
+        mvc: {
+          address: mainnetAddress,
+          privateKey: mainnetPrivateKey.toString(),
+          publicKey: ""
+        }
+      },
+      testnet: {
+        btc: btcTestnet,
+        mvc: {
+          address: testnetAddress,
+          privateKey: testnetPrivateKey.toString(),
+          publicKey: ""
+        }
+      },
       assetsDisplay: ['SPACE', 'BTC'],
     }
 
     await addAccount(account)
 
+    console.log("addAccount");
+    console.log("backup", backup);
+
+
     if (!backup) {
+      console.log("goto successs");
       router.push('/wallet/create-success')
     } else {
       router.push('/wallet/check-backup')
@@ -82,14 +100,10 @@ const saveAccount = async (backup: boolean) => {
         {{ wordsDisplay }}
       </div>
 
-      <div
-        class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-100/30 backdrop-blur"
-        v-if="isCover"
-      >
-        <button
-          class="w- flex w-32 items-center justify-center gap-x-2 rounded-full border border-black py-2"
-          @click="isCover = false"
-        >
+      <div class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-100/30 backdrop-blur"
+        v-if="isCover">
+        <button class="w- flex w-32 items-center justify-center gap-x-2 rounded-full border border-black py-2"
+          @click="isCover = false">
           <EyeIcon class="h-5 w-5" />
           <span>Show</span>
         </button>

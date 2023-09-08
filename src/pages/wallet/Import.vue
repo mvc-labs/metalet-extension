@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed, Ref, watch } from 'vue'
 import { mvc } from 'meta-contract'
-import { addAccount } from '@/lib/account'
+import { addAccount, deriveBTCInfo } from '@/lib/account'
 import { useRouter } from 'vue-router'
 import { RadioGroup, RadioGroupOption, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import { ChevronRightIcon, TrashIcon } from '@heroicons/vue/24/solid'
@@ -73,23 +73,38 @@ const onSubmit = async () => {
     const testnetPrivateKey = testnetHdpk.deriveChild(fullPath).privateKey
     const testnetAddress = testnetPrivateKey.toAddress('testnet').toString()
 
+    const { mainnet: btcMainnet, testnet: btcTestnet } = deriveBTCInfo(mnemonicStr, selectedScript.value.addressType)
+
     // 保存账号信息：助记词、私钥、地址；以地址为key，value为对象
     const account = {
       mnemonic: mnemonicStr,
-      path: pathDepth.value,
+      mvcIndex: pathDepth.value,
+      mvcPath: `m/44'/${pathDepth.value}'/0'/0/0`,
       btcPath,
       btcType: selectedScript.value.addressType,
-      mainnetPrivateKey: mainnetPrivateKey.toString(),
-      mainnetAddress,
-      testnetPrivateKey: testnetPrivateKey.toString(),
-      testnetAddress,
+      mainnet: {
+        btc: btcMainnet,
+        mvc: {
+          address: mainnetAddress,
+          privateKey: mainnetPrivateKey.toString(),
+          publicKey: ""
+        }
+      },
+      testnet: {
+        btc: btcTestnet,
+        mvc: {
+          address: testnetAddress,
+          privateKey: testnetPrivateKey.toString(),
+          publicKey: ""
+        }
+      },
       assetsDisplay: ['SPACE', 'BTC'],
     }
 
     await addAccount(account)
 
     // 跳转到首页
-    router.push('/')
+    router.push('/wallet')
   } catch (e) {
     console.log(e)
     error.value = 'Failed to import your wallet'

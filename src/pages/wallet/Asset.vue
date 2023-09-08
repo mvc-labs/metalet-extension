@@ -1,16 +1,22 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { MVCAssets } from '@/data/assets'
 import { useBalanceQuery } from '@/queries/balance'
-import { address } from '@/lib/account'
+import { getAddress } from '@/lib/account'
 import { prettifyBalance } from '@/lib/formatters'
 import Activities from './components/Activities.vue'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 
 const route = useRoute()
 const router = useRouter()
+
+const address = ref<string>("")
+
+onMounted(async () => {
+  address.value = await getAddress()
+})
 
 const symbol = route.params.symbol as string
 const asset = computed(() => MVCAssets.find((asset) => asset.symbol === symbol))

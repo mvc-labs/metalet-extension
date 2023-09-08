@@ -3,7 +3,7 @@ import { ComputedRef, computed, ref, Ref } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import { API_NET, API_TARGET, NftManager } from 'meta-contract'
 
-import { getAddress, getCurrentAccount, privateKey } from '@/lib/account'
+import { getAddress, getCurrentAccount, getPrivateKey } from '@/lib/account'
 import { parseMetaFile, getResizeQuery } from '@/lib/metadata'
 import { useOneNftQuery } from '@/queries/nfts'
 import { useNftInfoQuery } from '@/queries/metadata'
@@ -58,10 +58,12 @@ async function transfer() {
 
   operationLock.value = true
 
+  const privateKey = await getPrivateKey("mvc")
+
   const nftManager = new NftManager({
     network: network.value as API_NET,
     apiTarget: API_TARGET.MVC,
-    purse: privateKey.value!,
+    purse: privateKey,
   })
 
   // Pick the largest utxo from wallet to pay the transaction
@@ -77,7 +79,7 @@ async function transfer() {
       // add wif to utxo
       return {
         ...utxo,
-        wif: privateKey.value!,
+        wif: privateKey,
       }
     })
 
@@ -86,7 +88,7 @@ async function transfer() {
       codehash,
       genesis,
       tokenIndex: tokenIndex.toString(),
-      senderWif: privateKey.value,
+      senderWif: privateKey,
       receiverAddress: recipient.value,
       utxos: [largestUtxo],
     })
@@ -141,20 +143,14 @@ async function transfer() {
       </div>
 
       <div class="mt-4">
-        <input
-          class="main-input w-full !rounded-xl !p-4 !text-xs"
-          placeholder="Recipient's address"
-          v-model="recipient"
-        />
+        <input class="main-input w-full !rounded-xl !p-4 !text-xs" placeholder="Recipient's address"
+          v-model="recipient" />
       </div>
     </div>
 
     <div class="mt-4">
-      <button
-        class="main-btn-bg w-full rounded-md py-3 text-center text-base text-white disabled:opacity-50"
-        :disabled="!recipient || !recipient.length"
-        @click="isOpenConfirmModal = true"
-      >
+      <button class="main-btn-bg w-full rounded-md py-3 text-center text-base text-white disabled:opacity-50"
+        :disabled="!recipient || !recipient.length" @click="isOpenConfirmModal = true">
         Confirm
       </button>
     </div>
@@ -189,10 +185,8 @@ async function transfer() {
           <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Operating...</div>
         </div>
         <div class="grid grid-cols-2 gap-x-4" v-else>
-          <button
-            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
-            @click="isOpenConfirmModal = false"
-          >
+          <button class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
+            @click="isOpenConfirmModal = false">
             Cancel
           </button>
           <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="transfer">

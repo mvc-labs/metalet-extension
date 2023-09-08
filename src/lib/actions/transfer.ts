@@ -1,6 +1,6 @@
 import { API_NET, API_TARGET, FtManager, TxDecoder, Wallet, mvc } from 'meta-contract'
 import { getNetwork } from '../network'
-import { getAddress, privateKey } from '../account'
+import { getAddress, getPrivateKey } from '../account'
 import { FEEB } from '@/data/config'
 import { getApiHost } from '../host'
 
@@ -16,7 +16,7 @@ export type TransferTask = {
 export async function process({ tasks, broadcast = true }: { tasks: TransferTask[]; broadcast?: boolean }) {
   console.log('here')
   const network: API_NET = (await getNetwork()) as API_NET
-  const purse = await getAddress().then(() => privateKey.value)
+  const purse = await getPrivateKey("mvc")
   const address = (await getAddress())!
   const apiHost = await getApiHost()
 
