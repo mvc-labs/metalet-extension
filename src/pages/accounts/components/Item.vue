@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 
 import accountManager, { deriveAddress, type Account, updateBTCType } from '@/lib/account'
 import { network } from '@/lib/network'
-import { shortestAddress } from '@/lib/helpers'
+import { shortestAddress } from '@/lib/formatters'
 
 import EditName from './EditName.vue'
 

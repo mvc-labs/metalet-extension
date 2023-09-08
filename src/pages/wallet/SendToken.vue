@@ -5,7 +5,7 @@ import { API_NET, FtManager } from 'meta-contract'
 import { CircleStackIcon } from '@heroicons/vue/24/solid'
 import { useQueryClient } from '@tanstack/vue-query'
 
-import { prettifyTokenBalance } from '@/lib/helpers'
+import { prettifyTokenBalance } from '@/lib/formatters'
 import { getAddress, getCurrentAccount, privateKey } from '@/lib/account'
 import { useTokenQuery } from '@/queries/tokens'
 import { network } from '@/lib/network'

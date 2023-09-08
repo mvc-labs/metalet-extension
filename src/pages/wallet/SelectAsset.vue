@@ -34,7 +34,7 @@ function selectAsset(asset: any) {
 </script>
 
 <template>
-  <div class="divide-y divide-gray-100 text-black">
+  <div class="space-y-2 divide-y divide-gray-100 text-black">
     <AssetItem v-for="asset in displayingAssets" :key="asset.symbol" :asset="asset" @click="selectAsset(asset)" />
   </div>
 </template>
