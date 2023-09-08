@@ -45,7 +45,6 @@ const toActivityTx = async () => {
   const host = await getBrowserHost()
   toTx(txid, host as string)
 }
-console.log({ asset: props.asset })
 </script>
 
 <template>
