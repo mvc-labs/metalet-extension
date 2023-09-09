@@ -1,7 +1,6 @@
 import { getAddress, getCurrentAccount, privateKey } from '../account'
 import connector from '../connector'
-import { sign } from '../crypto'
-import { sleep } from '../helpers'
+import { signTransaction } from '../crypto'
 
 export async function process(params: any, host: string) {
   const wif = await getCurrentAccount().then((account) => privateKey.value)
@@ -10,7 +9,7 @@ export async function process(params: any, host: string) {
   // for (let i = 0; i < params.list.length; i++) {
   //   sigList[i] = sign(wif, params.list[i])
   // }
-  const signature = sign(wif, params.transaction)
+  const signature = signTransaction(wif, params.transaction)
 
   return { signature }
 }

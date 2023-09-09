@@ -97,6 +97,14 @@ export async function eciesDecrypt(params: { encrypted: string }) {
   return await createAction('EciesDecrypt', 'authorize', params)
 }
 
+export async function signMessage(params: { message: string }) {
+  return await createAction('SignMessage', 'authorize', params)
+}
+
+export async function verifySignature(params: { message: string; signature: string }) {
+  return await createAction('VerifySignature', 'query', params)
+}
+
 type SigningTransaction = {
   txHex: string
   address: string

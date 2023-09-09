@@ -2,10 +2,10 @@ import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'url'
-import nodePolyfills from 'rollup-plugin-polyfill-node'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), nodePolyfills()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -19,12 +19,6 @@ export default defineConfig({
       name: 'Metalet',
     },
     rollupOptions: {
-      plugins: [
-        // inject({
-        //   Buffer: ['buffer', 'Buffer'],
-        // }),
-        nodePolyfills(),
-      ],
       output: {
         entryFileNames: 'background.global.js',
         extend: true,
