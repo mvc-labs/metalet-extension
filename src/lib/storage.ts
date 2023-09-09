@@ -2,24 +2,19 @@ import browser from 'webextension-polyfill'
 import { raise } from './helpers'
 
 export async function setStorage(key: string, value: any) {
-  console.log('setStorage typeof', typeof value, typeof value === 'object', value)
-  // 先序列化
   if (typeof value === 'object') {
     value = JSON.stringify(value)
-    console.log('value', value)
   }
 
   await browser.storage.local.set({ [key]: value })
 }
 
-export async function getStorage(key: string, option?: { defaultValue?: any; isParse?: boolean }) {
-  // 先反序列化
+export async function getStorage(key: string, option?: { defaultValue?: unknown; isParse?: boolean }) {
   const res = await browser.storage.local.get(key)
   const value = res[key]
+
   if (typeof value === 'string') {
     try {
-      console.log('isParse', option?.isParse, option?.isParse === false)
-
       if (option?.isParse === false) {
         return value
       }

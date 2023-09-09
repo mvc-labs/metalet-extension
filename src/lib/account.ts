@@ -13,10 +13,8 @@ bitcoin.initEccLib(ecc)
 const bip32 = BIP32Factory(ecc)
 
 const CURRENT_ACCOUNT_ID = 'currentAccountId'
-const ACCOUNT_STORAGE_HISTORY_KEYS = ['accounts']
 const ACCOUNT_STORAGE_CURRENT_KEY = 'accounts_v2'
-
-export const currentAccount = ref<Account | null>(null)
+const ACCOUNT_STORAGE_HISTORY_KEYS = ['accounts']
 
 export type Chain = 'btc' | 'mvc'
 
@@ -72,56 +70,48 @@ export type Account = {
   testnet: ChainInfo
 }
 
-function stringify(map: Map<string, Account>) {
-  return JSON.stringify(map, (key, value) => {
-    if (value instanceof Map) {
-      return {
-        dataType: 'Map',
-        value: Array.from(value.entries()),
-      }
-    }
-    return value
-  })
+const loadAccounts = ref(false)
+
+export const currentAccount = ref<Account | null>(null)
+
+export const accounts = ref<Map<string, Account>>(new Map())
+
+// Account Map Serialization
+function serializeAccountMap(map: Map<string, Account>): string {
+  const obj: { [key: string]: Account } = {}
+  for (const [key, value] of map.entries()) {
+    obj[key] = value
+  }
+  return JSON.stringify(obj)
+}
+
+// Account Map Deserialization
+function deserializeAccountMap(json: string): Map<string, Account> {
+  const obj = JSON.parse(json)
+  const map = new Map()
+  for (const key in obj) {
+    map.set(key, obj[key])
+  }
+  return map
+}
+
 export const address = ref('')
 export const btcAddress = ref('bc1pv3efxdwc2nkck5kg8updw62kxqt8mclshk3a2ywlazqa6n225n9qvd2v93')
 export const privateKey = ref('')
 export const account = ref<Account | null>(null)
 
-export async function getAll(): Promise<Account[]> {
-  const accounts = await getStorage('accounts')
-  return accounts || []
-}
+export async function getAccounts(refresh = false): Promise<Map<string, Account>> {
+  if (!loadAccounts.value || refresh) {
+    ACCOUNT_STORAGE_HISTORY_KEYS.forEach((key) => {
+      deleteStorage(key)
+    })
+    accounts.value = deserializeAccountMap(
+      await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: '{}', isParse: false })
+    )
+    loadAccounts.value = true
+  }
 
-// JSON反序列化
-function parse(json: string) {
-  console.log('json', json)
-
-  return JSON.parse(json, (key, value) => {
-    if (value && value.dataType === 'Map') {
-      return new Map(value.value)
-    }
-
-    if (typeof value === 'object') {
-      return parse(JSON.stringify(value)) // 递归处理对象
-    }
-
-    return value
-  })
-}
-
-export async function getAccounts(): Promise<Map<string, Account>> {
-  ACCOUNT_STORAGE_HISTORY_KEYS.forEach((key) => {
-    deleteStorage(key)
-  })
-
-  // const accounts = await getStorage(ACCOUNT_STORAGE_CURRENT_KEY)||new Map()
-  // if(accounts){
-  //   return new Map([...Object.entries(accounts)])
-  // }
-  const accounts = parse(await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: {}, isParse: false }))
-  console.log('getAccounts accounts', accounts)
-
-  return accounts
+  return accounts.value
 }
 
 export async function getAccount(accountId: string): Promise<Account | null> {
@@ -129,9 +119,6 @@ export async function getAccount(accountId: string): Promise<Account | null> {
   if (accounts.size === 0) {
     return null
   }
-
-  console.log('accounts', accounts)
-  console.log('accountId', accountId)
 
   const account = accounts.get(accountId)
   if (!account) {
@@ -142,6 +129,10 @@ export async function getAccount(accountId: string): Promise<Account | null> {
 }
 
 export async function getCurrentAccount(): Promise<Account | null> {
+  if (currentAccount.value) {
+    return currentAccount.value
+  }
+
   const currentAccountId = await getStorage(CURRENT_ACCOUNT_ID)
   if (!currentAccountId) {
     return null
@@ -166,7 +157,7 @@ export async function removeCurrentAccount(): Promise<boolean> {
 
   accounts.delete(currentAccountId)
   await setStorage(CURRENT_ACCOUNT_ID, '')
-  await setStorage(ACCOUNT_STORAGE_CURRENT_KEY, accounts)
+  setAccounts(accounts)
   return true
 }
 
@@ -181,18 +172,19 @@ export async function connectAccount(accountId: string) {
   return true
 }
 
+export async function setAccounts(accountsMap: Map<string, Account>): Promise<void> {
+  accounts.value = accountsMap
+  await setStorage(ACCOUNT_STORAGE_CURRENT_KEY, serializeAccountMap(accountsMap))
+}
+
 export async function setAccount(account: Account) {
   const accounts = await getAccounts()
-  console.log('accounts', accounts)
-  console.log('account', account)
   accounts.set(account.id, account)
-  console.log('accounts', accounts)
-  await setStorage(ACCOUNT_STORAGE_CURRENT_KEY, stringify(accounts))
+  setAccounts(accounts)
 }
 
 export async function addAccount(newAccount: Omit<Account, 'id' | 'name'>) {
   const accounts = await getAccounts()
-  console.log('addAccount accounts', accounts)
 
   const { mnemonic } = newAccount
   let connectId = ''
@@ -208,7 +200,7 @@ export async function addAccount(newAccount: Omit<Account, 'id' | 'name'>) {
   } else {
     connectId = account.id
   }
-  // await connectAccount(connectId)
+  await connectAccount(connectId)
 }
 
 export async function deriveAddress({ chain }: { chain: Chain }) {

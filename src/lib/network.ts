@@ -3,7 +3,7 @@ import storage from './storage'
 
 export type Network = 'mainnet' | 'testnet'
 
-export const network = ref<Network>((await storage.get('network')) || 'mainnet')
+export const network = ref<Network>(await storage.get('network', { defaultValue: 'mainnet' }))
 
 export async function setNetwork(_network: Network) {
   await storage.set('network', _network)
