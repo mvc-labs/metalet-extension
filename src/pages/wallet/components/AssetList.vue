@@ -64,9 +64,9 @@ function toToken(token: UserOwnedToken) {
       </button>
     </div>
 
-    <div>
+    <div class=”space-y-5“>
       <div class="ext-lg text-[#141416]">BTC</div>
-      <AssetItem v-for="asset in btcAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)" class="mt-1.5" />
+      <AssetItem v-for="asset in btcAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)" />
     </div>
 
     <div>
