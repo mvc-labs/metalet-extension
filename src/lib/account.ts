@@ -102,9 +102,10 @@ export const account = ref<Account | null>(null)
 
 export async function getAccounts(refresh = false): Promise<Map<string, Account>> {
   if (!loadAccounts.value || refresh) {
-    ACCOUNT_STORAGE_HISTORY_KEYS.forEach((key) => {
-      deleteStorage(key)
-    })
+    // TODO 
+    // ACCOUNT_STORAGE_HISTORY_KEYS.forEach((key) => {
+    //   deleteStorage(key)
+    // })
     accounts.value = deserializeAccountMap(
       await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: '{}', isParse: false })
     )
@@ -293,7 +294,7 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
     case 'P2TR': {
       const { publicKey, privateKey } = root.derivePath("m/86'/0'/0'")
       const { address = '' } = payments.p2tr({
-        pubkey: publicKey,
+        pubkey: publicKey.subarray(1),
         network: network,
       })
       return {
@@ -352,7 +353,7 @@ export async function getInfo(key: keyof Account): Promise<any> {
   return account[key]
 }
 
-export async function getChainInfo(chain: Chain, key: keyof ChainInfo[Chain]): Promise<string> {
+async function getChainInfo(chain: Chain, key: keyof ChainInfo[Chain]): Promise<string> {
   const account = await getCurrentAccount()
   if (!account) {
     return ''
@@ -437,7 +438,7 @@ type AccountManager = {
 
 const accountManager = {} as AccountManager
 accountManager.all = getAccounts
-// accountManager.current = account
+accountManager.current = currentAccount
 accountManager.getCurrent = getCurrentAccount
 // accountManager.getAccountInstance = getAccountInstance
 accountManager.set = setAccount
