@@ -6,6 +6,10 @@ import accountManager, { getCurrentAccount } from './lib/account'
 const routes = [
   { path: '/', redirect: '/wallet' },
   {
+    path: '/dev',
+    component: () => import('./pages/Dev.vue'),
+  },
+  {
     path: '/welcome',
     component: () => import('./pages/welcome/Index.vue'),
     meta: {
@@ -138,6 +142,7 @@ const routes = [
     path: '/wallet/assets/:symbol',
     component: () => import('./pages/wallet/Asset.vue'),
     name: 'asset',
+    props: true,
     meta: {
       secondaryHeader: true,
       headerTitle: 'Asset',

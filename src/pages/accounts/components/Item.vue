@@ -21,18 +21,14 @@ console.log("network", network.value);
 console.log("currentAccount", currentAccount.value);
 console.log("props.account", props.account.id);
 
-const mvcAddress = ref('')
-deriveAddress({ chain: 'mvc' }).then((address = "") => (mvcAddress.value = address))
-const btcAddress = ref('')
-deriveAddress({ chain: 'btc' }).then((address = "") => (btcAddress.value = address))
+const mvcAddress = ref(props.account.mainnet.mvc.address)
+const btcAddress = ref(props.account.mainnet.btc.address)
 
 const isCopied = ref(false)
 const copyAddress = () => {
   navigator.clipboard.writeText(address.value)
   isCopied.value = true
 }
-
-console.log("test", 11111);
 
 
 // 根据当前网络环境获取地址
@@ -42,8 +38,6 @@ const address = computed(() => {
   }
   return props.account.mainnet.mvc.address
 })
-
-console.log("test", 222222);
 
 const randomColor = (key: string) => {
   const colors = [
@@ -62,7 +56,6 @@ const randomColor = (key: string) => {
 }
 
 
-console.log("test", 333333);
 
 const connect = async () => {
   await accountManager.connect(props.account.id)
@@ -71,14 +64,9 @@ const connect = async () => {
   router.push('/wallet')
 }
 
-
-console.log("test", 44444);
-
 const isCurrent = computed(() => {
   return props.account.id === accountManager.current.value?.id
 })
-
-console.log("test", 555555);
 
 const openEditNameModal = ref(false)
 </script>
@@ -88,9 +76,9 @@ const openEditNameModal = ref(false)
     <!-- edit name modal -->
     <EditName v-model:open="openEditNameModal" :account="props.account" />
 
-    <div class="flex items-center justify-start gap-x-2 py-4" :key="account.id">
+    <div class="flex items-center justify-start gap-x-2 py-4" :key="props.account.id">
       <!-- avatar -->
-      <div :class="['h-12 w-12 rounded-full bg-gradient-to-br', randomColor(account.mainnet.mvc.address)]"></div>
+      <div :class="['h-12 w-12 rounded-full bg-gradient-to-br', randomColor(props.account.mainnet.mvc.address)]"></div>
 
       <!-- info -->
       <div class="group flex flex-col">

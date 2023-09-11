@@ -1,13 +1,21 @@
-import { METASV_TESTNET_HOST, METASV_HOST, METALET_HOST } from '../data/hosts'
+import { METASV_TESTNET_HOST, METASV_HOST, METALET_HOST, ORDERS_HOST } from '../data/hosts'
 import { network } from '../lib/network'
 
-async function request(url: string, options = {}) {
+async function request(url: string, options: any = {}) {
   const defaultOptions = {
     headers: {
       'Content-Type': 'application/json',
     },
   }
   const allOptions = { ...defaultOptions, ...options }
+
+  // extract params from options and append to url
+  if (allOptions.params) {
+    const params = new URLSearchParams(allOptions.params)
+    url = `${url}?${params.toString()}`
+    delete allOptions.params
+  }
+
   return new Promise((resolve, reject) => {
     fetch(url, allOptions)
       .then((response) => {
@@ -34,6 +42,14 @@ export const metaletApi = (path: string) => {
   return {
     get: (params?: any) => request(`${metaletHost}${path}`, { method: 'GET', params }),
     post: (data?: any) => request(`${metaletHost}${path}`, { method: 'POST', data }),
+  }
+}
+
+export const ordersApi = (path: string) => {
+  const ordersHost = ORDERS_HOST + '/api'
+  return {
+    get: (params?: any) => request(`${ordersHost}${path}`, { method: 'GET', params }),
+    post: (data?: any) => request(`${ordersHost}${path}`, { method: 'POST', data }),
   }
 }
 

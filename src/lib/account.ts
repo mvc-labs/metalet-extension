@@ -28,22 +28,22 @@ export const scripts: {
   {
     name: 'Native Segwit',
     addressType: 'P2WPKH',
-    path: "m/84'/0'/0'",
+    path: "m/84'/0'/0'/0/0",
   },
   {
     name: 'Nested Segwit',
     addressType: 'P2SH-P2WPKH',
-    path: "m/49'/0'/0'",
+    path: "m/49'/0'/0'/0/0",
   },
   {
     name: 'Taproot',
     addressType: 'P2TR',
-    path: "m/86'/0'/0'",
+    path: "m/86'/0'/0'/0/0",
   },
   {
     name: 'Legacy',
     addressType: 'P2PKH',
-    path: "m/44'/0'/0'",
+    path: "m/44'/0'/0'/0/0",
   },
 ]
 
@@ -70,7 +70,7 @@ export type Account = {
   testnet: ChainInfo
 }
 
-const loadAccounts = ref(false)
+const isAccountsLoaded = ref(false)
 
 export const currentAccount = ref<Account | null>(null)
 
@@ -101,15 +101,15 @@ export const privateKey = ref('')
 export const account = ref<Account | null>(null)
 
 export async function getAccounts(refresh = false): Promise<Map<string, Account>> {
-  if (!loadAccounts.value || refresh) {
-    // TODO 
+  if (!isAccountsLoaded.value) {
+    // TODO
     // ACCOUNT_STORAGE_HISTORY_KEYS.forEach((key) => {
     //   deleteStorage(key)
     // })
     accounts.value = deserializeAccountMap(
       await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: '{}', isParse: false })
     )
-    loadAccounts.value = true
+    isAccountsLoaded.value = true
   }
 
   return accounts.value
@@ -266,7 +266,7 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
   const root = bip32.fromSeed(seed, network)
   switch (btcType) {
     case 'P2WPKH': {
-      const { publicKey, privateKey } = root.derivePath("m/84'/0'/0'")
+      const { publicKey, privateKey } = root.derivePath("m/84'/0'/0'/0/0")
       const { address = '' } = payments.p2wpkh({
         pubkey: publicKey,
         network: network,
@@ -279,7 +279,7 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
     }
 
     case 'P2SH-P2WPKH': {
-      const { publicKey, privateKey } = root.derivePath("m/49'/0'/0'")
+      const { publicKey, privateKey } = root.derivePath("m/49'/0'/0'/0/0")
       const { address = '' } = payments.p2sh({
         pubkey: publicKey,
         network: network,
@@ -292,7 +292,7 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
     }
 
     case 'P2TR': {
-      const { publicKey, privateKey } = root.derivePath("m/86'/0'/0'")
+      const { publicKey, privateKey } = root.derivePath("m/86'/0'/0'/0/0")
       const { address = '' } = payments.p2tr({
         pubkey: publicKey.subarray(1),
         network: network,
@@ -305,7 +305,7 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
     }
 
     case 'P2PKH': {
-      const { publicKey, privateKey } = root.derivePath("m/44'/0'/0'")
+      const { publicKey, privateKey } = root.derivePath("m/44'/0'/0'/0/0")
       const { address = '' } = payments.p2pkh({
         pubkey: publicKey,
         network: network,
@@ -318,7 +318,7 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
     }
 
     default: {
-      const { publicKey, privateKey } = root.derivePath("m/44'/0'/0'")
+      const { publicKey, privateKey } = root.derivePath("m/44'/0'/0'/0/0")
       const { address = '' } = payments.p2pkh({
         pubkey: publicKey,
         network: network,
@@ -376,7 +376,6 @@ export async function getPublicKey(chain: Chain = 'mvc'): Promise<string> {
 }
 
 export async function getXPublicKey(chain: Chain = 'mvc'): Promise<string> {
-  console.log('hi')
   const account = await getCurrentAccount()
   if (!account) {
     return ''
