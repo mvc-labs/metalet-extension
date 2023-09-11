@@ -9,17 +9,21 @@ import { prettifyBalance } from '@/lib/formatters'
 import Activities from './components/Activities.vue'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 
-const route = useRoute()
+const { symbol } = defineProps({
+  symbol: {
+    type: String,
+    required: true,
+  },
+})
+const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol))
+
 const router = useRouter()
 
-const address = ref<string>("")
+const address = ref<string>('')
 
 onMounted(async () => {
-  address.value = await getAddress()
+  address.value = await getAddress(asset.value?.chain)
 })
-
-const symbol = route.params.symbol as string
-const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol))
 
 const enabled = computed(() => !!address.value && asset.value!.queryable)
 const { isLoading, data: balance } = useBalanceQuery(address, symbol, { enabled })

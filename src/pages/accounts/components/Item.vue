@@ -17,10 +17,12 @@ const props = defineProps<{
   showNetwork?: boolean
 }>()
 
-const mvcAddress = ref('')
-deriveAddress({ chain: 'mvc' }).then((address = "") => (mvcAddress.value = address))
-const btcAddress = ref('')
-deriveAddress({ chain: 'btc' }).then((address = "") => (btcAddress.value = address))
+console.log('network', network.value)
+console.log('currentAccount', currentAccount.value)
+console.log('props.account', props.account.id)
+
+const mvcAddress = ref(props.account.mainnet.mvc.address)
+const btcAddress = ref(props.account.mainnet.btc.address)
 
 const isCopied = ref(false)
 const copyAddress = () => {
@@ -71,9 +73,9 @@ const openEditNameModal = ref(false)
     <!-- edit name modal -->
     <EditName v-model:open="openEditNameModal" :account="props.account" />
 
-    <div class="flex items-center justify-start gap-x-2 py-4" :key="account.id">
+    <div class="flex items-center justify-start gap-x-2 py-4" :key="props.account.id">
       <!-- avatar -->
-      <div :class="['h-12 w-12 rounded-full bg-gradient-to-br', randomColor(account.mainnet.mvc.address)]"></div>
+      <div :class="['h-12 w-12 rounded-full bg-gradient-to-br', randomColor(props.account.mainnet.mvc.address)]"></div>
 
       <!-- info -->
       <div class="group flex flex-col">
@@ -82,11 +84,17 @@ const openEditNameModal = ref(false)
             {{ account.name }}
           </div>
 
-          <PencilSquareIcon class="hidden h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-500 group-hover:inline"
-            @click="openEditNameModal = true" v-if="!showConnectButton" />
+          <PencilSquareIcon
+            class="hidden h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-500 group-hover:inline"
+            @click="openEditNameModal = true"
+            v-if="!showConnectButton"
+          />
 
-          <span class="rounded-sm bg-gray-100 px-2 py-0.5 text-xs text-gray-500"
-            v-if="showNetwork && network === 'testnet'">{{ network }}</span>
+          <span
+            class="rounded-sm bg-gray-100 px-2 py-0.5 text-xs text-gray-500"
+            v-if="showNetwork && network === 'testnet'"
+            >{{ network }}</span
+          >
         </div>
 
         <div class="mt-1 flex items-center gap-x-1">
@@ -118,8 +126,11 @@ const openEditNameModal = ref(false)
     <!-- connect button -->
     <template v-if="showConnectButton">
       <span v-if="isCurrent" class="text-sm text-gray-500">active</span>
-      <button class="rounded-md bg-blue-100 px-2 py-1 text-sm text-blue-700 transition hover:bg-blue-200" @click="connect"
-        v-else>
+      <button
+        class="rounded-md bg-blue-100 px-2 py-1 text-sm text-blue-700 transition hover:bg-blue-200"
+        @click="connect"
+        v-else
+      >
         Connect
       </button>
     </template>
