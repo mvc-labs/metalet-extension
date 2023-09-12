@@ -102,7 +102,7 @@ export const account = ref<Account | null>(null)
 
 export async function getAccounts(refresh = false): Promise<Map<string, Account>> {
   if (!loadAccounts.value || refresh) {
-    // TODO 
+    // TODO
     // ACCOUNT_STORAGE_HISTORY_KEYS.forEach((key) => {
     //   deleteStorage(key)
     // })
@@ -206,6 +206,8 @@ export async function addAccount(newAccount: Omit<Account, 'id' | 'name'>) {
 
 export async function deriveAddress({ chain }: { chain: Chain }) {
   const account = (await getCurrentAccount()) ?? raise('No account')
+  console.log('currentAccount', account)
+
   const network = await getNetwork()
   if (chain === 'btc') {
     bip39.validateMnemonic(account.mnemonic) ?? raise('Invalid mnemonic')

@@ -17,10 +17,6 @@ const props = defineProps<{
   showNetwork?: boolean
 }>()
 
-console.log("network", network.value);
-console.log("currentAccount", currentAccount.value);
-console.log("props.account", props.account.id);
-
 const mvcAddress = ref('')
 deriveAddress({ chain: 'mvc' }).then((address = "") => (mvcAddress.value = address))
 const btcAddress = ref('')
@@ -32,9 +28,6 @@ const copyAddress = () => {
   isCopied.value = true
 }
 
-console.log("test", 11111);
-
-
 // 根据当前网络环境获取地址
 const address = computed(() => {
   if (network.value === 'testnet') {
@@ -42,8 +35,6 @@ const address = computed(() => {
   }
   return props.account.mainnet.mvc.address
 })
-
-console.log("test", 222222);
 
 const randomColor = (key: string) => {
   const colors = [
@@ -61,9 +52,6 @@ const randomColor = (key: string) => {
   return colors[index]
 }
 
-
-console.log("test", 333333);
-
 const connect = async () => {
   await accountManager.connect(props.account.id)
 
@@ -71,14 +59,9 @@ const connect = async () => {
   router.push('/wallet')
 }
 
-
-console.log("test", 44444);
-
 const isCurrent = computed(() => {
   return props.account.id === accountManager.current.value?.id
 })
-
-console.log("test", 555555);
 
 const openEditNameModal = ref(false)
 </script>
