@@ -9,7 +9,7 @@ export const prettifyTxId = (txId: string) => {
 }
 
 export const prettifyBalance = (balance: number): string => {
-  if (!balance) return '--'
+  if (!balance) return '0'
   const total = balance
 
   // 如果小于 1000000，则使用sats为单位
