@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { metasvApi } from './request'
 import { ComputedRef, Ref } from 'vue'
 import type { Token } from './tokens'
+import { getBTActivities } from '@/queries/btc'
 
 export type Activity = {
   address: string
@@ -67,12 +68,22 @@ export const useOneActivityQuery = (
 export const useActivitiesQuery = (address: Ref, params: any, options?: { enabled: ComputedRef<boolean> }) =>
   useQuery({
     queryKey: ['activities', { address: address.value }],
-    queryFn: () => {
-      if (params.asset && params.asset.genesis) {
-        return fetchTokenActivities(address.value, params.asset)
-      }
+    queryFn: async () => {
+      switch (params.asset.symbol) {
+        case 'SPACE': {
+          if (params.asset && params.asset.genesis) {
+            return fetchTokenActivities(address.value, params.asset)
+          }
 
-      return fetchActivities(address.value)
+          return fetchActivities(address.value)
+        }
+        case 'BTC': {
+          const txs = await getBTActivities('bc1pv3efxdwc2nkck5kg8updw62kxqt8mclshk3a2ywlazqa6n225n9qvd2v93')
+          return txs
+        }
+        default:
+          return []
+      }
     },
     ...options,
   })

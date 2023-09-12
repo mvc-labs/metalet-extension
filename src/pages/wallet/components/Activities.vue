@@ -2,7 +2,7 @@
 import { Ref, ref, computed } from 'vue'
 
 import { getAddress } from '@/lib/account'
-import { useActivitiesQuery } from '@/queries/activities'
+import { Activity, useActivitiesQuery } from '@/queries/activities'
 import ActivityItem from './ActivityItem.vue'
 import type { Token } from '@/queries/tokens'
 import { InboxIcon } from '@heroicons/vue/24/solid'
@@ -18,12 +18,18 @@ const props = defineProps<{
 }>()
 
 const { isLoading, isError, data, error } = useActivitiesQuery(address, { asset: props.asset }, { enabled })
+let txs = []
+if (props.asset.chain === "mvc") {
+  txs = data.value as Activity[]
+} else if (props.asset.chain === "btc") {
+  txs = data.value as any[]
+}
 </script>
 
 <template>
   <div class="text-sm">
     <!-- label -->
-    <h4 class="py-2 uppercase text-gray-500">Activities</h4>
+    <h4 class="py-2 uppercase" style="color:#303133">Transaction History</h4>
 
     <!-- list -->
     <div v-if="isLoading" class="py-4 text-center">Loading...</div>
@@ -31,13 +37,12 @@ const { isLoading, isError, data, error } = useActivitiesQuery(address, { asset:
     <div v-else-if="isError" class="py-4 text-center">Error: {{ error }}</div>
 
     <div v-else-if="data" class="space-y-2">
-      <ActivityItem
-        v-if="data.length"
-        v-for="activity in data"
-        :key="activity.txid"
-        :activity="activity"
-        :asset="asset"
-      />
+      <ActivityItem v-if="data.length && props.asset.chain === 'mvc'" v-for="activity in data" :key="activity.txid"
+        :activity="activity" :asset="asset" />
+      <div v-else-if="data.length && props.asset.chain === 'btc'" v-for="activity in data" :key="activity.txid"
+        :activity="activity" :asset="asset">
+
+      </div>
 
       <div v-else class="flex flex-col items-center justify-center gap-y-2 pb-4 pt-8 text-center">
         <InboxIcon class="h-8 w-8 text-gray-300" />
