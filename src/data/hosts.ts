@@ -8,3 +8,5 @@ export const TX_BROWSER_TESTNET_HOST = 'https://test.mvcscan.com'
 
 export const MVC_API_HOST = 'https://api.microvisionchain.com'
 export const METAFILE_API_HOST = 'https://filecdn.showpay.top'
+
+export const API2_ORDERS_EXCHANGE='https://api2.orders.exchange/api'
