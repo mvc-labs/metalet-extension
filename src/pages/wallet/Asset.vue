@@ -27,6 +27,7 @@ onMounted(async () => {
 
 const enabled = computed(() => !!address.value && asset.value!.queryable)
 const { isLoading, data: balance } = useBalanceQuery(address, symbol, { enabled })
+console.log({ balance })
 
 const rateEnabled = computed(() => !!address.value && asset.value?.symbol === 'SPACE')
 const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled: rateEnabled })
