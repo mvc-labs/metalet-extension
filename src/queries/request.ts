@@ -43,17 +43,11 @@ async function request(url: string, options: requestOption) {
     delete options.data
   }
 
-  return new Promise((resolve, reject) => {
-    fetch(url, options)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(response.statusText)
-        }
-        return response.json()
-      })
-      .then((data) => resolve(data))
-      .catch((error) => reject(error))
-  })
+  const response = await fetch(url, options)
+  if (!response.ok) {
+    throw new Error(response.statusText)
+  }
+  return response.json()
 }
 
 export const metasvApi = (path: string) => {

@@ -8,6 +8,9 @@ import bitcoin, { networks, payments } from 'bitcoinjs-lib'
 import bip39 from 'bip39'
 import BIP32Factory from 'bip32'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
+import ECPairFactory, { ECPairInterface } from 'ecpair'
+
+const ECPair = ECPairFactory(ecc)
 
 bitcoin.initEccLib(ecc)
 const bip32 = BIP32Factory(ecc)
@@ -211,44 +214,9 @@ export async function deriveAddress({ chain }: { chain: Chain }) {
   const network = await getNetwork()
   if (chain === 'btc') {
     bip39.validateMnemonic(account.mnemonic) ?? raise('Invalid mnemonic')
-    const seed = bip39.mnemonicToSeedSync(account.mnemonic)
     const btcNetwork = network === 'mainnet' ? networks.bitcoin : networks.testnet
-    const root = bip32.fromSeed(seed, btcNetwork)
-    const child = root.derivePath(account.btcPath)
-    switch (account.btcType) {
-      case 'P2WPKH':
-        return payments.p2wpkh({
-          pubkey: child.publicKey,
-          network: btcNetwork,
-        }).address
-
-      case 'P2SH-P2WPKH':
-        const redeemScript = payments.p2wpkh({ pubkey: child.publicKey }).output
-        return payments.p2sh({
-          redeem: {
-            output: redeemScript,
-            network: btcNetwork,
-          },
-        }).address
-
-      case 'P2TR':
-        return payments.p2tr({
-          pubkey: child.publicKey.subarray(1),
-          network: btcNetwork,
-        }).address
-
-      case 'P2PKH':
-        return payments.p2pkh({
-          pubkey: child.publicKey,
-          network: btcNetwork,
-        }).address
-
-      default:
-        return payments.p2pkh({
-          pubkey: child.publicKey,
-          network: btcNetwork,
-        }).address
-    }
+    const { address } = getBTCInfo(account.mnemonic, btcNetwork, account.btcType)
+    return address
   } else {
     try {
       const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
@@ -268,7 +236,7 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
   const root = bip32.fromSeed(seed, network)
   switch (btcType) {
     case 'P2WPKH': {
-      const { publicKey, privateKey } = root.derivePath("m/84'/0'/0'")
+      const { publicKey, privateKey } = root.derivePath("m/84'/0'/0'/0/0")
       const { address = '' } = payments.p2wpkh({
         pubkey: publicKey,
         network: network,
@@ -281,22 +249,19 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
     }
 
     case 'P2SH-P2WPKH': {
-      const { publicKey, privateKey } = root.derivePath("m/49'/0'/0'")
-      const { address = '' } = payments.p2sh({
-        pubkey: publicKey,
-        network: network,
-      })
+      const { publicKey: pubkey, privateKey } = root.derivePath("m/49'/0'/0'/0/0")
+      const { address = '' } = payments.p2sh({ redeem: payments.p2wpkh({ pubkey, network }), network })
       return {
         address,
-        publicKey: publicKey.toString('hex'),
+        publicKey: pubkey.toString('hex'),
         privateKey: privateKey?.toString('hex') || '',
       }
     }
 
     case 'P2TR': {
-      const { publicKey, privateKey } = root.derivePath("m/86'/0'/0'")
+      const { publicKey, privateKey } = root.derivePath("m/86'/0'/0'/0/0")
       const { address = '' } = payments.p2tr({
-        pubkey: publicKey.subarray(1),
+        internalPubkey: publicKey.subarray(1),
         network: network,
       })
       return {
@@ -307,27 +272,21 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
     }
 
     case 'P2PKH': {
-      const { publicKey, privateKey } = root.derivePath("m/44'/0'/0'")
-      const { address = '' } = payments.p2pkh({
-        pubkey: publicKey,
-        network: network,
-      })
+      const { publicKey: pubkey, privateKey } = root.derivePath("m/44'/0'/0'/0/0")
+      const { address = '' } = payments.p2pkh({ pubkey, network })
       return {
         address,
-        publicKey: publicKey.toString('hex'),
+        publicKey: pubkey.toString('hex'),
         privateKey: privateKey?.toString('hex') || '',
       }
     }
 
     default: {
-      const { publicKey, privateKey } = root.derivePath("m/44'/0'/0'")
-      const { address = '' } = payments.p2pkh({
-        pubkey: publicKey,
-        network: network,
-      })
+      const { publicKey: pubkey, privateKey } = root.derivePath("m/44'/0'/0'/0/0")
+      const { address = '' } = payments.p2pkh({ pubkey, network })
       return {
         address,
-        publicKey: publicKey.toString('hex'),
+        publicKey: pubkey.toString('hex'),
         privateKey: privateKey?.toString('hex') || '',
       }
     }
