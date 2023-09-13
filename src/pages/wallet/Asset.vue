@@ -8,6 +8,7 @@ import { getAddress } from '@/lib/account'
 import { prettifyBalance } from '@/lib/formatters'
 import Activities from './components/Activities.vue'
 import { getExchangeRate } from '@/queries/exchange-rates'
+import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
 
 const route = useRoute()
 const router = useRouter()
@@ -20,8 +21,6 @@ console.log("tags", tags)
 
 const balance = ref(0)
 const exchangeRate = ref('0')
-const isExchangeRateLoading = ref(false)
-
 
 getAddress(asset.chain).then(async (address) => {
   balance.value = await getBalance(address, asset.chain)
@@ -71,11 +70,15 @@ const toReceive = () => {
 
         <!-- buttons -->
         <div class="mt-8 grid grid-cols-2 gap-x-3 self-stretch">
-          <button class="secondary-btn col-span-1 py-3" @click="toSend">Send</button>
-          <button class="secondary-btn col-span-1 py-3" @click="toReceive">Receive</button>
+          <button class="secondary-btn col-span-1 py-3 flex items-center gap-x-1 justify-center" @click="toSend">
+            <ArrowUpRightIcon class="mr-1 h-4 w-4" />Send
+          </button>
+          <button class="secondary-btn col-span-1 py-3 flex items-center gap-x-1 justify-center" @click="toReceive">
+            <QrCodeIcon class="mr-1 h-4 w-4" />Receive
+          </button>
         </div>
 
-        <Activities class="mt-8 self-stretch" :asset="asset" />
+        <Activities class="mt-8 self-stretch" :asset="asset" :exchangeRate="Number(exchangeRate)" />
       </template>
 
       <div class="text-gray-500" v-else>No Service for {{ asset?.symbol }} yet.</div>

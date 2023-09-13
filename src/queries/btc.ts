@@ -30,10 +30,18 @@ export const getBTCBalance = (address: string) => {
   return get('/balance', { address })
 }
 
-export const getBTActivities = async (address: string) => {
+export interface Tx {
+  txid: string
+  type: 'input' | 'output'
+  value: number
+  timeStamp: number
+  time: string
+}
+
+export const getBTActivities = async (address: string): Promise<Tx[]> => {
   const transactions = await get('/activities', { address })
 
-  const txs = []
+  const txs: Tx[] = []
 
   for (let tx of transactions) {
     for (let input of tx.vin) {
@@ -41,7 +49,7 @@ export const getBTActivities = async (address: string) => {
         txs.push({
           txid: tx.txid,
           type: 'output',
-          value: '-' + input.prevout.value,
+          value: input.prevout.value,
           timeStamp: tx.status.block_time,
           time: dayjs(tx.status.block_time * 1000).format('YYYY/MM/DD HH:mm'),
         })
@@ -53,7 +61,7 @@ export const getBTActivities = async (address: string) => {
         txs.push({
           txid: tx.txid,
           type: 'input',
-          value: '+' + output.value,
+          value: output.value,
           timeStamp: tx.status.block_time,
           time: dayjs(tx.status.block_time * 1000).format('YYYY/MM/DD HH:mm'),
         })
