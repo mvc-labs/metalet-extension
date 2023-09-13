@@ -55,8 +55,12 @@ function getUSD(balance: number) {
     <div v-else-if="isError" class="py-4 text-center">Error: {{ error }}</div>
 
     <div v-else-if="data" class="space-y-2">
+
+      <!-- mvc -->
       <ActivityItem v-if="data.length && props.asset.chain === 'mvc'" v-for="activity in data" :key="activity.txid"
         :activity="activity" :asset="asset" />
+
+      <!-- btc -->
       <div v-else-if="txs.length && props.asset.chain === 'btc'" v-for="tx in txs" :key="tx.txid"
         class="rounded-md py-3.5 px-4" style="background-color: #f5f5f5;">
         <div class="text-lg" style="color:#303133">{{ tx.type === "input" ? "+" : "-" }}{{ getUSD(tx.value) }} USD</div>
