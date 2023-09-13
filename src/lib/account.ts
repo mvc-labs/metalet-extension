@@ -47,27 +47,43 @@ export const scripts: {
   },
 ]
 
-interface ChainInfoDetail {
-  address: string
-  publicKey: string
-  privateKey: string
+// type ChainInfoDetail = {
+//   address: string
+//   publicKey: string
+//   privateKey: string
+// }
+
+// type ChainInfo = {
+//   [chain in Chain]: ChainInfoDetail
+// }
+
+type DerivationDetail = {
+  fullPath: string
+  addressType: AddressType
+  mainnetAddress: string
+  testnetAddress: string
 }
 
-type ChainInfo = {
-  [chain in Chain]: ChainInfoDetail
-}
+// export type Account = {
+//   id: string
+//   name?: string
+//   mvcIndex: string
+//   mvcPath: string
+//   btcPath: string
+//   mnemonic: string
+//   btcType?: AddressType
+//   assetsDisplay?: string[]
+//   mainnet: ChainInfo
+//   testnet: ChainInfo
+// }
 
 export type Account = {
   id: string
-  name?: string
-  mvcIndex: string
-  mvcPath: string
-  btcPath: string
+  name: string
   mnemonic: string
-  btcType?: AddressType
-  assetsDisplay?: string[]
-  mainnet: ChainInfo
-  testnet: ChainInfo
+  assetsDisplay: string[]
+  mvc: DerivationDetail
+  btc: DerivationDetail
 }
 
 const isAccountsLoaded = ref(false)
@@ -96,7 +112,6 @@ function deserializeAccountMap(json: string): Map<string, Account> {
 }
 
 export const address = ref('')
-export const btcAddress = ref('bc1pv3efxdwc2nkck5kg8updw62kxqt8mclshk3a2ywlazqa6n225n9qvd2v93')
 export const privateKey = ref('')
 export const account = ref<Account | null>(null)
 
@@ -188,84 +203,84 @@ export async function addAccount(newAccount: Omit<Account, 'id' | 'name'>) {
   const accounts = await getAccounts()
 
   const { mnemonic } = newAccount
-  let connectId = ''
+  let id: string
   let account = [...accounts.values()].find((account) => account.mnemonic === mnemonic)
 
   if (!account) {
-    connectId = generateRandomString(32)
+    id = generateRandomString(32)
     await setAccount({
       ...newAccount,
-      id: connectId,
+      id,
       name: `Account ${accounts.size + 1}`,
     })
   } else {
-    connectId = account.id
+    id = account.id
   }
-  await connectAccount(connectId)
+  await connectAccount(id)
 }
 
-export async function deriveAddress({ chain }: { chain: Chain }) {
-  const account = (await getCurrentAccount()) ?? raise('No account')
-  console.log('currentAccount', account)
+// export async function deriveAddress({ chain }: { chain: Chain }) {
+//   const account = (await getCurrentAccount()) ?? raise('No account')
+//   console.log('currentAccount', account)
 
-  const network = await getNetwork()
-  if (chain === 'btc') {
-    bip39.validateMnemonic(account.mnemonic) ?? raise('Invalid mnemonic')
-    const seed = bip39.mnemonicToSeedSync(account.mnemonic)
-    const btcNetwork = network === 'mainnet' ? networks.bitcoin : networks.testnet
-    const root = bip32.fromSeed(seed, btcNetwork)
-    const child = root.derivePath(account.btcPath)
-    switch (account.btcType) {
-      case 'P2WPKH':
-        return payments.p2wpkh({
-          pubkey: child.publicKey,
-          network: btcNetwork,
-        }).address
+//   const network = await getNetwork()
+//   if (chain === 'btc') {
+//     bip39.validateMnemonic(account.mnemonic) ?? raise('Invalid mnemonic')
+//     const seed = bip39.mnemonicToSeedSync(account.mnemonic)
+//     const btcNetwork = network === 'mainnet' ? networks.bitcoin : networks.testnet
+//     const root = bip32.fromSeed(seed, btcNetwork)
+//     const child = root.derivePath(account.btcPath)
+//     switch (account.btcType) {
+//       case 'P2WPKH':
+//         return payments.p2wpkh({
+//           pubkey: child.publicKey,
+//           network: btcNetwork,
+//         }).address
 
-      case 'P2SH-P2WPKH':
-        const redeemScript = payments.p2wpkh({ pubkey: child.publicKey }).output
-        return payments.p2sh({
-          redeem: {
-            output: redeemScript,
-            network: btcNetwork,
-          },
-        }).address
+//       case 'P2SH-P2WPKH':
+//         const redeemScript = payments.p2wpkh({ pubkey: child.publicKey }).output
+//         return payments.p2sh({
+//           redeem: {
+//             output: redeemScript,
+//             network: btcNetwork,
+//           },
+//         }).address
 
-      case 'P2TR':
-        return payments.p2tr({
-          pubkey: child.publicKey.subarray(1),
-          network: btcNetwork,
-        }).address
+//       case 'P2TR':
+//         return payments.p2tr({
+//           pubkey: child.publicKey.subarray(1),
+//           network: btcNetwork,
+//         }).address
 
-      case 'P2PKH':
-        return payments.p2pkh({
-          pubkey: child.publicKey,
-          network: btcNetwork,
-        }).address
+//       case 'P2PKH':
+//         return payments.p2pkh({
+//           pubkey: child.publicKey,
+//           network: btcNetwork,
+//         }).address
 
-      default:
-        return payments.p2pkh({
-          pubkey: child.publicKey,
-          network: btcNetwork,
-        }).address
-    }
-  } else {
-    try {
-      const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
-      const hdpk = mneObj.toHDPrivateKey('', network)
-      const pathDepth = account?.mvcIndex || 10001
-      const privateKey = hdpk.deriveChild(`m/44'/${pathDepth}'/0'/0/0`).privateKey
-      return privateKey.toAddress(network).toString()
-    } catch (e: any) {
-      throw new Error(e.message)
-    }
-  }
-}
+//       default:
+//         return payments.p2pkh({
+//           pubkey: child.publicKey,
+//           network: btcNetwork,
+//         }).address
+//     }
+//   } else {
+//     try {
+//       const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+//       const hdpk = mneObj.toHDPrivateKey('', network)
+//       const pathDepth = account?.mvcIndex || 10001
+//       const privateKey = hdpk.deriveChild(`m/44'/${pathDepth}'/0'/0/0`).privateKey
+//       return privateKey.toAddress(network).toString()
+//     } catch (e: any) {
+//       throw new Error(e.message)
+//     }
+//   }
+// }
 
 function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: string): ChainInfoDetail {
   bip39.validateMnemonic(mnemonic) ?? raise('Invalid mnemonic')
   const seed = bip39.mnemonicToSeedSync(mnemonic)
-  const root = bip32.fromSeed(seed, network)
+  const root = bip32.fromSeed(seed)
   switch (btcType) {
     case 'P2WPKH': {
       const { publicKey, privateKey } = root.derivePath("m/84'/0'/0'/0/0")

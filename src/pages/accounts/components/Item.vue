@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { ClipboardDocumentCheckIcon, ClipboardDocumentListIcon, PencilSquareIcon } from '@heroicons/vue/24/solid'
 import { useRouter } from 'vue-router'
 
-import accountManager, { deriveAddress, type Account, updateBTCType, currentAccount, getAddress } from '@/lib/account'
+import accountManager, { type Account, updateBTCType, currentAccount, getAddress } from '@/lib/account'
 import { network } from '@/lib/network'
 import { shortestAddress } from '@/lib/formatters'
 
@@ -19,7 +19,6 @@ const props = defineProps<{
 
 console.log('network', network.value)
 console.log('currentAccount', currentAccount.value)
-console.log('props.account', props.account.id)
 
 const mvcAddress = ref(props.account.mainnet.mvc.address)
 const btcAddress = ref(props.account.mainnet.btc.address)

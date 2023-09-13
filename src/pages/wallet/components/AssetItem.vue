@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
 import { useBalanceQuery, getBalance } from '@/queries/balance'
-import { getAddress, deriveAddress, btcAddress } from '@/lib/account'
+import { getAddress, btcAddress } from '@/lib/account'
 import { isOfficialToken } from '@/lib/assets'
 import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import type { Asset } from '@/data/assets'
@@ -20,13 +20,12 @@ const exchangeRate = ref('0')
 const isLoading = ref(false)
 const isExchangeRateLoading = ref(false)
 
-
 getAddress(asset.chain).then(async (address) => {
   balance.value = await getBalance(address, asset.chain)
-  console.log("balance", asset.symbol, balance.value);
+  console.log('balance', asset.symbol, balance.value)
 
   exchangeRate.value = await getExchangeRate(asset.symbol)
-  console.log("exchangeRate", asset.symbol, exchangeRate.value);
+  console.log('exchangeRate', asset.symbol, exchangeRate.value)
 })
 
 // const enabled = computed(() => !!address.value && asset.queryable)
@@ -64,10 +63,13 @@ const exchange = computed(() => {
         <img class="h-10 w-10 rounded-full" :src="asset.logo" v-if="asset.logo" />
         <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
         <div class="flex flex-col">
-          <div :class="[
-            'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
-            asset.isNative ? 'text-lg' : 'text-sm',
-          ]" :title="asset.tokenName">
+          <div
+            :class="[
+              'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
+              asset.isNative ? 'text-lg' : 'text-sm',
+            ]"
+            :title="asset.tokenName"
+          >
             {{ asset.tokenName }}
             <CheckBadgeIcon class="h-4 w-4 text-blue-500" v-if="asset?.genesis && isOfficialToken(asset.genesis)" />
           </div>
