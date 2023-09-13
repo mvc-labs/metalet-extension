@@ -7,13 +7,10 @@ import { RadioGroup, RadioGroupOption, Disclosure, DisclosureButton, DisclosureP
 import { ChevronRightIcon, TrashIcon } from '@heroicons/vue/24/solid'
 
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
-import {
-  Listbox,
-  ListboxButton,
-  ListboxOptions,
-  ListboxOption,
-} from '@headlessui/vue'
+import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
+import { type AddressType } from '@/lib/account'
+import { derive, deriveAllPaths } from '@/lib/address-deriver'
 
 import { scripts } from '@/lib/account'
 
@@ -75,30 +72,51 @@ const onSubmit = async () => {
 
     const { mainnet: btcMainnet, testnet: btcTestnet } = deriveBTCInfo(mnemonicStr, selectedScript.value.addressType)
 
-    // 保存账号信息：助记词、私钥、地址；以地址为key，value为对象
+    // construct new account object
+    // const account = {
+    //   mnemonic: mnemonicStr,
+    //   mvcIndex: pathDepth.value,
+    //   mvcPath: `m/44'/${pathDepth.value}'/0'/0/0`,
+    //   btcPath,
+    //   btcType: selectedScript.value.addressType,
+    //   mainnet: {
+    //     btc: btcMainnet,
+    //     mvc: {
+    //       address: mainnetAddress,
+    //       privateKey: mainnetPrivateKey.toString(),
+    //       publicKey: ""
+    //     }
+    //   },
+    //   testnet: {
+    //     btc: btcTestnet,
+    //     mvc: {
+    //       address: testnetAddress,
+    //       privateKey: testnetPrivateKey.toString(),
+    //       publicKey: ""
+    //     }
+    //   },
+    //   assetsDisplay: ['SPACE', 'BTC'],
+    // }
+    const allPaths = deriveAllPaths({
+      mnemonic: mnemonicStr,
+      btcPath,
+      mvcPath: fullPath,
+    })
     const account = {
       mnemonic: mnemonicStr,
-      mvcIndex: pathDepth.value,
-      mvcPath: `m/44'/${pathDepth.value}'/0'/0/0`,
-      btcPath,
-      btcType: selectedScript.value.addressType,
-      mainnet: {
-        btc: btcMainnet,
-        mvc: {
-          address: mainnetAddress,
-          privateKey: mainnetPrivateKey.toString(),
-          publicKey: ""
-        }
-      },
-      testnet: {
-        btc: btcTestnet,
-        mvc: {
-          address: testnetAddress,
-          privateKey: testnetPrivateKey.toString(),
-          publicKey: ""
-        }
-      },
       assetsDisplay: ['SPACE', 'BTC'],
+      mvc: {
+        fullPath,
+        addressType: 'P2PKH' as AddressType,
+        mainnetAddress: allPaths.mvcMainnetAddress,
+        testnetAddress: allPaths.mvcTestnetAddress,
+      },
+      btc: {
+        fullPath: btcPath,
+        addressType: selectedScript.value.addressType,
+        mainnetAddress: allPaths.btcMainnetAddress,
+        testnetAddress: allPaths.btcTestnetAddress,
+      },
     }
 
     await addAccount(account)
@@ -138,10 +156,12 @@ const onSubmit = async () => {
         <RadioGroup v-model="selectedWordsLength">
           <div class="flex items-center gap-x-2">
             <RadioGroupOption v-slot="{ checked }" :value="length" v-for="length of wordsLengths" class="rounded">
-              <div :class="[
-                checked ? 'bg-blue-100 text-blue-500' : 'text-gray-500',
-                'w-full cursor-pointer rounded-inherit px-2 py-0.5 text-center text-xs',
-              ]">
+              <div
+                :class="[
+                  checked ? 'bg-blue-100 text-blue-500' : 'text-gray-500',
+                  'w-full cursor-pointer rounded-inherit px-2 py-0.5 text-center text-xs',
+                ]"
+              >
                 {{ `${length} words` }}
               </div>
             </RadioGroupOption>
@@ -151,8 +171,15 @@ const onSubmit = async () => {
 
       <div class="grid grid-cols-3 gap-2">
         <!-- input框 绑定粘贴事件 -->
-        <input v-for="(word, index) in words" :key="index" type="text" class="pit-input gradient-text font-bold"
-          :placeholder="(index + 1).toString()" v-model="words[index]" @paste.prevent="onPasteWords" />
+        <input
+          v-for="(word, index) in words"
+          :key="index"
+          type="text"
+          class="pit-input gradient-text font-bold"
+          :placeholder="(index + 1).toString()"
+          v-model="words[index]"
+          @paste.prevent="onPasteWords"
+        />
       </div>
     </div>
 
@@ -164,9 +191,14 @@ const onSubmit = async () => {
           <!-- <ChevronRightIcon :class="['h-4 w-4 text-gray-400 transition duration-200', open && 'rotate-90 transform']" /> -->
         </DisclosureButton>
 
-        <transition enter-active-class="transition duration-100 ease-out" enter-from-class="transform scale-95 opacity-0"
-          enter-to-class="transform scale-100 opacity-100" leave-active-class="transition duration-75 ease-out"
-          leave-from-class="transform scale-100 opacity-100" leave-to-class="transform scale-95 opacity-0">
+        <transition
+          enter-active-class="transition duration-100 ease-out"
+          enter-from-class="transform scale-95 opacity-0"
+          enter-to-class="transform scale-100 opacity-100"
+          leave-active-class="transition duration-75 ease-out"
+          leave-from-class="transform scale-100 opacity-100"
+          leave-to-class="transform scale-95 opacity-0"
+        >
           <DisclosurePanel class="mt-1 space-y-2 rounded-lg bg-gray-100 p-4 text-sm text-gray-500 shadow-inner">
             <h3 class="text-sm font-bold text-gray-900">What is a derivation path?</h3>
             <p class="">
@@ -189,26 +221,35 @@ const onSubmit = async () => {
     <Listbox v-model="selectedScript">
       <div class="relative mt-1">
         <ListboxButton
-          class="relative w-full cursor-default rounded-lg bg-[#f5f5f5] py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+          class="relative w-full cursor-default rounded-lg bg-[#f5f5f5] py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm"
+        >
           <span class="block truncate">{{ selectedScript.path }}</span>
           <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
             <ChevronUpDownIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
           </span>
         </ListboxButton>
 
-        <transition leave-active-class="transition duration-100 ease-in" leave-from-class="opacity-100"
-          leave-to-class="opacity-0">
+        <transition
+          leave-active-class="transition duration-100 ease-in"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0"
+        >
           <ListboxOptions
-            class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-[#f5f5f5] py-2 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-            <ListboxOption v-slot="{ selected }" v-for="script in scripts" :key="script.name" :value="script"
-              as="template">
-              <li :class="['text-gray-900', 'relative cursor-pointer select-none pl-3 pr-4 py-1']">
-                <span :class="[
-                  selected ? 'font-medium' : 'font-normal',
-                  'block truncate',
-                ]">{{ script.path }}</span>
-                <span v-if="selected"
-                  class="absolute inset-y-2 right-2 flex items-center justify-center text-white bg-[#1E2BFF] h-5 w-5 rounded-md">
+            class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-[#f5f5f5] py-2 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+          >
+            <ListboxOption
+              v-slot="{ selected }"
+              v-for="script in scripts"
+              :key="script.name"
+              :value="script"
+              as="template"
+            >
+              <li :class="['text-gray-900', 'relative cursor-pointer select-none py-1 pl-3 pr-4']">
+                <span :class="[selected ? 'font-medium' : 'font-normal', 'block truncate']">{{ script.path }}</span>
+                <span
+                  v-if="selected"
+                  class="absolute inset-y-2 right-2 flex h-5 w-5 items-center justify-center rounded-md bg-[#1E2BFF] text-white"
+                >
                   <CheckIcon class="h-4 w-4" aria-hidden="true" />
                 </span>
               </li>
@@ -219,9 +260,13 @@ const onSubmit = async () => {
     </Listbox>
 
     <!-- ok -->
-    <div class="flex items-center justify-center mt-32">
-      <button class="main-btn-bg mt-8 grow rounded-md py-3 text-sm font-bold text-sky-50" :class="[!finished && 'muted']"
-        :disabled="!finished" @click="onSubmit">
+    <div class="mt-32 flex items-center justify-center">
+      <button
+        class="main-btn-bg mt-8 grow rounded-md py-3 text-sm font-bold text-sky-50"
+        :class="[!finished && 'muted']"
+        :disabled="!finished"
+        @click="onSubmit"
+      >
         OK
       </button>
     </div>
