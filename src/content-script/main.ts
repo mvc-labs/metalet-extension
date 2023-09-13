@@ -6,6 +6,7 @@ import {
   getPublicKey,
   getXPublicKey,
   getBalance,
+  getUtxos,
   getTokenBalance,
   transfer,
   merge,
@@ -32,7 +33,7 @@ type Metalet = {
   signTransaction: any
   signMessage: any
   // verifySignature: any
-  //   getUtxos: any
+  getUtxos: any
   //   getActivities: any
   transfer: any
   // transferAll: any
@@ -72,6 +73,7 @@ const metalet: Metalet = {
   getPublicKey,
   getXPublicKey,
   getBalance,
+  getUtxos,
   transfer,
   merge,
   signTransaction,

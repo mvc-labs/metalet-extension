@@ -85,8 +85,12 @@ export async function getXPublicKey() {
   return await createAction('GetXPublicKey', 'query')
 }
 
-export async function getBalance() {
-  return await createAction('GetBalance', 'query')
+export async function getBalance(params?: { path: string }) {
+  return await createAction('GetBalance', 'query', params)
+}
+
+export async function getUtxos(params?: { path: string }) {
+  return await createAction('GetUtxos', 'query', params)
 }
 
 export async function eciesEncrypt(params: { message: string }) {

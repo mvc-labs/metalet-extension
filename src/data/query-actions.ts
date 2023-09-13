@@ -1,5 +1,6 @@
 import * as IsConnected from '../lib/actions/is-connected'
 import * as GetAddress from '../lib/actions/get-address'
+import * as GetUtxos from '../lib/actions/get-utxos'
 import * as GetPublicKey from '../lib/actions/get-public-key'
 import * as GetXPublicKey from '../lib/actions/get-extended-public-key'
 import * as GetBalance from '../lib/actions/get-balance'
@@ -16,6 +17,7 @@ export default {
   GetAddress,
   GetPublicKey,
   GetBalance,
+  GetUtxos,
   GetTokenBalance,
   GetXPublicKey,
 } as { [key: string]: QueryAction }
