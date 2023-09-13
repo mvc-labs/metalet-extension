@@ -9,6 +9,8 @@ import bip39 from 'bip39'
 import BIP32Factory from 'bip32'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import ECPairFactory, { ECPairInterface } from 'ecpair'
+import bitcore from 'bitcore-lib'
+import { decode } from 'bs58check'
 
 const ECPair = ECPairFactory(ecc)
 
@@ -237,6 +239,14 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
   switch (btcType) {
     case 'P2WPKH': {
       const { publicKey, privateKey } = root.derivePath("m/84'/0'/0'/0/0")
+      const keyPair = ECPair.fromPrivateKey(privateKey!)
+      console.log('data', keyPair)
+      // const message = new bitcore.Message(text)
+      const message = new bitcore.Message('metalet.space')
+      const signature = message.sign(new bitcore.PrivateKey(keyPair.privateKey))
+      // const signature = message.sign(new bitcore.PrivateKey(keyPair.privateKey))
+      console.log('signature', signature)
+
       const { address = '' } = payments.p2wpkh({
         pubkey: publicKey,
         network: network,
@@ -251,6 +261,13 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
     case 'P2SH-P2WPKH': {
       const { publicKey: pubkey, privateKey } = root.derivePath("m/49'/0'/0'/0/0")
       const { address = '' } = payments.p2sh({ redeem: payments.p2wpkh({ pubkey, network }), network })
+      const keyPair = ECPair.fromPrivateKey(privateKey!)
+      console.log('data', keyPair)
+      // const message = new bitcore.Message(text)
+      const message = new bitcore.Message('metalet.space')
+      const signature = message.sign(new bitcore.PrivateKey(keyPair.privateKey))
+      // const signature = message.sign(new bitcore.PrivateKey(keyPair.privateKey))
+      console.log('signature', signature)
       return {
         address,
         publicKey: pubkey.toString('hex'),
@@ -260,6 +277,13 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
 
     case 'P2TR': {
       const { publicKey, privateKey } = root.derivePath("m/86'/0'/0'/0/0")
+      const keyPair = ECPair.fromPrivateKey(privateKey!)
+      console.log('data', keyPair)
+      // const message = new bitcore.Message(text)
+      const message = new bitcore.Message('metalet.space')
+      const signature = message.sign(new bitcore.PrivateKey(keyPair.privateKey))
+      // const signature = message.sign(new bitcore.PrivateKey(keyPair.privateKey))
+      console.log('signature', signature)
       const { address = '' } = payments.p2tr({
         internalPubkey: publicKey.subarray(1),
         network: network,
@@ -273,6 +297,13 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
 
     case 'P2PKH': {
       const { publicKey: pubkey, privateKey } = root.derivePath("m/44'/0'/0'/0/0")
+      const keyPair = ECPair.fromPrivateKey(privateKey!)
+      console.log('data', keyPair)
+      // const message = new bitcore.Message(text)
+      const message = new bitcore.Message('metalet.space')
+      const signature = message.sign(new bitcore.PrivateKey(keyPair.privateKey))
+      // const signature = message.sign(new bitcore.PrivateKey(keyPair.privateKey))
+      console.log('signature', signature)
       const { address = '' } = payments.p2pkh({ pubkey, network })
       return {
         address,
@@ -283,6 +314,13 @@ function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: strin
 
     default: {
       const { publicKey: pubkey, privateKey } = root.derivePath("m/44'/0'/0'/0/0")
+      const keyPair = ECPair.fromPrivateKey(privateKey!)
+      console.log('data', keyPair)
+      // const message = new bitcore.Message(text)
+      const message = new bitcore.Message('metalet.space')
+      const signature = message.sign(new bitcore.PrivateKey(keyPair.privateKey))
+      // const signature = message.sign(new bitcore.PrivateKey(keyPair.privateKey))
+      console.log('signature', signature)
       const { address = '' } = payments.p2pkh({ pubkey, network })
       return {
         address,
