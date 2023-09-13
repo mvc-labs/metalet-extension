@@ -16,13 +16,12 @@ const enabled = computed(() => !!address.value)
 
 const props = defineProps<{
   asset?: Token | any
-  exchangeRate: number
+  exchangeRate?: number
 }>()
 
 const txs = ref<Tx[]>([])
 
 const { isLoading, isError, data, error } = useActivitiesQuery(address, { asset: props.asset }, { enabled })
-console.log("asset", props.asset, props.asset.chain === 'btc');
 
 if (props.asset.chain === 'btc') {
   getBTActivities(props.asset.address).then(transactions => {
