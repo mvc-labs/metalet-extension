@@ -21,13 +21,30 @@ export function eciesDecrypt(encrypted: string, privateKey: mvc.PrivateKey): str
   return message
 }
 
-export const signMessage = (wif: string, message: string) => {
+export const signMessage = (wif: string, message: string, encoding?: 'utf-8' | 'base64' | 'hex' | 'utf8') => {
   let privateKey = mvc.PrivateKey.fromWIF(wif)
-  const messageBuf = Buffer.from(message, 'utf-8')
+  const messageHash = mvc.crypto.Hash.sha256(Buffer.from(message))
 
-  let sig = mvc.crypto.ECDSA.sign(messageBuf, privateKey, 'little')
+  let sigBuf = mvc.crypto.ECDSA.sign(messageHash, privateKey).toBuffer()
 
-  return 'hello'
+  let signature: string
+  switch (encoding) {
+    case 'utf-8':
+    case 'utf8':
+      signature = sigBuf.toString('utf-8')
+      break
+    case 'base64':
+      signature = sigBuf.toString('base64')
+      break
+    case 'hex':
+    default:
+      signature = sigBuf.toString('hex')
+      break
+  }
+
+  return {
+    signature,
+  }
 }
 
 export const signTransaction = (
