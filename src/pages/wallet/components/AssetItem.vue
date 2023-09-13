@@ -1,40 +1,51 @@
 <script lang="ts" setup>
-import { ref, computed, Ref } from 'vue'
+import { ref, computed } from 'vue'
 import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
-import { useBalanceQuery } from '@/queries/balance'
-import { getAddress, deriveAddress } from '@/lib/account'
+import { useBalanceQuery, getBalance } from '@/queries/balance'
+import { getAddress, deriveAddress, btcAddress } from '@/lib/account'
 import { isOfficialToken } from '@/lib/assets'
 import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import type { Asset } from '@/data/assets'
-import { useExchangeRatesQuery } from '@/queries/exchange-rates'
+import { useExchangeRatesQuery, getExchangeRate } from '@/queries/exchange-rates'
 import { getTagInfo } from '@/data/assets'
+import { getBTCBalance, getBTActivities } from '@/queries/btc'
 
 const { asset } = defineProps<{
   asset: Asset
 }>()
 
-const address = ref<string>('')
+const balance = ref(0)
+const exchangeRate = ref('0')
+const isLoading = ref(false)
+const isExchangeRateLoading = ref(false)
 
 
-getAddress().then((addr) => {
-  address.value = addr!
+getAddress(asset.chain).then(async (address) => {
+  balance.value = await getBalance(address, asset.chain)
+  console.log("balance", asset.symbol, balance.value);
+
+  exchangeRate.value = await getExchangeRate(asset.symbol)
+  console.log("exchangeRate", asset.symbol, exchangeRate.value);
 })
 
-const enabled = computed(() => !!address.value && asset.queryable)
-const rateEnabled = computed(() => !!address.value && asset.symbol === 'SPACE')
+// const enabled = computed(() => !!address.value && asset.queryable)
+// const rateEnabled = computed(() => !!address.value && asset.symbol === 'SPACE')
 
-
-
-const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled: rateEnabled })
-console.log("asset", asset)
-console.log("rateEnabled", rateEnabled)
-console.log("exchangeRate", exchangeRate.value)
+// const data = useBalanceQuery(address, asset.symbol, { enabled })
+// const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
+// const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled: rateEnabled })
+// console.log("asset", asset)
+// console.log("useBalanceQuery", data)
+// console.log("balance", balance)
+// console.log("balance.value", balance.value)
+// console.log("balance.value.value", balance.value.value)
+// console.log("rateEnabled", rateEnabled)
+// console.log("exchangeRate", exchangeRate.value)
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
-    const usdRate: number = Number(exchangeRate.value.USD)
+    const usdRate: number = Number(exchangeRate.value)
     const balanceInStandardUnit = balance.value / 10 ** asset.decimal
     const exchanged = balanceInStandardUnit * usdRate
 
@@ -85,6 +96,8 @@ const exchange = computed(() => {
         </template>
 
         <div v-else>--</div>
+
+        <div class="text-[#909399]">${{ exchangeRate }} USD</div>
       </div>
     </div>
   </div>

@@ -206,6 +206,8 @@ export async function addAccount(newAccount: Omit<Account, 'id' | 'name'>) {
 
 export async function deriveAddress({ chain }: { chain: Chain }) {
   const account = (await getCurrentAccount()) ?? raise('No account')
+  console.log('currentAccount', account)
+
   const network = await getNetwork()
   if (chain === 'btc') {
     bip39.validateMnemonic(account.mnemonic) ?? raise('Invalid mnemonic')

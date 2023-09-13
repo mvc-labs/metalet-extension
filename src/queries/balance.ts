@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/vue-query'
 import { metaletApi, metasvApi, ordersApi } from './request'
 import { ComputedRef, Ref } from 'vue'
+import { getBTCBalance } from '@/queries/btc'
 
 export type Balance = {
   address: string
@@ -33,9 +34,24 @@ export const doNothing = async (): Promise<Balance> => {
   }
 }
 
+export const getBalance = async (address: string, symbol: string): Promise<number> => {
+  switch (symbol) {
+    case 'SPACE': {
+      const { confirmed, unconfirmed } = await fetchSpaceBalance(address)
+      return confirmed + unconfirmed
+    }
+    case 'BTC': {
+      const { confirmed, unconfirmed } = await getBTCBalance(address)
+      return confirmed + unconfirmed
+    }
+    default:
+      return 0
+  }
+}
+
 export const useBalanceQuery = (address: Ref, symbol: string, options: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
-    queryKey: ['balance', { address: address.value, symbol }],
+    queryKey: ['balance', { address, symbol }],
     queryFn: () => {
       switch (symbol) {
         case 'SPACE':

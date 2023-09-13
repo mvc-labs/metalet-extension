@@ -64,15 +64,14 @@ function toToken(token: UserOwnedToken) {
       </button>
     </div>
 
-    <div class=”space-y-5“>
+    <div class="space-y-2">
       <div class="ext-lg text-[#141416]">BTC</div>
       <AssetItem v-for="asset in btcAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)" />
     </div>
 
-    <div>
+    <div class="space-y-2">
       <div class="text-lg text-[#141416]">MVC</div>
-      <AssetItem v-for="asset in displayingAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)"
-        class="mt-1.5" />
+      <AssetItem v-for="asset in displayingAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)" />
     </div>
 
     <AssetItem v-for="token in userOwnedTokens" :key="token.genesis" :asset="token" @click="toToken(token)" />
