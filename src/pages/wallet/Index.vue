@@ -4,16 +4,6 @@ import AccountItem from '../accounts/components/Item.vue'
 import AssetList from './components/AssetList.vue'
 import { currentAccount, deriveAddress } from '@/lib/account'
 import { getBTCBalance } from '@/queries/btc'
-
-const uuu = () => {
-  getBTCBalance("bc1pv3efxdwc2nkck5kg8updw62kxqt8mclshk3a2ywlazqa6n225n9qvd2v93").then(data => {
-    console.log("getBTCBalance", data);
-  })
-
-  deriveAddress({ chain: "btc" }).then(data => {
-    console.log("deriveAddress", data)
-  })
-}
 </script>
 
 <template>
@@ -26,7 +16,5 @@ const uuu = () => {
 
     <!-- 资产列表 -->
     <AssetList />
-
-    <button @click="uuu">getBTCBalance</button>
   </div>
 </template>

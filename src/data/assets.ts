@@ -29,13 +29,13 @@ const tags: Tag[] = [
   },
   {
     name: 'BRC-20',
-    bg: '#F7931A',
+    bg: 'rgb(247, 147, 26, 0.2)',
     color: '#FF981C',
   },
   {
     name: 'MVC',
-    bg: '#fff',
-    color: '#767EFF',
+    bg: '#767EFF',
+    color: '#fff',
   },
   {
     name: 'MetaContract',
