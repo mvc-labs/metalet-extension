@@ -5,6 +5,7 @@ import * as GetPublicKey from '../lib/actions/get-public-key'
 import * as GetXPublicKey from '../lib/actions/get-extended-public-key'
 import * as GetBalance from '../lib/actions/get-balance'
 import * as GetNetwork from '../lib/actions/get-network'
+import * as VerifySignature from '../lib/actions/verify-signature'
 import * as GetTokenBalance from '../lib/actions/token/get-balance'
 
 type QueryAction = {
@@ -19,5 +20,6 @@ export default {
   GetBalance,
   GetUtxos,
   GetTokenBalance,
+  VerifySignature,
   GetXPublicKey,
 } as { [key: string]: QueryAction }

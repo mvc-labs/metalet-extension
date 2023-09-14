@@ -21,8 +21,11 @@ export function eciesDecrypt(encrypted: string, privateKey: mvc.PrivateKey): str
   return message
 }
 
-export const signMessage = (wif: string, message: string, encoding?: 'utf-8' | 'base64' | 'hex' | 'utf8') => {
-  let privateKey = mvc.PrivateKey.fromWIF(wif)
+export const signMessage = (
+  message: string,
+  privateKey: mvc.PrivateKey,
+  encoding?: 'utf-8' | 'base64' | 'hex' | 'utf8'
+) => {
   const messageHash = mvc.crypto.Hash.sha256(Buffer.from(message))
 
   let sigBuf = mvc.crypto.ECDSA.sign(messageHash, privateKey).toBuffer()
@@ -45,6 +48,22 @@ export const signMessage = (wif: string, message: string, encoding?: 'utf-8' | '
   return {
     signature,
   }
+}
+
+export const verifySignature = (
+  message: string,
+  signature: string,
+  publicKey: mvc.PublicKey,
+  encoding?: 'utf-8' | 'base64' | 'hex' | 'utf8'
+) => {
+  const messageHash = mvc.crypto.Hash.sha256(Buffer.from(message))
+
+  const sigDER = Buffer.from(signature, encoding || 'hex')
+  const sigObj = mvc.crypto.Signature.fromDER(sigDER)
+
+  let verified = mvc.crypto.ECDSA.verify(messageHash, sigObj, publicKey)
+
+  return { verified }
 }
 
 export const signTransaction = (

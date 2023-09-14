@@ -32,7 +32,7 @@ type Metalet = {
   merge: any
   signTransaction: any
   signMessage: any
-  // verifySignature: any
+  verifySignature: any
   getUtxos: any
   //   getActivities: any
   transfer: any
@@ -78,6 +78,7 @@ const metalet: Metalet = {
   merge,
   signTransaction,
   signMessage,
+  verifySignature,
 
   eciesEncrypt,
   eciesDecrypt,
