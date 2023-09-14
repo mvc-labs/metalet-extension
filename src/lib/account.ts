@@ -192,7 +192,6 @@ export async function getPublicKey(params?: { path?: string }) {
 }
 
 export async function getXPublicKey() {
-  console.log('hi')
   const account = await getCurrentAccount()
   if (!account) {
     return null
@@ -200,7 +199,7 @@ export async function getXPublicKey() {
 
   const network = await getNetwork()
   const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
-  const xPublicKey = mneObj.toHDPrivateKey('', network).xpubkey.toString()
+  const xPublicKey = mneObj.toHDPrivateKey('', network).deriveChild(`m/44'/${account.path}'/0'`).xpubkey.toString()
   console.log('xPublicKey', xPublicKey)
 
   return xPublicKey
