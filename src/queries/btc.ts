@@ -1,8 +1,8 @@
 import dayjs from 'dayjs'
-import { btcApi } from '@/queries/request'
+import { ordersApi } from '@/queries/request'
 
 export const getBTCBalance = (address: string) => {
-  return btcApi('/balance').get({ address })
+  return ordersApi('/balance').get({ address })
 }
 
 export interface Tx {
@@ -14,7 +14,7 @@ export interface Tx {
 }
 
 export const getBTActivities = async (address: string): Promise<Tx[]> => {
-  const transactions = await btcApi('/activities').get({ address })
+  const transactions = (await ordersApi('/activities').get({ address })) as any
   console.log('transactions', transactions)
 
   const txs: Tx[] = []
@@ -49,5 +49,5 @@ export const getBTActivities = async (address: string): Promise<Tx[]> => {
 }
 
 export const getBTCPrice = () => {
-  return btcApi('/btc-price').get()
+  return ordersApi('/btc-price').get()
 }

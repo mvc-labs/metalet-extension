@@ -3,7 +3,6 @@ import { ref, computed } from 'vue'
 import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
 import { useBalanceQuery, getBalance } from '@/queries/balance'
-import { getAddress, deriveAddress, btcAddress } from '@/lib/account'
 import { isOfficialToken } from '@/lib/assets'
 import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import type { Asset } from '@/data/assets'
@@ -13,37 +12,17 @@ const { asset } = defineProps<{
   asset: Asset
 }>()
 
-const balance = ref(0)
-const exchangeRate = ref('0')
-const isLoading = ref(false)
-const isExchangeRateLoading = ref(false)
+const address = ref("")
 
+const enabled = computed(() => !!address.value && asset.queryable)
+const rateEnabled = computed(() => !!address.value && asset.symbol === 'SPACE')
 
-getAddress(asset.chain).then(async (address) => {
-  balance.value = await getBalance(address, asset.chain)
-  console.log("balance", asset.symbol, balance.value);
-
-  exchangeRate.value = await getExchangeRate(asset.symbol)
-  console.log("exchangeRate", asset.symbol, exchangeRate.value);
-})
-
-// const enabled = computed(() => !!address.value && asset.queryable)
-// const rateEnabled = computed(() => !!address.value && asset.symbol === 'SPACE')
-
-// const data = useBalanceQuery(address, asset.symbol, { enabled })
-// const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
-// const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled: rateEnabled })
-// console.log("asset", asset)
-// console.log("useBalanceQuery", data)
-// console.log("balance", balance)
-// console.log("balance.value", balance.value)
-// console.log("balance.value.value", balance.value.value)
-// console.log("rateEnabled", rateEnabled)
-// console.log("exchangeRate", exchangeRate.value)
+const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled: rateEnabled })
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
-    const usdRate: number = Number(exchangeRate.value)
+    const usdRate: number = Number(exchangeRate.value.USD)
     const balanceInStandardUnit = balance.value / 10 ** asset.decimal
     const exchanged = balanceInStandardUnit * usdRate
 

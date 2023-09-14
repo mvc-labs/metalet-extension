@@ -2,8 +2,7 @@
 import Balance from './components/Balance.vue'
 import AccountItem from '../accounts/components/Item.vue'
 import AssetList from './components/AssetList.vue'
-import { currentAccount, deriveAddress } from '@/lib/account'
-import { getBTCBalance } from '@/queries/btc'
+import { currentAccount } from '@/lib/account'
 </script>
 
 <template>

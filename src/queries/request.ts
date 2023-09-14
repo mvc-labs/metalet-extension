@@ -1,7 +1,6 @@
-import { METASV_TESTNET_HOST, METASV_HOST, METALET_HOST, API2_ORDERS_EXCHANGE } from '../data/hosts'
-import { network } from '../lib/network'
-
-const SIGNATURE_MESSAGE = 'metalet.space'
+import { network } from '@/lib/network'
+import { getCredential } from '@/lib/account'
+import { METASV_TESTNET_HOST, METASV_HOST, METALET_HOST, ORDERS_HOST } from '@/data/hosts'
 
 type OptionParams = Record<string, string>
 
@@ -9,21 +8,23 @@ interface OptionData {
   [key: string]: unknown
 }
 
-interface requestOption {
+interface RequestOption {
   method: 'GET' | 'POST'
   data?: OptionData
   params?: OptionParams
   headers?: Headers
+  withCredential?: boolean
   body?: string | URLSearchParams
 }
 
-async function request(url: string, options: requestOption) {
-  // const headers = new Headers({
-  //   'X-Signature': '',
-  //   'X-Public-Key': '',
-  // })
+async function request(url: string, options: RequestOption) {
   if (!options?.headers) {
     options.headers = new Headers()
+  }
+  if (options?.withCredential) {
+    const { publicKey, signature } = await getCredential()
+    options.headers.set('X-Signature', signature)
+    options.headers.set('X-Public-Key', publicKey)
   }
   if (options?.params) {
     if (options.method === 'GET') {
@@ -50,7 +51,7 @@ async function request(url: string, options: requestOption) {
   return response.json()
 }
 
-export const metasvApi = (path: string) => {
+export const mvcApi = (path: string) => {
   const metasvHost = network.value === 'mainnet' ? METASV_HOST : METASV_TESTNET_HOST
   return {
     get: (params?: any) => request(`${metasvHost}${path}`, { method: 'GET', params }),
@@ -61,15 +62,16 @@ export const metasvApi = (path: string) => {
 export const metaletApi = (path: string) => {
   const metaletHost = METALET_HOST + '/wallet-api/v1'
   return {
-    get: (params?: any) => request(`${metaletHost}${path}`, { method: 'GET', params }),
-    post: (data?: any) => request(`${metaletHost}${path}`, { method: 'POST', data }),
+    get: (params?: OptionParams) => request(`${metaletHost}${path}`, { method: 'GET', params, withCredential: true }),
+    post: (data?: OptionData) => request(`${metaletHost}${path}`, { method: 'POST', data, withCredential: true }),
   }
 }
 
-export const btcApi = (path: string) => {
+export const ordersApi = (path: string) => {
+  const ordersHost = ORDERS_HOST + '/api'
   return {
-    get: (params?: OptionParams) => request(`${API2_ORDERS_EXCHANGE}${path}`, { method: 'GET', params }),
-    post: (data?: OptionData) => request(`${API2_ORDERS_EXCHANGE}${path}`, { method: 'POST', data }),
+    get: (params?: any) => request(`${ordersHost}${path}`, { method: 'GET', params }),
+    post: (data?: any) => request(`${ordersHost}${path}`, { method: 'POST', data }),
   }
 }
 

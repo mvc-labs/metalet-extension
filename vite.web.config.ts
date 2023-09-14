@@ -7,6 +7,7 @@ import alias from '@rollup/plugin-alias'
 import baseConfig from './vite.base.config'
 import wasm from 'vite-plugin-wasm'
 import topLevelAwait from 'vite-plugin-top-level-await'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 const env = loadEnv('', process.cwd())
 
@@ -17,7 +18,7 @@ export default defineConfig({
     globals: true,
   },
 
-  plugins: [alias(), vue(), wasm(), topLevelAwait(), svgLoader()],
+  plugins: [alias(), vue(), nodePolyfills(), wasm(), topLevelAwait(), svgLoader()],
   build: {
     minify: env.VITE_ENVIRONMENT === 'production',
     outDir: 'dist',

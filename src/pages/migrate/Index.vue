@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
-import accountManager, { deriveBTCInfo } from '@/lib/account'
+import accountManager from '@/lib/account'
 import type { Account } from '@/lib/account'
 import { mvc } from 'meta-contract'
 import { setNetwork } from '@/lib/network'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { deriveAllAddresses, type AddressType } from '@/lib/bip32-deriver'
 
 const router = useRouter()
 
@@ -46,38 +47,31 @@ const importWallet = async () => {
           throw new Error('Cannot find the path of the original account')
         }
 
-        const mainnetHdpk = mneObj.toHDPrivateKey('', 'mainnet')
-        const mainnetPrivateKey = mainnetHdpk.deriveChild(`m/44'/${usingPath}'/0'/0/0`).privateKey
-        const mainnetAddress = mainnetPrivateKey.toAddress('mainnet').toString()
+        const fullPath = `m/44'/${usingPath}'/0'/0/0`
+        const btcPath = `m/86'/0'/0'/0/0`
 
-        const testnetHdpk = mneObj.toHDPrivateKey('', 'testnet')
-        const testnetPrivateKey = testnetHdpk.deriveChild(`m/44'/${usingPath}'/0'/0/0`).privateKey
-        const testnetAddress = testnetPrivateKey.toAddress('testnet').toString()
+        const allAddresses = deriveAllAddresses({
+          mnemonic: mnemonicStr,
+          btcPath,
+          mvcPath: fullPath,
+        })
 
-        const { mainnet: btcMainnet, testnet: btcTestnet } = deriveBTCInfo(mnemonicStr)
-
+        // construct new account object
         const account = {
           mnemonic: mnemonicStr,
-          mvcIndex: usingPath,
-          mvcPath: `m/44'/${usingPath}'/0'/0/0`,
-          btcPath: `m/86'/0'/0'/0/0`,
-          mainnet: {
-            btc: btcMainnet,
-            mvc: {
-              address: mainnetAddress,
-              privateKey: mainnetPrivateKey.toString(),
-              publicKey: ""
-            }
-          },
-          testnet: {
-            btc: btcTestnet,
-            mvc: {
-              address: testnetAddress,
-              privateKey: testnetPrivateKey.toString(),
-              publicKey: ""
-            }
-          },
           assetsDisplay: ['SPACE', 'BTC'],
+          mvc: {
+            path: fullPath,
+            addressType: 'P2PKH' as AddressType,
+            mainnetAddress: allAddresses.mvcMainnetAddress,
+            testnetAddress: allAddresses.mvcTestnetAddress,
+          },
+          btc: {
+            path: btcPath,
+            addressType: 'P2TR' as AddressType,
+            mainnetAddress: allAddresses.btcMainnetAddress,
+            testnetAddress: allAddresses.btcTestnetAddress,
+          },
         }
 
         // 保存账号信息：助记词、私钥、地址；以地址为key，value为对象

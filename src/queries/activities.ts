@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/vue-query'
-import { metasvApi } from './request'
+import { mvcApi } from './request'
 import { ComputedRef, Ref } from 'vue'
 import type { Token } from './tokens'
 
@@ -20,8 +20,8 @@ type Activities = ReadonlyArray<Activity>
 type TokenActivities = ReadonlyArray<TokenActivity>
 
 export const fetchActivities = async (address: string): Promise<Activities> => {
-  const unconfirmed: any = metasvApi(`/address/${address}/tx?confirmed=false`).get()
-  const confirmed: any = metasvApi(`/address/${address}/tx?confirmed=true`).get()
+  const unconfirmed: any = mvcApi(`/address/${address}/tx?confirmed=false`).get()
+  const confirmed: any = mvcApi(`/address/${address}/tx?confirmed=true`).get()
 
   const [unconfirmedActivities, confirmedActivities] = await Promise.all([unconfirmed, confirmed])
 
@@ -29,7 +29,7 @@ export const fetchActivities = async (address: string): Promise<Activities> => {
 }
 
 export const fetchOneActivity = async (txid: string): Promise<Activity> => {
-  const activity: any = await metasvApi(`/tx/${txid}`).get()
+  const activity: any = await mvcApi(`/tx/${txid}`).get()
 
   // rename timestamp to time
   const detail = activity.txDetail
@@ -40,7 +40,7 @@ export const fetchOneActivity = async (txid: string): Promise<Activity> => {
 }
 
 export const fetchTokenActivities = async (address: string, asset: Token): Promise<TokenActivities> => {
-  const activities: any = await metasvApi(`/contract/ft/address/${address}/${asset.codehash}/${asset.genesis}/tx`).get()
+  const activities: any = await mvcApi(`/contract/ft/address/${address}/${asset.codehash}/${asset.genesis}/tx`).get()
 
   return activities
 }

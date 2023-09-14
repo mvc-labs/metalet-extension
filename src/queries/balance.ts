@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/vue-query'
-import { metaletApi, metasvApi } from './request'
+import { metaletApi, mvcApi, ordersApi } from './request'
 import { ComputedRef, Ref } from 'vue'
 import { getBTCBalance } from '@/queries/btc'
 
@@ -7,19 +7,23 @@ export type Balance = {
   address: string
   confirmed: number
   unconfirmed: number
+  total: number
 }
 
 export const fetchSpaceBalance = async (address: string): Promise<Balance> => {
-  const balance: any = await metasvApi(`/address/${address}/balance`).get()
+  const balance: any = await mvcApi(`/address/${address}/balance`).get()
   balance.total = balance.confirmed + balance.unconfirmed
 
   return balance
 }
 
 export const fetchBtcBalance = async (address: string): Promise<Balance> => {
-  const balance: any = await metaletApi(`/address/balance`).get({ address, chain: 'btc' })
-  console.log('fetchBtcBalance', { balance })
+  const balance: any = await metaletApi(`/address/balance`)
+    .get({ address, chain: 'btc' })
+    .then((res) => res.data)
+
   balance.total = balance.confirmed + balance.unconfirmed
+  console.log({ balance })
 
   return balance
 }
@@ -29,16 +33,19 @@ export const doNothing = async (): Promise<Balance> => {
     address: '',
     confirmed: 0,
     unconfirmed: 0,
+    total: 0,
   }
 }
 
 export const getBalance = async (address: string, symbol: string): Promise<number> => {
+  console.log('symbol', symbol)
   switch (symbol) {
     case 'SPACE': {
       const { confirmed, unconfirmed } = await fetchSpaceBalance(address)
       return confirmed + unconfirmed
     }
     case 'BTC': {
+      console.log('what?')
       const { confirmed, unconfirmed } = await getBTCBalance(address)
       return confirmed + unconfirmed
     }

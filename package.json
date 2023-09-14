@@ -1,10 +1,11 @@
 {
   "name": "metalet",
   "private": true,
-  "version": "1.7.1",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.dev.config.ts",
+    "type-check": "vue-tsc --noEmit",
     "build:content": "vite build --config vite.content.config.ts",
     "build:inject": "vite build --config vite.inject.config.ts",
     "build:injectWatch": "vite build --config vite.injectwatch.config.ts",
@@ -58,8 +59,8 @@
     "autoprefixer": "^10.4.13",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.4.21",
-    "prettier": "^2.8.7",
-    "prettier-plugin-tailwindcss": "^0.2.6",
+    "prettier": "^3.0.3",
+    "prettier-plugin-tailwindcss": "^0.5.4",
     "rimraf": "^5.0.1",
     "sass": "^1.62.1",
     "tailwindcss": "^3.2.7",

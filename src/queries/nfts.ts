@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/vue-query'
-import { metasvApi } from './request'
+import { mvcApi } from './request'
 import { ComputedRef, Ref } from 'vue'
 import { bannedCollections } from '../data/nfts'
 
@@ -26,7 +26,7 @@ export type Nft = {
 }
 
 export const fetchNftCollections = async (address: string): Promise<NftCollection[]> => {
-  const nftCollections: any = await metasvApi(`/contract/nft/address/${address}/summary`).get()
+  const nftCollections: any = await mvcApi(`/contract/nft/address/${address}/summary`).get()
 
   return nftCollections
     .filter((nftCollection: any) => {
@@ -48,7 +48,7 @@ export const fetchNftCollections = async (address: string): Promise<NftCollectio
 }
 
 export const fetchOneNftCollection = async (codehash: string, genesis: string): Promise<NftCollection> => {
-  const nftCollection: any = await metasvApi(`/contract/nft/genesis/${codehash}/${genesis}/summary`).get()
+  const nftCollection: any = await mvcApi(`/contract/nft/genesis/${codehash}/${genesis}/summary`).get()
 
   // codeHash to lowercase
   nftCollection.codehash = nftCollection.codeHash
@@ -72,7 +72,7 @@ export const fetchNfts = async (
   if (params?.limit) {
     path += `&limit=${params.limit}`
   }
-  const nfts: any = await metasvApi(path).get()
+  const nfts: any = await mvcApi(path).get()
 
   return nfts.map((nft: any) => {
     // codeHash to codehash
@@ -85,7 +85,7 @@ export const fetchNfts = async (
 export const fetchOneNft = async (params: { codehash: string; genesis: string; tokenIndex: number }): Promise<Nft> => {
   let path = `/contract/nft/genesis/${params.codehash}/${params.genesis}/utxo?tokenIndex=${params.tokenIndex}`
 
-  const nft: any = await metasvApi(path)
+  const nft: any = await mvcApi(path)
     .get()
     .then((nfts: any) => nfts[0])
   // codeHash to codehash
