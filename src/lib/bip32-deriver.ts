@@ -70,9 +70,7 @@ function deriveBtcPrivateKey(mnemonic: string, path: string, network: Network): 
   const seed = bip39.mnemonicToSeedSync(mnemonic)
   const master = bip32.fromSeed(seed, btcNetwork)
 
-  const child = master.derivePath(path)
-
-  return child
+  return master.derivePath(path)
 }
 
 // public key

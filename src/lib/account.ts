@@ -13,6 +13,8 @@ import { fetchSpaceBalance } from '@/queries/balance'
 import { getStorage, setStorage } from './storage'
 import { generateRandomString, raise } from './helpers'
 import { getNetwork } from './network'
+import BIP32Factory, { BIP32Interface } from 'bip32'
+import { signMessage } from './crypto'
 
 bitcoin.initEccLib(ecc)
 
@@ -194,12 +196,38 @@ export async function getAddress(chain: Chain = 'mvc'): Promise<string> {
   return getAccountProperty(chain, network === 'mainnet' ? 'mainnetAddress' : 'testnetAddress')
 }
 
-export async function getPrivateKey(chain: Chain = 'mvc'): Promise<string> {
+export async function getPrivateKey(chain: Chain = 'mvc') {
   const network = await getNetwork()
   const mnemonic = await getCurrentAccount().then((account) => account!.mnemonic)
   const path = await getAccountProperty(chain, 'path')
 
   return derivePrivateKey({ mnemonic, chain, network, path })
+}
+
+export async function getCredential(
+  chain: Chain = 'btc'
+): Promise<{ address: string; publicKey: string; signature: string }> {
+  const account = currentAccount.value ?? raise('No current account')
+  const cachedCredential = account[chain]['credential']
+
+  if (cachedCredential) return cachedCredential
+
+  const message = 'metalet.space'
+  const wif = await getPrivateKey(chain)
+  const { signature } = signMessage(wif, message)
+  const address = await getAddress(chain)
+  const publicKey = await getPublicKey(chain)
+  const newCredential = {
+    address,
+    publicKey,
+    signature,
+  }
+
+  // cache credential
+  account[chain]['credential'] = newCredential
+  await setAccount(account)
+
+  return newCredential
 }
 
 export async function getPublicKey(chain: Chain = 'mvc'): Promise<string> {

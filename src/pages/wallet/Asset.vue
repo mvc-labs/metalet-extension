@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { Ref, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { type Asset, allAssets, getTags } from '@/data/assets'
-import { getBalance } from '@/queries/balance'
+import { getBalance, useBalanceQuery } from '@/queries/balance'
 import { getAddress } from '@/lib/account'
 import { prettifyBalance } from '@/lib/formatters'
 import Activities from './components/Activities.vue'
-import { getExchangeRate } from '@/queries/exchange-rates'
+import { getExchangeRate, useExchangeRatesQuery } from '@/queries/exchange-rates'
 import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
 
 const { symbol } = defineProps({
@@ -19,25 +19,24 @@ const { symbol } = defineProps({
 const asset = allAssets.find((asset) => asset.symbol === symbol) as Asset
 
 const router = useRouter()
-const route = useRoute()
 
 const tags = getTags(asset)
 console.log('tags', tags)
 
-const balance = ref(0)
-const exchangeRate = ref('0')
-
-getAddress(asset.chain).then(async (address) => {
-  balance.value = await getBalance(address, asset.chain)
-  console.log('balance', asset.symbol, balance.value)
-
-  exchangeRate.value = await getExchangeRate(asset.symbol)
-  console.log('exchangeRate', asset.symbol, exchangeRate.value)
+const address: Ref<string> = ref('')
+getAddress(asset.chain).then((add) => {
+  address.value = add!
 })
+
+const enabled = computed(() => !!address.value && asset.queryable)
+const rateEnabled = computed(() => !!address.value && asset.symbol === 'SPACE')
+
+const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled: rateEnabled })
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
-    const usdRate: number = Number(exchangeRate.value)
+    const usdRate: number = Number(exchangeRate.value.USD)
     const balanceInStandardUnit = balance.value / 10 ** asset.decimal
     const exchanged = balanceInStandardUnit * usdRate
 
@@ -73,8 +72,11 @@ const toReceive = () => {
 
     <div class="mt-8 flex flex-col items-center self-stretch">
       <template v-if="asset?.queryable">
-        <div class="mb-1 text-center text-3xl text-[#141416]">{{ prettifyBalance(balance) }} {{ asset.symbol }}</div>
-        <div style="color: #909399">${{ exchange }}USD</div>
+        <div v-if="isLoading">--</div>
+        <template v-else-if="balance">
+          <div class="mb-1 text-center text-3xl text-[#141416]">{{ prettifyBalance(balance) }} {{ asset.symbol }}</div>
+          <div style="color: #909399">${{ exchange }}USD</div>
+        </template>
 
         <!-- buttons -->
         <div class="mt-8 grid grid-cols-2 gap-x-3 self-stretch">

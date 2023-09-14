@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/vue-query'
-import { metasvApi } from './request'
+import { mvcApi } from './request'
 import { ComputedRef, Ref } from 'vue'
 import tokens from '../data/tokens'
 
@@ -18,7 +18,7 @@ export type Token = {
 }
 
 export const fetchTokens = async (address: string): Promise<Token[]> => {
-  const tokens: any = await metasvApi(`/contract/ft/address/${address}/balance`).get()
+  const tokens: any = await mvcApi(`/contract/ft/address/${address}/balance`).get()
 
   return tokens.map((token: any) => {
     // 将codeHash改为小写

@@ -2,29 +2,16 @@
 import { ref, computed, Ref } from 'vue'
 import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
-import { useBalanceQuery, getBalance } from '@/queries/balance'
+import { useBalanceQuery } from '@/queries/balance'
 import { getAddress } from '@/lib/account'
 import { isOfficialToken } from '@/lib/assets'
 import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import type { Asset } from '@/data/assets'
-import { useExchangeRatesQuery, getExchangeRate } from '@/queries/exchange-rates'
+import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 
 const { asset } = defineProps<{
   asset: Asset
 }>()
-
-// const balance = ref(0)
-// const exchangeRate = ref('0')
-// const isLoading = ref(false)
-// const isExchangeRateLoading = ref(false)
-
-// getAddress(asset.chain).then(async (address) => {
-//   balance.value = await getBalance(address, asset.chain)
-//   console.log('balance', asset.symbol, balance.value)
-
-//   exchangeRate.value = await getExchangeRate(asset.symbol)
-//   console.log('exchangeRate', asset.symbol, exchangeRate.value)
-// })
 
 const address: Ref<string> = ref('')
 getAddress().then((add) => {

@@ -1,5 +1,5 @@
 import { mvc } from 'meta-contract'
-import { metasvApi } from '../queries/request'
+import { mvcApi } from '../queries/request'
 import { METAFILE_API_HOST } from '../data/hosts'
 
 export function parseMetaFile(metaFileUri: string): string {
@@ -87,7 +87,7 @@ export async function parseMetaData(txid: string, outputIndex: number): Promise<
 }
 
 export async function parse(txid: string, outputIndex: number): Promise<string[]> {
-  const { hex: metaTxHex } = (await metasvApi('/tx/' + txid + '/raw').get()) as {
+  const { hex: metaTxHex } = (await mvcApi('/tx/' + txid + '/raw').get()) as {
     hex: string
   }
   const tx = new mvc.Transaction(metaTxHex)

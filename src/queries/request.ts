@@ -1,3 +1,4 @@
+import { getCredential } from '@/lib/account'
 import { METASV_TESTNET_HOST, METASV_HOST, METALET_HOST, ORDERS_HOST } from '../data/hosts'
 import { network } from '../lib/network'
 
@@ -16,7 +17,14 @@ async function request(url: string, options: any = {}): Promise<any> {
     delete allOptions.params
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    if (allOptions.requiresCredential) {
+      const { publicKey, signature } = await getCredential()
+      allOptions.headers['X-Signature'] = signature
+      allOptions.headers['X-Public-Key'] = publicKey
+      delete allOptions.requiresCredential
+    }
+
     fetch(url, allOptions)
       .then((response) => {
         if (!response.ok) {
@@ -29,7 +37,7 @@ async function request(url: string, options: any = {}): Promise<any> {
   })
 }
 
-export const metasvApi = (path: string) => {
+export const mvcApi = (path: string) => {
   const metasvHost = network.value === 'mainnet' ? METASV_HOST : METASV_TESTNET_HOST
   return {
     get: (params?: any) => request(`${metasvHost}${path}`, { method: 'GET', params }),
@@ -39,9 +47,11 @@ export const metasvApi = (path: string) => {
 
 export const metaletApi = (path: string) => {
   const metaletHost = METALET_HOST + '/wallet-api/v1'
+  const requiresCredential = true
+
   return {
-    get: (params?: any) => request(`${metaletHost}${path}`, { method: 'GET', params }),
-    post: (data?: any) => request(`${metaletHost}${path}`, { method: 'POST', data }),
+    get: (params?: any) => request(`${metaletHost}${path}`, { method: 'GET', requiresCredential, params }),
+    post: (data?: any) => request(`${metaletHost}${path}`, { method: 'POST', requiresCredential, data }),
   }
 }
 
