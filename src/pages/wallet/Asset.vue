@@ -1,14 +1,15 @@
 <script lang="ts" setup>
 import { Ref, computed, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
+import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
 
 import { type Asset, allAssets, getTags } from '@/data/assets'
-import { getBalance, useBalanceQuery } from '@/queries/balance'
+import { useBalanceQuery } from '@/queries/balance'
 import { getAddress } from '@/lib/account'
 import { prettifyBalance } from '@/lib/formatters'
+import { useExchangeRatesQuery } from '@/queries/exchange-rates'
+
 import Activities from './components/Activities.vue'
-import { getExchangeRate, useExchangeRatesQuery } from '@/queries/exchange-rates'
-import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
 
 const { symbol } = defineProps({
   symbol: {

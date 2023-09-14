@@ -1,17 +1,20 @@
 <script lang="ts" setup>
-import { ref, computed, Ref, onMounted } from 'vue'
+import { ref, computed, Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQRCode } from '@vueuse/integrations/useQRCode'
 
-import { getAddress } from '@/lib/account'
-import { MVCAssets } from '@/data/assets'
+import { type Chain, getAddress } from '@/lib/account'
+import { allAssets } from '@/data/assets'
 
 // init
 const route = useRoute()
-const chain: Ref<'btc' | 'mvc'> = ref(route.query.chain as 'btc' | 'mvc')
-const asset = computed(() => MVCAssets.find((asset) => asset.chain === chain.value))
+const chain: Ref<Chain> = ref(route.query.chain as Chain)
+const asset = computed(() => allAssets.find((asset) => asset.chain === chain.value))
 
-const address = ref<string>("")
+const address = ref<string>('')
+getAddress(chain.value).then((add) => {
+  address.value = add!
+})
 
 // copy
 const isCopied = ref(false)
@@ -22,10 +25,6 @@ function copyAddress() {
 
 // QRCode
 const qrcode = useQRCode(address)
-
-onMounted(async () => {
-  address.value = await getAddress("mvc")
-})
 </script>
 
 <template>
@@ -45,7 +44,10 @@ onMounted(async () => {
       <!-- copy button -->
       <button
         class="w-20 shrink-0 rounded-lg bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 py-3 text-xs font-bold text-sky-100 transition-all hover:saturate-150"
-        :class="{ 'opacity-50 hover:!saturate-100': isCopied }" @click="copyAddress" :disabled="isCopied">
+        :class="{ 'opacity-50 hover:!saturate-100': isCopied }"
+        @click="copyAddress"
+        :disabled="isCopied"
+      >
         {{ isCopied ? 'Copied' : 'Copy' }}
       </button>
     </div>

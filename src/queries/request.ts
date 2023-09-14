@@ -60,6 +60,7 @@ export const mvcApi = (path: string) => {
 }
 
 export const metaletApi = (path: string) => {
+  // metalet api requires credential to pass authentication check
   const metaletHost = METALET_HOST + '/wallet-api/v1'
   return {
     get: (params?: OptionParams) => request(`${metaletHost}${path}`, { method: 'GET', params, withCredential: true }),
