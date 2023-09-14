@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { ref, computed, Ref } from 'vue'
 import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
 import { useBalanceQuery, getBalance } from '@/queries/balance'
@@ -13,18 +13,29 @@ const { asset } = defineProps<{
   asset: Asset
 }>()
 
-const balance = ref(0)
-const exchangeRate = ref('0')
-const isLoading = ref(false)
-const isExchangeRateLoading = ref(false)
+// const balance = ref(0)
+// const exchangeRate = ref('0')
+// const isLoading = ref(false)
+// const isExchangeRateLoading = ref(false)
 
-getAddress(asset.chain).then(async (address) => {
-  balance.value = await getBalance(address, asset.chain)
-  console.log('balance', asset.symbol, balance.value)
+// getAddress(asset.chain).then(async (address) => {
+//   balance.value = await getBalance(address, asset.chain)
+//   console.log('balance', asset.symbol, balance.value)
 
-  exchangeRate.value = await getExchangeRate(asset.symbol)
-  console.log('exchangeRate', asset.symbol, exchangeRate.value)
+//   exchangeRate.value = await getExchangeRate(asset.symbol)
+//   console.log('exchangeRate', asset.symbol, exchangeRate.value)
+// })
+
+const address: Ref<string> = ref('')
+getAddress().then((add) => {
+  address.value = add!
 })
+
+const enabled = computed(() => !!address.value && asset.queryable)
+const rateEnabled = computed(() => !!address.value && asset.symbol === 'SPACE')
+
+const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled: rateEnabled })
 
 // const enabled = computed(() => !!address.value && asset.queryable)
 // const rateEnabled = computed(() => !!address.value && asset.symbol === 'SPACE')
@@ -42,7 +53,7 @@ getAddress(asset.chain).then(async (address) => {
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
-    const usdRate: number = Number(exchangeRate.value)
+    const usdRate: number = Number(exchangeRate.value.USD)
     const balanceInStandardUnit = balance.value / 10 ** asset.decimal
     const exchanged = balanceInStandardUnit * usdRate
 
@@ -96,8 +107,6 @@ const exchange = computed(() => {
         </template>
 
         <div v-else>--</div>
-
-        <div class="text-[#909399]">${{ exchangeRate }} USD</div>
       </div>
     </div>
   </div>

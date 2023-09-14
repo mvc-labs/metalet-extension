@@ -1,7 +1,7 @@
 import { METASV_TESTNET_HOST, METASV_HOST, METALET_HOST, ORDERS_HOST } from '../data/hosts'
 import { network } from '../lib/network'
 
-async function request(url: string, options: any = {}) {
+async function request(url: string, options: any = {}): Promise<any> {
   const defaultOptions = {
     headers: {
       'Content-Type': 'application/json',

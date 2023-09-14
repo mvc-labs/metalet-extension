@@ -72,9 +72,8 @@ function toToken(token: UserOwnedToken) {
     <div class="space-y-2">
       <div class="text-lg text-[#141416]">MVC</div>
       <AssetItem v-for="asset in displayingAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)" />
+      <AssetItem v-for="token in userOwnedTokens" :key="token.genesis" :asset="token" @click="toToken(token)" />
     </div>
-
-    <AssetItem v-for="token in userOwnedTokens" :key="token.genesis" :asset="token" @click="toToken(token)" />
 
     <!-- 拥有的FT资产 -->
   </div>

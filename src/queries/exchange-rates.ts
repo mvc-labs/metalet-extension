@@ -26,7 +26,9 @@ export const useExchangeRatesQuery = (symbol: string, options?: { enabled: Compu
   return useQuery({
     queryKey: ['exchangeRates', { symbol }],
     queryFn: () => fetchExchangeRates(),
-    select: (rates: Rate[]) => rates.find((rate) => rate.symbol === symbolLC)?.price,
+    select: (rates: Rate[]) => {
+      return rates.find((rate) => rate.symbol === symbolLC)?.price
+    },
     ...options,
   })
 }
@@ -35,7 +37,7 @@ export const getExchangeRate = async (symbol: string): Promise<string> => {
   switch (symbol) {
     case 'SPACE': {
       const rates = await fetchExchangeRates()
-      return rates.find((rate) => rate.symbol === "mvc")?.price.USD || '0'
+      return rates.find((rate) => rate.symbol === 'mvc')?.price.USD || '0'
     }
     case 'BTC': {
       return await getBTCPrice()
