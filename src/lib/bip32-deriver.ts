@@ -1,12 +1,123 @@
 import bip39 from 'bip39'
-import BIP32Factory from 'bip32'
+import BIP32Factory, { BIP32Interface } from 'bip32'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { mvc } from 'meta-contract'
 
 import { raise } from './helpers'
+import { type Network } from './network'
 import { networks, payments } from 'bitcoinjs-lib'
 
-export function deriveAllPaths({ mnemonic, btcPath, mvcPath }: { mnemonic: string; btcPath: string; mvcPath: string }) {
+export type AddressType = 'P2WPKH' | 'P2SH-P2WPKH' | 'P2TR' | 'P2PKH'
+
+export const scripts: {
+  name: string
+  path: string
+  addressType: AddressType
+}[] = [
+  {
+    name: 'Native Segwit',
+    addressType: 'P2WPKH',
+    path: "m/84'/0'/0'/0/0",
+  },
+  {
+    name: 'Nested Segwit',
+    addressType: 'P2SH-P2WPKH',
+    path: "m/49'/0'/0'/0/0",
+  },
+  {
+    name: 'Taproot',
+    addressType: 'P2TR',
+    path: "m/86'/0'/0'/0/0",
+  },
+  {
+    name: 'Legacy',
+    addressType: 'P2PKH',
+    path: "m/44'/0'/0'/0/0",
+  },
+]
+
+// private key
+export function derivePrivateKey({
+  mnemonic,
+  chain,
+  network,
+  path,
+}: {
+  mnemonic: string
+  chain: 'mvc' | 'btc'
+  network: Network
+  path: string
+}): string {
+  bip39.validateMnemonic(mnemonic) ?? raise('Invalid mnemonic')
+
+  if (chain === 'mvc') {
+    return deriveMvcPrivateKey(mnemonic, path, network).toString()
+  }
+
+  return deriveBtcPrivateKey(mnemonic, path, network).toWIF()
+}
+
+function deriveMvcPrivateKey(mnemonic: string, path: string, network: Network): mvc.PrivateKey {
+  const mneObj = mvc.Mnemonic.fromString(mnemonic)
+  const hdpk = mneObj.toHDPrivateKey('', network)
+
+  return hdpk.deriveChild(path).privateKey
+}
+
+function deriveBtcPrivateKey(mnemonic: string, path: string, network: Network): BIP32Interface {
+  const bip32 = BIP32Factory(ecc)
+  const btcNetwork = network === 'mainnet' ? networks.bitcoin : networks.testnet
+  const seed = bip39.mnemonicToSeedSync(mnemonic)
+  const master = bip32.fromSeed(seed, btcNetwork)
+
+  const child = master.derivePath(path)
+
+  return child
+}
+
+// public key
+export function derivePublicKey({
+  mnemonic,
+  chain,
+  network,
+  path,
+}: {
+  mnemonic: string
+  chain: 'mvc' | 'btc'
+  network: Network
+  path: string
+}): string {
+  bip39.validateMnemonic(mnemonic) ?? raise('Invalid mnemonic')
+
+  if (chain === 'mvc') {
+    return deriveMvcPublicKey(mnemonic, path, network).toString()
+  }
+
+  return deriveBtcPublicKey(mnemonic, path, network).toString('hex')
+}
+
+function deriveMvcPublicKey(mnemonic: string, path: string, network: Network): mvc.PublicKey {
+  const privateKey = deriveMvcPrivateKey(mnemonic, path, network)
+
+  return privateKey.toPublicKey()
+}
+
+function deriveBtcPublicKey(mnemonic: string, path: string, network: Network): Buffer {
+  const child = deriveBtcPrivateKey(mnemonic, path, network)
+
+  return child.publicKey
+}
+
+// address
+export function deriveAllAddresses({
+  mnemonic,
+  btcPath,
+  mvcPath,
+}: {
+  mnemonic: string
+  btcPath: string
+  mvcPath: string
+}) {
   bip39.validateMnemonic(mnemonic) ?? raise('Invalid mnemonic')
 
   const mvcTestnetAddress = deriveMvcAddress(mnemonic, mvcPath, 'testnet')
@@ -22,7 +133,7 @@ export function deriveAllPaths({ mnemonic, btcPath, mvcPath }: { mnemonic: strin
   }
 }
 
-export function derive({
+export function deriveAddress({
   mnemonic,
   chain,
   network,
@@ -30,7 +141,7 @@ export function derive({
 }: {
   mnemonic: string
   chain: 'mvc' | 'btc'
-  network: 'mainnet' | 'testnet'
+  network: Network
   path: string
 }): string {
   bip39.validateMnemonic(mnemonic) ?? raise('Invalid mnemonic')
@@ -42,27 +153,19 @@ export function derive({
   return deriveBtcAddress(mnemonic, path, network)
 }
 
-function deriveMvcAddress(mnemonic: string, path: string, network: 'mainnet' | 'testnet'): string {
-  const mneObj = mvc.Mnemonic.fromString(mnemonic)
-
-  const hdpk = mneObj.toHDPrivateKey('', network)
-  const privateKey = hdpk.deriveChild(path).privateKey
+function deriveMvcAddress(mnemonic: string, path: string, network: Network): string {
+  const privateKey = deriveMvcPrivateKey(mnemonic, path, network)
 
   return privateKey.toAddress(network).toString()
 }
 
-function deriveBtcAddress(mnemonic: string, path: string, network: 'mainnet' | 'testnet'): string {
-  const bip32 = BIP32Factory(ecc)
+function deriveBtcAddress(mnemonic: string, path: string, network: Network): string {
+  const child = deriveBtcPrivateKey(mnemonic, path, network)
   const btcNetwork = network === 'mainnet' ? networks.bitcoin : networks.testnet
-  const seed = bip39.mnemonicToSeedSync(mnemonic)
-  const master = bip32.fromSeed(seed, btcNetwork)
-
-  const child = master.derivePath(path)
+  const publicKey = child.publicKey
 
   // Infer address type based on path
   const addressType = inferAddressType(path)
-
-  const publicKey = child.publicKey
 
   switch (addressType) {
     case 'P2PKH':
@@ -79,7 +182,7 @@ function deriveBtcAddress(mnemonic: string, path: string, network: 'mainnet' | '
   }
 }
 
-function inferAddressType(path: string) {
+export function inferAddressType(path: string): AddressType {
   const pathProtocolNumber = parseInt(path.split('/')[1].replace("'", ''), 10)
   let addressType: 'P2PKH' | 'P2SH-P2WPKH' | 'P2WPKH' | 'P2TR'
   switch (pathProtocolNumber) {

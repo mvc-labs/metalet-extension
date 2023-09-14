@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { ClipboardDocumentCheckIcon, ClipboardDocumentListIcon, PencilSquareIcon } from '@heroicons/vue/24/solid'
 import { useRouter } from 'vue-router'
 
-import accountManager, { type Account, updateBTCType, currentAccount, getAddress } from '@/lib/account'
+import accountManager, { type Account, currentAccount } from '@/lib/account'
 import { network } from '@/lib/network'
 import { shortestAddress } from '@/lib/formatters'
 
@@ -17,25 +17,18 @@ const props = defineProps<{
   showNetwork?: boolean
 }>()
 
-console.log('network', network.value)
-console.log('currentAccount', currentAccount.value)
-
-const mvcAddress = ref(props.account.mainnet.mvc.address)
-const btcAddress = ref(props.account.mainnet.btc.address)
+const mvcAddress = ref(
+  network.value === 'mainnet' ? props.account.mvc.mainnetAddress : props.account.mvc.testnetAddress
+)
+const btcAddress = ref(
+  network.value === 'mainnet' ? props.account.btc.mainnetAddress : props.account.btc.testnetAddress
+)
 
 const isCopied = ref(false)
 const copyAddress = () => {
-  navigator.clipboard.writeText(address.value)
+  navigator.clipboard.writeText(mvcAddress.value)
   isCopied.value = true
 }
-
-// 根据当前网络环境获取地址
-const address = computed(() => {
-  if (network.value === 'testnet') {
-    return props.account.testnet.mvc.address
-  }
-  return props.account.mainnet.mvc.address
-})
 
 const randomColor = (key: string) => {
   const colors = [
@@ -74,7 +67,7 @@ const openEditNameModal = ref(false)
 
     <div class="flex items-center justify-start gap-x-2 py-4" :key="props.account.id">
       <!-- avatar -->
-      <div :class="['h-12 w-12 rounded-full bg-gradient-to-br', randomColor(props.account.mainnet.mvc.address)]"></div>
+      <div :class="['h-12 w-12 rounded-full bg-gradient-to-br', randomColor(props.account.mvc.mainnetAddress)]"></div>
 
       <!-- info -->
       <div class="group flex flex-col">

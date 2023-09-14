@@ -1,18 +1,22 @@
 <script lang="ts" setup>
 import { ref, computed, Ref, watch } from 'vue'
-import { mvc } from 'meta-contract'
-import { addAccount } from '@/lib/account'
 import { useRouter } from 'vue-router'
-import { RadioGroup, RadioGroupOption, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
-import { ChevronRightIcon, TrashIcon } from '@heroicons/vue/24/solid'
+import {
+  RadioGroup,
+  RadioGroupOption,
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+  Listbox,
+  ListboxButton,
+  ListboxOptions,
+  ListboxOption,
+} from '@headlessui/vue'
+import { TrashIcon, CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/24/solid'
 
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
-import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
-import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
-import { type AddressType } from '@/lib/account'
-import { derive, deriveAllPaths } from '@/lib/bip32-deriver'
-
-import { scripts } from '@/lib/account'
+import { addAccount } from '@/lib/account'
+import { deriveAllAddresses, scripts, type AddressType } from '@/lib/bip32-deriver'
 
 const selectedScript = ref(scripts[3])
 
@@ -60,62 +64,28 @@ const onSubmit = async () => {
   try {
     const fullPath = `m/44'/${pathDepth.value}'/0'/0/0`
     const btcPath = `m/86'/0'/0'/0/0`
-    const mneObj = mvc.Mnemonic.fromString(mnemonicStr)
-    // const hdpk = mneObj.toHDPrivateKey('', network)
-    const mainnetHdpk = mneObj.toHDPrivateKey('', 'mainnet')
-    const mainnetPrivateKey = mainnetHdpk.deriveChild(fullPath).privateKey
-    const mainnetAddress = mainnetPrivateKey.toAddress('mainnet').toString()
 
-    const testnetHdpk = mneObj.toHDPrivateKey('', 'testnet')
-    const testnetPrivateKey = testnetHdpk.deriveChild(fullPath).privateKey
-    const testnetAddress = testnetPrivateKey.toAddress('testnet').toString()
-
-    // const { mainnet: btcMainnet, testnet: btcTestnet } = deriveBTCInfo(mnemonicStr, selectedScript.value.addressType)
-
-    // construct new account object
-    // const account = {
-    //   mnemonic: mnemonicStr,
-    //   mvcIndex: pathDepth.value,
-    //   mvcPath: `m/44'/${pathDepth.value}'/0'/0/0`,
-    //   btcPath,
-    //   btcType: selectedScript.value.addressType,
-    //   mainnet: {
-    //     btc: btcMainnet,
-    //     mvc: {
-    //       address: mainnetAddress,
-    //       privateKey: mainnetPrivateKey.toString(),
-    //       publicKey: ""
-    //     }
-    //   },
-    //   testnet: {
-    //     btc: btcTestnet,
-    //     mvc: {
-    //       address: testnetAddress,
-    //       privateKey: testnetPrivateKey.toString(),
-    //       publicKey: ""
-    //     }
-    //   },
-    //   assetsDisplay: ['SPACE', 'BTC'],
-    // }
-    const allPaths = deriveAllPaths({
+    const allAddresses = deriveAllAddresses({
       mnemonic: mnemonicStr,
       btcPath,
       mvcPath: fullPath,
     })
+
+    // construct new account object
     const account = {
       mnemonic: mnemonicStr,
       assetsDisplay: ['SPACE', 'BTC'],
       mvc: {
-        fullPath,
+        path: fullPath,
         addressType: 'P2PKH' as AddressType,
-        mainnetAddress: allPaths.mvcMainnetAddress,
-        testnetAddress: allPaths.mvcTestnetAddress,
+        mainnetAddress: allAddresses.mvcMainnetAddress,
+        testnetAddress: allAddresses.mvcTestnetAddress,
       },
       btc: {
-        fullPath: btcPath,
+        path: btcPath,
         addressType: selectedScript.value.addressType,
-        mainnetAddress: allPaths.btcMainnetAddress,
-        testnetAddress: allPaths.btcTestnetAddress,
+        mainnetAddress: allAddresses.btcMainnetAddress,
+        testnetAddress: allAddresses.btcTestnetAddress,
       },
     }
 

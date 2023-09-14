@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { ref,onMounted } from "vue"
+import { ref, onMounted } from 'vue'
 import { currentAccount as account, getAddress } from '@/lib/account'
-const address = ref<string>("")
+const address = ref<string>('')
 
 onMounted(async () => {
   address.value = await getAddress()
@@ -17,17 +17,17 @@ onMounted(async () => {
 
     <div class="">
       <div class="label">MVC Path</div>
-      <div class="value">{{ `m/44'/${account?.mvcIndex}'/0'/0/0` }}</div>
+      <div class="value">{{ account.mvc.path }}</div>
     </div>
 
-    <div class="" v-if="account.btcPath">
+    <div class="">
       <div class="label">BTC Path</div>
-      <div class="value">{{ account.btcPath }}</div>
+      <div class="value">{{ account.btc.path }}</div>
     </div>
 
     <div class="">
       <div class="label">BTC Address Type</div>
-      <div class="value">{{ account?.btcType || "Legacy(P2PKH)(m/44'/0'/0')" }}</div>
+      <div class="value">{{ account.btc.addressType || "Legacy(P2PKH)(m/44'/0'/0')" }}</div>
     </div>
   </div>
 </template>

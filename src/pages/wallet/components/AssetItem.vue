@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
 import { useBalanceQuery, getBalance } from '@/queries/balance'
-import { getAddress, btcAddress } from '@/lib/account'
+import { getAddress } from '@/lib/account'
 import { isOfficialToken } from '@/lib/assets'
 import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import type { Asset } from '@/data/assets'

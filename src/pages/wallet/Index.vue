@@ -3,8 +3,6 @@ import Balance from './components/Balance.vue'
 import AccountItem from '../accounts/components/Item.vue'
 import AssetList from './components/AssetList.vue'
 import { currentAccount } from '@/lib/account'
-import { getBTCBalance } from '@/queries/btc'
-
 </script>
 
 <template>

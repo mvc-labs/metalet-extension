@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import { Ref, computed, ref } from 'vue'
 import { mvc } from 'meta-contract'
-import LockIcon from '@/assets/icons/lock.svg?component'
 import { EyeIcon } from '@heroicons/vue/24/solid'
 import { useRouter } from 'vue-router'
-import { addAccount, deriveBTCInfo } from '@/lib/account'
-import passwordManager from '@/lib/password'
+
+import LockIcon from '@/assets/icons/lock.svg?component'
+import { addAccount } from '@/lib/account'
+import { deriveAllAddresses, type AddressType } from '@/lib/bip32-deriver'
 
 const router = useRouter()
 
@@ -26,58 +27,41 @@ const isCover = ref(true)
 const saveAccount = async (backup: boolean) => {
   const mnemonicStr = words.value.join(' ')
   try {
-    const pathDepth = '10001'
-    const btcPath = `m/44'/0'/0'/0/0`
-    const mneObj = mvc.Mnemonic.fromString(mnemonicStr)
-    const mainnetHdpk = mneObj.toHDPrivateKey('', 'mainnet')
-    const mainnetPrivateKey = mainnetHdpk.deriveChild(`m/44'/10001'/0'/0/0`).privateKey
-    const mainnetAddress = mainnetPrivateKey.toAddress('mainnet').toString()
+    const fullPath = `m/44'/10001'/0'/0/0`
+    const btcPath = `m/86'/0'/0'/0/0`
 
-    const testnetHdpk = mneObj.toHDPrivateKey('', 'testnet')
-    const testnetPrivateKey = testnetHdpk.deriveChild(`m/44'/10001'/0'/0/0`).privateKey
-    const testnetAddress = testnetPrivateKey.toAddress('testnet').toString()
+    const allAddresses = deriveAllAddresses({
+      mnemonic: mnemonicStr,
+      btcPath,
+      mvcPath: fullPath,
+    })
 
-    const { mainnet: btcMainnet, testnet: btcTestnet } = deriveBTCInfo(mnemonicStr)
-
+    // construct new account object
     const account = {
       mnemonic: mnemonicStr,
-      mvcIndex: pathDepth,
-      mvcPath: `m/44'/${pathDepth}'/0'/0/0`,
-      btcPath,
-      mainnet: {
-        btc: btcMainnet,
-        mvc: {
-          address: mainnetAddress,
-          privateKey: mainnetPrivateKey.toString(),
-          publicKey: ""
-        }
-      },
-      testnet: {
-        btc: btcTestnet,
-        mvc: {
-          address: testnetAddress,
-          privateKey: testnetPrivateKey.toString(),
-          publicKey: ""
-        }
-      },
       assetsDisplay: ['SPACE', 'BTC'],
+      mvc: {
+        path: fullPath,
+        addressType: 'P2PKH' as AddressType,
+        mainnetAddress: allAddresses.mvcMainnetAddress,
+        testnetAddress: allAddresses.mvcTestnetAddress,
+      },
+      btc: {
+        path: btcPath,
+        addressType: 'P2TR' as AddressType,
+        mainnetAddress: allAddresses.btcMainnetAddress,
+        testnetAddress: allAddresses.btcTestnetAddress,
+      },
     }
-
     await addAccount(account)
 
-    console.log("addAccount");
-    console.log("backup", backup);
-
-
     if (!backup) {
-      console.log("goto successs");
       router.push('/wallet/create-success')
     } else {
       router.push('/wallet/check-backup')
     }
   } catch (e) {
     console.log(e)
-    // error.value = 'Failed to import your wallet'
   }
 }
 </script>
@@ -100,10 +84,14 @@ const saveAccount = async (backup: boolean) => {
         {{ wordsDisplay }}
       </div>
 
-      <div class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-100/30 backdrop-blur"
-        v-if="isCover">
-        <button class="w- flex w-32 items-center justify-center gap-x-2 rounded-full border border-black py-2"
-          @click="isCover = false">
+      <div
+        class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-100/30 backdrop-blur"
+        v-if="isCover"
+      >
+        <button
+          class="w- flex w-32 items-center justify-center gap-x-2 rounded-full border border-black py-2"
+          @click="isCover = false"
+        >
           <EyeIcon class="h-5 w-5" />
           <span>Show</span>
         </button>
