@@ -68,7 +68,7 @@ function deriveBtcAddress(mnemonic: string, path: string, network: 'mainnet' | '
     case 'P2PKH':
       return payments.p2pkh({ pubkey: publicKey, network: btcNetwork }).address ?? raise('Invalid address')
     case 'P2SH-P2WPKH':
-    // return payments.p2sh({ pubkey: publicKey, network: btcNetwork }).address ?? raise('Invalid address')
+      return payments.p2sh({ redeem: payments.p2wpkh({ pubkey: publicKey }) }).address ?? raise('Invalid address')
     case 'P2WPKH':
       return payments.p2wpkh({ pubkey: publicKey, network: btcNetwork }).address ?? raise('Invalid address')
     case 'P2TR':

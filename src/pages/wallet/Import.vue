@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed, Ref, watch } from 'vue'
 import { mvc } from 'meta-contract'
-import { addAccount, deriveBTCInfo } from '@/lib/account'
+import { addAccount } from '@/lib/account'
 import { useRouter } from 'vue-router'
 import { RadioGroup, RadioGroupOption, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import { ChevronRightIcon, TrashIcon } from '@heroicons/vue/24/solid'
@@ -10,7 +10,7 @@ import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
 import { type AddressType } from '@/lib/account'
-import { derive, deriveAllPaths } from '@/lib/address-deriver'
+import { derive, deriveAllPaths } from '@/lib/bip32-deriver'
 
 import { scripts } from '@/lib/account'
 
@@ -70,7 +70,7 @@ const onSubmit = async () => {
     const testnetPrivateKey = testnetHdpk.deriveChild(fullPath).privateKey
     const testnetAddress = testnetPrivateKey.toAddress('testnet').toString()
 
-    const { mainnet: btcMainnet, testnet: btcTestnet } = deriveBTCInfo(mnemonicStr, selectedScript.value.addressType)
+    // const { mainnet: btcMainnet, testnet: btcTestnet } = deriveBTCInfo(mnemonicStr, selectedScript.value.addressType)
 
     // construct new account object
     // const account = {
@@ -275,3 +275,4 @@ const onSubmit = async () => {
     <div class="mt-4 text-center text-sm text-red-500" v-if="error">{{ error }}</div>
   </div>
 </template>
+@/lib/bip32-deriver

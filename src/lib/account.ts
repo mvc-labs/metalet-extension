@@ -57,11 +57,16 @@ export const scripts: {
 //   [chain in Chain]: ChainInfoDetail
 // }
 
-type DerivationDetail = {
+type DerivedAccountDetail = {
   fullPath: string
   addressType: AddressType
   mainnetAddress: string
   testnetAddress: string
+  credential?: {
+    address: string
+    publicKey: string
+    signature: string
+  }
 }
 
 // export type Account = {
@@ -82,8 +87,8 @@ export type Account = {
   name: string
   mnemonic: string
   assetsDisplay: string[]
-  mvc: DerivationDetail
-  btc: DerivationDetail
+  mvc: DerivedAccountDetail
+  btc: DerivedAccountDetail
 }
 
 const isAccountsLoaded = ref(false)
@@ -277,89 +282,89 @@ export async function addAccount(newAccount: Omit<Account, 'id' | 'name'>) {
 //   }
 // }
 
-function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: string): ChainInfoDetail {
-  bip39.validateMnemonic(mnemonic) ?? raise('Invalid mnemonic')
-  const seed = bip39.mnemonicToSeedSync(mnemonic)
-  const root = bip32.fromSeed(seed)
-  switch (btcType) {
-    case 'P2WPKH': {
-      const { publicKey, privateKey } = root.derivePath("m/84'/0'/0'/0/0")
-      const { address = '' } = payments.p2wpkh({
-        pubkey: publicKey,
-        network: network,
-      })
-      return {
-        address,
-        publicKey: publicKey.toString('hex'),
-        privateKey: privateKey?.toString('hex') || '',
-      }
-    }
+// function getBTCInfo(mnemonic: string, network: networks.Network, btcType?: string): ChainInfoDetail {
+//   bip39.validateMnemonic(mnemonic) ?? raise('Invalid mnemonic')
+//   const seed = bip39.mnemonicToSeedSync(mnemonic)
+//   const root = bip32.fromSeed(seed)
+//   switch (btcType) {
+//     case 'P2WPKH': {
+//       const { publicKey, privateKey } = root.derivePath("m/84'/0'/0'/0/0")
+//       const { address = '' } = payments.p2wpkh({
+//         pubkey: publicKey,
+//         network: network,
+//       })
+//       return {
+//         address,
+//         publicKey: publicKey.toString('hex'),
+//         privateKey: privateKey?.toString('hex') || '',
+//       }
+//     }
 
-    case 'P2SH-P2WPKH': {
-      const { publicKey, privateKey } = root.derivePath("m/49'/0'/0'/0/0")
-      const { address = '' } = payments.p2sh({
-        pubkey: publicKey,
-        network: network,
-      })
-      return {
-        address,
-        publicKey: publicKey.toString('hex'),
-        privateKey: privateKey?.toString('hex') || '',
-      }
-    }
+//     case 'P2SH-P2WPKH': {
+//       const { publicKey, privateKey } = root.derivePath("m/49'/0'/0'/0/0")
+//       const { address = '' } = payments.p2sh({
+//         pubkey: publicKey,
+//         network: network,
+//       })
+//       return {
+//         address,
+//         publicKey: publicKey.toString('hex'),
+//         privateKey: privateKey?.toString('hex') || '',
+//       }
+//     }
 
-    case 'P2TR': {
-      const { publicKey, privateKey } = root.derivePath("m/86'/0'/0'/0/0")
-      const { address = '' } = payments.p2tr({
-        pubkey: publicKey.subarray(1),
-        network: network,
-      })
-      return {
-        address,
-        publicKey: publicKey.toString('hex'),
-        privateKey: privateKey?.toString('hex') || '',
-      }
-    }
+//     case 'P2TR': {
+//       const { publicKey, privateKey } = root.derivePath("m/86'/0'/0'/0/0")
+//       const { address = '' } = payments.p2tr({
+//         pubkey: publicKey.subarray(1),
+//         network: network,
+//       })
+//       return {
+//         address,
+//         publicKey: publicKey.toString('hex'),
+//         privateKey: privateKey?.toString('hex') || '',
+//       }
+//     }
 
-    case 'P2PKH': {
-      const { publicKey, privateKey } = root.derivePath("m/44'/0'/0'/0/0")
-      const { address = '' } = payments.p2pkh({
-        pubkey: publicKey,
-        network: network,
-      })
-      return {
-        address,
-        publicKey: publicKey.toString('hex'),
-        privateKey: privateKey?.toString('hex') || '',
-      }
-    }
+//     case 'P2PKH': {
+//       const { publicKey, privateKey } = root.derivePath("m/44'/0'/0'/0/0")
+//       const { address = '' } = payments.p2pkh({
+//         pubkey: publicKey,
+//         network: network,
+//       })
+//       return {
+//         address,
+//         publicKey: publicKey.toString('hex'),
+//         privateKey: privateKey?.toString('hex') || '',
+//       }
+//     }
 
-    default: {
-      const { publicKey, privateKey } = root.derivePath("m/44'/0'/0'/0/0")
-      const { address = '' } = payments.p2pkh({
-        pubkey: publicKey,
-        network: network,
-      })
-      return {
-        address,
-        publicKey: publicKey.toString('hex'),
-        privateKey: privateKey?.toString('hex') || '',
-      }
-    }
-  }
-}
+//     default: {
+//       const { publicKey, privateKey } = root.derivePath("m/44'/0'/0'/0/0")
+//       const { address = '' } = payments.p2pkh({
+//         pubkey: publicKey,
+//         network: network,
+//       })
+//       return {
+//         address,
+//         publicKey: publicKey.toString('hex'),
+//         privateKey: privateKey?.toString('hex') || '',
+//       }
+//     }
+//   }
+// }
 
-export function deriveBTCInfo(
-  mnemonic: string,
-  btcType?: string
-): {
-  [network in Network]: ChainInfoDetail
-} {
-  return {
-    mainnet: getBTCInfo(mnemonic, networks.bitcoin, btcType),
-    testnet: getBTCInfo(mnemonic, networks.testnet, btcType),
-  }
-}
+// export function deriveBTCInfo(
+//   mnemonic: string,
+//   btcType?: string
+// ): {
+//   [network in Network]: ChainInfoDetail
+// } {
+//   return {
+//     mainnet: getBTCInfo(mnemonic, networks.bitcoin, btcType),
+//     testnet: getBTCInfo(mnemonic, networks.testnet, btcType),
+//   }
+// }
 
 export async function getInfo(key: keyof Account): Promise<any> {
   const account = await getCurrentAccount()
