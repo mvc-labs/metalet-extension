@@ -104,6 +104,7 @@ export const signTransaction = (
     r: sig.r.toString('hex'),
     s: sig.s.toString('hex'),
     sig: sig.set({ nhashtype: sigtype }).toTxFormat().toString('hex'),
+    sigDER: sig.set({ nhashtype: sigtype }).toDER().toString('hex'),
     sigtype,
   }
 }
