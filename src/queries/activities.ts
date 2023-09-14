@@ -67,7 +67,7 @@ export const useOneActivityQuery = (
 export const useActivitiesQuery = (address: Ref, params: any, options?: { enabled: ComputedRef<boolean> }) =>
   useQuery({
     queryKey: ['activities', { address: address.value }],
-    queryFn: () => {
+    queryFn: async () => {
       if (params.asset && params.asset.genesis) {
         return fetchTokenActivities(address.value, params.asset)
       }

@@ -8,8 +8,6 @@ import { isOfficialToken } from '@/lib/assets'
 import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import type { Asset } from '@/data/assets'
 import { useExchangeRatesQuery, getExchangeRate } from '@/queries/exchange-rates'
-import { getTagInfo } from '@/data/assets'
-import { getBTCBalance, getBTActivities } from '@/queries/btc'
 
 const { asset } = defineProps<{
   asset: Asset

@@ -1,39 +1,23 @@
 import dayjs from 'dayjs'
-import { API2_ORDERS_EXCHANGE } from '@/data/hosts'
-
-/**
- * get request
- * @param {string} url
- * @param {object} params
- */
-function get(url: string, params = {}) {
-  const p = new URLSearchParams(params).toString()
-  return fetch(`${API2_ORDERS_EXCHANGE}${url}` + '?' + p).then((res) => res.json())
-}
-
-/**
- * post request
- * @param {string} url
- * @param {object} data
- */
-function post(url: string, data = {}) {
-  return fetch(`${API2_ORDERS_EXCHANGE}${url}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  }).then((res) => res.json())
-}
+import { btcApi } from '@/queries/request'
 
 export const getBTCBalance = (address: string) => {
-  return get('/balance', { address })
+  return btcApi('/balance').get({ address })
 }
 
-export const getBTActivities = async (address: string) => {
-  const transactions = await get('/activities', { address })
+export interface Tx {
+  txid: string
+  type: 'input' | 'output'
+  value: number
+  timeStamp: number
+  time: string
+}
 
-  const txs = []
+export const getBTActivities = async (address: string): Promise<Tx[]> => {
+  const transactions = await btcApi('/activities').get({ address })
+  console.log('transactions', transactions)
+
+  const txs: Tx[] = []
 
   for (let tx of transactions) {
     for (let input of tx.vin) {
@@ -65,5 +49,5 @@ export const getBTActivities = async (address: string) => {
 }
 
 export const getBTCPrice = () => {
-  return get('/btc-price')
+  return btcApi('/btc-price').get()
 }

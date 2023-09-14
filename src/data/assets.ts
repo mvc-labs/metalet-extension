@@ -24,18 +24,18 @@ export interface Tag {
 const tags: Tag[] = [
   {
     name: 'BTC',
-    bg: '#fff',
-    color: '#F7931A',
+    bg: '#F7931A',
+    color: '#ffffff',
   },
   {
     name: 'BRC-20',
-    bg: '#F7931A',
+    bg: 'rgb(247, 147, 26, 0.2)',
     color: '#FF981C',
   },
   {
     name: 'MVC',
-    bg: '#fff',
-    color: '#767EFF',
+    bg: '#767EFF',
+    color: '#fff',
   },
   {
     name: 'MetaContract',
@@ -44,8 +44,23 @@ const tags: Tag[] = [
   },
 ]
 
-function getTagInfo(name: string) {
+function getTagInfo(name: string): Tag | undefined {
   return tags.find((tag) => tag.name === name)
+}
+
+function getTags(asset: Asset): Tag[] {
+  const tagList: Tag[] = []
+  const chainTag = getTagInfo(asset.chain.toUpperCase())
+  if (chainTag) {
+    tagList.push(chainTag)
+  }
+  if (asset.contract) {
+    const contractTag = getTagInfo(asset.contract)
+    if (contractTag) {
+      tagList.push(contractTag)
+    }
+  }
+  return tagList
 }
 
 const BTCAssets: Asset[] = [
@@ -84,4 +99,4 @@ const MVCAssets: Asset[] = [
 
 const allAssets = [...BTCAssets, ...MVCAssets]
 
-export { BTCAssets, MVCAssets, getTagInfo, allAssets }
+export { BTCAssets, MVCAssets, getTags, allAssets }

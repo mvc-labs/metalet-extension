@@ -1,13 +1,14 @@
 <script lang="ts" setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { allAssets } from '@/data/assets'
-import { useBalanceQuery } from '@/queries/balance'
+import { type Asset, allAssets, getTags } from '@/data/assets'
+import { getBalance } from '@/queries/balance'
 import { getAddress } from '@/lib/account'
 import { prettifyBalance } from '@/lib/formatters'
 import Activities from './components/Activities.vue'
-import { useExchangeRatesQuery } from '@/queries/exchange-rates'
+import { getExchangeRate } from '@/queries/exchange-rates'
+import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
 
 const { symbol } = defineProps({
   symbol: {
@@ -15,41 +16,43 @@ const { symbol } = defineProps({
     required: true,
   },
 })
-const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol))
+const asset = allAssets.find((asset) => asset.symbol === symbol) as Asset
 
 const router = useRouter()
+const route = useRoute()
 
-const address = ref<string>('')
+const tags = getTags(asset)
+console.log('tags', tags)
 
-onMounted(async () => {
-  address.value = await getAddress(asset.value?.chain)
+const balance = ref(0)
+const exchangeRate = ref('0')
+
+getAddress(asset.chain).then(async (address) => {
+  balance.value = await getBalance(address, asset.chain)
+  console.log('balance', asset.symbol, balance.value)
+
+  exchangeRate.value = await getExchangeRate(asset.symbol)
+  console.log('exchangeRate', asset.symbol, exchangeRate.value)
 })
-
-const enabled = computed(() => !!address.value && asset.value!.queryable)
-const { isLoading, data: balance } = useBalanceQuery(address, symbol, { enabled })
-console.log({ balance })
-
-const rateEnabled = computed(() => !!address.value && asset.value?.symbol === 'SPACE')
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled: rateEnabled })
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
-    const usdRate: number = Number(exchangeRate.value.USD)
-    const balanceInStandardUnit = balance.value / 10 ** asset.value!.decimal
+    const usdRate: number = Number(exchangeRate.value)
+    const balanceInStandardUnit = balance.value / 10 ** asset.decimal
     const exchanged = balanceInStandardUnit * usdRate
 
     // 保留两位
     return `$${exchanged.toFixed(2)}`
   }
 
-  return '--'
+  return '0'
 })
 
 const toSend = () => {
   router.push(`/wallet/send?symbol=${symbol}`)
 }
 const toReceive = () => {
-  router.push(`/wallet/receive?chain=${asset.value!.chain}`)
+  router.push(`/wallet/receive?chain=${asset.chain}`)
 }
 </script>
 
@@ -57,22 +60,33 @@ const toReceive = () => {
   <div class="mt-8 flex flex-col items-center">
     <img :src="asset!.logo" alt="" class="h-20 w-20 rounded-xl" />
 
+    <div class="mt-1.5 flex items-center gap-x-1.5">
+      <div
+        v-for="tag in tags"
+        :key="tag.name"
+        :style="`background-color:${tag.bg};color:${tag.color};`"
+        :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs']"
+      >
+        {{ tag.name }}
+      </div>
+    </div>
+
     <div class="mt-8 flex flex-col items-center self-stretch">
       <template v-if="asset?.queryable">
-        <div class="" v-if="isLoading">--</div>
-        <div class="mb-1 text-center text-xl" v-else-if="balance">
-          {{ prettifyBalance(balance) }}
-        </div>
-        <div class="text-sm text-gray-500" v-if="isExchangeRateLoading">--</div>
-        <div class="text-sm text-gray-500" v-else>{{ exchange }}</div>
+        <div class="mb-1 text-center text-3xl text-[#141416]">{{ prettifyBalance(balance) }} {{ asset.symbol }}</div>
+        <div style="color: #909399">${{ exchange }}USD</div>
 
         <!-- buttons -->
         <div class="mt-8 grid grid-cols-2 gap-x-3 self-stretch">
-          <button class="secondary-btn col-span-1 py-3" @click="toSend">Send</button>
-          <button class="secondary-btn col-span-1 py-3" @click="toReceive">Receive</button>
+          <button class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3" @click="toSend">
+            <ArrowUpRightIcon class="mr-1 h-4 w-4" />Send
+          </button>
+          <button class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3" @click="toReceive">
+            <QrCodeIcon class="mr-1 h-4 w-4" />Receive
+          </button>
         </div>
 
-        <Activities class="mt-8 self-stretch" :asset="asset" />
+        <Activities class="mt-8 self-stretch" :asset="asset" :exchangeRate="Number(exchangeRate)" />
       </template>
 
       <div class="text-gray-500" v-else>No Service for {{ asset?.symbol }} yet.</div>
