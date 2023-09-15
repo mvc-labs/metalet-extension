@@ -9,7 +9,13 @@ export async function process(params: any, host: string) {
   // for (let i = 0; i < params.list.length; i++) {
   //   sigList[i] = sign(wif, params.list[i])
   // }
-  const signature = signTransaction(wif, params.transaction)
+  if (params.returnsTransaction) {
+    const { txHex } = signTransaction(wif, params.transaction, params.returnsTransaction)
+
+    return { txHex }
+  }
+
+  const signature = signTransaction(wif, params.transaction, params.returnsTransaction)
 
   return { signature }
 }
