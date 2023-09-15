@@ -45,8 +45,8 @@ export const fetchBtcActivities = async (address: string): Promise<Activities> =
           flag: '',
           time: Number(activity.transactionTime),
           height: Number(activity.height),
-          income: 0,
-          outcome: new Decimal(activity.amount).times(1e8).toNumber(),
+          income: new Decimal(activity.amount).times(1e8).toNumber(),
+          outcome: 0,
           txid: activity.txId,
         }
       })

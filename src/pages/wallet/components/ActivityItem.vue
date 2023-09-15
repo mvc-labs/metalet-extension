@@ -24,6 +24,8 @@ const difference = computed(() => {
   let display
   let displayClass
 
+  console.log({ outcome, income })
+
   if (outcome > income) {
     display = `-${(outcome - income) / 10 ** decimal} ${symbol}`
     displayClass = 'text-red-700'
