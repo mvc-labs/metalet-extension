@@ -10,18 +10,18 @@ import { getAddress } from '@/lib/account'
 const router = useRouter()
 
 const address: Ref<string> = ref('')
-getAddress().then((add) => {
+getAddress('mvc').then((add) => {
   address.value = add!
 })
 
 const enabled = computed(() => !!address.value)
 
 const { isLoading, data: balance } = useBalanceQuery(address, 'SPACE', { enabled })
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled })
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('SPACE', { enabled })
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
-    const usdRate: number = Number(exchangeRate.value.USD)
+    const usdRate: number = Number(exchangeRate.value.price)
     const balanceInStandardUnit = balance.value / 10 ** 8
     const exchanged = balanceInStandardUnit * usdRate
 

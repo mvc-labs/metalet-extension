@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/vue-query'
-import { mvcApi } from './request'
+import Decimal from 'decimal.js'
 import { ComputedRef, Ref } from 'vue'
-import type { Token } from './tokens'
+
+import { metaletApi, mvcApi } from './request'
+import { type Token } from './tokens'
+import { type Asset } from '@/data/assets'
 
 export type Activity = {
   address: string
@@ -19,7 +22,38 @@ export type TokenActivity = {
 type Activities = ReadonlyArray<Activity>
 type TokenActivities = ReadonlyArray<TokenActivity>
 
-export const fetchActivities = async (address: string): Promise<Activities> => {
+type BtcRawActivity = {
+  amount: string
+  from: string
+  height: string
+  to: string
+  txId: string
+  txFee: string
+  transactionTime: string
+}
+export const fetchBtcActivities = async (address: string): Promise<Activities> => {
+  return metaletApi(`/address/activities`)
+    .get({
+      address,
+      chain: 'btc',
+    })
+    .then((res) => res.data.transactionList)
+    .then((activities: BtcRawActivity[]) => {
+      return activities.map((activity) => {
+        return {
+          address: activity.from,
+          flag: '',
+          time: Number(activity.transactionTime),
+          height: Number(activity.height),
+          income: 0,
+          outcome: new Decimal(activity.amount).times(1e8).toNumber(),
+          txid: activity.txId,
+        }
+      })
+    })
+}
+
+export const fetchSpaceActivities = async (address: string): Promise<Activities> => {
   const unconfirmed: any = mvcApi(`/address/${address}/tx?confirmed=false`).get()
   const confirmed: any = mvcApi(`/address/${address}/tx?confirmed=true`).get()
 
@@ -64,15 +98,46 @@ export const useOneActivityQuery = (
   })
 }
 
-export const useActivitiesQuery = (address: Ref, params: any, options?: { enabled: ComputedRef<boolean> }) =>
-  useQuery({
-    queryKey: ['activities', { address: address.value }],
+export const useActivitiesQuery = (
+  address: Ref,
+  params:
+    | {
+        type: 'native'
+        asset: Asset
+      }
+    | {
+        type: 'token'
+        token: Token
+      },
+  options?: { enabled: ComputedRef<boolean> }
+) => {
+  let queryKeyParams: any
+  if (params.type === 'native') {
+    queryKeyParams = {
+      address: address.value,
+      symbol: params.asset.symbol,
+    }
+  } else {
+    queryKeyParams = {
+      address: address.value,
+      symbol: params.token.symbol,
+      genesis: params.token.genesis,
+    }
+  }
+
+  return useQuery({
+    queryKey: ['activities', queryKeyParams],
     queryFn: async () => {
-      if (params.asset && params.asset.genesis) {
-        return fetchTokenActivities(address.value, params.asset)
+      if (params.type === 'token') {
+        return fetchTokenActivities(address.value, params.token)
       }
 
-      return fetchActivities(address.value)
+      if (params.asset.symbol === 'BTC') {
+        return fetchBtcActivities(address.value)
+      }
+
+      return fetchSpaceActivities(address.value)
     },
     ...options,
   })
+}

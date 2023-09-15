@@ -22,7 +22,6 @@ const asset = allAssets.find((asset) => asset.symbol === symbol) as Asset
 const router = useRouter()
 
 const tags = getTags(asset)
-console.log('tags', tags)
 
 const address: Ref<string> = ref('')
 getAddress(asset.chain).then((add) => {
@@ -30,14 +29,16 @@ getAddress(asset.chain).then((add) => {
 })
 
 const enabled = computed(() => !!address.value && asset.queryable)
-const rateEnabled = computed(() => !!address.value && asset.symbol === 'SPACE')
+const rateEnabled = computed(() => !!address.value && asset.isNative)
 
 const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled: rateEnabled })
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(asset.symbol, {
+  enabled: rateEnabled,
+})
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
-    const usdRate: number = Number(exchangeRate.value.USD)
+    const usdRate: number = Number(exchangeRate.value.price)
     const balanceInStandardUnit = balance.value / 10 ** asset.decimal
     const exchanged = balanceInStandardUnit * usdRate
 
@@ -75,8 +76,10 @@ const toReceive = () => {
       <template v-if="asset?.queryable">
         <div v-if="isLoading">--</div>
         <template v-else-if="balance">
-          <div class="mb-1 text-center text-3xl text-[#141416]">{{ prettifyBalance(balance) }} {{ asset.symbol }}</div>
-          <div style="color: #909399">${{ exchange }}USD</div>
+          <div class="mb-1 text-center text-3xl text-[#141416]">
+            {{ prettifyBalance(balance, symbol) }}
+          </div>
+          <div style="color: #909399">{{ exchange }}</div>
         </template>
 
         <!-- buttons -->

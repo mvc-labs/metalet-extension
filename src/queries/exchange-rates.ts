@@ -4,45 +4,35 @@ import { ComputedRef, Ref } from 'vue'
 import { getBTCPrice } from '@/queries/btc'
 
 import { MVC_API_HOST } from '../data/hosts'
+import { metaletApi } from './request'
 
 export type Rate = {
   symbol: string
-  price: {
-    CNY: string
-    USD: string
-  }
-  remark: string
-  updateTime: number
+  price: number
 }
 
-export const fetchExchangeRates = async (): Promise<Rate[]> => {
-  const response = await axios.get(`${MVC_API_HOST}/metaid-base/v1/exchange/rates`)
-
-  return response.data.result.rates
+export type RawRates = {
+  btc: number
+  space: number
+}
+export const fetchExchangeRates = async (): Promise<RawRates> => {
+  return await metaletApi(`/coin/price`)
+    .get()
+    .then((res) => res.data.priceInfo)
 }
 
 export const useExchangeRatesQuery = (symbol: string, options?: { enabled: ComputedRef<boolean> }) => {
-  const symbolLC = symbol.toLowerCase()
+  const symbolLC = symbol.toLowerCase() as 'btc' | 'space'
   return useQuery({
     queryKey: ['exchangeRates', { symbol }],
     queryFn: () => fetchExchangeRates(),
-    select: (rates: Rate[]) => {
-      return rates.find((rate) => rate.symbol === symbolLC)?.price
+    select: (rates: RawRates) => {
+      const rate = rates[symbolLC]
+      return {
+        symbol,
+        price: rate,
+      }
     },
     ...options,
   })
-}
-
-export const getExchangeRate = async (symbol: string): Promise<string> => {
-  switch (symbol) {
-    case 'SPACE': {
-      const rates = await fetchExchangeRates()
-      return rates.find((rate) => rate.symbol === 'mvc')?.price.USD || '0'
-    }
-    case 'BTC': {
-      return await getBTCPrice()
-    }
-    default:
-      return '0'
-  }
 }

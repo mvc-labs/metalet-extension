@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import Decimal from 'decimal.js'
 
 export const prettifyTimestamp = (timestamp: number, format = 'YYYY-MM-DD HH:mm:ss') => {
   return dayjs(timestamp).format(format)
@@ -8,15 +9,10 @@ export const prettifyTxId = (txId: string) => {
   return `${txId.slice(0, 6)}...${txId.slice(-6)}`
 }
 
-export const prettifyBalance = (balance: number): string => {
+export const prettifyBalance = (balance: number, symbol: string = 'SPACE'): string => {
   if (!balance) return '0'
-  const total = balance
 
-  // 如果小于 1000000，则使用sats为单位
-  if (total < 1e6) return `${total} sats`
-
-  // 否则使用SPACE为单位
-  return `${(total / 1e8).toFixed(8)} SPACE`
+  return `${new Decimal(balance).dividedBy(1e8)} ${symbol}`
 }
 
 export const prettifyTokenBalance = (balance: number, decimal: number, useRound = false): string => {

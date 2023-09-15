@@ -1,6 +1,9 @@
 export const METASV_HOST = 'https://mainnet.mvcapi.com'
 export const METASV_TESTNET_HOST = 'https://testnet.mvcapi.com'
 
+export const MEMPOOL_HOST = 'https://mempool.space'
+export const MEMPOOL_TESTNET_HOST = 'https://mempool.space/testnet'
+
 export const METALET_HOST = 'https://www.metalet.space'
 export const ORDERS_HOST = 'https://api2.orders.exchange'
 

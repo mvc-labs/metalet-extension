@@ -6,23 +6,39 @@ import { useBalanceQuery, getBalance } from '@/queries/balance'
 import { isOfficialToken } from '@/lib/assets'
 import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import type { Asset } from '@/data/assets'
-import { useExchangeRatesQuery, getExchangeRate } from '@/queries/exchange-rates'
+import { useExchangeRatesQuery } from '@/queries/exchange-rates'
+import { getAddress, getCurrentAccount } from '@/lib/account'
+import { getNetwork } from '@/lib/network'
+import { raise } from '@/lib/helpers'
 
 const { asset } = defineProps<{
   asset: Asset
 }>()
 
-const address = ref("")
+const chain = computed(() => asset.chain)
+const address = ref('')
+getCurrentAccount().then(async (account) => {
+  if (!account) return
+
+  const network = await getNetwork()
+  if (network === 'mainnet') {
+    address.value = account[chain.value].mainnetAddress
+  } else {
+    address.value = account[chain.value].testnetAddress
+  }
+})
 
 const enabled = computed(() => !!address.value && asset.queryable)
-const rateEnabled = computed(() => !!address.value && asset.symbol === 'SPACE')
+const rateEnabled = computed(() => !!address.value && asset.isNative)
 
 const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('MVC', { enabled: rateEnabled })
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(asset.symbol, {
+  enabled: rateEnabled,
+})
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
-    const usdRate: number = Number(exchangeRate.value.USD)
+    const usdRate: number = Number(exchangeRate.value.price)
     const balanceInStandardUnit = balance.value / 10 ** asset.decimal
     const exchanged = balanceInStandardUnit * usdRate
 
@@ -41,10 +57,13 @@ const exchange = computed(() => {
         <img class="h-10 w-10 rounded-full" :src="asset.logo" v-if="asset.logo" />
         <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
         <div class="flex flex-col">
-          <div :class="[
-            'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
-            asset.isNative ? 'text-lg' : 'text-sm',
-          ]" :title="asset.tokenName">
+          <div
+            :class="[
+              'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
+              asset.isNative ? 'text-lg' : 'text-sm',
+            ]"
+            :title="asset.tokenName"
+          >
             {{ asset.tokenName }}
             <CheckBadgeIcon class="h-4 w-4 text-blue-500" v-if="asset?.genesis && isOfficialToken(asset.genesis)" />
           </div>
@@ -59,7 +78,7 @@ const exchange = computed(() => {
         <template v-if="asset.queryable">
           <div class="" v-if="isLoading">--</div>
           <div class="" v-else-if="balance">
-            {{ prettifyBalance(balance) }}
+            {{ prettifyBalance(balance, asset.symbol) }}
           </div>
 
           <div class="text-xs text-gray-500" v-if="isExchangeRateLoading">--</div>
@@ -68,13 +87,11 @@ const exchange = computed(() => {
 
         <template v-else-if="asset.total">
           <div class="whitespace-nowrap">
-            {{ prettifyTokenBalance(asset.total, asset.decimal, true) + ' ' + asset.symbol }}
+            {{ prettifyTokenBalance(asset.total, asset.decimal, true) }}
           </div>
         </template>
 
         <div v-else>--</div>
-
-        <div class="text-[#909399]">${{ exchangeRate }} USD</div>
       </div>
     </div>
   </div>

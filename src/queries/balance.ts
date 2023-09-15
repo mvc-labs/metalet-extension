@@ -23,7 +23,6 @@ export const fetchBtcBalance = async (address: string): Promise<Balance> => {
     .then((res) => res.data)
 
   balance.total = balance.confirmed + balance.unconfirmed
-  console.log({ balance })
 
   return balance
 }
@@ -62,7 +61,7 @@ export const useBalanceQuery = (address: Ref, symbol: string, options: { enabled
         case 'SPACE':
           return fetchSpaceBalance(address.value)
         case 'BTC':
-          return getBTCBalance(address.value)
+          return fetchBtcBalance(address.value)
         default:
           return doNothing()
       }

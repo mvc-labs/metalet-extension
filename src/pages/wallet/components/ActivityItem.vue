@@ -6,10 +6,11 @@ import { prettifyTimestamp, prettifyTxId } from '@/lib/formatters'
 import { toTx } from '@/lib/helpers'
 import { getBrowserHost } from '@/lib/host'
 import type { Token } from '@/queries/tokens'
+import { Chain } from '@/lib/account'
 
 const props = defineProps<{
   activity: Activity
-  asset: Token
+  asset: any
 }>()
 
 const isConfirmed = computed(() => {
@@ -42,7 +43,8 @@ const difference = computed(() => {
 
 const toActivityTx = async () => {
   const { txid } = props.activity
-  const host = await getBrowserHost()
+  const chain = props.asset.chain as Chain
+  const host = await getBrowserHost(chain)
   toTx(txid, host as string)
 }
 </script>

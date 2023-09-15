@@ -78,7 +78,7 @@ const copyGenesis = () => {
         <button class="secondary-btn col-span-1 py-3" @click="toReceive">RECEIVE</button>
       </div>
 
-      <Activities class="mt-8 self-stretch" :asset="token" ex/>
+      <Activities class="mt-8 self-stretch" :asset="token" />
     </div>
   </div>
 </template>
