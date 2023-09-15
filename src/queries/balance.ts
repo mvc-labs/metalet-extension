@@ -27,6 +27,21 @@ export const fetchBtcBalance = async (address: string): Promise<Balance> => {
   return balance
 }
 
+export const fetchOrdiBalance = async (address: string): Promise<Balance> => {
+  const { tickList } = await metaletApi(`/address/brc20/asset`)
+    .get({ address, chain: 'btc' })
+    .then((res) => res.data)
+
+  const total = tickList.reduce((sum: number, item: any) => sum + item.balance, 0);
+
+  return {
+    address,
+    confirmed: total,
+    unconfirmed: 0,
+    total,
+  }
+}
+
 export const doNothing = async (): Promise<Balance> => {
   return {
     address: '',
@@ -36,24 +51,9 @@ export const doNothing = async (): Promise<Balance> => {
   }
 }
 
-export const getBalance = async (address: string, symbol: string): Promise<number> => {
-  console.log('symbol', symbol)
-  switch (symbol) {
-    case 'SPACE': {
-      const { confirmed, unconfirmed } = await fetchSpaceBalance(address)
-      return confirmed + unconfirmed
-    }
-    case 'BTC': {
-      console.log('what?')
-      const { confirmed, unconfirmed } = await getBTCBalance(address)
-      return confirmed + unconfirmed
-    }
-    default:
-      return 0
-  }
-}
-
 export const useBalanceQuery = (address: Ref, symbol: string, options: { enabled: ComputedRef<boolean> }) => {
+  console.log("symbol", symbol)
+
   return useQuery({
     queryKey: ['balance', { address, symbol }],
     queryFn: () => {
@@ -62,6 +62,11 @@ export const useBalanceQuery = (address: Ref, symbol: string, options: { enabled
           return fetchSpaceBalance(address.value)
         case 'BTC':
           return fetchBtcBalance(address.value)
+        case 'ORDI':
+          const res = fetchOrdiBalance(address.value)
+          console.log("res", res);
+
+          return res
         default:
           return doNothing()
       }

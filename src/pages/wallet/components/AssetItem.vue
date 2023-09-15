@@ -2,14 +2,13 @@
 import { ref, computed } from 'vue'
 import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
-import { useBalanceQuery, getBalance } from '@/queries/balance'
+import { useBalanceQuery } from '@/queries/balance'
 import { isOfficialToken } from '@/lib/assets'
 import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import type { Asset } from '@/data/assets'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
-import { getAddress, getCurrentAccount } from '@/lib/account'
+import { getCurrentAccount } from '@/lib/account'
 import { getNetwork } from '@/lib/network'
-import { raise } from '@/lib/helpers'
 
 const { asset } = defineProps<{
   asset: Asset
@@ -57,13 +56,10 @@ const exchange = computed(() => {
         <img class="h-10 w-10 rounded-full" :src="asset.logo" v-if="asset.logo" />
         <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
         <div class="flex flex-col">
-          <div
-            :class="[
-              'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
-              asset.isNative ? 'text-lg' : 'text-sm',
-            ]"
-            :title="asset.tokenName"
-          >
+          <div :class="[
+            'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
+            asset.isNative ? 'text-lg' : 'text-sm',
+          ]" :title="asset.tokenName">
             {{ asset.tokenName }}
             <CheckBadgeIcon class="h-4 w-4 text-blue-500" v-if="asset?.genesis && isOfficialToken(asset.genesis)" />
           </div>
