@@ -26,10 +26,17 @@ const btcAddress = ref(
   network.value === 'mainnet' ? props.account.btc.mainnetAddress : props.account.btc.testnetAddress
 )
 
-const isCopied = ref(false)
-const copyAddress = () => {
+const isBTCCopied = ref(false)
+const isMVCCopied = ref(false)
+
+const copyBTCAddress = () => {
+  navigator.clipboard.writeText(btcAddress.value)
+  isBTCCopied.value = true
+}
+
+const copyMVCAddress = () => {
   navigator.clipboard.writeText(mvcAddress.value)
-  isCopied.value = true
+  isMVCCopied.value = true
 }
 
 const randomColor = (key: string) => {
@@ -91,8 +98,8 @@ const openEditNameModal = ref(false)
             <div class="text-sm text-gray-500">{{ shortestAddress(mvcAddress) }}</div>
           </div>
 
-          <ClipboardDocumentCheckIcon class="h-4 w-4 text-blue-500" v-if="isCopied" />
-          <button class="text-gray-400 hover:text-gray-500" @click.stop="copyAddress" type="button" v-else>
+          <ClipboardDocumentCheckIcon class="h-4 w-4 text-blue-500" v-if="isMVCCopied" />
+          <button class="text-gray-400 hover:text-gray-500" @click.stop="copyMVCAddress" type="button" v-else>
             <ClipboardDocumentListIcon class="h-4 w-4" />
           </button>
         </div>
@@ -103,8 +110,8 @@ const openEditNameModal = ref(false)
             <div class="text-sm text-gray-500">{{ shortestAddress(btcAddress) }}</div>
           </div>
 
-          <ClipboardDocumentCheckIcon class="h-4 w-4 text-blue-500" v-if="isCopied" />
-          <button class="text-gray-400 hover:text-gray-500" @click.stop="copyAddress" type="button" v-else>
+          <ClipboardDocumentCheckIcon class="h-4 w-4 text-blue-500" v-if="isBTCCopied" />
+          <button class="text-gray-400 hover:text-gray-500" @click.stop="copyBTCAddress" type="button" v-else>
             <ClipboardDocumentListIcon class="h-4 w-4" />
           </button>
         </div>
