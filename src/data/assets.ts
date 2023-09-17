@@ -110,4 +110,4 @@ const MVCAssets: Asset[] = [
 
 const allAssets = [...BTCAssets, ...MVCAssets]
 
-export { BTCAssets, MVCAssets, allAssets, getTags }
+export { BTCAssets, MVCAssets, allAssets, getTags,getTagInfo }

@@ -23,7 +23,6 @@ const enabled = computed(() => !!address.value)
 const btcAssets = ref(BTCAssets)
 const listedAssets = ref(MVCAssets)
 
-// 用户拥有的代币资产
 const { isLoading, data: userOwnedTokens } = useTokensQuery(address, { enabled })
 type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
 

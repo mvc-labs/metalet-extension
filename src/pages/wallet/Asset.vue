@@ -17,6 +17,7 @@ const { symbol } = defineProps({
     required: true,
   },
 })
+
 const asset = allAssets.find((asset) => asset.symbol === symbol) as Asset
 
 const router = useRouter()
@@ -43,10 +44,10 @@ const exchange = computed(() => {
     const exchanged = balanceInStandardUnit * usdRate
 
     // 保留两位
-    return `$${exchanged.toFixed(2)}`
+    return `$${exchanged.toFixed(2)} USD`
   }
 
-  return '0'
+  return '$0.00 USD'
 })
 
 const toSend = () => {

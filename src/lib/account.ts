@@ -2,11 +2,6 @@ import { Ref, ref } from 'vue'
 import { mvc } from 'meta-contract'
 import bitcoin from 'bitcoinjs-lib'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-import ECPairFactory, { ECPairInterface } from 'ecpair'
-import bitcore from 'bitcore-lib'
-import { decode } from 'bs58check'
-
-const ECPair = ECPairFactory(ecc)
 
 import { AddressType, deriveAddress, derivePrivateKey, derivePublicKey, inferAddressType } from './bip32-deriver'
 import { fetchSpaceBalance } from '@/queries/balance'
