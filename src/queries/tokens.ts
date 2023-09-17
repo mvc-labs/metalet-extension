@@ -1,13 +1,14 @@
+import { SymbolUC } from '@/lib/asset-symbol'
 import { useQuery } from '@tanstack/vue-query'
-import { mvcApi } from './request'
 import { ComputedRef, Ref } from 'vue'
 import tokens from '../data/tokens'
+import { mvcApi } from './request'
 
 export type Token = {
   codehash: string
   genesis: string
   name: string
-  symbol: string
+  symbol: SymbolUC
   decimal: number
   sensibleId: string
   utxoCount: number

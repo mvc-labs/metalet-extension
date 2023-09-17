@@ -22,14 +22,14 @@ const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRate
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
     const usdRate: number = Number(exchangeRate.value.price)
-    const balanceInStandardUnit = balance.value / 10 ** 8
+    const balanceInStandardUnit = balance.value.total / 10 ** 8
     const exchanged = balanceInStandardUnit * usdRate
 
     // 保留两位
     return `$${exchanged.toFixed(2)}`
   }
 
-  return '0'
+  return '--'
 })
 
 function toSelectAsset(purpose: 'receive' | 'send') {

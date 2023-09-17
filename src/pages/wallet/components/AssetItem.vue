@@ -28,7 +28,9 @@ getCurrentAccount().then(async (account) => {
 })
 
 const enabled = computed(() => !!address.value && asset.queryable)
-const rateEnabled = computed(() => !!address.value && asset.isNative)
+const rateEnabled = computed(() => !!address.value)
+
+console.log("asset", asset);
 
 const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
 const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(asset.symbol, {
@@ -36,9 +38,12 @@ const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRate
 })
 
 const exchange = computed(() => {
+  console.log("balance", balance.value?.total);
+  console.log("exchange price", exchangeRate.value?.price);
+
   if (balance.value && exchangeRate.value) {
     const usdRate: number = Number(exchangeRate.value.price)
-    const balanceInStandardUnit = balance.value / 10 ** asset.decimal
+    const balanceInStandardUnit = balance.value.total / 10 ** asset.decimal
     const exchanged = balanceInStandardUnit * usdRate
 
     // 保留两位
@@ -74,7 +79,7 @@ const exchange = computed(() => {
         <template v-if="asset.queryable">
           <div class="" v-if="isLoading">--</div>
           <div class="" v-else-if="balance">
-            {{ prettifyBalance(balance, asset.symbol) }}
+            {{ prettifyBalance(balance.total, asset.symbol) }}
           </div>
 
           <div class="text-xs text-gray-500" v-if="isExchangeRateLoading">--</div>

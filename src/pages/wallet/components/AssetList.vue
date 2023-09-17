@@ -3,12 +3,12 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
 
-import type { Asset } from '@/data/assets'
-import { BTCAssets, MVCAssets } from '@/data/assets'
 import AssetItem from './AssetItem.vue'
-import { getAssetsDisplay } from '@/lib/assets'
-import useTokensQuery from '@/queries/tokens'
 import { getAddress } from '@/lib/account'
+import type { Asset } from '@/data/assets'
+import useTokensQuery from '@/queries/tokens'
+import { getAssetsDisplay } from '@/lib/assets'
+import { BTCAssets, MVCAssets } from '@/data/assets'
 
 const router = useRouter()
 

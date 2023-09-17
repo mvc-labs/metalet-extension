@@ -13,7 +13,6 @@ import { fetchSpaceBalance } from '@/queries/balance'
 import { getStorage, setStorage } from './storage'
 import { generateRandomString, raise } from './helpers'
 import { getNetwork } from './network'
-import BIP32Factory, { BIP32Interface } from 'bip32'
 import { signMessage } from './crypto'
 
 bitcoin.initEccLib(ecc)
@@ -118,6 +117,8 @@ export async function getCurrentAccount(): Promise<Account | null> {
   }
 
   currentAccount.value = await getAccount(currentAccountId)
+  console.log("currentAccount.value", currentAccount.value);
+
 
   return currentAccount.value
 }

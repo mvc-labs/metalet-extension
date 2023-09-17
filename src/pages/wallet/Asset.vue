@@ -39,7 +39,7 @@ const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRate
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
     const usdRate: number = Number(exchangeRate.value.price)
-    const balanceInStandardUnit = balance.value / 10 ** asset.decimal
+    const balanceInStandardUnit = balance.value.total / 10 ** asset.decimal
     const exchanged = balanceInStandardUnit * usdRate
 
     // 保留两位
@@ -77,7 +77,7 @@ const toReceive = () => {
         <div v-if="isLoading">--</div>
         <template v-else-if="balance">
           <div class="mb-1 text-center text-3xl text-[#141416]">
-            {{ prettifyBalance(balance, symbol) }}
+            {{ prettifyBalance(balance.total, symbol) }}
           </div>
           <div style="color: #909399">{{ exchange }}</div>
         </template>

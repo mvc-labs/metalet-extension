@@ -1,9 +1,10 @@
+import { SymbolUC } from '@/lib/asset-symbol'
 import BtcLogoImg from '../assets/images/btc-logo.svg?url'
 import OrdiLogoImg from '../assets/images/ordi-logo.svg?url'
 import SpaceLogoImg from '../assets/images/space-logo.svg?url'
 
 export type Asset = {
-  symbol: string
+  symbol: SymbolUC
   logo: string
   tokenName: string
   isNative: boolean
@@ -76,13 +77,23 @@ const BTCAssets: Asset[] = [
   {
     symbol: 'ORDI',
     logo: OrdiLogoImg,
-    tokenName: 'Ordi',
+    tokenName: 'ORDI',
     isNative: false,
     chain: 'btc',
     queryable: true,
     decimal: 8,
     contract: 'BRC-20',
   },
+  {
+    symbol: 'ORXC',
+    logo: OrdiLogoImg,
+    tokenName: 'ORXC',
+    isNative: false,
+    chain: 'btc',
+    queryable: true,
+    decimal: 8,
+    contract: 'BRC-20',
+  }
 ]
 
 const MVCAssets: Asset[] = [
@@ -99,4 +110,4 @@ const MVCAssets: Asset[] = [
 
 const allAssets = [...BTCAssets, ...MVCAssets]
 
-export { BTCAssets, MVCAssets, getTags, allAssets }
+export { BTCAssets, MVCAssets, allAssets, getTags }
