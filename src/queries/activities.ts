@@ -86,10 +86,10 @@ export const fetchBRC20Activities = async (address: string, symbol: SymbolUC): P
         return {
           address: activity.fromAddress,
           flag: '',
-          time: Number(activity.fromAddress),
+          time: Number(activity.time),
           height: Number(activity.blockHeight),
-          income: activity.fromAddress === address ? Number(activity.amount) : 0,
-          outcome: activity.toAddress === address ? Number(activity.amount) : 0,
+          income: activity.toAddress === address ? Number(activity.amount) : 0,
+          outcome: activity.fromAddress === address ? Number(activity.amount) : 0,
           txid: activity.txId,
         }
       })
