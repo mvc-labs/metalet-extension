@@ -64,7 +64,7 @@ async function sendSpace() {
 }
 
 async function sendBtc() {
-  const wallet = new BtcWallet()
+  const wallet = await BtcWallet.create()
   const sentRes = await wallet.send(recipient.value, amountInSats.value)
 }
 
@@ -116,7 +116,11 @@ async function send() {
 
       <!-- amount input -->
       <div class="relative">
-        <input class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 !text-xs" placeholder="Amount" v-model="amount" />
+        <input
+          class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 !text-xs"
+          placeholder="Amount"
+          v-model="amount"
+        />
         <!-- unit -->
         <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500">
           <div class="border-l border-solid border-gray-500 px-4 py-1">{{ asset.symbol }}</div>

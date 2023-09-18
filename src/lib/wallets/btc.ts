@@ -1,31 +1,36 @@
 import { Psbt } from 'bitcoinjs-lib'
-import { getBtcNetwork } from '../network';
+import { getBtcNetwork, getNetwork } from '../network'
+import { fetchBtcUtxos } from '@/queries/utxos'
+import { deriveAddress } from '../bip32-deriver'
+import { Account, getAccount, getCurrentAccount } from '@/lib/account'
+import { raise } from '../helpers'
 
 export class BtcWallet {
-  constructor() {
-    console.log('BtcWallet constructor')
-  }
+  private account?: Account = undefined
 
-  // getUtxos method
-  public async getUtxos() {
-    const network = await getBtcNetwork()
+  constructor() {}
 
-    const utxos = await regtestUtils.faucetComplex(
-      address,
-      sendAmount,
-      output,
-      network,
-    );
+  static async create() {
+    const wallet = new BtcWallet()
+
+    wallet.account = (await getCurrentAccount()) ?? raise('No account found')
+
+    return wallet
   }
 
   // send method
   public async send(recipient: string, amount: number) {
-    const network = await getBtcNetwork()
+    if (!this.account) throw new Error('hi')
+
+    const network = await getNetwork()
+    const btcNetwork = await getBtcNetwork()
 
     // get my cardinal utxos
-    const utxos = await this.getUtxos()
-    
-    const sendPsbt = new Psbt({ network })
+    const btcAddress = network === 'testnet' ? this.account.btc.testnetAddress : this.account.btc.mainnetAddress
+
+    const utxos = await fetchBtcUtxos(btcAddress)
+
+    const sendPsbt = new Psbt({ network: btcNetwork })
       .addInput({
         hash,
         index,
@@ -37,6 +42,6 @@ export class BtcWallet {
         address: regtestUtils.RANDOM_ADDRESS,
       })
       .signInput(0, tweakedChildNode)
-      .finalizeAllInputs();
+      .finalizeAllInputs()
   }
 }
