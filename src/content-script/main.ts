@@ -17,6 +17,7 @@ import {
   signMessage,
   verifySignature,
   signTransaction,
+  signTransactions,
 } from './actions'
 
 type Metalet = {
@@ -31,6 +32,7 @@ type Metalet = {
   getBalance: any
   merge: any
   signTransaction: any
+  signTransactions: any
   signMessage: any
   verifySignature: any
   getUtxos: any
@@ -77,6 +79,7 @@ const metalet: Metalet = {
   transfer,
   merge,
   signTransaction,
+  signTransactions,
   signMessage,
   verifySignature,
 

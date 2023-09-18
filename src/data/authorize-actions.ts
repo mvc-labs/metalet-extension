@@ -6,6 +6,7 @@ import * as SwitchNetwork from '../lib/actions/switch-network'
 import * as EciesEncrypt from '../lib/actions/ecies-encrypt'
 import * as EciesDecrypt from '../lib/actions/ecies-decrypt'
 import * as SignTransaction from '../lib/actions/sign-transaction'
+import * as SignTransactions from '../lib/actions/sign-transactions'
 import * as SignMessage from '../lib/actions/sign-message'
 import * as Merge from '../lib/actions/merge'
 
@@ -77,6 +78,15 @@ export default {
     title: 'Sign a Transaction',
     description: ['Sign a transaction with my wallet'],
     process: SignTransaction.process,
+    estimate: doNothing,
+    closeAfterProcess: true,
+  },
+
+  SignTransactions: {
+    name: 'Sign Transactions',
+    title: 'Sign Multiple Transactions',
+    description: ['Sign multiple transactions with my wallet as once'],
+    process: SignTransactions.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },

@@ -120,6 +120,9 @@ type SigningTransaction = {
 export async function signTransaction(params: { transaction: SigningTransaction }) {
   return await createAction('SignTransaction', 'authorize', params)
 }
+export async function signTransactions(params: { transactions: SigningTransaction[] }) {
+  return await createAction('SignTransactions', 'authorize', params)
+}
 
 type TransferTask = {
   genesis?: string
