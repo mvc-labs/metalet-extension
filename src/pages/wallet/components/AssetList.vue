@@ -3,12 +3,12 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
 
-import type { Asset } from '@/data/assets'
-import { BTCAssets, MVCAssets } from '@/data/assets'
 import AssetItem from './AssetItem.vue'
-import { getAssetsDisplay } from '@/lib/assets'
-import useTokensQuery from '@/queries/tokens'
 import { getAddress } from '@/lib/account'
+import type { Asset } from '@/data/assets'
+import useTokensQuery from '@/queries/tokens'
+import { getAssetsDisplay } from '@/lib/assets'
+import { BTCAssets, MVCAssets } from '@/data/assets'
 
 const router = useRouter()
 
@@ -23,7 +23,6 @@ const enabled = computed(() => !!address.value)
 const btcAssets = ref(BTCAssets)
 const listedAssets = ref(MVCAssets)
 
-// 用户拥有的代币资产
 const { isLoading, data: userOwnedTokens } = useTokensQuery(address, { enabled })
 type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
 

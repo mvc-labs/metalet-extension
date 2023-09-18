@@ -2,18 +2,12 @@ import { Ref, ref } from 'vue'
 import { mvc } from 'meta-contract'
 import bitcoin from 'bitcoinjs-lib'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-import ECPairFactory, { ECPairInterface } from 'ecpair'
-import bitcore from 'bitcore-lib'
-import { decode } from 'bs58check'
-
-const ECPair = ECPairFactory(ecc)
 
 import { AddressType, deriveAddress, derivePrivateKey, derivePublicKey, inferAddressType } from './bip32-deriver'
 import { fetchSpaceBalance } from '@/queries/balance'
 import { getStorage, setStorage } from './storage'
 import { generateRandomString, raise } from './helpers'
 import { getNetwork } from './network'
-import BIP32Factory, { BIP32Interface } from 'bip32'
 import { signMessage } from './crypto'
 
 bitcoin.initEccLib(ecc)
@@ -118,6 +112,8 @@ export async function getCurrentAccount(): Promise<Account | null> {
   }
 
   currentAccount.value = await getAccount(currentAccountId)
+  console.log("currentAccount.value", currentAccount.value);
+
 
   return currentAccount.value
 }

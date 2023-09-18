@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { BRC20_SYMBOLS } from '@/lib/asset-symbol';
 
 import type { Activity } from '@/queries/activities'
 import { prettifyTimestamp, prettifyTxId } from '@/lib/formatters'
 import { toTx } from '@/lib/helpers'
 import { getBrowserHost } from '@/lib/host'
-import type { Token } from '@/queries/tokens'
 import { Chain } from '@/lib/account'
 
 const props = defineProps<{
@@ -14,6 +14,9 @@ const props = defineProps<{
 }>()
 
 const isConfirmed = computed(() => {
+  if (BRC20_SYMBOLS.includes(props.asset.symbol)) {
+    return props.activity.income > props.activity.outcome
+  }
   return props.activity.height !== -1
 })
 

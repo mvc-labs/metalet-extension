@@ -128,7 +128,7 @@ async function send() {
         <div class="">Your Balance:</div>
         <div class="" v-if="isLoading">--</div>
         <div class="" v-else-if="error">Error</div>
-        <div class="" v-else-if="balance">{{ prettifyBalance(balance, asset.symbol) }}</div>
+        <div class="" v-else-if="balance">{{ prettifyBalance(balance.total, asset.symbol) }}</div>
       </div>
     </div>
 

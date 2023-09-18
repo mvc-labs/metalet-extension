@@ -1,19 +1,30 @@
 import { useQuery } from '@tanstack/vue-query'
-import { metaletApi, mvcApi, ordersApi } from './request'
+import { metaletApi, mvcApi } from './request'
 import { ComputedRef, Ref } from 'vue'
-import { getBTCBalance } from '@/queries/btc'
+import { SymbolUC, BRC20_SYMBOLS } from '@/lib/asset-symbol'
+
+type TokenType = "BRC20"
+
+interface Tick {
+  token: SymbolUC
+  tokenType: TokenType
+  balance: string
+  availableBalance: string
+  transferBalance: string
+}
 
 export type Balance = {
   address: string
-  confirmed: number
-  unconfirmed: number
+  confirmed?: number
+  unconfirmed?: number
+  availableBalance?: number
+  transferBalance?: number
   total: number
 }
 
 export const fetchSpaceBalance = async (address: string): Promise<Balance> => {
   const balance: any = await mvcApi(`/address/${address}/balance`).get()
   balance.total = balance.confirmed + balance.unconfirmed
-
   return balance
 }
 
@@ -27,6 +38,30 @@ export const fetchBtcBalance = async (address: string): Promise<Balance> => {
   return balance
 }
 
+export const fetchBRC20Balance = async (address: string, symbol: SymbolUC): Promise<Balance> => {
+  const { tickList } = await metaletApi(`/address/brc20/asset`)
+    .get({ address, chain: 'btc', tick: symbol.toLowerCase() })
+    .then((res) => res.data)
+
+  const tickAsset = tickList.find((tick: Tick) => tick.token === symbol)
+
+  if (tickAsset) {
+    return {
+      address,
+      availableBalance: Number(tickAsset.availableBalance),
+      transferBalance: Number(tickAsset.transferBalance),
+      total: Number(tickAsset.balance),
+    }
+  }
+
+  return {
+    address,
+    availableBalance: 0,
+    transferBalance: 0,
+    total: 0,
+  }
+}
+
 export const doNothing = async (): Promise<Balance> => {
   return {
     address: '',
@@ -36,24 +71,7 @@ export const doNothing = async (): Promise<Balance> => {
   }
 }
 
-export const getBalance = async (address: string, symbol: string): Promise<number> => {
-  console.log('symbol', symbol)
-  switch (symbol) {
-    case 'SPACE': {
-      const { confirmed, unconfirmed } = await fetchSpaceBalance(address)
-      return confirmed + unconfirmed
-    }
-    case 'BTC': {
-      console.log('what?')
-      const { confirmed, unconfirmed } = await getBTCBalance(address)
-      return confirmed + unconfirmed
-    }
-    default:
-      return 0
-  }
-}
-
-export const useBalanceQuery = (address: Ref, symbol: string, options: { enabled: ComputedRef<boolean> }) => {
+export const useBalanceQuery = (address: Ref, symbol: SymbolUC, options: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
     queryKey: ['balance', { address, symbol }],
     queryFn: () => {
@@ -62,11 +80,15 @@ export const useBalanceQuery = (address: Ref, symbol: string, options: { enabled
           return fetchSpaceBalance(address.value)
         case 'BTC':
           return fetchBtcBalance(address.value)
-        default:
+        default: {
+          if (BRC20_SYMBOLS.includes(symbol)) {
+            return fetchBRC20Balance(address.value, symbol)
+          }
           return doNothing()
+        }
       }
     },
-    select: (data: Balance) => data.confirmed + data.unconfirmed,
     ...options,
+
   })
 }

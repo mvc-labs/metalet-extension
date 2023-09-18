@@ -1,3 +1,4 @@
+import { SymbolUC, BRC20_SYMBOLS } from '@/lib/asset-symbol';
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 import { ComputedRef, Ref } from 'vue'
@@ -31,6 +32,25 @@ type BtcRawActivity = {
   txFee: string
   transactionTime: string
 }
+
+type BRC20RawActivity = {
+  txId: string
+  blockHeight: string
+  state: string
+  tokenType: string
+  actionType: string
+  fromAddress: string
+  toAddress: string
+  amount: string
+  token: string
+  inscriptionId: string
+  inscriptionNumber: string
+  index: string
+  location: string
+  msg: string
+  time: string
+}
+
 export const fetchBtcActivities = async (address: string): Promise<Activities> => {
   return metaletApi(`/address/activities`)
     .get({
@@ -47,6 +67,29 @@ export const fetchBtcActivities = async (address: string): Promise<Activities> =
           height: Number(activity.height),
           income: new Decimal(activity.amount).times(1e8).toNumber(),
           outcome: 0,
+          txid: activity.txId,
+        }
+      })
+    })
+}
+
+export const fetchBRC20Activities = async (address: string, symbol: SymbolUC): Promise<Activities> => {
+  return metaletApi(`/address/brc20/activities`)
+    .get({
+      address,
+      chain: 'btc',
+      tick: symbol,
+    })
+    .then((res) => res.data.inscriptionsList)
+    .then((activities: BRC20RawActivity[]) => {
+      return activities.map((activity) => {
+        return {
+          address: activity.fromAddress,
+          flag: '',
+          time: Number(activity.time),
+          height: Number(activity.blockHeight),
+          income: activity.toAddress === address ? Number(activity.amount) : 0,
+          outcome: activity.fromAddress === address ? Number(activity.amount) : 0,
           txid: activity.txId,
         }
       })
@@ -102,13 +145,13 @@ export const useActivitiesQuery = (
   address: Ref,
   params:
     | {
-        type: 'native'
-        asset: Asset
-      }
+      type: 'native'
+      asset: Asset
+    }
     | {
-        type: 'token'
-        token: Token
-      },
+      type: 'token'
+      token: Token
+    },
   options?: { enabled: ComputedRef<boolean> }
 ) => {
   let queryKeyParams: any
@@ -129,6 +172,9 @@ export const useActivitiesQuery = (
     queryKey: ['activities', queryKeyParams],
     queryFn: async () => {
       if (params.type === 'token') {
+        if (BRC20_SYMBOLS.includes(params.token.symbol)) {
+          return fetchBRC20Activities(address.value, params.token.symbol)
+        }
         return fetchTokenActivities(address.value, params.token)
       }
 
