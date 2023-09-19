@@ -51,6 +51,13 @@ type Metalet = {
     //   getActivities: any
   }
 
+  btc: {
+    getBalance: any
+    getAddress: any
+    getPublicKey: any
+    getUtxos: any
+  }
+
   // Deprecating
   requestAccount: any
   getAccount: any
@@ -82,6 +89,13 @@ const metalet: Metalet = {
   },
   nft: {},
 
+  btc: {
+    getBalance: () => { },
+    getAddress: () => { },
+    getPublicKey: () => { },
+    getUtxos: () => { },
+  },
+
   // Deprecating
   requestAccount: connect,
   getAccount: connect,
@@ -92,4 +106,4 @@ const metalet: Metalet = {
 
 window.metaidwallet = metalet
 
-export {}
+export { }

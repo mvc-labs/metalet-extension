@@ -10,7 +10,7 @@ export const prettifyTxId = (txId: string) => {
 }
 
 export const prettifyBalance = (balance: number, symbol: string = 'SPACE'): string => {
-  if (!balance) return '0'
+  if (!balance) return `0 ${symbol}`
 
   return `${new Decimal(balance).dividedBy(1e8)} ${symbol}`
 }

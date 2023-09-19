@@ -15,7 +15,7 @@ const props = defineProps<{
 
 const isConfirmed = computed(() => {
   if (BRC20_SYMBOLS.includes(props.asset.symbol)) {
-    return props.activity.income > props.activity.outcome
+    return true
   }
   return props.activity.height !== -1
 })
