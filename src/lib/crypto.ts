@@ -91,30 +91,6 @@ export const signTransaction = (
   const publicKey = privateKey.toPublicKey()
   const tx = new mvc.Transaction(txHex)
 
-  if (returnsTransaction) {
-    const sig = new mvc.Transaction.Signature({
-      publicKey,
-      prevTxId: tx.inputs[inputIndex].prevTxId,
-      outputIndex: tx.inputs[inputIndex].outputIndex,
-      inputIndex,
-      signature: mvc.Transaction.Sighash.sign(
-        tx,
-        privateKey,
-        sigtype,
-        inputIndex,
-        tx.inputs[inputIndex].output!.script,
-        tx.inputs[inputIndex].output!.satoshisBN
-      ),
-      sigtype,
-    })
-
-    tx.inputs[inputIndex].setScript(mvc.Script.buildPublicKeyHashIn(sig.publicKey, sig.signature.toDER(), sig.sigtype))
-
-    return {
-      txHex: tx.toString(),
-    }
-  }
-
   let sighash = mvc.Transaction.Sighash.sighash(
     tx,
     sigtype,
@@ -125,11 +101,22 @@ export const signTransaction = (
 
   let sig = mvc.crypto.ECDSA.sign(Buffer.from(sighash, 'hex'), privateKey, 'little')
 
+  if (returnsTransaction) {
+    const signedScript = mvc.Script.buildPublicKeyHashIn(publicKey, sig, sigtype)
+    tx.inputs[inputIndex].setScript(signedScript)
+
+    return {
+      txHex: tx.toString(),
+      txid: tx.id,
+    }
+  }
+
   return {
     publicKey: publicKey.toString(),
     r: sig.r.toString('hex'),
     s: sig.s.toString('hex'),
     sig: sig.set({ nhashtype: sigtype }).toTxFormat().toString('hex'),
     sigtype,
+    txid: tx.id,
   }
 }

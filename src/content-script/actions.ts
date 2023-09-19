@@ -117,6 +117,9 @@ type SigningTransaction = {
   satoshis: number
   sigtype: number
 }
+export async function previewTransaction(params: { transaction: SigningTransaction }) {
+  return await createAction('PreviewTransaction', 'query', params)
+}
 export async function signTransaction(params: { transaction: SigningTransaction }) {
   return await createAction('SignTransaction', 'authorize', params)
 }

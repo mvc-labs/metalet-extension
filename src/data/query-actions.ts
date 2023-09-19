@@ -7,6 +7,7 @@ import * as GetBalance from '../lib/actions/get-balance'
 import * as GetNetwork from '../lib/actions/get-network'
 import * as VerifySignature from '../lib/actions/verify-signature'
 import * as GetTokenBalance from '../lib/actions/token/get-balance'
+import * as PreviewTransaction from '../lib/actions/preview-transaction'
 
 type QueryAction = {
   process: Function
@@ -22,4 +23,5 @@ export default {
   GetTokenBalance,
   VerifySignature,
   GetXPublicKey,
+  PreviewTransaction,
 } as { [key: string]: QueryAction }

@@ -16,6 +16,7 @@ import {
   eciesDecrypt,
   signMessage,
   verifySignature,
+  previewTransaction,
   signTransaction,
   signTransactions,
 } from './actions'
@@ -31,6 +32,7 @@ type Metalet = {
   getXPublicKey: any
   getBalance: any
   merge: any
+  previewTransaction: any
   signTransaction: any
   signTransactions: any
   signMessage: any
@@ -78,6 +80,7 @@ const metalet: Metalet = {
   getUtxos,
   transfer,
   merge,
+  previewTransaction,
   signTransaction,
   signTransactions,
   signMessage,
