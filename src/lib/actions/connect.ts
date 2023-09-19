@@ -3,6 +3,7 @@ import connector from '../connector'
 
 export async function process(params: any, host: string) {
   const account = await getCurrentAccount()
+  console.log({account})
   if (!account) {
     return { address: '', txid: '' }
   }
