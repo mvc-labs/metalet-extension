@@ -16,6 +16,9 @@ import {
   signTransaction,
 } from './actions'
 
+import { createAction } from './actions'
+import { queryKeys, authorizeKeys } from '@/data/keys'
+
 type Metalet = {
   //   signMessage: any
   connect: any
@@ -66,43 +69,55 @@ type Metalet = {
   getSensibleFtBalance: any
 }
 
-const metalet: Metalet = {
-  connect,
-  isConnected,
-  disconnect,
-  getNetwork,
-  switchNetwork,
-  getAddress,
-  getPublicKey,
-  getXPublicKey,
-  getBalance,
-  transfer,
-  merge,
-  signTransaction,
-
-  eciesEncrypt,
-  eciesDecrypt,
+const metalet: any = {
+  // connect,
+  // isConnected,
+  // disconnect,
+  // getNetwork,
+  // switchNetwork,
+  // getAddress,
+  // getPublicKey,
+  // getXPublicKey,
+  // getBalance,
+  // transfer,
+  // merge,
   // signTransaction,
-  // transferAll,
-  token: {
-    getBalance: getTokenBalance,
-  },
-  nft: {},
 
-  btc: {
-    getBalance: () => { },
-    getAddress: () => { },
-    getPublicKey: () => { },
-    getUtxos: () => { },
-  },
+  // eciesEncrypt,
+  // eciesDecrypt,
+  // // signTransaction,
+  // // transferAll,
+  // token: {
+  //   getBalance: getTokenBalance,
+  // },
+  // nft: {},
 
-  // Deprecating
-  requestAccount: connect,
-  getAccount: connect,
-  exitAccount: disconnect,
-  getMvcBalance: getBalance,
-  getSensibleFtBalance: getTokenBalance,
+  // btc: {
+  //   getBalance: () => { },
+  //   getAddress: () => { },
+  //   getPublicKey: () => { },
+  //   getUtxos: () => { },
+  // },
+
+  // // Deprecating
+  // requestAccount: connect,
+  // getAccount: connect,
+  // exitAccount: disconnect,
+  // getMvcBalance: getBalance,
+  // getSensibleFtBalance: getTokenBalance,
 }
+
+// Object.keys(queryActions).forEach((actionName) => {
+//   metalet[actionName] = async (params?: any) => {
+//     return await createAction(actionName, 'query', params)
+//   }
+// })
+
+authorizeKeys.forEach((actionName) => {
+  metalet[actionName] = async (params?: any) => {
+    return await createAction(actionName as string, 'authorize', params)
+  }
+})
 
 window.metaidwallet = metalet
 

@@ -10,7 +10,7 @@ type Echo = {
 
 type ActionType = 'authorize' | 'query'
 
-async function createAction(actionName: string, actionType: ActionType = 'authorize', params?: any): Promise<any> {
+export async function createAction(actionName: string, actionType: ActionType = 'authorize', params?: any): Promise<any> {
   const action = `${actionType}-${actionName}`
   // nonce为32位随机字符串
   const nonce = generateRandomString(16)
@@ -105,6 +105,7 @@ type SigningTransaction = {
   satoshis: number
   sigtype: number
 }
+
 export async function signTransaction(params: { transaction: SigningTransaction }) {
   return await createAction('SignTransaction', 'authorize', params)
 }
