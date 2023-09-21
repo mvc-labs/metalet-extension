@@ -11,7 +11,8 @@ import SelectNetwork from './components/SelectNetwork.vue'
 import ResetModal from '@/components/ResetModal.vue'
 
 function openWindowMode() {
-  window.open(window.location.href, '_blank')
+  const indexLocation = window.location.href.replace('settings', 'wallet')
+  window.open(indexLocation, '_blank')
 }
 
 const router = useRouter()

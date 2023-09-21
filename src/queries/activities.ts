@@ -73,6 +73,7 @@ export const fetchBtcActivities = async (address: string): Promise<Activities> =
     })
 }
 
+
 export const fetchBRC20Activities = async (address: string, symbol: SymbolUC): Promise<Activities> => {
   return metaletApi(`/address/brc20/activities`)
     .get({

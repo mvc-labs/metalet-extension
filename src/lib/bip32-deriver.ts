@@ -64,7 +64,7 @@ function deriveMvcPrivateKey(mnemonic: string, path: string, network: Network): 
   return hdpk.deriveChild(path).privateKey
 }
 
-function deriveBtcPrivateKey(mnemonic: string, path: string, network: Network): BIP32Interface {
+export function deriveBtcPrivateKey(mnemonic: string, path: string, network: Network): BIP32Interface {
   const bip32 = BIP32Factory(ecc)
   const btcNetwork = network === 'mainnet' ? networks.bitcoin : networks.testnet
   const seed = bip39.mnemonicToSeedSync(mnemonic)
