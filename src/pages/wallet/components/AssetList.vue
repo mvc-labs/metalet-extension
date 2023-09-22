@@ -4,27 +4,37 @@ import { useRouter } from 'vue-router'
 import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
 
 import AssetItem from './AssetItem.vue'
+import Brc20AssetItem from './Brc20AssetItem.vue'
 import { getAddress } from '@/lib/account'
 import type { Asset } from '@/data/assets'
 import useTokensQuery from '@/queries/tokens'
 import { getAssetsDisplay } from '@/lib/assets'
 import { BTCAssets, MVCAssets } from '@/data/assets'
+import { useBrc20sQuery } from '@/queries/brc20s'
 
 const router = useRouter()
 
-const address = ref<string>('')
+const mvcAddress = ref<string>('')
+const btcAddress = ref<string>('')
 getAddress().then((add) => {
   if (!add) return router.push('/welcome')
 
-  address.value = add
+  mvcAddress.value = add
 })
-const enabled = computed(() => !!address.value)
+getAddress('btc').then((add) => {
+  console.log({ add })
+  btcAddress.value = add
+})
 
 const btcAssets = ref(BTCAssets)
 const listedAssets = ref(MVCAssets)
 
-const { isLoading, data: userOwnedTokens } = useTokensQuery(address, { enabled })
+const tokenQueryEnabled = computed(() => !!mvcAddress.value)
+const { isLoading, data: userOwnedTokens } = useTokensQuery(mvcAddress, { enabled: tokenQueryEnabled })
 type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
+
+const brc20QueryEnabled = computed(() => !!btcAddress.value)
+const { data: userOwnedBrc20s } = useBrc20sQuery(btcAddress, { enabled: brc20QueryEnabled })
 
 const assetsDisplay = ref<string[]>([])
 getAssetsDisplay().then((display) => {
@@ -58,6 +68,7 @@ function toToken(token: UserOwnedToken) {
     <div class="space-y-2">
       <div class="text-base font-bold text-gray-900">BTC</div>
       <AssetItem v-for="asset in btcAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)" />
+      <Brc20AssetItem v-for="brc20 in userOwnedBrc20s" :key="brc20.symbol" :brc20="brc20" @click="toBrc20(brc20)" />
     </div>
 
     <div class="space-y-2">

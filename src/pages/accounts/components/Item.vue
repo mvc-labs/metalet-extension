@@ -17,8 +17,6 @@ const props = defineProps<{
   showNetwork?: boolean
 }>()
 
-console.log("currentAccount", currentAccount.value);
-
 const mvcAddress = ref(
   network.value === 'mainnet' ? props.account.mvc.mainnetAddress : props.account.mvc.testnetAddress
 )

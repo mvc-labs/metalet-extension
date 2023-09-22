@@ -74,26 +74,26 @@ const BTCAssets: Asset[] = [
     queryable: true,
     decimal: 8,
   },
-  {
-    symbol: 'ORDI',
-    logo: OrdiLogoImg,
-    tokenName: 'ORDI',
-    isNative: false,
-    chain: 'btc',
-    queryable: true,
-    decimal: 8,
-    contract: 'BRC-20',
-  },
-  {
-    symbol: 'ORXC',
-    logo: OrdiLogoImg,
-    tokenName: 'ORXC',
-    isNative: false,
-    chain: 'btc',
-    queryable: true,
-    decimal: 8,
-    contract: 'BRC-20',
-  }
+  // {
+  //   symbol: 'ORDI',
+  //   logo: OrdiLogoImg,
+  //   tokenName: 'ORDI',
+  //   isNative: false,
+  //   chain: 'btc',
+  //   queryable: true,
+  //   decimal: 8,
+  //   contract: 'BRC-20',
+  // },
+  // {
+  //   symbol: 'ORXC',
+  //   logo: OrdiLogoImg,
+  //   tokenName: 'ORXC',
+  //   isNative: false,
+  //   chain: 'btc',
+  //   queryable: true,
+  //   decimal: 8,
+  //   contract: 'BRC-20',
+  // }
 ]
 
 const MVCAssets: Asset[] = [
@@ -110,4 +110,4 @@ const MVCAssets: Asset[] = [
 
 const allAssets = [...BTCAssets, ...MVCAssets]
 
-export { BTCAssets, MVCAssets, allAssets, getTags,getTagInfo }
+export { BTCAssets, MVCAssets, allAssets, getTags, getTagInfo }

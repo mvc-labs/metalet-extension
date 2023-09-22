@@ -112,7 +112,6 @@ export async function getCurrentAccount(): Promise<Account | null> {
   }
 
   currentAccount.value = await getAccount(currentAccountId)
-  console.log('currentAccount.value', currentAccount.value)
 
   return currentAccount.value
 }
