@@ -1,124 +1,27 @@
-import {
-  connect,
-  isConnected,
-  disconnect,
-  getAddress,
-  getPublicKey,
-  getXPublicKey,
-  getBalance,
-  getTokenBalance,
-  transfer,
-  merge,
-  getNetwork,
-  switchNetwork,
-  eciesEncrypt,
-  eciesDecrypt,
-  signTransaction,
-} from './actions'
+import { createAction } from './create-action'
+import { authorizeActionNames } from '../data/authorize-actions'
+import { queryActionNames } from '../data/query-actions'
 
-import { createAction } from './actions'
-import { queryKeys, authorizeKeys } from '@/data/keys'
+const metalet: any = {}
 
-type Metalet = {
-  //   signMessage: any
-  connect: any
-  disconnect: any
-  isConnected: any
-  getNetwork: any
-  switchNetwork: any
-  getAddress: any
-  getPublicKey: any
-  getXPublicKey: any
-  getBalance: any
-  merge: any
-  signTransaction: any
-  //   getUtxos: any
-  //   getActivities: any
-  transfer: any
-  // transferAll: any
-  //   merge: any
+const camelCased = (str: string) => str.charAt(0).toLowerCase() + str.slice(1)
 
-  eciesEncrypt: any
-  eciesDecrypt: any
+queryActionNames.forEach((actionName) => {
+  const actionNameCamelCased = camelCased(actionName)
 
-  token: {
-    //   list: any
-    getBalance: any
-    //   transfer: any
-    //   merge: any
-    //   getActivities: any
+  metalet[actionNameCamelCased] = async (params?: any) => {
+    return await createAction(actionName, 'query', params)
   }
-  nft: {
-    //   list: any
-    //   transfer: any
-    //   getActivities: any
-  }
+})
 
-  btc: {
-    getBalance: any
-    getAddress: any
-    getPublicKey: any
-    getUtxos: any
-  }
+authorizeActionNames.forEach((actionName) => {
+  const actionNameCamelCased = camelCased(actionName)
 
-  // Deprecating
-  requestAccount: any
-  getAccount: any
-  exitAccount: any
-  getMvcBalance: any
-  getSensibleFtBalance: any
-}
-
-const metalet: any = {
-  // connect,
-  // isConnected,
-  // disconnect,
-  // getNetwork,
-  // switchNetwork,
-  // getAddress,
-  // getPublicKey,
-  // getXPublicKey,
-  // getBalance,
-  // transfer,
-  // merge,
-  // signTransaction,
-
-  // eciesEncrypt,
-  // eciesDecrypt,
-  // // signTransaction,
-  // // transferAll,
-  // token: {
-  //   getBalance: getTokenBalance,
-  // },
-  // nft: {},
-
-  // btc: {
-  //   getBalance: () => { },
-  //   getAddress: () => { },
-  //   getPublicKey: () => { },
-  //   getUtxos: () => { },
-  // },
-
-  // // Deprecating
-  // requestAccount: connect,
-  // getAccount: connect,
-  // exitAccount: disconnect,
-  // getMvcBalance: getBalance,
-  // getSensibleFtBalance: getTokenBalance,
-}
-
-// Object.keys(queryActions).forEach((actionName) => {
-//   metalet[actionName] = async (params?: any) => {
-//     return await createAction(actionName, 'query', params)
-//   }
-// })
-
-authorizeKeys.forEach((actionName) => {
-  metalet[actionName] = async (params?: any) => {
+  metalet[actionNameCamelCased] = async (params?: any) => {
     return await createAction(actionName as string, 'authorize', params)
   }
 })
 
 window.metaidwallet = metalet
 
-export { }
+export {}
