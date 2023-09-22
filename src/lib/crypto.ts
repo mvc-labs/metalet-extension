@@ -1,5 +1,6 @@
 import { BN, mvc } from 'meta-contract'
 import { Buffer } from 'buffer'
+import { type Account } from './account'
 
 export function eciesEncrypt(message: string, privateKey: mvc.PrivateKey): string {
   const publicKey = privateKey.toPublicKey()
@@ -72,6 +73,7 @@ type ToSignTransaction = {
   inputIndex: number
   satoshis: number
   sigtype?: number
+  path?: string
 }
 export const signTransaction = (
   wif: string,
@@ -114,9 +116,14 @@ export const signTransaction = (
   }
 }
 
-export const signTransactions = (wif: string, toSignTransactions: ToSignTransaction[]) => {
-  const privateKey = mvc.PrivateKey.fromWIF(wif)
-  const publicKey = privateKey.toPublicKey()
+export const signTransactions = (
+  account: Account,
+  network: 'testnet' | 'mainnet',
+  toSignTransactions: ToSignTransaction[]
+) => {
+  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+  const hdpk = mneObj.toHDPrivateKey('', network)
+  const accountPath = account.path
 
   // find out if transactions other than the first one are dependent on previous ones
   // if so, we need to sign them in order, and sequentially update the prevTxId of the later ones
@@ -159,6 +166,11 @@ export const signTransactions = (wif: string, toSignTransactions: ToSignTransact
       const prevTxId = signedTransactions[toSign.dependsOn].txid
       tx.inputs[inputIndex].prevTxId = Buffer.from(prevTxId, 'hex')
     }
+
+    // find out priv / pub according to path
+    const subPath = toSign.path || '0/0'
+    const privateKey = hdpk.deriveChild(`m/44'/${accountPath}'/0'/${subPath}`).privateKey
+    const publicKey = privateKey.toPublicKey()
 
     // Build signature of this input
     const signature = mvc.Transaction.Sighash.sign(

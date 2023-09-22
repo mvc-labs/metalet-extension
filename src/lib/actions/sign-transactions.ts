@@ -1,12 +1,14 @@
 import { getAddress, getCurrentAccount, privateKey } from '../account'
 import connector from '../connector'
 import { signTransaction, signTransactions } from '../crypto'
+import { getNetwork } from '../network'
 
 export async function process(params: any, host: string) {
-  const wif = await getCurrentAccount().then((account) => privateKey.value)
+  const account = await getCurrentAccount()
+  const network = await getNetwork()
 
   const signingTransactions = params.transactions
-  const signedTransactions = signTransactions(wif, signingTransactions)
+  const signedTransactions = signTransactions(account!, network, signingTransactions)
 
   return { signedTransactions }
 }
