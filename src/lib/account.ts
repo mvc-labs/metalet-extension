@@ -4,7 +4,7 @@ import bitcoin from 'bitcoinjs-lib'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 
 import { AddressType, deriveAddress, derivePrivateKey, derivePublicKey, inferAddressType } from './bip32-deriver'
-import { fetchSpaceBalance } from '@/queries/balance'
+import { fetchSpaceBalance, fetchBtcBalance, doNothing } from '@/queries/balance'
 import { getStorage, setStorage } from './storage'
 import { generateRandomString, raise } from './helpers'
 import { getNetwork } from './network'
@@ -253,14 +253,21 @@ export async function getXPublicKey(chain: Chain = 'mvc'): Promise<string> {
   return xPublicKey
 }
 
-export async function getBalance(address: string) {
+export async function getBalance(address: string, chain: Chain = 'mvc') {
   const account = await getCurrentAccount()
   if (!account) {
     return null
   }
-  const balance = await fetchSpaceBalance(address)
 
-  return balance
+  switch (chain) {
+    case 'mvc':
+      return fetchSpaceBalance(address)
+    case 'btc':
+      return fetchBtcBalance(address)
+    default: {
+      return doNothing()
+    }
+  }
 }
 
 export async function updateName(name: string) {

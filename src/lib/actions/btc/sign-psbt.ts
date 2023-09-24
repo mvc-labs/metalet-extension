@@ -42,8 +42,8 @@ export async function process(
   const networkType = await getNetwork()
   const pubkey = await getPublicKey('btc')
   const addressType = await getAddressType('btc')
-  const psbtNetwork = networkType === 'mainnet' ? networks.bitcoin : networks.testnet
   const privateKey = await getPrivateKey('btc')
+  const psbtNetwork = networkType === 'mainnet' ? networks.bitcoin : networks.testnet
 
   const keyPair = ECPair.fromWIF(privateKey)
 
