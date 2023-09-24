@@ -1,1 +1,137 @@
-(function(){"use strict";const f=(e=32)=>{let t="";const n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";for(let i=0;i<e;i++)t+=n.charAt(Math.floor(Math.random()*n.length));return t};async function p(e,t="authorize",n){const i=`${t}-${e}`,d=f(16),C=window.location.host;window.postMessage({nonce:d,channel:"to-metaidwallet",action:i,host:C,icon:"",params:n||{}},"*");const k=a=>{const l=c=>{if(!(c.source!==window||c.data?.channel!=="from-metaidwallet")){if(c.data?.nonce===d){if(window.removeEventListener("message",l),c.data?.res?.error)throw new Error(c.data.res.error);a&&typeof a=="function"&&a(c.data)}return!0}};window.addEventListener("message",l)};return await new Promise(a=>{k(l=>{a(l.res)})})}function s(e){return()=>import(`../lib/actions/${e.toLowerCase()}`).then(t=>t.process)}function u(e){return()=>import(`../lib/actions/${e.toLowerCase()}`).then(t=>t.estimate)}function r(){}const h={Connect:{name:"Connect",title:"Connect",description:"Connect",process:()=>s("connect"),estimate:r,closeAfterProcess:!0},Disconnect:{name:"Disconnect",title:"Disconnect",description:"Disconnect",process:s("disconnect"),estimate:r,closeAfterProcess:!0},SwitchNetwork:{name:"SwitchNetwork",title:"SwitchNetwork",description:"SwitchNetwork",process:s("switch-network"),estimate:r,closeAfterProcess:!0},TokenTransfer:{name:"TokenTransfer",title:"Token Transfer",description:"Transfer tokens from my wallet to another",process:s("transfer-token"),estimate:u("transfer-token"),closeAfterProcess:!1},Transfer:{name:"Transfer",title:"Transfer",description:"Transfer tokens from my wallet to another",process:s("transfer"),estimate:r,closeAfterProcess:!1},Merge:{name:"Merge",title:"Merge",description:"Merge all the UTXOs into one in my wallet",process:s("merge"),estimate:r,closeAfterProcess:!1},SignTransaction:{name:"Sign a Transaction",title:"Sign a Transaction",description:["Sign a transaction with my wallet"],process:s("sign-transaction"),estimate:r,closeAfterProcess:!0},EciesEncrypt:{name:"ECIES Encrypt",title:"ECIES Encrypt",description:"Encrypt a message with ECIES algorithm",process:s("ecies-encrypt"),estimate:r,closeAfterProcess:!0},EciesDecrypt:{name:"ECIES Decrypt",title:"ECIES Decrypt",description:["Decrypt an encrypted message with ECIES algorithm"],process:s("ecies-decrypt"),estimate:r,closeAfterProcess:!0}},g=Object.keys(h);function o(e){return()=>import(`../lib/actions/${e.toLowerCase()}`).then(t=>t.process)}const y={IsConnected:{process:()=>o("is-connected")},GetNetwork:{process:o("get-network")},GetAddress:{process:o("get-address")},GetPublicKey:{process:o("get-public-key")},GetBalance:{process:o("get-balance")},GetTokenBalance:{process:o("token/get-balance")},GetXPublicKey:{process:o("get-extended-public-key")}},E=Object.keys(y),m={},w=e=>e.charAt(0).toLowerCase()+e.slice(1);E.forEach(e=>{const t=w(e);m[t]=async n=>await p(e,"query",n)}),g.forEach(e=>{const t=w(e);m[t]=async n=>await p(e,"authorize",n)}),window.metaidwallet=m})();
+const m = (t = 32) => {
+  let e = "";
+  const a = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let c = 0; c < t; c++)
+    e += a.charAt(Math.floor(Math.random() * a.length));
+  return e;
+};
+async function n(t, e = "authorize", a) {
+  const c = `${e}-${t}`, u = m(16), l = window.location.host;
+  window.postMessage(
+    {
+      nonce: u,
+      channel: "to-metaidwallet",
+      action: c,
+      host: l,
+      icon: "",
+      params: a || {}
+    },
+    "*"
+  );
+  const h = (i) => {
+    const o = (r) => {
+      if (!(r.source !== window || r.data?.channel !== "from-metaidwallet")) {
+        if (r.data?.nonce === u) {
+          if (window.removeEventListener("message", o), r.data?.res?.error)
+            throw new Error(r.data.res.error);
+          i && typeof i == "function" && i(r.data);
+        }
+        return !0;
+      }
+    };
+    window.addEventListener("message", o);
+  };
+  return await new Promise((i) => {
+    h((o) => {
+      i(o.res);
+    });
+  });
+}
+async function s() {
+  return await n("Connect");
+}
+async function w() {
+  return await n("Disconnect");
+}
+async function B() {
+  return await n("IsConnected", "query");
+}
+async function b() {
+  return await n("GetNetwork", "query");
+}
+async function T() {
+  return await n("SwitchNetwork");
+}
+async function G(t) {
+  return await n("GetAddress", "query", t);
+}
+async function q(t) {
+  return await n("GetPublicKey", "query", t);
+}
+async function A() {
+  return await n("GetXPublicKey", "query");
+}
+async function y() {
+  return await n("GetBalance", "query");
+}
+async function C(t) {
+  return await n("EciesEncrypt", "authorize", t);
+}
+async function E(t) {
+  return await n("EciesDecrypt", "authorize", t);
+}
+async function P(t) {
+  return await n("SignTransaction", "authorize", t);
+}
+async function p(t) {
+  return await n("Transfer", "authorize", t);
+}
+async function z(t) {
+  return await n("Merge", "authorize", t);
+}
+async function g(t) {
+  return await n("GetTokenBalance", "query", t);
+}
+const d = {
+  query: [
+    { name: "getBalance", action: "GetBTCBalance" },
+    { name: "getAddress", action: "GetBTCAddress" },
+    { name: "getPublicKey", action: "GetBTCPublicKey" },
+    { name: "getUtxos", action: "GetBTCUtxos" }
+  ],
+  authorize: [
+    { name: "signPsbt", action: "SignBTCPsbt" },
+    { name: "signMessage", action: "SignBTCMessage" }
+  ]
+}, f = {
+  connect: s,
+  isConnected: B,
+  disconnect: w,
+  getNetwork: b,
+  switchNetwork: T,
+  getAddress: G,
+  getPublicKey: q,
+  getXPublicKey: A,
+  getBalance: y,
+  transfer: p,
+  merge: z,
+  signTransaction: P,
+  eciesEncrypt: C,
+  eciesDecrypt: E,
+  // signTransaction,
+  // transferAll,
+  token: {
+    getBalance: g
+  },
+  nft: {},
+  btc: {},
+  // btc: {
+  //   getBalance: () => {},
+  //   getAddress: () => {},
+  //   getPublicKey: () => {},
+  //   getUtxos: () => {},
+  // },
+  // Deprecating
+  requestAccount: s,
+  getAccount: s,
+  exitAccount: w,
+  getMvcBalance: y,
+  getSensibleFtBalance: g
+};
+Object.keys(d).forEach((t) => {
+  const e = t;
+  d[e].forEach((a) => {
+    f.btc[a.name] = async (c) => await n(a.action, e, c);
+  });
+});
+window.metaidwallet = f;

@@ -1,9 +1,16 @@
-function getProcessor(actionName: string) {
-  return () => import(`../lib/actions/${actionName.toLowerCase()}`).then((m) => m.process)
-}
-function getEstimator(actionName: string) {
-  return () => import(`../lib/actions/${actionName.toLowerCase()}`).then((m) => m.estimate)
-}
+import * as TransferToken from '../lib/actions/transfer-token'
+import * as Transfer from '../lib/actions/transfer'
+import * as Connect from '../lib/actions/connect'
+import * as Disconnect from '../lib/actions/disconnect'
+import * as SwitchNetwork from '../lib/actions/switch-network'
+import * as EciesEncrypt from '../lib/actions/ecies-encrypt'
+import * as EciesDecrypt from '../lib/actions/ecies-decrypt'
+import * as SignTransaction from '../lib/actions/sign-transaction'
+import * as Merge from '../lib/actions/merge'
+
+// BTC
+import * as SignBTCPsbt from '../lib/actions/btc/sign-psbt'
+import * as SignBTCMessage from '../lib/actions/btc/sign-message'
 
 function doNothing() {}
 
@@ -16,44 +23,47 @@ type AuthorizeAction = {
   closeAfterProcess: boolean
 }
 
-const actions = {
+export default {
   Connect: {
     name: 'Connect',
     title: 'Connect',
     description: 'Connect',
-    process: () => getProcessor('connect'),
+    process: Connect.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },
+
   Disconnect: {
     name: 'Disconnect',
     title: 'Disconnect',
     description: 'Disconnect',
-    process: getProcessor('disconnect'),
+    process: Disconnect.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },
+
   SwitchNetwork: {
     name: 'SwitchNetwork',
     title: 'SwitchNetwork',
     description: 'SwitchNetwork',
-    process: getProcessor('switch-network'),
+    process: SwitchNetwork.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },
+
   TokenTransfer: {
     name: 'TokenTransfer',
     title: 'Token Transfer',
     description: 'Transfer tokens from my wallet to another',
-    process: getProcessor('transfer-token'),
-    estimate: getEstimator('transfer-token'),
+    process: TransferToken.process,
+    estimate: TransferToken.estimate,
     closeAfterProcess: false,
   },
   Transfer: {
     name: 'Transfer',
     title: 'Transfer',
     description: 'Transfer tokens from my wallet to another',
-    process: getProcessor('transfer'),
+    process: Transfer.process,
     estimate: doNothing,
     closeAfterProcess: false,
   },
@@ -61,7 +71,7 @@ const actions = {
     name: 'Merge',
     title: 'Merge',
     description: 'Merge all the UTXOs into one in my wallet',
-    process: getProcessor('merge'),
+    process: Merge.process,
     estimate: doNothing,
     closeAfterProcess: false,
   },
@@ -69,15 +79,16 @@ const actions = {
     name: 'Sign a Transaction',
     title: 'Sign a Transaction',
     description: ['Sign a transaction with my wallet'],
-    process: getProcessor('sign-transaction'),
+    process: SignTransaction.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },
+
   EciesEncrypt: {
     name: 'ECIES Encrypt',
     title: 'ECIES Encrypt',
     description: 'Encrypt a message with ECIES algorithm',
-    process: getProcessor('ecies-encrypt'),
+    process: EciesEncrypt.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },
@@ -85,13 +96,26 @@ const actions = {
     name: 'ECIES Decrypt',
     title: 'ECIES Decrypt',
     description: ['Decrypt an encrypted message with ECIES algorithm'],
-    process: getProcessor('ecies-decrypt'),
+    process: EciesDecrypt.process,
+    estimate: doNothing,
+    closeAfterProcess: true,
+  },
+
+  // BTC
+  SignBTCMessage: {
+    name: 'Sign BTC Message',
+    title: 'Sign BTC Message',
+    description: ['Sign BTC Message'],
+    process: SignBTCMessage.process,
+    estimate: doNothing,
+    closeAfterProcess: true,
+  },
+  SignBTCPsbt: {
+    name: 'Sign BTC Psbt',
+    title: 'Sign BTC Psbt',
+    description: ['Sign BTC Psbt'],
+    process: SignBTCPsbt.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },
 } as { [key: string]: AuthorizeAction }
-
-export default actions
-
-const authorizeActionNames = Object.keys(actions)
-export { authorizeActionNames }
