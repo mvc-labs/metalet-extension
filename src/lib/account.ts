@@ -191,6 +191,10 @@ export async function getAddress(chain: Chain = 'mvc'): Promise<string> {
   return getAccountProperty(chain, network === 'mainnet' ? 'mainnetAddress' : 'testnetAddress')
 }
 
+export async function getAddressType(chain: Chain = 'mvc'): Promise<string> {
+  return getAccountProperty(chain, 'addressType')
+}
+
 export async function getPrivateKey(chain: Chain = 'mvc') {
   const network = await getNetwork()
   const mnemonic = await getCurrentAccount().then((account) => account!.mnemonic)
