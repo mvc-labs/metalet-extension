@@ -10,17 +10,26 @@ import useTokensQuery from '@/queries/tokens'
 import { getAssetsDisplay } from '@/lib/assets'
 import { BTCAssets, MVCAssets } from '@/data/assets'
 
+import { fetchBtcAsset } from '@/queries/btc'
+
 const router = useRouter()
 
 const address = ref<string>('')
-getAddress().then((add) => {
-  if (!add) return router.push('/welcome')
-
-  address.value = add
+const btcAssets = ref(BTCAssets)
+getAddress().then((addr) => {
+  if (!addr) return router.push('/welcome')
+  address.value = addr
+  fetchBtcAsset(addr).then(userBRC20Asset => {
+    btcAssets.value = btcAssets.value
+      .filter(asset =>
+        asset.symbol === 'BTC' || userBRC20Asset.includes(asset.symbol))
+  })
 })
+
+
 const enabled = computed(() => !!address.value)
 
-const btcAssets = ref(BTCAssets)
+
 const listedAssets = ref(MVCAssets)
 
 const { isLoading, data: userOwnedTokens } = useTokensQuery(address, { enabled })

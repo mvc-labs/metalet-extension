@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
-import { ordersApi } from '@/queries/request'
+import { ordersApi, metaletApi } from '@/queries/request'
+import { BRC20_Symbol_UC } from '@/lib/asset-symbol'
 
 export const getBTCBalance = (address: string) => {
   return ordersApi('/balance').get({ address })
@@ -50,4 +51,24 @@ export const getBTActivities = async (address: string): Promise<Tx[]> => {
 
 export const getBTCPrice = () => {
   return ordersApi('/btc-price').get()
+}
+
+type TokenType = 'BRC20'
+
+interface Tick {
+  token: BRC20_Symbol_UC
+  tokenType: TokenType
+  balance: string
+  availableBalance: string
+  transferBalance: string
+}
+
+export const fetchBtcAsset = async (address: string): Promise<string[]> => {
+  const brc20Assets = await metaletApi(`/address/brc20/asset`)
+    .get({ address, chain: 'btc' })
+    .then((res) => {
+      return res.data.tickList.map((tick: Tick) => tick.token)
+    })
+
+  return brc20Assets
 }

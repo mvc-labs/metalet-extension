@@ -1,36 +1,9 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'
-import { computed, ref, Ref } from 'vue'
+import { totalBalance } from '@/lib/balance'
 import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
 
-import { useBalanceQuery } from '@/queries/balance'
-import { useExchangeRatesQuery } from '@/queries/exchange-rates'
-import { getAddress } from '@/lib/account'
-
 const router = useRouter()
-
-const address: Ref<string> = ref('')
-getAddress('mvc').then((add) => {
-  address.value = add!
-})
-
-const enabled = computed(() => !!address.value)
-
-const { isLoading, data: balance } = useBalanceQuery(address, 'SPACE', { enabled })
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery('SPACE', { enabled })
-
-const exchange = computed(() => {
-  if (balance.value && exchangeRate.value) {
-    const usdRate: number = Number(exchangeRate.value.price)
-    const balanceInStandardUnit = balance.value.total / 10 ** 8
-    const exchanged = balanceInStandardUnit * usdRate
-
-    // 保留两位
-    return `$${exchanged.toFixed(2)}`
-  }
-
-  return '--'
-})
 
 function toSelectAsset(purpose: 'receive' | 'send') {
   const selectAssetRoute = {
@@ -46,9 +19,8 @@ function toSelectAsset(purpose: 'receive' | 'send') {
 <template>
   <div class="pt-4">
     <div class="text-gray-500">Total Balance</div>
-    <div class="mt-2 text-3xl font-bold" v-if="isLoading || isExchangeRateLoading">--</div>
-    <div class="mt-2 text-3xl font-bold" v-else>
-      {{ exchange }}
+    <div class="mt-2 text-3xl font-bold">
+      $ {{ totalBalance.toFixed(2) }} USD
     </div>
 
     <!-- 接收和发送按钮 -->
