@@ -173,14 +173,14 @@ export const signTransactions = async (
     // find out if this transaction depends on previous ones
     // if so, we need to update the prevTxId of the current one
     if (toSign.dependsOn !== undefined) {
-      // structure replace
+      // structure dependencies
       const wrongTxId = tx.inputs[inputIndex].prevTxId.toString('hex')
       const prevTxId = signedTransactions[toSign.dependsOn].txid
 
-      // data replace
+      // data dependencies
       let wrongDataTxId: string
       let prevDataTxId: string
-      if (toSign.dataDependsOn) {
+      if (toSign.dataDependsOn !== undefined) {
         const dataDependentTx = new mvc.Transaction(toSignTransactionsWithDependsOn[toSign.dataDependsOn].txHex)
         wrongDataTxId = dataDependentTx.id
         prevDataTxId = signedTransactions[toSign.dataDependsOn].txid
@@ -189,9 +189,11 @@ export const signTransactions = async (
         prevDataTxId = prevTxId
       }
 
+      // update the prevTxId of the current tx
       tx.inputs[inputIndex].prevTxId = Buffer.from(prevTxId, 'hex')
 
       // if hasMetaId is true, we need to also update the parent txid written in OP_RETURN
+      // based on the wrongDataTxId and prevDataTxId
       if (hasMetaId) {
         const { messages: metaIdMessages, outputIndex } = await parseLocalTransaction(tx)
 
