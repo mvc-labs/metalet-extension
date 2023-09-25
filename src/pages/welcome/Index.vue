@@ -1,8 +1,10 @@
 <script lang="ts" setup>
-import { useRouter } from 'vue-router'
-import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
 import { ref } from 'vue'
-import { getAccounts, needsMigrationV2 } from '@/lib/account'
+import { useRouter } from 'vue-router'
+
+import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
+import { currentAccount, getAccounts, getCurrentAccount, migrateV2, needsMigrationV2 } from '@/lib/account'
+import { sleep } from '@/lib/helpers'
 
 const router = useRouter()
 
@@ -11,15 +13,25 @@ const createWallet = () => {
 }
 
 const accountsCount = ref(0)
-getAccounts().then((accounts: any) => {
-  accountsCount.value = Object.keys(accounts).length
+getAccounts().then((accounts) => {
+  accountsCount.value = accounts.size
 })
 
 const showingMigrationCover = ref(false)
-needsMigrationV2().then((needsMigration: boolean) => {
+needsMigrationV2().then(async (needsMigration: boolean) => {
   if (needsMigration) {
-    console.log('migrating')
     showingMigrationCover.value = true
+
+    await migrateV2()
+    await sleep(3000)
+
+    showingMigrationCover.value = false
+
+    if (await getCurrentAccount()) {
+      router.push('/')
+    } else {
+      window.location.reload()
+    }
   }
 })
 </script>

@@ -3,7 +3,14 @@ import { mvc } from 'meta-contract'
 import bitcoin from 'bitcoinjs-lib'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 
-import { AddressType, deriveAddress, derivePrivateKey, derivePublicKey, inferAddressType } from './bip32-deriver'
+import {
+  AddressType,
+  deriveAddress,
+  deriveAllAddresses,
+  derivePrivateKey,
+  derivePublicKey,
+  inferAddressType,
+} from './bip32-deriver'
 import { fetchSpaceBalance, fetchBtcBalance, doNothing } from '@/queries/balance'
 import { getStorage, setStorage } from './storage'
 import { generateRandomString, raise } from './helpers'
@@ -134,12 +141,13 @@ export async function removeCurrentAccount(): Promise<boolean> {
 }
 
 export async function connectAccount(accountId: string) {
-  const currentAccount = await getAccount(accountId)
-  if (!currentAccount) {
+  const _currentAccount = await getAccount(accountId)
+  if (!_currentAccount) {
     return false
   }
 
   await setStorage(CURRENT_ACCOUNT_ID, accountId)
+  currentAccount.value = _currentAccount
 
   return true
 }
@@ -310,16 +318,47 @@ export async function migrateV2(): Promise<void> {
   if (!oldRecords) {
     return
   }
-  // const newAccount
+  const oldRecordsIds = Object.keys(oldRecords)
 
-  const accounts = deserializeAccountMap(oldRecords)
-  const currentAccount = await getStorage('currentAccount')
-  if (currentAccount) {
-    await setStorage(CURRENT_ACCOUNT_ID, currentAccount)
+  // loop through old records and construct new accounts map accordingly
+  const newAccounts = new Map()
+  for (let i = 0; i < oldRecordsIds.length; i++) {
+    const oldRecordId = oldRecordsIds[i]
+    const oldRecord = oldRecords[oldRecordId]
+
+    const deriveChainPath = oldRecord.path
+    const path = `m/44'/${deriveChainPath}'/0'/0/0`
+    const rndNameId = generateRandomString(4)
+
+    const allAddresses = deriveAllAddresses({
+      mnemonic: oldRecord.mnemonic,
+      btcPath: path,
+      mvcPath: path,
+    })
+
+    const newAccount = {
+      id: oldRecordId,
+      name: oldRecord.name || `Account ${rndNameId}`,
+      mnemonic: oldRecord.mnemonic,
+      assetsDisplay: ['SPACE', 'BTC'],
+      mvc: {
+        path,
+        addressType: 'P2PKH',
+        mainnetAddress: allAddresses.mvcMainnetAddress,
+        testnetAddress: allAddresses.mvcTestnetAddress,
+      },
+      btc: {
+        path,
+        addressType: 'P2PKH',
+        mainnetAddress: allAddresses.btcMainnetAddress,
+        testnetAddress: allAddresses.btcTestnetAddress,
+      },
+    }
+    newAccounts.set(oldRecordId, newAccount)
   }
 
-  await setAccounts(accounts)
-  await setStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0], '')
+  // set new accounts map
+  await setAccounts(newAccounts)
 }
 
 type AccountManager = {

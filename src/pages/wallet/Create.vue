@@ -28,7 +28,7 @@ const saveAccount = async (backup: boolean) => {
   const mnemonicStr = words.value.join(' ')
   try {
     const fullPath = `m/44'/10001'/0'/0/0`
-    const btcPath = `m/86'/0'/0'/0/0`
+    const btcPath = fullPath
 
     const allAddresses = deriveAllAddresses({
       mnemonic: mnemonicStr,
@@ -48,19 +48,18 @@ const saveAccount = async (backup: boolean) => {
       },
       btc: {
         path: btcPath,
-        addressType: 'P2TR' as AddressType,
+        addressType: 'P2PKH' as AddressType,
         mainnetAddress: allAddresses.btcMainnetAddress,
         testnetAddress: allAddresses.btcTestnetAddress,
       },
     }
     await addAccount(account)
 
-    console.log("addAccount");
-    console.log("backup", backup);
-
+    console.log('addAccount')
+    console.log('backup', backup)
 
     if (!backup) {
-      console.log("goto successs");
+      console.log('goto successs')
       router.push('/wallet/create-success')
     } else {
       router.push('/wallet/check-backup')
@@ -89,10 +88,14 @@ const saveAccount = async (backup: boolean) => {
         {{ wordsDisplay }}
       </div>
 
-      <div class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-100/30 backdrop-blur"
-        v-if="isCover">
-        <button class="w- flex w-32 items-center justify-center gap-x-2 rounded-full border border-black py-2"
-          @click="isCover = false">
+      <div
+        class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-100/30 backdrop-blur"
+        v-if="isCover"
+      >
+        <button
+          class="w- flex w-32 items-center justify-center gap-x-2 rounded-full border border-black py-2"
+          @click="isCover = false"
+        >
           <EyeIcon class="h-5 w-5" />
           <span>Show</span>
         </button>
