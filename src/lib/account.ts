@@ -79,10 +79,6 @@ export const account = ref<Account | null>(null)
 
 export async function getAccounts(refresh = false): Promise<Map<string, Account>> {
   if (!isAccountsLoaded.value) {
-    // TODO
-    // ACCOUNT_STORAGE_HISTORY_KEYS.forEach((key) => {
-    //   deleteStorage(key)
-    // })
     accounts.value = deserializeAccountMap(
       await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: '{}', isParse: false })
     )

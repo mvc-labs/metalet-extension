@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import useNftsQuery, { useOneNftCollectionQuery } from '@/queries/nfts'
 import { useCollectionInfoQuery } from '@/queries/metadata'
@@ -22,11 +22,17 @@ const { meta_txid: txid, meta_output_index: outputIndex } = route.query as {
 }
 const { isLoading: isLoadingCollectionInfo, data: collectionInfo } = useCollectionInfoQuery(txid, Number(outputIndex))
 
-const { isLoading, data: nfts } = useNftsQuery(address, {
-  codehash,
-  genesis,
-  limit: 10,
-})
+const { isLoading, data: nfts } = useNftsQuery(
+  address,
+  {
+    codehash,
+    genesis,
+    limit: 10,
+  },
+  {
+    enabled: computed(() => !!address.value),
+  }
+)
 </script>
 
 <template>

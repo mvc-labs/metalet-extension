@@ -20,7 +20,7 @@ export default defineConfig({
 
   plugins: [alias(), vue(), nodePolyfills(), wasm(), topLevelAwait(), svgLoader()],
   build: {
-    minify: env.VITE_ENVIRONMENT === 'production',
+    minify: env.VITE_ENVIRONMENT !== 'development',
     outDir: 'dist',
     emptyOutDir: false,
     rollupOptions: {
