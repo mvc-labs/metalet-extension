@@ -104,4 +104,27 @@ export async function parse(txid: string, outputIndex: number): Promise<string[]
   return messages
 }
 
+export async function parseLocalTransaction(transaction: mvc.Transaction) {
+  // loop through all outputs and find the one with OP_RETURN
+  const outputs = transaction.outputs
+  const outputIndex = outputs.findIndex((output) => output.script.toASM().includes('OP_RETURN'))
+
+  if (outputIndex === -1)
+    return {
+      messages: [],
+      outputIndex: null,
+    }
+
+  const outputAsm = outputs[outputIndex].script.toASM()
+  const asmFractions = outputAsm.split('OP_RETURN')[1].trim().split(' ')
+  let messages = asmFractions.map((fraction: string) => {
+    return Buffer.from(fraction, 'hex').toString()
+  })
+
+  return {
+    messages,
+    outputIndex,
+  }
+}
+
 export default parseMetaData
