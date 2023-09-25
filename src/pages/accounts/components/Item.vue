@@ -1,14 +1,16 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { Ref, computed, inject, ref } from 'vue'
 import { ClipboardDocumentCheckIcon, ClipboardDocumentListIcon, PencilSquareIcon } from '@heroicons/vue/24/solid'
 import { useRouter } from 'vue-router'
+import { API_NET, API_TARGET, Wallet } from 'meta-contract'
+import { useQueryClient } from '@tanstack/vue-query'
 
-import accountManager, { type Account, currentAccount } from '@/lib/account'
-import { network } from '@/lib/network'
+import accountManager, { type Account, getPrivateKey } from '@/lib/account'
+import { getNetwork, network } from '@/lib/network'
 import { shortestAddress } from '@/lib/formatters'
 
 import EditName from './EditName.vue'
-import { useQueryClient } from '@tanstack/vue-query'
+import { FEEB } from '@/data/config'
 
 const router = useRouter()
 
@@ -55,11 +57,17 @@ const randomColor = (key: string) => {
 }
 
 const queryClient = useQueryClient()
+const wallet = inject<Ref<Wallet>>('wallet')!
 const connect = async () => {
   await accountManager.connect(props.account.id)
 
   // invalidate all queries
   await queryClient.invalidateQueries()
+
+  // update injected wallet
+  const network = await getNetwork()
+  const wif = await getPrivateKey()
+  wallet.value = new Wallet(wif, network as API_NET, FEEB, API_TARGET.MVC)
 
   router.push('/wallet')
 }
