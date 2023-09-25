@@ -8,6 +8,7 @@ import { network } from '@/lib/network'
 import { shortestAddress } from '@/lib/formatters'
 
 import EditName from './EditName.vue'
+import { useQueryClient } from '@tanstack/vue-query'
 
 const router = useRouter()
 
@@ -53,10 +54,13 @@ const randomColor = (key: string) => {
   return colors[index]
 }
 
+const queryClient = useQueryClient()
 const connect = async () => {
   await accountManager.connect(props.account.id)
 
-  // 返回首页
+  // invalidate all queries
+  await queryClient.invalidateQueries()
+
   router.push('/wallet')
 }
 

@@ -143,6 +143,7 @@ export async function connectAccount(accountId: string) {
 
   await setStorage(CURRENT_ACCOUNT_ID, accountId)
   currentAccount.value = _currentAccount
+  account.value = _currentAccount
 
   return true
 }

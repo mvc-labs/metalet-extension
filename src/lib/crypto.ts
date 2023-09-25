@@ -76,6 +76,7 @@ type ToSignTransaction = {
   sigtype?: number
   path?: string
   hasMetaId?: boolean
+  dataDependsOn?: number
 }
 export const signTransaction = async (
   account: Account,
@@ -172,9 +173,22 @@ export const signTransactions = async (
     // find out if this transaction depends on previous ones
     // if so, we need to update the prevTxId of the current one
     if (toSign.dependsOn !== undefined) {
+      // structure replace
       const wrongTxId = tx.inputs[inputIndex].prevTxId.toString('hex')
-
       const prevTxId = signedTransactions[toSign.dependsOn].txid
+
+      // data replace
+      let wrongDataTxId: string
+      let prevDataTxId: string
+      if (toSign.dataDependsOn) {
+        const dataDependentTx = new mvc.Transaction(toSignTransactionsWithDependsOn[toSign.dataDependsOn].txHex)
+        wrongDataTxId = dataDependentTx.id
+        prevDataTxId = signedTransactions[toSign.dataDependsOn].txid
+      } else {
+        wrongDataTxId = wrongTxId
+        prevDataTxId = prevTxId
+      }
+
       tx.inputs[inputIndex].prevTxId = Buffer.from(prevTxId, 'hex')
 
       // if hasMetaId is true, we need to also update the parent txid written in OP_RETURN
@@ -185,8 +199,8 @@ export const signTransactions = async (
           // find out if prevTxId is already in the messages;
           // if so, we need to replace it with the new one
           for (let i = 0; i < metaIdMessages.length; i++) {
-            if (metaIdMessages[i].includes(wrongTxId)) {
-              metaIdMessages[i] = metaIdMessages[i].replace(wrongTxId, prevTxId)
+            if (metaIdMessages[i].includes(wrongDataTxId)) {
+              metaIdMessages[i] = metaIdMessages[i].replace(wrongDataTxId, prevDataTxId)
               break
             }
           }
