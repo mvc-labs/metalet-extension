@@ -109,6 +109,7 @@ browser.runtime.onMessage.addListener(async (msg, sender, response) => {
   if (msg.action?.startsWith('query')) {
     // 调用对应的查询方法
     const action = actions[actionName]
+    console.log('action', msg.params)
     if (action) {
       action.process(msg.params, msg.host as string).then(async (res: any) => {
         // 发送消息给 content-script-tab

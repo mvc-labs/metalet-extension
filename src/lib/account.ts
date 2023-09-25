@@ -189,6 +189,7 @@ async function getAccountProperty(chain: Chain, key: keyof ChainDetail[Chain]): 
 
 export async function getAddress(chain: Chain = 'mvc', path?: string): Promise<string> {
   const network = await getNetwork()
+  const account = await getCurrentAccount()
 
   if (chain === 'btc' || !path) {
     return getAccountProperty(chain, network === 'mainnet' ? 'mainnetAddress' : 'testnetAddress')
@@ -199,7 +200,7 @@ export async function getAddress(chain: Chain = 'mvc', path?: string): Promise<s
     const rootPath = await getMvcRootPath()
     const concatPath = `${rootPath}/${path}`
 
-    const mneObj = mvc.Mnemonic.fromString(account.value!.mnemonic)
+    const mneObj = mvc.Mnemonic.fromString(account!.mnemonic)
     const hdpk = mneObj.toHDPrivateKey('', network)
     const privateKey = hdpk.deriveChild(concatPath).privateKey
 
@@ -269,7 +270,7 @@ export async function getPublicKey(chain: Chain = 'mvc', path?: string): Promise
     const rootPath = await getMvcRootPath()
     const concatPath = `${rootPath}/${path}`
 
-    const mneObj = mvc.Mnemonic.fromString(account.value!.mnemonic)
+    const mneObj = mvc.Mnemonic.fromString(mnemonic)
     const hdpk = mneObj.toHDPrivateKey('', network)
     const privateKey = hdpk.deriveChild(concatPath).privateKey
 
