@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [vue(), nodePolyfills(), wasm(), topLevelAwait()],
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
+      '@': resolve(__dirname, '../src'),
     },
   },
 })

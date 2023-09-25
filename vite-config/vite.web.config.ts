@@ -25,7 +25,7 @@ export default defineConfig({
     emptyOutDir: false,
     rollupOptions: {
       input: {
-        index: new URL('./index.html', import.meta.url).pathname,
+        index: new URL('../index.html', import.meta.url).pathname,
       },
     },
   },

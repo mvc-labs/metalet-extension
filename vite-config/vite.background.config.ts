@@ -8,9 +8,9 @@ export default defineConfig({
   ...baseConfig,
   build: {
     emptyOutDir: false,
-    outDir: resolve(__dirname, 'dist'),
+    outDir: resolve(__dirname, '../dist'),
     lib: {
-      entry: resolve(__dirname, 'src/background.ts'),
+      entry: resolve(__dirname, '../src/background.ts'),
       name: 'Metalet',
       formats: ['es'],
     },
