@@ -56,6 +56,8 @@ const toSend = () => {
 const toReceive = () => {
   router.push(`/wallet/receive?chain=${asset.chain}`)
 }
+
+const isBtcRelated = computed(() => asset.chain === 'btc')
 </script>
 
 <template>
@@ -85,10 +87,19 @@ const toReceive = () => {
 
         <!-- buttons -->
         <div class="mt-8 grid grid-cols-2 gap-x-3 self-stretch">
-          <button class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3" @click="toSend">
+          <button
+            class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3"
+            :class="isBtcRelated && 'hidden'"
+            @click="toSend"
+            :disabled="isBtcRelated"
+          >
             <ArrowUpRightIcon class="mr-1 h-4 w-4" />Send
           </button>
-          <button class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3" @click="toReceive">
+          <button
+            class="secondary-btn flex items-center justify-center gap-x-1 py-3"
+            :class="isBtcRelated ? 'col-span-2' : 'col-span-1'"
+            @click="toReceive"
+          >
             <QrCodeIcon class="mr-1 h-4 w-4" />Receive
           </button>
         </div>

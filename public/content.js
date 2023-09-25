@@ -1,17 +1,17 @@
-const m = (t = 32) => {
+const m = (n = 32) => {
   let e = "";
   const a = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let c = 0; c < t; c++)
+  for (let r = 0; r < n; r++)
     e += a.charAt(Math.floor(Math.random() * a.length));
   return e;
 };
-async function n(t, e = "authorize", a) {
-  const c = `${e}-${t}`, u = m(16), l = window.location.host;
+async function t(n, e = "authorize", a) {
+  const r = `${e}-${n}`, u = m(16), l = window.location.host;
   window.postMessage(
     {
       nonce: u,
       channel: "to-metaidwallet",
-      action: c,
+      action: r,
       host: l,
       icon: "",
       params: a || {}
@@ -19,12 +19,12 @@ async function n(t, e = "authorize", a) {
     "*"
   );
   const h = (i) => {
-    const o = (r) => {
-      if (!(r.source !== window || r.data?.channel !== "from-metaidwallet")) {
-        if (r.data?.nonce === u) {
-          if (window.removeEventListener("message", o), r.data?.res?.error)
-            throw new Error(r.data.res.error);
-          i && typeof i == "function" && i(r.data);
+    const o = (c) => {
+      if (!(c.source !== window || c.data?.channel !== "from-metaidwallet")) {
+        if (c.data?.nonce === u) {
+          if (window.removeEventListener("message", o), c.data?.res?.error)
+            throw new Error(c.data.res.error);
+          i && typeof i == "function" && i(c.data);
         }
         return !0;
       }
@@ -38,51 +38,66 @@ async function n(t, e = "authorize", a) {
   });
 }
 async function s() {
-  return await n("Connect");
-}
-async function w() {
-  return await n("Disconnect");
-}
-async function B() {
-  return await n("IsConnected", "query");
-}
-async function b() {
-  return await n("GetNetwork", "query");
-}
-async function T() {
-  return await n("SwitchNetwork");
-}
-async function G(t) {
-  return await n("GetAddress", "query", t);
-}
-async function q(t) {
-  return await n("GetPublicKey", "query", t);
-}
-async function A() {
-  return await n("GetXPublicKey", "query");
+  return await t("Connect");
 }
 async function y() {
-  return await n("GetBalance", "query");
+  return await t("Disconnect");
 }
-async function C(t) {
-  return await n("EciesEncrypt", "authorize", t);
+async function T() {
+  return await t("IsConnected", "query");
 }
-async function E(t) {
-  return await n("EciesDecrypt", "authorize", t);
+async function B() {
+  return await t("GetNetwork", "query");
 }
-async function P(t) {
-  return await n("SignTransaction", "authorize", t);
+async function b() {
+  return await t("SwitchNetwork");
 }
-async function p(t) {
-  return await n("Transfer", "authorize", t);
+async function q(n) {
+  return await t("GetAddress", "query", n);
 }
-async function z(t) {
-  return await n("Merge", "authorize", t);
+async function G(n) {
+  return await t("GetPublicKey", "query", n);
 }
-async function g(t) {
-  return await n("GetTokenBalance", "query", t);
+async function S() {
+  return await t("GetXPublicKey", "query");
 }
-const d = {
+async function w(n) {
+  return await t("GetBalance", "query", n);
+}
+async function P(n) {
+  return await t("GetUtxos", "query", n);
+}
+async function p(n) {
+  return await t("EciesEncrypt", "authorize", n);
+}
+async function z(n) {
+  return await t("EciesDecrypt", "authorize", n);
+}
+async function A(n) {
+  return await t("SignMessage", "authorize", n);
+}
+async function C(n) {
+  return await t("VerifySignature", "query", n);
+}
+async function E(n) {
+  return await t("PreviewTransaction", "query", n);
+}
+async function M(n) {
+  return await t("SignTransaction", "authorize", n);
+}
+async function K(n) {
+  return await t("SignTransactions", "authorize", n);
+}
+async function k(n) {
+  return await t("Transfer", "authorize", n);
+}
+async function x(n) {
+  return await t("Merge", "authorize", n);
+}
+async function g(n) {
+  return await t("GetTokenBalance", "query", n);
+}
+const f = {
   query: [
     { name: "getBalance", action: "GetBTCBalance" },
     { name: "getAddress", action: "GetBTCAddress" },
@@ -93,21 +108,26 @@ const d = {
     { name: "signPsbt", action: "SignBTCPsbt" },
     { name: "signMessage", action: "SignBTCMessage" }
   ]
-}, f = {
+}, d = {
   connect: s,
-  isConnected: B,
-  disconnect: w,
-  getNetwork: b,
-  switchNetwork: T,
-  getAddress: G,
-  getPublicKey: q,
-  getXPublicKey: A,
-  getBalance: y,
-  transfer: p,
-  merge: z,
-  signTransaction: P,
-  eciesEncrypt: C,
-  eciesDecrypt: E,
+  isConnected: T,
+  disconnect: y,
+  getNetwork: B,
+  switchNetwork: b,
+  getAddress: q,
+  getPublicKey: G,
+  getXPublicKey: S,
+  getBalance: w,
+  getUtxos: P,
+  transfer: k,
+  merge: x,
+  previewTransaction: E,
+  signTransaction: M,
+  signTransactions: K,
+  signMessage: A,
+  verifySignature: C,
+  eciesEncrypt: p,
+  eciesDecrypt: z,
   // signTransaction,
   // transferAll,
   token: {
@@ -124,14 +144,14 @@ const d = {
   // Deprecating
   requestAccount: s,
   getAccount: s,
-  exitAccount: w,
-  getMvcBalance: y,
+  exitAccount: y,
+  getMvcBalance: w,
   getSensibleFtBalance: g
 };
-Object.keys(d).forEach((t) => {
-  const e = t;
-  d[e].forEach((a) => {
-    f.btc[a.name] = async (c) => await n(a.action, e, c);
+Object.keys(f).forEach((n) => {
+  const e = n;
+  f[e].forEach((a) => {
+    d.btc[a.name] = async (r) => await t(a.action, e, r);
   });
 });
-window.metaidwallet = f;
+window.metaidwallet = d;

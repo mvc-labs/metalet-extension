@@ -1,7 +1,7 @@
 import accountManager from '../account'
 
 export async function process(params: any, host: string) {
-  const balance = await accountManager.getBalance("")
+  const balance = await accountManager.getBalance('mvc')
 
   return balance
 }

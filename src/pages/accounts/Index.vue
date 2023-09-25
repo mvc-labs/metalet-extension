@@ -4,12 +4,11 @@ import accountManager from '@/lib/account'
 
 import AccountItem from './components/Item.vue'
 import { PlusIcon } from '@heroicons/vue/20/solid'
-import { toRaw } from 'vue';
+import { toRaw } from 'vue'
 
 const accounts = ref()
 accountManager.all().then((res) => {
-  console.log(toRaw(res))
-  accounts.value = Array.from(toRaw(res), ([key, value]) => (value))
+  accounts.value = Array.from(toRaw(res), ([key, value]) => value)
 })
 </script>
 
