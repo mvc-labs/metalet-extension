@@ -1,4 +1,4 @@
-import { SymbolUC, BRC20_SYMBOLS } from '@/lib/asset-symbol';
+import { SymbolUC, BRC20_SYMBOLS } from '@/lib/asset-symbol'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 import { ComputedRef, Ref } from 'vue'
@@ -65,8 +65,8 @@ export const fetchBtcActivities = async (address: string): Promise<Activities> =
           flag: '',
           time: Number(activity.transactionTime),
           height: Number(activity.height),
-          income: 0,
-          outcome: new Decimal(activity.amount).times(1e8).toNumber(),
+          income: new Decimal(activity.amount).times(1e8).toNumber(),
+          outcome: 0,
           txid: activity.txId,
         }
       })
@@ -145,13 +145,13 @@ export const useActivitiesQuery = (
   address: Ref,
   params:
     | {
-      type: 'native'
-      asset: Asset
-    }
+        type: 'native'
+        asset: Asset
+      }
     | {
-      type: 'token'
-      token: Token
-    },
+        type: 'token'
+        token: Token
+      },
   options?: { enabled: ComputedRef<boolean> }
 ) => {
   let queryKeyParams: any
