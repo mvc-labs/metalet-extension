@@ -1,12 +1,30 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { currentAccount as account, updateBtcPath } from '@/lib/account'
-import { scripts } from '@/lib/bip32-deriver'
 import { RadioGroup, RadioGroupLabel, RadioGroupDescription, RadioGroupOption } from '@headlessui/vue'
 
-const index = scripts.findIndex((script) => script.addressType === (account.value?.btc.addressType || 'P2PKH'))
+import { currentAccount as account, updateBtcPath } from '@/lib/account'
+import { scripts } from '@/lib/bip32-deriver'
+
+let index = scripts.findIndex((script) => script.addressType === (account.value?.btc.addressType || 'P2PKH'))
+if (index === 3) {
+  // determine if the mvc path is the same as the btc path
+  if (account.value?.mvc.path === account.value?.btc.path) {
+    index = 4
+  }
+}
+
+const mvcPath = ref(account.value?.mvc.path || '')
 
 const selected = ref(scripts[index])
+
+const onUpdateBtcPath = async (script: (typeof scripts)[number]) => {
+  selected.value = script
+  if (script.name === 'Same as MVC') {
+    await updateBtcPath(mvcPath.value)
+  } else {
+    await updateBtcPath(script.path)
+  }
+}
 </script>
 
 <template>
@@ -23,7 +41,7 @@ const selected = ref(scripts[index])
             v-slot="{ checked }"
           >
             <div
-              @click="updateBtcPath(script.path)"
+              @click="onUpdateBtcPath(script)"
               :class="[checked ? ' ' : 'bg-[#f5f5f5] ']"
               class="relative flex cursor-pointer rounded-lg px-5 py-4 shadow-md focus:outline-none"
               :style="checked ? 'background: linear-gradient(98deg, #72F5F6 4%, #171AFF 94%)' : ''"
@@ -37,7 +55,7 @@ const selected = ref(scripts[index])
                     <RadioGroupDescription as="span" :class="checked ? 'text-sky-100' : 'text-gray-500'" class="inline">
                       <span> {{ script.addressType }}</span>
                       <span aria-hidden="true"> &middot; </span>
-                      <span>{{ script.path }}</span>
+                      <span>{{ script.name === 'Same as MVC' ? mvcPath : script.path }}</span>
                     </RadioGroupDescription>
                   </div>
                 </div>

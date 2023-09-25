@@ -59,7 +59,7 @@ const exchange = computed(() => {
       <div class="flex items-center gap-x-3">
         <img class="h-10 w-10 rounded-full" :src="asset.logo" v-if="asset.logo" />
         <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
-        <div class="flex flex-col gap-y-1.5">
+        <div class="flex flex-col gap-y-1 items-start">
           <div
             :class="[
               'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
@@ -73,13 +73,13 @@ const exchange = computed(() => {
               v-if="asset?.genesis && isOfficialToken(asset.genesis)"
             />
           </div>
-          <div v-if="tag">
-            <div
-              :style="`background-color:${tag.bg};color:${tag.color};`"
-              :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs', 'inline-block']"
-            >
-              {{ tag.name }}
-            </div>
+
+          <div
+            :style="`background-color:${tag.bg};color:${tag.color};`"
+            :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs', 'inline-block']"
+            v-if="tag"
+          >
+            {{ tag.name }}
           </div>
         </div>
       </div>
