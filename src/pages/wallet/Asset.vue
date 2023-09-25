@@ -6,7 +6,7 @@ import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
 import { type Asset, allAssets, getTags } from '@/data/assets'
 import { useBalanceQuery } from '@/queries/balance'
 import { getAddress } from '@/lib/account'
-import { prettifyBalance } from '@/lib/formatters'
+import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 
 import Activities from './components/Activities.vue'
@@ -80,7 +80,7 @@ const isBtcRelated = computed(() => asset.chain === 'btc')
         <div v-if="isLoading">--</div>
         <template v-else-if="balance">
           <div class="mb-1 text-center text-3xl text-[#141416]">
-            {{ prettifyBalance(balance.total, symbol) }}
+            {{ prettifyTokenBalance(balance.total, asset.decimal, false, symbol) }}
           </div>
           <div style="color: #909399">{{ exchange }}</div>
         </template>

@@ -88,7 +88,15 @@ const exchange = computed(() => {
         <template v-if="asset.queryable">
           <div class="" v-if="isLoading">--</div>
           <div class="" v-else-if="balance">
-            {{ prettifyBalance(balance.total, asset.symbol) }}
+            <span v-if="asset.isNative">
+              {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
+            </span>
+            <span v-else-if="asset.contract === 'BRC-20'">
+              {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
+            </span>
+            <span v-else>
+              {{ prettifyTokenBalance(balance.total, asset.decimal, true) }}
+            </span>
           </div>
 
           <div class="text-xs text-gray-500" v-if="isExchangeRateLoading">--</div>
