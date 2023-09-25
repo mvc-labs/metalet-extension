@@ -5,7 +5,7 @@ export async function process(params: any, host: string) {
   console.log('connect process load')
 
   const account = await getCurrentAccount()
-  console.log({ account })
+
   if (!account) {
     return { address: '', txid: '' }
   }
@@ -13,7 +13,6 @@ export async function process(params: any, host: string) {
   await connector.connect(account.id, host)
 
   const address = await getAddress()
-  console.log({ address })
 
   return { address }
 }

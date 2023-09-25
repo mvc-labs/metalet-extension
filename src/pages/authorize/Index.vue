@@ -14,6 +14,8 @@ import SwitchNetwork from './SwitchNetwork.vue'
 import EciesEncrypt from './EciesEncrypt.vue'
 import EciesDecrypt from './EciesDecrypt.vue'
 import SignTransaction from './SignTransaction.vue'
+import SignTransactions from './SignTransactions.vue'
+import SignMessage from './SignMessage.vue'
 import Merge from './Merge.vue'
 import { getBrowserHost } from '@/lib/host'
 import { LinkIcon } from '@heroicons/vue/20/solid'
@@ -177,6 +179,8 @@ const cancelAction = async () => {
       <EciesEncrypt v-if="actionName === 'EciesEncrypt'" :params="params" />
       <EciesDecrypt v-if="actionName === 'EciesDecrypt'" :params="params" />
       <SignTransaction v-if="actionName === 'SignTransaction'" :params="params" />
+      <SignTransactions v-if="actionName === 'SignTransactions'" :params="params" />
+      <SignMessage v-if="actionName === 'SignMessage'" :params="params" />
     </div>
 
     <!-- buttons -->

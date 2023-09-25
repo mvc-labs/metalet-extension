@@ -17,6 +17,11 @@ export default defineConfig({
   define: {
     'process.env': {},
   },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
   build: {
     emptyOutDir: false,
     outDir: resolve(__dirname, 'dist'),

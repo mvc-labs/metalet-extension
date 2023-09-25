@@ -1,4 +1,5 @@
 import { Ref, ref } from 'vue'
+import { fetchUtxos } from '../queries/utxos'
 import { mvc } from 'meta-contract'
 import bitcoin from 'bitcoinjs-lib'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
@@ -74,8 +75,6 @@ function deserializeAccountMap(json: string): Map<string, Account> {
   return map
 }
 
-export const address = ref('')
-export const privateKey = ref('')
 export const account = ref<Account | null>(null)
 
 export async function getAccounts(refresh = false): Promise<Map<string, Account>> {
@@ -192,13 +191,36 @@ async function getAccountProperty(chain: Chain, key: keyof ChainDetail[Chain]): 
   return account[chain][key]
 }
 
-export async function getAddress(chain: Chain = 'mvc'): Promise<string> {
+export async function getAddress(chain: Chain = 'mvc', path?: string): Promise<string> {
   const network = await getNetwork()
-  return getAccountProperty(chain, network === 'mainnet' ? 'mainnetAddress' : 'testnetAddress')
+
+  if (chain === 'btc' || !path) {
+    return getAccountProperty(chain, network === 'mainnet' ? 'mainnetAddress' : 'testnetAddress')
+  }
+
+  // derive mvc address by path
+  try {
+    const rootPath = await getMvcRootPath()
+    const concatPath = `${rootPath}/${path}`
+
+    const mneObj = mvc.Mnemonic.fromString(account.value!.mnemonic)
+    const hdpk = mneObj.toHDPrivateKey('', network)
+    const privateKey = hdpk.deriveChild(concatPath).privateKey
+
+    return privateKey.toAddress(network).toString()
+  } catch (e: any) {
+    throw new Error(e.message)
+  }
 }
 
 export async function getAddressType(chain: Chain = 'mvc'): Promise<string> {
   return getAccountProperty(chain, 'addressType')
+}
+
+export async function getMvcRootPath(): Promise<string> {
+  const mvcFullPath = await getAccountProperty('mvc', 'path')
+
+  return mvcFullPath.slice(0, mvcFullPath.length - 4)
 }
 
 export async function getPrivateKey(chain: Chain = 'mvc') {
@@ -219,7 +241,8 @@ export async function getCredential(
 
   const message = 'metalet.space'
   const wif = await getPrivateKey(chain)
-  const { signature } = signMessage(wif, message)
+  const privateKey = mvc.PrivateKey.fromWIF(wif)
+  const { signature } = signMessage(message, privateKey)
   const address = await getAddress(chain)
   const publicKey = await getPublicKey(chain)
   const newCredential = {
@@ -235,17 +258,32 @@ export async function getCredential(
   return newCredential
 }
 
-export async function getPublicKey(chain: Chain = 'mvc'): Promise<string> {
+export async function getPublicKey(chain: Chain = 'mvc', path?: string): Promise<string> {
   const network = await getNetwork()
   const mnemonic = await getCurrentAccount().then((account) => account!.mnemonic)
-  const path = await getAccountProperty(chain, 'path')
 
-  return derivePublicKey({ mnemonic, chain, network, path })
+  if (!path) {
+    const fullPath = await getAccountProperty(chain, 'path')
+
+    return derivePublicKey({ mnemonic, chain, network, path: fullPath })
+  }
+
+  // derive mvc public key by path
+  try {
+    const rootPath = await getMvcRootPath()
+    const concatPath = `${rootPath}/${path}`
+
+    const mneObj = mvc.Mnemonic.fromString(account.value!.mnemonic)
+    const hdpk = mneObj.toHDPrivateKey('', network)
+    const privateKey = hdpk.deriveChild(concatPath).privateKey
+
+    return privateKey.toPublicKey().toString()
+  } catch (e: any) {
+    throw new Error(e.message)
+  }
 }
 
-export async function getXPublicKey(chain: Chain = 'mvc'): Promise<string> {
-  if (chain === 'btc') raise('Not supported yet')
-
+export async function getXPublicKey() {
   const account = await getCurrentAccount()
   if (!account) {
     return ''
@@ -253,16 +291,22 @@ export async function getXPublicKey(chain: Chain = 'mvc'): Promise<string> {
 
   const network = await getNetwork()
   const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
-  const xPublicKey = mneObj.toHDPrivateKey('', network).xpubkey.toString()
+  const rootPath = await getMvcRootPath()
+  const xPublicKey = mneObj.toHDPrivateKey('', network).deriveChild(rootPath).xpubkey.toString()
   console.log('xPublicKey', xPublicKey)
 
   return xPublicKey
 }
 
-export async function getBalance(address: string, chain: Chain = 'mvc') {
+export async function getBalance(chain: Chain = 'mvc', address?: string) {
   const account = await getCurrentAccount()
+
   if (!account) {
     return null
+  }
+
+  if (!address) {
+    address = await getAddress(chain)
   }
 
   switch (chain) {
@@ -274,6 +318,17 @@ export async function getBalance(address: string, chain: Chain = 'mvc') {
       return doNothing()
     }
   }
+}
+
+export async function getUtxos(params?: { path?: string }) {
+  const account = await getCurrentAccount()
+  console.log('account', account)
+  if (!account) {
+    return null
+  }
+  const address = await getAddress('mvc', params?.path)
+
+  return await fetchUtxos(address)
 }
 
 export async function updateName(name: string) {
@@ -369,10 +424,11 @@ type AccountManager = {
   set: (account: Account) => Promise<void>
   add: (account: Omit<Account, 'id' | 'name'>) => Promise<void>
   connect: (accountId: string) => Promise<boolean>
-  getAddress: (chain: Chain) => Promise<string>
-  getPublicKey: (chain: Chain) => Promise<string>
-  getXPublicKey: (chain: Chain) => Promise<string>
-  getBalance: (address: string) => Promise<Awaited<ReturnType<typeof fetchSpaceBalance>> | null>
+  getPublicKey: (chain: Chain, path?: string) => Promise<string>
+  getBalance: (chain: Chain, address?: string) => Promise<Awaited<ReturnType<typeof fetchSpaceBalance>> | null>
+  getAddress: (chain: Chain, path?: string) => Promise<any>
+  getXPublicKey: () => Promise<string | null>
+  getUtxos: (params?: any) => Promise<any>
   updateName: (name: string) => Promise<void>
 }
 
@@ -387,6 +443,7 @@ accountManager.getAddress = getAddress
 accountManager.getPublicKey = getPublicKey
 accountManager.getXPublicKey = getXPublicKey
 accountManager.getBalance = getBalance
+accountManager.getUtxos = getUtxos
 accountManager.removeCurrent = removeCurrentAccount
 accountManager.updateName = updateName
 
