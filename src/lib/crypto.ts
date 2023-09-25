@@ -76,14 +76,21 @@ type ToSignTransaction = {
   path?: string
 }
 export const signTransaction = (
-  wif: string,
-  { txHex, scriptHex, inputIndex, satoshis, sigtype }: ToSignTransaction,
+  account: Account,
+  network: 'testnet' | 'mainnet',
+  { txHex, scriptHex, inputIndex, satoshis, sigtype, path }: ToSignTransaction,
   returnsTransaction: boolean = false
 ) => {
+  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+  const hdpk = mneObj.toHDPrivateKey('', network)
+  const accountPath = account.path
+  // find out priv / pub according to path
+  const subPath = path || '0/0'
+  const privateKey = hdpk.deriveChild(`m/44'/${accountPath}'/0'/${subPath}`).privateKey
+  const publicKey = privateKey.toPublicKey()
+
   if (!sigtype) sigtype = mvc.crypto.Signature.SIGHASH_ALL | mvc.crypto.Signature.SIGHASH_FORKID
 
-  const privateKey = mvc.PrivateKey.fromWIF(wif)
-  const publicKey = privateKey.toPublicKey()
   const tx = new mvc.Transaction(txHex)
 
   let sighash = mvc.Transaction.Sighash.sighash(
