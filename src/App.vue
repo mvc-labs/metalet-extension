@@ -76,23 +76,6 @@ const secondaryHeaderTitle = computed(() => {
 </template>
 
 <style scoped lang="css">
-/* #app:after {
-  background: linear-gradient(transparent, #3b82f6, transparent);
-  height: 140px;
-  width: 3px;
-  content: '';
-  position: absolute;
-  left: -1px;
-  top: 70%;
-  opacity: 0;
-  transition: top 600ms ease, opacity 600ms ease;
-}
-
-#app:hover:after {
-  opacity: 1;
-  top: 25%;
-} */
-
 .ext-app::-webkit-scrollbar {
   @apply h-1.5 w-1.5;
 }

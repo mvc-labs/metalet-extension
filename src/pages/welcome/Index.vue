@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
 import { ref } from 'vue'
-import accountManager from '@/lib/account'
+import { getAccounts, needsMigrationV2 } from '@/lib/account'
 
 const router = useRouter()
 
@@ -11,12 +11,31 @@ const createWallet = () => {
 }
 
 const accountsCount = ref(0)
-accountManager.all().then((accounts: any) => {
+getAccounts().then((accounts: any) => {
   accountsCount.value = Object.keys(accounts).length
+})
+
+const showingMigrationCover = ref(false)
+needsMigrationV2().then((needsMigration: boolean) => {
+  if (needsMigration) {
+    console.log('migrating')
+    showingMigrationCover.value = true
+  }
 })
 </script>
 
 <template>
+  <!-- migration cover -->
+  <div v-if="showingMigrationCover" class="fixed inset-0 w-full h-full bg-white">
+    <div class="flex flex-col items-center justify-center h-full">
+      <div class="mt-12">
+        <img class="mx-auto h-20 w-20" :src="MetaletLogoImg" alt="metalet-logo" />
+      </div>
+      <div class="text-2xl font-bold mt-16">Migrating to new version...</div>
+      <div class="text-lg text-gray-500">Please wait a moment.</div>
+    </div>
+  </div>
+
   <div class="flex h-full flex-col justify-between text-center">
     <div class="">
       <div class="mt-12">

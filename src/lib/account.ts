@@ -46,7 +46,6 @@ export type Account = {
 const isAccountsLoaded = ref(false)
 
 export const currentAccount = ref<Account | null>(null)
-
 export const accounts = ref<Map<string, Account>>(new Map())
 
 // Account Map Serialization
@@ -112,8 +111,6 @@ export async function getCurrentAccount(): Promise<Account | null> {
   }
 
   currentAccount.value = await getAccount(currentAccountId)
-  console.log("currentAccount.value", currentAccount.value);
-
 
   return currentAccount.value
 }
@@ -288,6 +285,30 @@ export async function updateBtcPath(path: string) {
   }
 
   await setAccount(account)
+}
+
+export async function needsMigrationV2(): Promise<boolean> {
+  const oldRecords = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
+  const newRecords = await getStorage(ACCOUNT_STORAGE_CURRENT_KEY)
+
+  return !!(oldRecords && !newRecords)
+}
+
+export async function migrateV2(): Promise<void> {
+  const oldRecords = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
+  if (!oldRecords) {
+    return
+  }
+  // const newAccount
+
+  const accounts = deserializeAccountMap(oldRecords)
+  const currentAccount = await getStorage('currentAccount')
+  if (currentAccount) {
+    await setStorage(CURRENT_ACCOUNT_ID, currentAccount)
+  }
+
+  await setAccounts(accounts)
+  await setStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0], '')
 }
 
 type AccountManager = {
