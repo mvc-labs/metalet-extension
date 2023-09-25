@@ -12,6 +12,8 @@ export type MetaletParams = {
 
 const listenToMetalet = () => {
   browser.runtime.onMessage.addListener((msg, sender, response) => {
+    console.log('listenToMetalet', msg, sender)
+
     if (msg.channel === 'from-metaidwallet') {
       window.postMessage(msg, '*')
     }
@@ -19,13 +21,8 @@ const listenToMetalet = () => {
     return true
   })
 }
-listenToMetalet()
 
-const node = document.getElementsByTagName('body')[0]
-const script = document.createElement('script')
-script.setAttribute('type', 'text/javascript')
-script.setAttribute('src', chrome.runtime.getURL('content.js'))
-node.appendChild(script)
+listenToMetalet()
 
 const callMetalet = (params: MetaletParams) => {
   browser.runtime.sendMessage(params)
@@ -39,9 +36,17 @@ window.addEventListener(
       return
     }
 
+    console.log('callMetalet', event)
+
     callMetalet(event.data)
 
     return true
   },
   false
 )
+
+const node = document.getElementsByTagName('body')[0]
+const script = document.createElement('script')
+script.setAttribute('type', 'text/javascript')
+script.setAttribute('src', chrome.runtime.getURL('content.js'))
+node.appendChild(script)
