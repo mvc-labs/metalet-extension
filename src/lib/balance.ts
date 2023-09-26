@@ -6,6 +6,8 @@ interface Asset {
 }
 
 export const totalBalance = computed(() => {
+  console.log('assetList', assetList.value)
+
   return assetList.value.reduce((sum, asset) => sum + asset.value, 0)
 })
 

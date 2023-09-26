@@ -16,7 +16,9 @@ const router = useRouter()
 
 const address = ref<string>('')
 const btcAssets = ref(BTCAssets)
-getAddress().then((addr) => {
+
+// TODO Refactor into hooks
+getAddress("btc").then((addr) => {
   if (!addr) return router.push('/welcome')
   address.value = addr
   fetchBtcAsset(addr).then(userBRC20Asset => {
@@ -26,11 +28,9 @@ getAddress().then((addr) => {
   })
 })
 
+const listedAssets = ref(MVCAssets)
 
 const enabled = computed(() => !!address.value)
-
-
-const listedAssets = ref(MVCAssets)
 
 const { isLoading, data: userOwnedTokens } = useTokensQuery(address, { enabled })
 type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
