@@ -37,7 +37,7 @@ export async function deleteStorage(key: string): Promise<void> {
   try {
     await browser.storage.local.remove(key)
   } catch (e) {
-    raise(`browser local storage delele ${key} failed`)
+    raise(`browser local storage delete ${key} failed`)
   }
 }
 

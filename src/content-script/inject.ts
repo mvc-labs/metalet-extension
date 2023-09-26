@@ -12,8 +12,6 @@ export type MetaletParams = {
 
 const listenToMetalet = () => {
   browser.runtime.onMessage.addListener((msg, sender, response) => {
-    console.log('listenToMetalet', msg, sender)
-
     if (msg.channel === 'from-metaidwallet') {
       window.postMessage(msg, '*')
     }
@@ -35,8 +33,6 @@ window.addEventListener(
     if (event.source !== window || event.data?.channel !== 'to-metaidwallet') {
       return
     }
-
-    console.log('callMetalet', event)
 
     callMetalet(event.data)
 

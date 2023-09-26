@@ -1,38 +1,32 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import topLevelAwait from 'vite-plugin-top-level-await'
+
 import baseConfig from './vite.base.config'
 
 export default defineConfig({
   ...baseConfig,
-  plugins: [
-    vue(),
-    {
-      name: 'watch-external',
-      buildStart() {
-        this.addWatchFile(resolve(__dirname, 'public/content.js'))
-      },
-    },
-  ],
+  plugins: [vue(), topLevelAwait()],
   define: {
     'process.env': {},
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
+      '@': resolve(__dirname, '../src'),
     },
   },
   build: {
     emptyOutDir: false,
-    outDir: resolve(__dirname, 'dist'),
+    outDir: resolve(__dirname, '../public'),
     lib: {
-      formats: ['iife'],
-      entry: resolve(__dirname, 'src/content-script/inject.ts'),
+      entry: resolve(__dirname, '../src/content-script/main.ts'),
       name: 'Metalet',
+      formats: ['es'],
     },
     rollupOptions: {
       output: {
-        entryFileNames: 'index.global.js',
+        entryFileNames: 'content.js',
         extend: true,
       },
     },

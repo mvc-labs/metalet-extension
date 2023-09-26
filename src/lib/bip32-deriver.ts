@@ -34,6 +34,11 @@ export const scripts: {
     addressType: 'P2PKH',
     path: "m/44'/0'/0'/0/0",
   },
+  {
+    name: 'Same as MVC',
+    addressType: 'P2PKH',
+    path: "m/44'/0'/0'/0/0",
+  },
 ]
 
 // private key

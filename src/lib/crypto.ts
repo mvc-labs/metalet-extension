@@ -1,6 +1,7 @@
 import { BN, mvc } from 'meta-contract'
 import { Buffer } from 'buffer'
 import { getMvcRootPath, type Account } from './account'
+import { parseLocalTransaction } from './metadata'
 
 export function eciesEncrypt(message: string, privateKey: mvc.PrivateKey): string {
   const publicKey = privateKey.toPublicKey()
@@ -74,6 +75,8 @@ type ToSignTransaction = {
   satoshis: number
   sigtype?: number
   path?: string
+  hasMetaId?: boolean
+  dataDependsOn?: number
 }
 export const signTransaction = async (
   account: Account,
@@ -158,7 +161,7 @@ export const signTransactions = async (
     txid: string
   }[] = []
   for (let i = 0; i < toSignTransactionsWithDependsOn.length; i++) {
-    let { txHex, scriptHex, inputIndex, satoshis, sigtype } = toSignTransactionsWithDependsOn[i]
+    let { txHex, scriptHex, inputIndex, satoshis, sigtype, hasMetaId } = toSignTransactionsWithDependsOn[i]
     const toSign = toSignTransactionsWithDependsOn[i]
 
     if (!sigtype) {
@@ -170,8 +173,50 @@ export const signTransactions = async (
     // find out if this transaction depends on previous ones
     // if so, we need to update the prevTxId of the current one
     if (toSign.dependsOn !== undefined) {
+      // structure dependencies
+      const wrongTxId = tx.inputs[inputIndex].prevTxId.toString('hex')
       const prevTxId = signedTransactions[toSign.dependsOn].txid
+
+      // data dependencies
+      let wrongDataTxId: string
+      let prevDataTxId: string
+      if (toSign.dataDependsOn !== undefined) {
+        const dataDependentTx = new mvc.Transaction(toSignTransactionsWithDependsOn[toSign.dataDependsOn].txHex)
+        wrongDataTxId = dataDependentTx.id
+        prevDataTxId = signedTransactions[toSign.dataDependsOn].txid
+      } else {
+        wrongDataTxId = wrongTxId
+        prevDataTxId = prevTxId
+      }
+
+      // update the prevTxId of the current tx
       tx.inputs[inputIndex].prevTxId = Buffer.from(prevTxId, 'hex')
+
+      // if hasMetaId is true, we need to also update the parent txid written in OP_RETURN
+      // based on the wrongDataTxId and prevDataTxId
+      if (hasMetaId) {
+        const { messages: metaIdMessages, outputIndex } = await parseLocalTransaction(tx)
+
+        if (outputIndex !== null) {
+          // find out if prevTxId is already in the messages;
+          // if so, we need to replace it with the new one
+          for (let i = 0; i < metaIdMessages.length; i++) {
+            if (metaIdMessages[i].includes(wrongDataTxId)) {
+              metaIdMessages[i] = metaIdMessages[i].replace(wrongDataTxId, prevDataTxId)
+              break
+            }
+          }
+
+          // update the OP_RETURN
+          const opReturnOutput = new mvc.Transaction.Output({
+            script: mvc.Script.buildSafeDataOut(metaIdMessages),
+            satoshis: 0,
+          })
+
+          // update the OP_RETURN output in tx
+          tx.outputs[outputIndex] = opReturnOutput
+        }
+      }
     }
 
     // find out priv / pub according to path

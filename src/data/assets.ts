@@ -81,7 +81,7 @@ const BTCAssets: Asset[] = [
     isNative: false,
     chain: 'btc',
     queryable: true,
-    decimal: 8,
+    decimal: 0,
     contract: 'BRC-20',
   },
   {
@@ -91,9 +91,9 @@ const BTCAssets: Asset[] = [
     isNative: false,
     chain: 'btc',
     queryable: true,
-    decimal: 8,
+    decimal: 0,
     contract: 'BRC-20',
-  }
+  },
 ]
 
 const MVCAssets: Asset[] = [
@@ -110,4 +110,4 @@ const MVCAssets: Asset[] = [
 
 const allAssets = [...BTCAssets, ...MVCAssets]
 
-export { BTCAssets, MVCAssets, allAssets, getTags,getTagInfo }
+export { BTCAssets, MVCAssets, allAssets, getTags, getTagInfo }

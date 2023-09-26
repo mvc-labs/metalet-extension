@@ -42,7 +42,7 @@ const action = actions[actionName as ActionType]
 const params: any = JSON.parse(route.query.params as string)
 
 const exit = () => {
-  // window.close()
+  window.close()
 }
 
 const getHostAndToTx = async (txid: string) => {
