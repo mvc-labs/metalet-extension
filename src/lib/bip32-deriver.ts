@@ -5,7 +5,9 @@ import { mvc } from 'meta-contract'
 
 import { raise } from './helpers'
 import { type Network } from './network'
-import { networks, payments } from 'bitcoinjs-lib'
+import bitcoin, { networks, payments } from 'bitcoinjs-lib'
+
+bitcoin.initEccLib(ecc)
 
 export type AddressType = 'P2WPKH' | 'P2SH-P2WPKH' | 'P2TR' | 'P2PKH'
 
