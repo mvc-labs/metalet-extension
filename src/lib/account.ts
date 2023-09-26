@@ -1,8 +1,6 @@
 import { Ref, ref } from 'vue'
 import { fetchUtxos } from '../queries/utxos'
 import { mvc } from 'meta-contract'
-import bitcoin from 'bitcoinjs-lib'
-import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 
 import {
   AddressType,
@@ -17,8 +15,6 @@ import { getStorage, setStorage } from './storage'
 import { generateRandomString, raise } from './helpers'
 import { getNetwork } from './network'
 import { signMessage } from './crypto'
-
-bitcoin.initEccLib(ecc)
 
 const CURRENT_ACCOUNT_ID = 'currentAccountId'
 const ACCOUNT_STORAGE_CURRENT_KEY = 'accounts_v2'

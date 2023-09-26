@@ -1,21 +1,18 @@
 import browser from 'webextension-polyfill'
 import actions from './data/query-actions'
-import { getNetwork } from './lib/network'
 import { NOTIFICATION_HEIGHT, NOTIFICATION_WIDTH } from './data/config'
 import connector from './lib/connector'
 import { getCurrentAccount } from './lib/account'
 import { isLocked } from './lib/password'
-type ActionType = keyof typeof actions
 
-getNetwork()
-
-browser.runtime.onMessage.addListener(async (msg, sender, response) => {
+browser.runtime.onMessage.addListener(async (msg, sender) => {
+  const account = await getCurrentAccount()
+  const walletLocked = await isLocked()
   const actionName = msg.action.replace('authorize-', '').replace('query-', '')
 
   // 如果连接状态为未连接，且请求的 action 不是connect或者IsConnected，则返回错误
-  const account = await getCurrentAccount()
   let failedStatus: string = ''
-  if (await isLocked()) {
+  if (walletLocked) {
     failedStatus = 'locked'
   } else if (!account || !account.id) {
     failedStatus = 'not-logged-in'
@@ -24,23 +21,20 @@ browser.runtime.onMessage.addListener(async (msg, sender, response) => {
   }
 
   if (!!failedStatus) {
-    const [tab] = await browser.tabs.query({ active: true, windowType: 'normal', currentWindow: true })
-    if (tab?.id) {
-      const response = {
-        nonce: msg.nonce,
-        channel: 'from-metaidwallet',
-        action: `respond-${actionName}`,
-        host: msg.host as string,
-        res: {
-          status: failedStatus,
-        },
-      }
-      browser.tabs.sendMessage(tab.id, response)
+    const response = {
+      nonce: msg.nonce,
+      channel: 'from-metaidwallet',
+      action: `respond-${actionName}`,
+      host: msg.host as string,
+      res: {
+        status: failedStatus,
+      },
     }
-    return
+
+    return response
   }
 
-  // 授权请求
+  // authorize actions
   if (msg.action?.startsWith('authorize')) {
     const icon = sender.tab?.favIconUrl || msg.icon || ''
     const rawUrl = 'index.html#authorize'
@@ -81,7 +75,7 @@ browser.runtime.onMessage.addListener(async (msg, sender, response) => {
         if (windowId === popupWindow.id) {
           // 发送消息给 content-script-tab
           const tab = (
-            await chrome.tabs.query({
+            await browser.tabs.query({
               active: true,
               windowType: 'normal',
             })
@@ -96,7 +90,7 @@ browser.runtime.onMessage.addListener(async (msg, sender, response) => {
                 status: 'canceled',
               },
             }
-            chrome.tabs.sendMessage(tab.id, response)
+            browser.tabs.sendMessage(tab.id, response)
           }
         }
       })
@@ -105,25 +99,22 @@ browser.runtime.onMessage.addListener(async (msg, sender, response) => {
     return true
   }
 
-  // 查询请求
+  // query actions
   if (msg.action?.startsWith('query')) {
-    // 调用对应的查询方法
+    // call corresponding process function
     const action = actions[actionName]
     if (action) {
-      action.process(msg.params, msg.host as string).then(async (res: any) => {
-        // 发送消息给 content-script-tab
-        const [tab] = await browser.tabs.query({ active: true, windowType: 'normal', currentWindow: true })
-        if (tab?.id) {
-          const response = {
-            nonce: msg.nonce,
-            channel: 'from-metaidwallet',
-            action: `respond-${actionName}`,
-            host: msg.host as string,
-            res,
-          }
-          browser.tabs.sendMessage(tab.id, response)
-        }
-      })
+      const processed = await action.process(msg.params, msg.host as string)
+
+      const response = {
+        nonce: msg.nonce,
+        channel: 'from-metaidwallet',
+        action: `respond-${actionName}`,
+        host: msg.host as string,
+        res: processed,
+      }
+
+      return response
     }
   }
 
