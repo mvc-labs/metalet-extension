@@ -23,9 +23,7 @@ const listenToMetalet = () => {
 listenToMetalet()
 
 const callMetalet = async (params: MetaletParams) => {
-  console.log('calling...')
   const response = await browser.runtime.sendMessage(params)
-  console.log({ response })
 
   if (response?.channel === 'from-metaidwallet') {
     window.postMessage(response, '*')
