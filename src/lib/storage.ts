@@ -42,7 +42,7 @@ export async function deleteStorage(key: string): Promise<void> {
 }
 
 type Storage = {
-  get: (key: string, defaultValue?: any) => Promise<any>
+  get: (key: string, option?: { defaultValue?: unknown; isParse?: boolean }) => Promise<any>
   set: (key: string, value: any) => Promise<void>
   delete: (key: string) => Promise<void>
 }

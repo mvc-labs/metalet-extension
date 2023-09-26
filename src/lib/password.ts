@@ -31,7 +31,7 @@ export async function lock() {
 }
 
 export async function isLocked() {
-  return await storageManager.get('locked', false)
+  return await storageManager.get('locked', { defaultValue: false })
 }
 
 export async function unlock(password: string) {

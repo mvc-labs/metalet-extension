@@ -5,15 +5,7 @@ import baseConfig from './vite.base.config'
 
 export default defineConfig({
   ...baseConfig,
-  plugins: [
-    vue(),
-    {
-      name: 'watch-external',
-      buildStart() {
-        this.addWatchFile(resolve(__dirname, '../public/content.js'))
-      },
-    },
-  ],
+  plugins: [vue()],
   define: {
     'process.env': {},
   },

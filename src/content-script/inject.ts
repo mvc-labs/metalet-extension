@@ -11,7 +11,7 @@ export type MetaletParams = {
 }
 
 const listenToMetalet = () => {
-  browser.runtime.onMessage.addListener((msg, sender, response) => {
+  browser.runtime.onMessage.addListener((msg, sender) => {
     if (msg.channel === 'from-metaidwallet') {
       window.postMessage(msg, '*')
     }
@@ -22,19 +22,25 @@ const listenToMetalet = () => {
 
 listenToMetalet()
 
-const callMetalet = (params: MetaletParams) => {
-  browser.runtime.sendMessage(params)
+const callMetalet = async (params: MetaletParams) => {
+  console.log('calling...')
+  const response = await browser.runtime.sendMessage(params)
+  console.log({ response })
+
+  if (response?.channel === 'from-metaidwallet') {
+    window.postMessage(response, '*')
+  }
 }
 
 window.addEventListener(
   'message',
-  (event) => {
+  async (event) => {
     // We only accept messages from ourselves
     if (event.source !== window || event.data?.channel !== 'to-metaidwallet') {
       return
     }
 
-    callMetalet(event.data)
+    await callMetalet(event.data)
 
     return true
   },
@@ -44,5 +50,7 @@ window.addEventListener(
 const node = document.getElementsByTagName('body')[0]
 const script = document.createElement('script')
 script.setAttribute('type', 'text/javascript')
-script.setAttribute('src', chrome.runtime.getURL('content.js'))
+script.setAttribute('src', browser.runtime.getURL('content.js'))
 node.appendChild(script)
+
+console.log('Metalet is ready. Happy coding! 🎉')
