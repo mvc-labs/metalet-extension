@@ -23,10 +23,26 @@ const listenToMetalet = () => {
 listenToMetalet()
 
 const callMetalet = async (params: MetaletParams) => {
-  const response = await browser.runtime.sendMessage(params)
+  // try call metalet;
+  // if failed, that's probably because metalet's service worker does not wake up on time;
+  // so we catch that and try again after 500ms
+  const tryCall = async (params: MetaletParams) => {
+    const response = await browser.runtime.sendMessage(params)
 
-  if (response?.channel === 'from-metaidwallet') {
-    window.postMessage(response, '*')
+    if (response?.channel === 'from-metaidwallet') {
+      window.postMessage(response, '*')
+    }
+  }
+
+  try {
+    await tryCall(params)
+  } catch (e: any) {
+    // If the error comes from timeout, we try again
+    if (e.message.includes('Could not establish connection.')) {
+      setTimeout(async () => {
+        await tryCall(params)
+      }, 1000)
+    }
   }
 }
 

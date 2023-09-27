@@ -2,12 +2,10 @@ import bip39 from 'bip39'
 import BIP32Factory, { BIP32Interface } from 'bip32'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { mvc } from 'meta-contract'
+import bitcoinjs from 'bitcoinjs-lib'
 
 import { raise } from './helpers'
 import { type Network } from './network'
-import bitcoin, { networks, payments } from 'bitcoinjs-lib'
-
-bitcoin.initEccLib(ecc)
 
 export type AddressType = 'P2WPKH' | 'P2SH-P2WPKH' | 'P2TR' | 'P2PKH'
 
@@ -73,7 +71,7 @@ function deriveMvcPrivateKey(mnemonic: string, path: string, network: Network): 
 
 function deriveBtcPrivateKey(mnemonic: string, path: string, network: Network): BIP32Interface {
   const bip32 = BIP32Factory(ecc)
-  const btcNetwork = network === 'mainnet' ? networks.bitcoin : networks.testnet
+  const btcNetwork = network === 'mainnet' ? bitcoinjs.networks.bitcoin : bitcoinjs.networks.testnet
   const seed = bip39.mnemonicToSeedSync(mnemonic)
   const master = bip32.fromSeed(seed, btcNetwork)
 
@@ -165,6 +163,9 @@ function deriveMvcAddress(mnemonic: string, path: string, network: Network): str
 }
 
 function deriveBtcAddress(mnemonic: string, path: string, network: Network): string {
+  bitcoinjs.initEccLib(ecc)
+  const { networks, payments } = bitcoinjs
+
   const child = deriveBtcPrivateKey(mnemonic, path, network)
   const btcNetwork = network === 'mainnet' ? networks.bitcoin : networks.testnet
   const publicKey = child.publicKey
