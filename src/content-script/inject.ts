@@ -37,8 +37,8 @@ const callMetalet = async (params: MetaletParams) => {
   try {
     await tryCall(params)
   } catch (e: any) {
-    // If the error comes from timeout, we try again
-    if (e.message.includes('Could not establish connection.')) {
+    // If the error comes from timeout and it's a query action, we try again
+    if (e.message.includes('Could not establish connection.') && params.action.includes('query')) {
       setTimeout(async () => {
         await tryCall(params)
       }, 1000)
