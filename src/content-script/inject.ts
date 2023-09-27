@@ -26,24 +26,38 @@ const callMetalet = async (params: MetaletParams) => {
   // try call metalet;
   // if failed, that's probably because metalet's service worker does not wake up on time;
   // so we catch that and try again after 500ms
-  const tryCall = async (params: MetaletParams) => {
-    const response = await browser.runtime.sendMessage(params)
+  const tryCall = async (params: MetaletParams, retry = 0) => {
+    try {
+      const response = await browser.runtime.sendMessage(params)
 
-    if (response?.channel === 'from-metaidwallet') {
-      window.postMessage(response, '*')
+      if (response?.channel === 'from-metaidwallet') {
+        window.postMessage(response, '*')
+      }
+    } catch (e: any) {
+      if (!e.message.includes('Could not establish connection.')) {
+        throw e
+      }
+
+      if (retry < 3) {
+        setTimeout(async () => {
+          await tryCall(params, retry + 1)
+        }, 1000)
+      }
     }
   }
 
-  try {
-    await tryCall(params)
-  } catch (e: any) {
-    // If the error comes from timeout, we try again
-    if (e.message.includes('Could not establish connection.')) {
-      setTimeout(async () => {
-        await tryCall(params)
-      }, 500)
-    }
-  }
+  await tryCall(params)
+
+  // try {
+  //   await tryCall(params)
+  // } catch (e: any) {
+  //   // If the error comes from timeout, we try again
+  //   if (e.message.includes('Could not establish connection.')) {
+  //     setTimeout(async () => {
+  //       await tryCall(params)
+  //     }, 1000)
+  //   }
+  // }
 }
 
 window.addEventListener(
