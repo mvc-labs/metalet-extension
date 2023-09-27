@@ -177,6 +177,8 @@ export async function addAccount(newAccount: Omit<Account, 'id' | 'name'>) {
 
 async function getAccountProperty(chain: Chain, key: keyof ChainDetail[Chain]): Promise<string> {
   const account = await getCurrentAccount()
+  console.log('current account', account)
+
   if (!account) {
     return ''
   }

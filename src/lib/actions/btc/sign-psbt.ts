@@ -1,5 +1,5 @@
 import ECPairFactory from 'ecpair'
-import { getPrivateKey, getCurrentAccount, getAddressType, getPublicKey, getAddress } from '@/lib/account'
+import { getPrivateKey, getAddressType, getPublicKey, getAddress } from '@/lib/account'
 import bitcoin, { address as PsbtAddress, networks } from 'bitcoinjs-lib'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { getNetwork } from '@/lib/network'

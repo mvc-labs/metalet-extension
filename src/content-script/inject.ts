@@ -34,7 +34,7 @@ const callMetalet = async (params: MetaletParams) => {
         window.postMessage(response, '*')
       }
     } catch (e: any) {
-      if (!e.message.includes('Could not establish connection.')) {
+      if (!e.message.includes('Could not establish connection.') && params.action.includes('query')) {
         throw e
       }
 
@@ -47,17 +47,6 @@ const callMetalet = async (params: MetaletParams) => {
   }
 
   await tryCall(params)
-
-  // try {
-  //   await tryCall(params)
-  // } catch (e: any) {
-  //   // If the error comes from timeout, we try again
-  //   if (e.message.includes('Could not establish connection.')) {
-  //     setTimeout(async () => {
-  //       await tryCall(params)
-  //     }, 1000)
-  //   }
-  // }
 }
 
 window.addEventListener(

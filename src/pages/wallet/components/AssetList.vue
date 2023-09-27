@@ -10,18 +10,27 @@ import useTokensQuery from '@/queries/tokens'
 import { getAssetsDisplay } from '@/lib/assets'
 import { BTCAssets, MVCAssets } from '@/data/assets'
 
+import { fetchBtcAsset } from '@/queries/btc'
+
 const router = useRouter()
 
 const address = ref<string>('')
-getAddress().then((add) => {
-  if (!add) return router.push('/welcome')
-
-  address.value = add
-})
-const enabled = computed(() => !!address.value)
-
 const btcAssets = ref(BTCAssets)
+
+// TODO Refactor into hooks
+getAddress("btc").then((addr) => {
+  if (!addr) return router.push('/welcome')
+  address.value = addr
+  fetchBtcAsset(addr).then(userBRC20Asset => {
+    btcAssets.value = btcAssets.value
+      .filter(asset =>
+        asset.symbol === 'BTC' || userBRC20Asset.includes(asset.symbol))
+  })
+})
+
 const listedAssets = ref(MVCAssets)
+
+const enabled = computed(() => !!address.value)
 
 const { isLoading, data: userOwnedTokens } = useTokensQuery(address, { enabled })
 type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]

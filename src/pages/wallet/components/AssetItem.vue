@@ -9,6 +9,7 @@ import { type Asset, getTagInfo, Tag } from '@/data/assets'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 import { getCurrentAccount } from '@/lib/account'
 import { getNetwork } from '@/lib/network'
+import { updateAsset } from '@/lib/balance'
 
 const { asset } = defineProps<{
   asset: Asset
@@ -46,6 +47,7 @@ const exchange = computed(() => {
     const usdRate: number = Number(exchangeRate.value.price)
     const balanceInStandardUnit = balance.value.total / 10 ** asset.decimal
     const exchanged = balanceInStandardUnit * usdRate
+    updateAsset({ name: asset.symbol, value: exchanged })
     return `$${exchanged.toFixed(2)} USD`
   }
 
