@@ -42,6 +42,7 @@
     "ecpair": "^2.1.0",
     "meta-contract": "0.3.29",
     "mvc-std-lib": "^1.1.4",
+    "node-stdlib-browser": "1.0",
     "object-hash": "^3.0.0",
     "qrcode": "^1.5.3",
     "vue": "^3.2.45",

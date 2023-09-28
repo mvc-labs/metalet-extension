@@ -2,7 +2,6 @@ import { BN, mvc } from 'meta-contract'
 import { Buffer } from 'buffer'
 import { getMvcRootPath, type Account } from './account'
 import { parseLocalTransaction } from './metadata'
-import { DEFAULT_FLAGS, signTx, toHex } from 'meta-contract/dist/scryptlib'
 
 export function eciesEncrypt(message: string, privateKey: mvc.PrivateKey): string {
   const publicKey = privateKey.toPublicKey()
@@ -117,7 +116,34 @@ export const signTransaction = async (
     }
   }
 
-  const sig2 = toHex(signTx(tx, privateKey, new mvc.Script(scriptHex), Number(satoshis), inputIndex, sigtype))
+  const Interp = mvc.Script.Interpreter
+  const flags =
+    Interp.SCRIPT_ENABLE_MAGNETIC_OPCODES |
+    Interp.SCRIPT_ENABLE_MONOLITH_OPCODES |
+    Interp.SCRIPT_VERIFY_STRICTENC |
+    Interp.SCRIPT_ENABLE_SIGHASH_FORKID |
+    Interp.SCRIPT_VERIFY_LOW_S |
+    Interp.SCRIPT_VERIFY_NULLFAIL |
+    Interp.SCRIPT_VERIFY_DERSIG |
+    Interp.SCRIPT_VERIFY_MINIMALDATA |
+    Interp.SCRIPT_VERIFY_NULLDUMMY |
+    Interp.SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_NOPS |
+    Interp.SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY |
+    Interp.SCRIPT_VERIFY_CHECKSEQUENCEVERIFY |
+    // @ts-ignore
+    Interp.SCRIPT_VERIFY_CLEANSTACK
+
+  const sig2 = mvc.Transaction.Sighash.sign(
+    tx,
+    privateKey,
+    sigtype,
+    inputIndex,
+    new mvc.Script(scriptHex),
+    new mvc.crypto.BN(satoshis),
+    flags
+  )
+    .toTxFormat()
+    .toString('hex')
 
   return {
     publicKey: publicKey.toString(),
