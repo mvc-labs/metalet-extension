@@ -133,17 +133,14 @@ export const signTransaction = async (
     // @ts-ignore
     Interp.SCRIPT_VERIFY_CLEANSTACK
 
-  const sig2 = mvc.Transaction.Sighash.sign(
-    tx,
-    privateKey,
-    sigtype,
-    inputIndex,
-    new mvc.Script(scriptHex),
-    new mvc.crypto.BN(satoshis),
-    flags
-  )
+  const script = mvc.Script.fromBuffer(Buffer.from(scriptHex, 'hex'))
+  // @ts-ignore
+  const sig2 = mvc.Transaction.sighash
+    .sign(tx, privateKey, sigtype, inputIndex, script, new BN(satoshis), flags)
     .toTxFormat()
     .toString('hex')
+
+  // const sig3 = toHex(signTx(tx, privateKey, script, Number(satoshis), inputIndex))
 
   return {
     publicKey: publicKey.toString(),
@@ -151,6 +148,7 @@ export const signTransaction = async (
     s: sig.s.toString('hex'),
     sig: sig.set({ nhashtype: sigtype }).toTxFormat().toString('hex'),
     sig2,
+    // sig3,
     sigtype,
     txid: tx.id,
   }
