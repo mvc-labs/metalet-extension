@@ -10,27 +10,29 @@ import { getAssetsDisplay } from '@/lib/assets'
 import { type Asset, BTCAssets, MVCAssets } from '@/data/assets'
 
 import { fetchBtcAsset } from '@/queries/btc'
+import { deriveAllAddresses } from '@/lib/bip32-deriver'
 
 const router = useRouter()
 
-const address = ref<string>('')
-const btcAssets = ref<Asset[]>(BTCAssets.filter(asset => asset.symbol === 'BTC') || [])
+const mvcAddress = ref<string>('')
+const btcAddress = ref<string>('')
+const btcAssets = ref<Asset[]>(BTCAssets.filter((asset) => asset.symbol === 'BTC') || [])
 
 // TODO Refactor into hooks
-getAddress("btc").then((addr) => {
+getAddress('mvc').then((addr) => {
+  mvcAddress.value = addr
+})
+getAddress('btc').then((addr) => {
   if (!addr) return router.push('/welcome')
-  address.value = addr
-  fetchBtcAsset(addr).then(userBRC20Asset => {
-    btcAssets.value = BTCAssets.filter(asset =>
-      asset.symbol === 'BTC' || userBRC20Asset.includes(asset.symbol))
+  btcAddress.value = addr
+  fetchBtcAsset(addr).then((userBRC20Asset) => {
+    btcAssets.value = BTCAssets.filter((asset) => asset.symbol === 'BTC' || userBRC20Asset.includes(asset.symbol))
   })
 })
 
 const listedAssets = ref(MVCAssets)
 
-const enabled = computed(() => !!address.value)
-
-const { isLoading, data: userOwnedTokens } = useTokensQuery(address, { enabled })
+const { isLoading, data: userOwnedTokens } = useTokensQuery(mvcAddress, { enabled: computed(() => !!mvcAddress.value) })
 type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
 
 const assetsDisplay = ref<string[]>([])

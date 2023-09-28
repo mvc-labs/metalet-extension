@@ -13,6 +13,7 @@
     "build:web": "vue-tsc && vite build --config ./vite-config/vite.web.config.ts",
     "build": "set NODE_ENV=production && run-s clear build:content build:inject build:bg build:web",
     "b": "yarn build",
+    "bw": "yarn build:web",
     "bwc": "yarn build:content --watch",
     "bwi": "yarn build:injectWatch",
     "bwb": "yarn build:bg --watch",
