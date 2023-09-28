@@ -5,26 +5,24 @@ import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
 
 import AssetItem from './AssetItem.vue'
 import { getAddress } from '@/lib/account'
-import type { Asset } from '@/data/assets'
 import useTokensQuery from '@/queries/tokens'
 import { getAssetsDisplay } from '@/lib/assets'
-import { BTCAssets, MVCAssets } from '@/data/assets'
+import { type Asset, BTCAssets, MVCAssets } from '@/data/assets'
 
 import { fetchBtcAsset } from '@/queries/btc'
 
 const router = useRouter()
 
 const address = ref<string>('')
-const btcAssets = ref(BTCAssets)
+const btcAssets = ref<Asset[]>(BTCAssets.filter(asset => asset.symbol === 'BTC') || [])
 
 // TODO Refactor into hooks
 getAddress("btc").then((addr) => {
   if (!addr) return router.push('/welcome')
   address.value = addr
   fetchBtcAsset(addr).then(userBRC20Asset => {
-    btcAssets.value = btcAssets.value
-      .filter(asset =>
-        asset.symbol === 'BTC' || userBRC20Asset.includes(asset.symbol))
+    btcAssets.value = BTCAssets.filter(asset =>
+      asset.symbol === 'BTC' || userBRC20Asset.includes(asset.symbol))
   })
 })
 
