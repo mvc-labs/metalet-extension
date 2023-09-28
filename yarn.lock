@@ -2536,9 +2536,9 @@ merge2@^1.3.0:
   resolved "https://registry.npmjs.org/merge2/-/merge2-1.4.1.tgz"
   integrity sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==
 
-meta-contract@0.3.29:
+meta-contract@^0.3.29:
   version "0.3.29"
-  resolved "https://registry.npmjs.org/meta-contract/-/meta-contract-0.3.29.tgz"
+  resolved "https://registry.yarnpkg.com/meta-contract/-/meta-contract-0.3.29.tgz#c5132674c3623658a0bfbbcac483b1e02f9274e8"
   integrity sha512-8WrJSaCoHxvGl2IVuEw3lWBXjvdWxhK6Y4pVD57F5G4Xie6t24BDDGFTXJe77hyOoz/e9OzPK2UzfDdMklrzSQ==
   dependencies:
     mvc-scrypt "^0.1.2"
@@ -2644,20 +2644,6 @@ mvc-lib@^1.0.5:
     hash.js "^1.1.7"
     inherits "2.0.3"
     unorm "1.4.1"
-
-mvc-scrypt@0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/mvc-scrypt/-/mvc-scrypt-0.1.1.tgz#841a8179be9cc6bdb0b60200ba5dbb716e5eb53f"
-  integrity sha512-csJ5QVontTNHTRKR/Mmh9r0JMg6vBFoEFa99Ey5D/9BwhoxFQ73/jtvzEC6WcG9xsWoLwisVh65WXN418sKsYw==
-  dependencies:
-    "@discoveryjs/json-ext" "^0.5.7"
-    compare-versions "^3.6.0"
-    json-bigint "^1.0.0"
-    md5 "^2.2.1"
-    mvc-lib "^1.0.5"
-    node-fetch "^3.0.0"
-    patch-package "^6.4.7"
-    sourcemap-codec "^1.4.8"
 
 mvc-scrypt@^0.1.2:
   version "0.1.6"

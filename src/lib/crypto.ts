@@ -1,5 +1,6 @@
 import { BN, mvc } from 'meta-contract'
 import { Buffer } from 'buffer'
+
 import { getMvcRootPath, type Account } from './account'
 import { parseLocalTransaction } from './metadata'
 
@@ -116,39 +117,11 @@ export const signTransaction = async (
     }
   }
 
-  const Interp = mvc.Script.Interpreter
-  const flags =
-    Interp.SCRIPT_ENABLE_MAGNETIC_OPCODES |
-    Interp.SCRIPT_ENABLE_MONOLITH_OPCODES |
-    Interp.SCRIPT_VERIFY_STRICTENC |
-    Interp.SCRIPT_ENABLE_SIGHASH_FORKID |
-    Interp.SCRIPT_VERIFY_LOW_S |
-    Interp.SCRIPT_VERIFY_NULLFAIL |
-    Interp.SCRIPT_VERIFY_DERSIG |
-    Interp.SCRIPT_VERIFY_MINIMALDATA |
-    Interp.SCRIPT_VERIFY_NULLDUMMY |
-    Interp.SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_NOPS |
-    Interp.SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY |
-    Interp.SCRIPT_VERIFY_CHECKSEQUENCEVERIFY |
-    // @ts-ignore
-    Interp.SCRIPT_VERIFY_CLEANSTACK
-
-  const script = mvc.Script.fromBuffer(Buffer.from(scriptHex, 'hex'))
-  // @ts-ignore
-  const sig2 = mvc.Transaction.sighash
-    .sign(tx, privateKey, sigtype, inputIndex, script, new BN(satoshis), flags)
-    .toTxFormat()
-    .toString('hex')
-
-  // const sig3 = toHex(signTx(tx, privateKey, script, Number(satoshis), inputIndex))
-
   return {
     publicKey: publicKey.toString(),
     r: sig.r.toString('hex'),
     s: sig.s.toString('hex'),
     sig: sig.set({ nhashtype: sigtype }).toTxFormat().toString('hex'),
-    sig2,
-    // sig3,
     sigtype,
     txid: tx.id,
   }
