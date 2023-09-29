@@ -25,14 +25,14 @@ connector.connect = async function (accountId, host) {
 }
 
 connector.isConnected = async function (accountId, host) {
-  const connections = await storage.get('connections', { defaultValue: {}})
+  const connections = await storage.get('connections', { defaultValue: {} })
   const accountConnections = connections[accountId] || {}
 
   return accountConnections[host] !== undefined
 }
 
 connector.disconnect = async function (accountId, host) {
-  const connections = await storage.get('connections', { defaultValue: {}})
+  const connections = await storage.get('connections', { defaultValue: {} })
   const accountConnections = connections[accountId] || {}
 
   delete accountConnections[host]

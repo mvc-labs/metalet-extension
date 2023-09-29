@@ -99,10 +99,6 @@ export async function getAccount(accountId: string): Promise<Account | null> {
 }
 
 export async function getCurrentAccount(): Promise<Account | null> {
-  if (currentAccount.value) {
-    return currentAccount.value
-  }
-
   const currentAccountId = await getStorage(CURRENT_ACCOUNT_ID)
   if (!currentAccountId) {
     return null
