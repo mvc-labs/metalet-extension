@@ -2,8 +2,9 @@ import { useQuery } from '@tanstack/vue-query'
 import { metaletApi, mvcApi } from './request'
 import { ComputedRef, Ref } from 'vue'
 import { SymbolUC, BRC20_SYMBOLS } from '@/lib/asset-symbol'
+import { brc20TickList } from './btc'
 
-type TokenType = "BRC20"
+type TokenType = 'BRC20'
 
 interface Tick {
   token: SymbolUC
@@ -39,6 +40,17 @@ export const fetchBtcBalance = async (address: string): Promise<Balance> => {
 }
 
 export const fetchBRC20Balance = async (address: string, symbol: SymbolUC): Promise<Balance> => {
+  if (brc20TickList.value?.length) {
+    const brc20TickAsset = brc20TickList.value.find((tick) => tick.token === symbol)
+    if (brc20TickAsset) {
+      return {
+        address,
+        total: Number(brc20TickAsset.balance),
+        transferBalance: Number(brc20TickAsset.transferBalance),
+        availableBalance: Number(brc20TickAsset.availableBalance),
+      }
+    }
+  }
   const { tickList } = await metaletApi(`/address/brc20/asset`)
     .get({ address, chain: 'btc', tick: symbol.toLowerCase() })
     .then((res) => res.data)
@@ -48,9 +60,9 @@ export const fetchBRC20Balance = async (address: string, symbol: SymbolUC): Prom
   if (tickAsset) {
     return {
       address,
-      availableBalance: Number(tickAsset.availableBalance),
-      transferBalance: Number(tickAsset.transferBalance),
       total: Number(tickAsset.balance),
+      transferBalance: Number(tickAsset.transferBalance),
+      availableBalance: Number(tickAsset.availableBalance),
     }
   }
 
@@ -89,6 +101,5 @@ export const useBalanceQuery = (address: Ref, symbol: SymbolUC, options: { enabl
       }
     },
     ...options,
-
   })
 }

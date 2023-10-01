@@ -1,6 +1,18 @@
 import dayjs from 'dayjs'
-import { ordersApi, metaletApi } from '@/queries/request'
+import { ref, Ref, ComputedRef } from 'vue'
+import { useQuery } from '@tanstack/vue-query'
 import { BRC20_Symbol_UC } from '@/lib/asset-symbol'
+import { ordersApi, metaletApi } from '@/queries/request'
+
+interface Tick {
+  token: BRC20_Symbol_UC
+  tokenType: TokenType
+  balance: string
+  availableBalance: string
+  transferBalance: string
+}
+
+export const brc20TickList = ref<Tick[]>()
 
 export const getBTCBalance = (address: string) => {
   return ordersApi('/balance').get({ address })
@@ -16,7 +28,6 @@ export interface Tx {
 
 export const getBTActivities = async (address: string): Promise<Tx[]> => {
   const transactions = (await ordersApi('/activities').get({ address })) as any
-  console.log('transactions', transactions)
 
   const txs: Tx[] = []
 
@@ -55,20 +66,28 @@ export const getBTCPrice = () => {
 
 type TokenType = 'BRC20'
 
-interface Tick {
-  token: BRC20_Symbol_UC
-  tokenType: TokenType
-  balance: string
-  availableBalance: string
-  transferBalance: string
-}
-
-export const fetchBtcAsset = async (address: string): Promise<string[]> => {
-  const brc20Assets = await metaletApi(`/address/brc20/asset`)
+export const fetchBTCAsset = async (address: string): Promise<string[]> => {
+  console.log('fetchBtcAsset address', address)
+  if (!address) {
+    return []
+  }
+  return await metaletApi(`/address/brc20/asset`)
     .get({ address, chain: 'btc' })
     .then((res) => {
-      return res.data.tickList.map((tick: Tick) => tick.token)
-    })
+      // brc20TickList.value = res?.data?.tickList || []
+      console.log('tickList', res.data.tickList)
 
-  return brc20Assets
+      return res?.data?.tickList.map((tick: Tick) => tick.token) || []
+    })
+}
+
+export const useBTCAseetQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
+  const address = addressRef.value
+  console.log('useBTCAseetQuery address', address, options.enabled.value)
+
+  return useQuery({
+    queryKey: ['BTCAsset', { address }],
+    queryFn: () => fetchBTCAsset(address),
+    ...options,
+  })
 }
