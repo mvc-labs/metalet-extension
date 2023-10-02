@@ -1,7 +1,7 @@
 import * as VueRouter from 'vue-router'
 import Wallet from './pages/wallet/Index.vue'
 import { getStorage } from './lib/storage'
-import accountManager, { getCurrentAccount } from './lib/account'
+import accountManager, { Account, getAccounts, getCurrentAccount } from './lib/account'
 
 const routes = [
   { path: '/', redirect: '/wallet' },
@@ -254,8 +254,9 @@ router.beforeEach(async (to, from) => {
     const mneStr = oldRecord.currentAccount.mnemonicStr
 
     // 比照查看有无该助记词的账号
-    const accounts: any[] = await accountManager.all().then((res) => Object.values(res))
-    const hasAccount = accounts.some((account) => account.mnemonic === mneStr)
+    const accounts = await getAccounts()
+    const accountsArr = Array.from(accounts.values())
+    const hasAccount = accountsArr.some((account) => account.mnemonic === mneStr)
 
     if (!hasAccount && to.path !== '/migrate') {
       return '/migrate'

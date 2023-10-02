@@ -104,9 +104,10 @@ export async function getCurrentAccount(): Promise<Account | null> {
     return null
   }
 
-  currentAccount.value = await getAccount(currentAccountId)
+  const account = await getAccount(currentAccountId)
+  currentAccount.value = account
 
-  return currentAccount.value
+  return account
 }
 
 export async function removeCurrentAccount(): Promise<boolean> {

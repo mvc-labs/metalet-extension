@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
-import accountManager from '@/lib/account'
+import accountManager, { getAccounts } from '@/lib/account'
 import type { Account } from '@/lib/account'
 import { mvc } from 'meta-contract'
 import { setNetwork } from '@/lib/network'
@@ -18,8 +18,9 @@ const importWallet = async () => {
     const mneStr = oldRecord.currentAccount.mnemonicStr
 
     // 比照查看有无该助记词的账号
-    const accounts: Account[] = await accountManager.all().then((res) => Object.values(res))
-    const hasAccount = accounts.some((account) => account.mnemonic === mneStr)
+    const accounts = await getAccounts()
+    const accountsArr = Array.from(accounts.values())
+    const hasAccount = accountsArr.some((account) => account.mnemonic === mneStr)
 
     if (!hasAccount) {
       // 迁移过程
