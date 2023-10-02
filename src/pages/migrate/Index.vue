@@ -100,7 +100,7 @@ const importWallet = async () => {
       <div class="mt-4">
         <div class="flex items-end justify-center gap-x-2">
           <h1 class="text-3xl font-extrabold leading-none">Metalet</h1>
-          <span class="text-base font-bold leading-none text-amber-500">v1.5</span>
+          <span class="text-base font-bold leading-none text-amber-500">v2.0</span>
         </div>
 
         <p class="mt-2 text-gray-500">Welcome Back!</p>
