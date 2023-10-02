@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
-import accountManager, { getAccounts } from '@/lib/account'
+import accountManager, { getAccounts, getLegacyAccounts } from '@/lib/account'
 import type { Account } from '@/lib/account'
 import { mvc } from 'meta-contract'
 import { setNetwork } from '@/lib/network'
@@ -14,7 +14,8 @@ const error = ref('')
 const importWallet = async () => {
   // 如果是老用户（sync存储中有助记词），且该账号在localStorage中不存在，则说明需要迁移，跳转至新版本迁移页面
   const oldRecord = await chrome.storage.sync.get('currentAccount')
-  if (oldRecord && oldRecord.currentAccount && oldRecord.currentAccount.mnemonicStr) {
+  const v1Records = await getLegacyAccounts()
+  if (oldRecord && oldRecord.currentAccount && oldRecord.currentAccount.mnemonicStr && !v1Records.length) {
     const mneStr = oldRecord.currentAccount.mnemonicStr
 
     // 比照查看有无该助记词的账号

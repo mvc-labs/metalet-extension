@@ -360,6 +360,15 @@ export async function needsMigrationV2(): Promise<boolean> {
   return !!(oldRecords && !newRecords)
 }
 
+export async function getLegacyAccounts(): Promise<Account[]> {
+  const legacyRecords = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
+  if (!legacyRecords) {
+    return []
+  }
+
+  return Object.values(legacyRecords)
+}
+
 export async function migrateV2(): Promise<void> {
   const oldRecords = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
   if (!oldRecords) {
@@ -409,7 +418,7 @@ export async function migrateV2(): Promise<void> {
 }
 
 type AccountManager = {
-  all: () => Promise<any>
+  all: () => Promise<Map<string, Account>>
   current: Ref<Account | null>
   getCurrent: () => Promise<Account | null>
   removeCurrent: () => Promise<boolean>

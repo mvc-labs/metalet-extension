@@ -17,8 +17,13 @@ getAccounts().then((accounts) => {
   accountsCount.value = accounts.size
 })
 
-const showingMigrationCover = ref(false)
+const showingMigrationCover = ref(true)
 needsMigrationV2().then(async (needsMigration: boolean) => {
+  if (!needsMigration) {
+    showingMigrationCover.value = false
+    return
+  }
+
   if (needsMigration) {
     showingMigrationCover.value = true
 
