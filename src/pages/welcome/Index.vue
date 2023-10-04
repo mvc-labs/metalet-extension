@@ -28,7 +28,7 @@ needsMigrationV2().then(async (needsMigration: boolean) => {
     showingMigrationCover.value = true
 
     await migrateV2()
-    await sleep(3000)
+    await sleep(1000)
 
     showingMigrationCover.value = false
 

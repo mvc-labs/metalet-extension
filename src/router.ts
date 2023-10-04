@@ -1,7 +1,13 @@
 import * as VueRouter from 'vue-router'
 import Wallet from './pages/wallet/Index.vue'
 import { getStorage } from './lib/storage'
-import accountManager, { Account, getAccounts, getCurrentAccount, getLegacyAccounts } from './lib/account'
+import accountManager, {
+  Account,
+  getAccounts,
+  getCurrentAccount,
+  getLegacyAccounts,
+  needsMigrationV2,
+} from './lib/account'
 
 const routes = [
   { path: '/', redirect: '/wallet' },
@@ -261,6 +267,12 @@ router.beforeEach(async (to, from) => {
 
     if (!hasAccount && to.path !== '/migrate') {
       return '/migrate'
+    }
+  }
+
+  if (await needsMigrationV2()) {
+    if (to.path !== '/welcome') {
+      return '/welcome'
     }
   }
 

@@ -46,6 +46,13 @@ export type Account = {
   mvc: DerivedAccountDetail
   btc: DerivedAccountDetail
 }
+type V1Account = {
+  id: string
+  name: string
+  mnemonic: string
+  path: string
+  assetsDisplay: string[]
+}
 
 // Account Map Serialization
 function serializeAccountMap(map: Map<string, Account>): string {
@@ -334,67 +341,83 @@ export async function updateBtcPath(path: string) {
 }
 
 export async function needsMigrationV2(): Promise<boolean> {
-  const oldRecords = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
-  const newRecords = await getStorage(ACCOUNT_STORAGE_CURRENT_KEY)
+  const v1Records = await getLegacyAccounts()
+  const v2Records = await getAccounts()
 
-  return !!(oldRecords && !newRecords)
+  // find out if there are any old records that exists in v1 but not in v2, judged by mnemonic
+  const v1Mnemonics = v1Records.map((record) => record.mnemonic)
+  const v2Mnemonics = Array.from(v2Records.values()).map((record) => record.mnemonic)
+
+  return v1Mnemonics.some((mne) => !v2Mnemonics.includes(mne))
 }
 
-export async function getLegacyAccounts(): Promise<Account[]> {
-  const legacyRecords = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
-  if (!legacyRecords) {
+export async function getLegacyAccounts(): Promise<V1Account[]> {
+  const legacyAccounts = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
+  if (!legacyAccounts) {
     return []
   }
 
-  return Object.values(legacyRecords)
+  return Object.values(legacyAccounts)
 }
 
 export async function migrateV2(): Promise<void> {
-  const oldRecords = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
-  if (!oldRecords) {
+  const v1Accounts = await getLegacyAccounts()
+  const v2Accounts = await getAccounts()
+  const v2AccountsArr = Array.from(v2Accounts.values())
+  if (!v1Accounts) {
     return
   }
-  const oldRecordsIds = Object.keys(oldRecords)
+  const v1AccountsIds = v1Accounts.map((account) => account.id)
 
-  // loop through old records and construct new accounts map accordingly
-  const newAccounts = new Map()
-  for (let i = 0; i < oldRecordsIds.length; i++) {
-    const oldRecordId = oldRecordsIds[i]
-    const oldRecord = oldRecords[oldRecordId]
+  // loop through v1 accounts, see if there are any accounts that are not in v2
+  for (let i = 0; i < v1AccountsIds.length; i++) {
+    const v1AccountId = v1AccountsIds[i]
+    const v1Account = v1Accounts.find((account) => account.id === v1AccountId)
 
-    const deriveChainPath = oldRecord.path
+    if (!v1Account) {
+      continue
+    }
+
+    // check if account already exists in v2
+    const accountHasMigrated = v2AccountsArr.some((account) => account.mnemonic === v1Account.mnemonic)
+
+    if (accountHasMigrated) {
+      continue
+    }
+
+    const deriveChainPath = v1Account.path
     const path = `m/44'/${deriveChainPath}'/0'/0/0`
     const rndNameId = generateRandomString(4)
 
     const allAddresses = deriveAllAddresses({
-      mnemonic: oldRecord.mnemonic,
+      mnemonic: v1Account.mnemonic,
       btcPath: path,
       mvcPath: path,
     })
 
     const newAccount = {
-      id: oldRecordId,
-      name: oldRecord.name || `Account ${rndNameId}`,
-      mnemonic: oldRecord.mnemonic,
+      id: v1AccountId,
+      name: v1Account.name || `Account ${rndNameId}`,
+      mnemonic: v1Account.mnemonic,
       assetsDisplay: ['SPACE', 'BTC'],
       mvc: {
         path,
         addressType: 'P2PKH',
         mainnetAddress: allAddresses.mvcMainnetAddress,
         testnetAddress: allAddresses.mvcTestnetAddress,
-      },
+      } as DerivedAccountDetail,
       btc: {
         path,
         addressType: 'P2PKH',
         mainnetAddress: allAddresses.btcMainnetAddress,
         testnetAddress: allAddresses.btcTestnetAddress,
-      },
+      } as DerivedAccountDetail,
     }
-    newAccounts.set(oldRecordId, newAccount)
+    v2Accounts.set(v1AccountId, newAccount)
   }
 
   // set new accounts map
-  await setAccounts(newAccounts)
+  await setAccounts(v2Accounts)
 }
 
 type AccountManager = {
