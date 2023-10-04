@@ -47,11 +47,6 @@ export type Account = {
   btc: DerivedAccountDetail
 }
 
-const isAccountsLoaded = ref(false)
-
-export const currentAccount = ref<Account | null>(null)
-export const accounts = ref<Map<string, Account>>(new Map())
-
 // Account Map Serialization
 function serializeAccountMap(map: Map<string, Account>): string {
   const obj: { [key: string]: Account } = {}
@@ -71,17 +66,8 @@ function deserializeAccountMap(json: string): Map<string, Account> {
   return map
 }
 
-export const account = ref<Account | null>(null)
-
 export async function getAccounts(refresh = false): Promise<Map<string, Account>> {
-  if (!isAccountsLoaded.value) {
-    accounts.value = deserializeAccountMap(
-      await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: '{}', isParse: false })
-    )
-    isAccountsLoaded.value = true
-  }
-
-  return accounts.value
+  return deserializeAccountMap(await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: '{}', isParse: false }))
 }
 
 export async function getAccount(accountId: string): Promise<Account | null> {
@@ -105,7 +91,6 @@ export async function getCurrentAccount(): Promise<Account | null> {
   }
 
   const account = await getAccount(currentAccountId)
-  currentAccount.value = account
 
   return account
 }
@@ -135,14 +120,11 @@ export async function connectAccount(accountId: string) {
   }
 
   await setStorage(CURRENT_ACCOUNT_ID, accountId)
-  currentAccount.value = _currentAccount
-  account.value = _currentAccount
 
   return true
 }
 
 export async function setAccounts(accountsMap: Map<string, Account>): Promise<void> {
-  accounts.value = accountsMap
   await setStorage(ACCOUNT_STORAGE_CURRENT_KEY, serializeAccountMap(accountsMap))
 }
 
@@ -226,7 +208,7 @@ export async function getPrivateKey(chain: Chain = 'mvc') {
 export async function getCredential(
   chain: Chain = 'btc'
 ): Promise<{ address: string; publicKey: string; signature: string }> {
-  const account = currentAccount.value ?? raise('No current account')
+  const account = (await getCurrentAccount()) ?? raise('No current account')
   const cachedCredential = account[chain]['credential']
 
   if (cachedCredential) return cachedCredential
@@ -285,7 +267,6 @@ export async function getXPublicKey() {
   const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
   const rootPath = await getMvcRootPath()
   const xPublicKey = mneObj.toHDPrivateKey('', network).deriveChild(rootPath).xpubkey.toString()
-  console.log('xPublicKey', xPublicKey)
 
   return xPublicKey
 }
@@ -314,7 +295,6 @@ export async function getBalance(chain: Chain = 'mvc', address?: string) {
 
 export async function getUtxos(params?: { path?: string }) {
   const account = await getCurrentAccount()
-  console.log('account', account)
   if (!account) {
     return null
   }
@@ -419,7 +399,6 @@ export async function migrateV2(): Promise<void> {
 
 type AccountManager = {
   all: () => Promise<Map<string, Account>>
-  current: Ref<Account | null>
   getCurrent: () => Promise<Account | null>
   removeCurrent: () => Promise<boolean>
   set: (account: Account) => Promise<void>
@@ -435,7 +414,6 @@ type AccountManager = {
 
 const accountManager = {} as AccountManager
 accountManager.all = getAccounts
-accountManager.current = currentAccount
 accountManager.getCurrent = getCurrentAccount
 accountManager.set = setAccount
 accountManager.add = addAccount
@@ -503,7 +481,6 @@ class AccountCls {
     const network = await getNetwork()
     const mneObj = mvc.Mnemonic.fromString(this.mnemonic)
     const xPublicKey = mneObj.toHDPrivateKey('', network).xpubkey.toString()
-    console.log('xPublicKey', xPublicKey)
 
     return xPublicKey
   }

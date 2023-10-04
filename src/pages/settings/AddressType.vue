@@ -2,20 +2,25 @@
 import { ref } from 'vue'
 import { RadioGroup, RadioGroupLabel, RadioGroupDescription, RadioGroupOption } from '@headlessui/vue'
 
-import { currentAccount as account, updateBtcPath } from '@/lib/account'
+import { getCurrentAccount, updateBtcPath } from '@/lib/account'
 import { scripts } from '@/lib/bip32-deriver'
 
-let index = scripts.findIndex((script) => script.addressType === (account.value?.btc.addressType || 'P2PKH'))
-if (index === 3) {
-  // determine if the mvc path is the same as the btc path
-  if (account.value?.mvc.path === account.value?.btc.path) {
-    index = 4
+const mvcPath = ref('')
+const selected = ref(scripts[0])
+getCurrentAccount().then((account) => {
+  if (!account) {
+    return
   }
-}
-
-const mvcPath = ref(account.value?.mvc.path || '')
-
-const selected = ref(scripts[index])
+  let index = scripts.findIndex((script) => script.addressType === (account.btc.addressType || 'P2PKH'))
+  if (index === 3) {
+    // determine if the mvc path is the same as the btc path
+    if (account.mvc.path === account.btc.path) {
+      index = 4
+    }
+  }
+  selected.value = scripts[index]
+  mvcPath.value = account.mvc.path
+})
 
 const onUpdateBtcPath = async (script: (typeof scripts)[number]) => {
   selected.value = script
