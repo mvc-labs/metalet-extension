@@ -1,12 +1,18 @@
 <script lang="ts" setup>
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
+import { ref } from 'vue'
 
 import SpaceLogoImg from '@/assets/images/space-logo.svg?url'
 import BtcLogoImg from '@/assets/images/btc-logo.svg?url'
 import MvcCollectionPanel from './components/MvcCollectionPanel.vue'
 import BtcCollectionPanel from './components/BtcCollectionPanel.vue'
 import AccountItem from '../accounts/components/Item.vue'
-import { currentAccount as account } from '@/lib/account'
+import { type Account, getCurrentAccount } from '@/lib/account'
+
+const account = ref<Account | null>(null)
+getCurrentAccount().then((acc) => {
+  account.value = acc
+})
 </script>
 
 <template>

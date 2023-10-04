@@ -1,10 +1,14 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import { currentAccount as account, getAddress } from '@/lib/account'
+
+import { getCurrentAccount, getAddress, type Account } from '@/lib/account'
+
 const address = ref<string>('')
+const account = ref<Account | null>(null)
 
 onMounted(async () => {
   address.value = await getAddress()
+  account.value = await getCurrentAccount()
 })
 </script>
 
@@ -29,7 +33,6 @@ onMounted(async () => {
       <div class="label">BTC Address Type</div>
       <div class="value">{{ account.btc.addressType || "Legacy(P2PKH)(m/44'/0'/0')" }}</div>
     </div>
-
   </div>
 </template>
 

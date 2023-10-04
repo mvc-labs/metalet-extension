@@ -5,12 +5,12 @@ import { useRouter } from 'vue-router'
 import { API_NET, API_TARGET, Wallet } from 'meta-contract'
 import { useQueryClient } from '@tanstack/vue-query'
 
-import accountManager, { type Account, getPrivateKey } from '@/lib/account'
+import accountManager, { type Account, getPrivateKey, getCurrentAccount } from '@/lib/account'
 import { getNetwork, network } from '@/lib/network'
 import { shortestAddress } from '@/lib/formatters'
+import { FEEB } from '@/data/config'
 
 import EditName from './EditName.vue'
-import { FEEB } from '@/data/config'
 
 const router = useRouter()
 
@@ -20,6 +20,10 @@ const props = defineProps<{
   showNetwork?: boolean
 }>()
 
+const currentAccount = ref<Account | null>(null)
+getCurrentAccount().then((acc) => {
+  currentAccount.value = acc
+})
 const mvcAddress = ref(
   network.value === 'mainnet' ? props.account.mvc.mainnetAddress : props.account.mvc.testnetAddress
 )
@@ -73,7 +77,7 @@ const connect = async () => {
 }
 
 const isCurrent = computed(() => {
-  return props.account.id === accountManager.current.value?.id
+  return currentAccount.value && props.account.id === currentAccount.value.id
 })
 
 const openEditNameModal = ref(false)

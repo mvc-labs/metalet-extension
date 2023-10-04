@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
-import { currentAccount, getAccounts, getCurrentAccount, migrateV2, needsMigrationV2 } from '@/lib/account'
+import { getAccounts, getCurrentAccount, migrateV2, needsMigrationV2 } from '@/lib/account'
 import { sleep } from '@/lib/helpers'
 
 const router = useRouter()
