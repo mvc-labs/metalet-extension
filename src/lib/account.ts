@@ -1,7 +1,10 @@
-import { Ref, ref } from 'vue'
-import { fetchUtxos } from '../queries/utxos'
 import { mvc } from 'meta-contract'
-
+import { getNetwork } from './network'
+import { signMessage } from './crypto'
+import { fetchUtxos } from '../queries/utxos'
+import { getStorage, setStorage } from './storage'
+import { generateRandomString, raise } from './helpers'
+import { fetchSpaceBalance, fetchBtcBalance, doNothing } from '@/queries/balance'
 import {
   AddressType,
   deriveAddress,
@@ -10,11 +13,6 @@ import {
   derivePublicKey,
   inferAddressType,
 } from './bip32-deriver'
-import { fetchSpaceBalance, fetchBtcBalance, doNothing } from '@/queries/balance'
-import { getStorage, setStorage } from './storage'
-import { generateRandomString, raise } from './helpers'
-import { getNetwork } from './network'
-import { signMessage } from './crypto'
 
 const CURRENT_ACCOUNT_ID = 'currentAccountId'
 const ACCOUNT_STORAGE_CURRENT_KEY = 'accounts_v2'

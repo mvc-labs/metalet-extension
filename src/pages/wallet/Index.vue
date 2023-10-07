@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-
 import Balance from './components/Balance.vue'
-import AccountItem from '../accounts/components/Item.vue'
 import AssetList from './components/AssetList.vue'
-import { type Account, getCurrentAccount } from '@/lib/account'
+import AccountItem from '../accounts/components/Item.vue'
+import { type Account } from '@/lib/account'
+import { getCurrentAccount } from '@/lib/emitters'
 
 const currentAccount = ref<Account | null>(null)
 getCurrentAccount().then((acc) => {
@@ -13,14 +13,13 @@ getCurrentAccount().then((acc) => {
 </script>
 
 <template>
-  <!-- main -->
   <div class="-mt-4">
-    <!-- 账号信息 -->
+    <!-- Account Info -->
     <AccountItem :account="currentAccount" v-if="currentAccount" :show-network="true" />
 
     <Balance />
 
-    <!-- 资产列表 -->
+    <!-- Asset List -->
     <AssetList />
   </div>
 </template>
