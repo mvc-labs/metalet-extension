@@ -11,16 +11,11 @@ async function emit<T>(params: EmitParams): Promise<T> {
   const channel = 'from-extension'
   const nonce = generateRandomString(16)
   browser.runtime.sendMessage({ ...params, nonce, channel })
-  const subscribe = (callback: Function) => {
+  return await new Promise((resolve) => {
     browser.runtime.onMessage.addListener((msg) => {
       if (msg.nonce === nonce) {
-        callback(msg.data)
+        resolve(msg.data)
       }
-    })
-  }
-  return await new Promise((resolve) => {
-    subscribe((data: T) => {
-      resolve(data)
     })
   })
 }
