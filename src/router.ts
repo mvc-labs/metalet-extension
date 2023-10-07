@@ -1,7 +1,13 @@
 import * as VueRouter from 'vue-router'
 import Wallet from './pages/wallet/Index.vue'
 import { getStorage } from './lib/storage'
-import accountManager, { getCurrentAccount } from './lib/account'
+import accountManager, {
+  Account,
+  getAccounts,
+  getCurrentAccount,
+  getLegacyAccounts,
+  needsMigrationV2,
+} from './lib/account'
 
 const routes = [
   { path: '/', redirect: '/wallet' },
@@ -249,16 +255,24 @@ router.beforeEach(async (to, from) => {
 // 检查账号状态；如果没有当前账号，跳转到账号页面
 router.beforeEach(async (to, from) => {
   // 如果是老用户（sync存储中有助记词），且该账号在localStorage中不存在，则说明需要迁移，跳转至新版本迁移页面
-  const oldRecord = await chrome.storage.sync.get('currentAccount')
-  if (oldRecord && oldRecord.currentAccount) {
-    const mneStr = oldRecord.currentAccount.mnemonicStr
+  const v0Record = await chrome.storage.sync.get('currentAccount')
+  const v1Records = await getLegacyAccounts()
+  if (v0Record && v0Record.currentAccount && v1Records.length === 0) {
+    const mneStr = v0Record.currentAccount.mnemonicStr
 
     // 比照查看有无该助记词的账号
-    const accounts: any[] = await accountManager.all().then((res) => Object.values(res))
-    const hasAccount = accounts.some((account) => account.mnemonic === mneStr)
+    const accounts = await getAccounts()
+    const accountsArr = Array.from(accounts.values())
+    const hasAccount = accountsArr.some((account) => account.mnemonic === mneStr)
 
     if (!hasAccount && to.path !== '/migrate') {
       return '/migrate'
+    }
+  }
+
+  if (await needsMigrationV2()) {
+    if (to.path !== '/welcome') {
+      return '/welcome'
     }
   }
 

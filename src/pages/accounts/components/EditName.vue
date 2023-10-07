@@ -1,12 +1,15 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import Modal from '@/components/Modal.vue'
-import accountManager from '@/lib/account'
+import accountManager, { type Account } from '@/lib/account'
 
 defineProps(['open'])
 const emit = defineEmits(['update:open'])
 
-const currentAccount = accountManager.current
+const currentAccount = ref<Account | null>(null)
+accountManager.getCurrent().then((acc) => {
+  currentAccount.value = acc
+})
 const name = ref(currentAccount.value?.name)
 function updateName() {
   if (currentAccount.value && name.value) {

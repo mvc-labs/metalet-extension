@@ -4,9 +4,14 @@ import { useRouter } from 'vue-router'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/solid'
 import PasswordImg from '@/assets/images/password.svg?url'
 import passwordManager from '@/lib/password'
-import { currentAccount as account } from '@/lib/account'
+import { type Account, getCurrentAccount } from '@/lib/account'
 
 const router = useRouter()
+
+const account = ref<Account | null>(null)
+getCurrentAccount().then((acc) => {
+  account.value = acc
+})
 
 const phase: Ref<1 | 2> = ref(1)
 const isCovered = ref(true)

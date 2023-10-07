@@ -46,11 +46,13 @@ export type Account = {
   mvc: DerivedAccountDetail
   btc: DerivedAccountDetail
 }
-
-const isAccountsLoaded = ref(false)
-
-export const currentAccount = ref<Account | null>(null)
-export const accounts = ref<Map<string, Account>>(new Map())
+type V1Account = {
+  id: string
+  name: string
+  mnemonic: string
+  path: string
+  assetsDisplay: string[]
+}
 
 // Account Map Serialization
 function serializeAccountMap(map: Map<string, Account>): string {
@@ -71,17 +73,8 @@ function deserializeAccountMap(json: string): Map<string, Account> {
   return map
 }
 
-export const account = ref<Account | null>(null)
-
 export async function getAccounts(refresh = false): Promise<Map<string, Account>> {
-  if (!isAccountsLoaded.value) {
-    accounts.value = deserializeAccountMap(
-      await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: '{}', isParse: false })
-    )
-    isAccountsLoaded.value = true
-  }
-
-  return accounts.value
+  return deserializeAccountMap(await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: '{}', isParse: false }))
 }
 
 export async function getAccount(accountId: string): Promise<Account | null> {
@@ -104,9 +97,9 @@ export async function getCurrentAccount(): Promise<Account | null> {
     return null
   }
 
-  currentAccount.value = await getAccount(currentAccountId)
+  const account = await getAccount(currentAccountId)
 
-  return currentAccount.value
+  return account
 }
 
 export async function removeCurrentAccount(): Promise<boolean> {
@@ -134,14 +127,11 @@ export async function connectAccount(accountId: string) {
   }
 
   await setStorage(CURRENT_ACCOUNT_ID, accountId)
-  currentAccount.value = _currentAccount
-  account.value = _currentAccount
 
   return true
 }
 
 export async function setAccounts(accountsMap: Map<string, Account>): Promise<void> {
-  accounts.value = accountsMap
   await setStorage(ACCOUNT_STORAGE_CURRENT_KEY, serializeAccountMap(accountsMap))
 }
 
@@ -225,7 +215,7 @@ export async function getPrivateKey(chain: Chain = 'mvc') {
 export async function getCredential(
   chain: Chain = 'btc'
 ): Promise<{ address: string; publicKey: string; signature: string }> {
-  const account = currentAccount.value ?? raise('No current account')
+  const account = (await getCurrentAccount()) ?? raise('No current account')
   const cachedCredential = account[chain]['credential']
 
   if (cachedCredential) return cachedCredential
@@ -284,7 +274,6 @@ export async function getXPublicKey() {
   const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
   const rootPath = await getMvcRootPath()
   const xPublicKey = mneObj.toHDPrivateKey('', network).deriveChild(rootPath).xpubkey.toString()
-  console.log('xPublicKey', xPublicKey)
 
   return xPublicKey
 }
@@ -313,7 +302,6 @@ export async function getBalance(chain: Chain = 'mvc', address?: string) {
 
 export async function getUtxos(params?: { path?: string }) {
   const account = await getCurrentAccount()
-  console.log('account', account)
   if (!account) {
     return null
   }
@@ -353,63 +341,87 @@ export async function updateBtcPath(path: string) {
 }
 
 export async function needsMigrationV2(): Promise<boolean> {
-  const oldRecords = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
-  const newRecords = await getStorage(ACCOUNT_STORAGE_CURRENT_KEY)
+  const v1Records = await getLegacyAccounts()
+  const v2Records = await getAccounts()
 
-  return !!(oldRecords && !newRecords)
+  // find out if there are any old records that exists in v1 but not in v2, judged by mnemonic
+  const v1Mnemonics = v1Records.map((record) => record.mnemonic)
+  const v2Mnemonics = Array.from(v2Records.values()).map((record) => record.mnemonic)
+
+  return v1Mnemonics.some((mne) => !v2Mnemonics.includes(mne))
+}
+
+export async function getLegacyAccounts(): Promise<V1Account[]> {
+  const legacyAccounts = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
+  if (!legacyAccounts) {
+    return []
+  }
+
+  return Object.values(legacyAccounts)
 }
 
 export async function migrateV2(): Promise<void> {
-  const oldRecords = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
-  if (!oldRecords) {
+  const v1Accounts = await getLegacyAccounts()
+  const v2Accounts = await getAccounts()
+  const v2AccountsArr = Array.from(v2Accounts.values())
+  if (!v1Accounts) {
     return
   }
-  const oldRecordsIds = Object.keys(oldRecords)
+  const v1AccountsIds = v1Accounts.map((account) => account.id)
 
-  // loop through old records and construct new accounts map accordingly
-  const newAccounts = new Map()
-  for (let i = 0; i < oldRecordsIds.length; i++) {
-    const oldRecordId = oldRecordsIds[i]
-    const oldRecord = oldRecords[oldRecordId]
+  // loop through v1 accounts, see if there are any accounts that are not in v2
+  for (let i = 0; i < v1AccountsIds.length; i++) {
+    const v1AccountId = v1AccountsIds[i]
+    const v1Account = v1Accounts.find((account) => account.id === v1AccountId)
 
-    const deriveChainPath = oldRecord.path
+    if (!v1Account) {
+      continue
+    }
+
+    // check if account already exists in v2
+    const accountHasMigrated = v2AccountsArr.some((account) => account.mnemonic === v1Account.mnemonic)
+
+    if (accountHasMigrated) {
+      continue
+    }
+
+    const deriveChainPath = v1Account.path
     const path = `m/44'/${deriveChainPath}'/0'/0/0`
     const rndNameId = generateRandomString(4)
 
     const allAddresses = deriveAllAddresses({
-      mnemonic: oldRecord.mnemonic,
+      mnemonic: v1Account.mnemonic,
       btcPath: path,
       mvcPath: path,
     })
 
     const newAccount = {
-      id: oldRecordId,
-      name: oldRecord.name || `Account ${rndNameId}`,
-      mnemonic: oldRecord.mnemonic,
+      id: v1AccountId,
+      name: v1Account.name || `Account ${rndNameId}`,
+      mnemonic: v1Account.mnemonic,
       assetsDisplay: ['SPACE', 'BTC'],
       mvc: {
         path,
         addressType: 'P2PKH',
         mainnetAddress: allAddresses.mvcMainnetAddress,
         testnetAddress: allAddresses.mvcTestnetAddress,
-      },
+      } as DerivedAccountDetail,
       btc: {
         path,
         addressType: 'P2PKH',
         mainnetAddress: allAddresses.btcMainnetAddress,
         testnetAddress: allAddresses.btcTestnetAddress,
-      },
+      } as DerivedAccountDetail,
     }
-    newAccounts.set(oldRecordId, newAccount)
+    v2Accounts.set(v1AccountId, newAccount)
   }
 
   // set new accounts map
-  await setAccounts(newAccounts)
+  await setAccounts(v2Accounts)
 }
 
 type AccountManager = {
-  all: () => Promise<any>
-  current: Ref<Account | null>
+  all: () => Promise<Map<string, Account>>
   getCurrent: () => Promise<Account | null>
   removeCurrent: () => Promise<boolean>
   set: (account: Account) => Promise<void>
@@ -425,7 +437,6 @@ type AccountManager = {
 
 const accountManager = {} as AccountManager
 accountManager.all = getAccounts
-accountManager.current = currentAccount
 accountManager.getCurrent = getCurrentAccount
 accountManager.set = setAccount
 accountManager.add = addAccount
@@ -493,7 +504,6 @@ class AccountCls {
     const network = await getNetwork()
     const mneObj = mvc.Mnemonic.fromString(this.mnemonic)
     const xPublicKey = mneObj.toHDPrivateKey('', network).xpubkey.toString()
-    console.log('xPublicKey', xPublicKey)
 
     return xPublicKey
   }

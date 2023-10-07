@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import { currentAccount } from '@/lib/account'
+import { type Account, getCurrentAccount } from '@/lib/account'
 import password from '@/lib/password'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -8,6 +8,11 @@ import MoreIcon from '@/assets/icons/more.svg?component'
 import ResetModal from '../ResetModal.vue'
 
 const router = useRouter()
+
+const account = ref<Account | null>(null)
+getCurrentAccount().then((acc) => {
+  account.value = acc
+})
 
 // const isCopied = ref(false)
 // const copyAddress = () => {
@@ -39,7 +44,7 @@ const toAccountList = () => {
 </script>
 
 <template>
-  <Menu as="div" class="relative z-[1] transition-all duration-200" v-if="currentAccount">
+  <Menu as="div" class="relative z-[1] transition-all duration-200" v-if="account">
     <MenuButton class="relative flex items-center gap-x-0.5 py-1 hover:text-blue-700">
       <MoreIcon class="h-6 w-6 text-gray-500" />
     </MenuButton>
@@ -62,17 +67,17 @@ const toAccountList = () => {
       </MenuItem> -->
 
       <MenuItem>
-      <button class="menu-item" @click="lock" v-if="hasPassword">Lock</button>
-      <button class="menu-item" @click="setPassword" v-else>Set Password</button>
+        <button class="menu-item" @click="lock" v-if="hasPassword">Lock</button>
+        <button class="menu-item" @click="setPassword" v-else>Set Password</button>
       </MenuItem>
 
       <MenuItem>
-      <button class="menu-item" @click="toAccountList">Add / Switch Account</button>
+        <button class="menu-item" @click="toAccountList">Add / Switch Account</button>
       </MenuItem>
 
       <!-- disconnect button -->
       <MenuItem v-if="hasPassword">
-      <button class="menu-item" @click="showResetModal = true">Reset Account</button>
+        <button class="menu-item" @click="showResetModal = true">Reset Account</button>
       </MenuItem>
     </MenuItems>
   </Menu>
