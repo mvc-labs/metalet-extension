@@ -6,7 +6,8 @@ import { useQueryClient } from '@tanstack/vue-query'
 
 import { useBalanceQuery } from '@/queries/balance'
 import { prettifyBalance } from '@/lib/formatters'
-import { getAddress } from '@/lib/account'
+// import { getAddress } from '@/lib/account'
+import { createEmit } from '@/lib/emitters'
 import { MVCAssets } from '@/data/assets'
 
 import Modal from '@/components/Modal.vue'
@@ -18,7 +19,10 @@ const asset = computed(() => MVCAssets.find((asset) => asset.symbol === symbol.v
 const queryClient = useQueryClient()
 
 const address = ref('')
-getAddress().then((addr) => {
+// getAddress().then((addr) => {
+//   address.value = addr!
+// })
+createEmit<string>('getAddress')().then((addr) => {
   address.value = addr!
 })
 

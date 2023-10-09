@@ -4,7 +4,8 @@ import { useRouter } from 'vue-router'
 
 import { NftCollection, useNftsQuery } from '@/queries/nfts'
 import { useCollectionInfoQuery } from '@/queries/metadata'
-import { getAddress } from '@/lib/account'
+// import { getAddress } from '@/lib/account'
+import { createEmit } from '@/lib/emitters'
 import { ref, onMounted, computed } from 'vue'
 
 import NftItem from './NftItem.vue'
@@ -17,7 +18,8 @@ const router = useRouter()
 const address = ref<string>('')
 
 onMounted(async () => {
-  address.value = await getAddress('mvc')
+  // address.value = await getAddress('mvc')
+  address.value = await createEmit<string>('getAddress')('mvc')
 })
 
 const { isLoading, data: nfts } = useNftsQuery(
@@ -55,14 +57,10 @@ const toCollection = () => {
 
     <!-- list -->
     <div class="grid grid-cols-3 gap-x-2">
-      <NftItem
-        v-for="nft in nfts"
-        :nft="nft"
-        :collection-meta-info="{
-          metaTxid: props.collection.metaTxid,
-          metaOutputIndex: props.collection.metaOutputIndex,
-        }"
-      />
+      <NftItem v-for="nft in nfts" :nft="nft" :collection-meta-info="{
+        metaTxid: props.collection.metaTxid,
+        metaOutputIndex: props.collection.metaOutputIndex,
+      }" />
     </div>
   </div>
 </template>

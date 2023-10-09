@@ -4,10 +4,10 @@ import Balance from './components/Balance.vue'
 import AssetList from './components/AssetList.vue'
 import AccountItem from '../accounts/components/Item.vue'
 import { type Account } from '@/lib/account'
-import { getCurrentAccount } from '@/lib/emitters'
+import { createEmit } from '@/lib/emitters'
 
 const currentAccount = ref<Account | null>(null)
-getCurrentAccount().then((acc) => {
+createEmit<Account>('getCurrentAccount')().then((acc) => {
   currentAccount.value = acc
 })
 </script>

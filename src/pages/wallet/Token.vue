@@ -8,7 +8,8 @@ import {
   ClipboardDocumentListIcon,
 } from '@heroicons/vue/24/solid'
 
-import { getAddress } from '@/lib/account'
+// import { getAddress } from '@/lib/account'
+import { createEmit } from '@/lib/emitters'
 import { prettifyTokenBalance, prettifyTokenGenesis } from '@/lib/formatters'
 import { useTokenQuery } from '@/queries/tokens'
 import { isOfficialToken } from '@/lib/assets'
@@ -21,7 +22,10 @@ const genesis = route.params.genesis as string
 const symbol = route.params.symbol as string
 
 const address: Ref<string> = ref('')
-getAddress().then((add) => {
+// getAddress().then((add) => {
+//   address.value = add!
+// })
+createEmit<string>('getAddress')().then((add) => {
   address.value = add!
 })
 const enabled = computed(() => !!address.value)

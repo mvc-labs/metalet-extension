@@ -6,7 +6,8 @@ import { CircleStackIcon } from '@heroicons/vue/24/solid'
 import { useQueryClient } from '@tanstack/vue-query'
 
 import { prettifyTokenBalance } from '@/lib/formatters'
-import { getAddress, getCurrentAccount, getPrivateKey } from '@/lib/account'
+// import { getAddress, getCurrentAccount, getPrivateKey } from '@/lib/account'
+import { createEmit } from '@/lib/emitters'
 import { useTokenQuery } from '@/queries/tokens'
 import { network } from '@/lib/network'
 
@@ -19,8 +20,11 @@ const genesis = route.params.genesis as string
 const queryClient = useQueryClient()
 
 const address = ref('')
-getCurrentAccount()
-getAddress().then((addr) => {
+// getCurrentAccount()
+// getAddress().then((addr) => {
+//   address.value = addr!
+// })
+createEmit<string>('getAddress')().then((addr) => {
   address.value = addr!
 })
 
@@ -50,7 +54,8 @@ async function send() {
 
   operationLock.value = true
 
-  const privateKey = await getPrivateKey("mvc")
+  // const privateKey = await getPrivateKey("mvc")
+  const privateKey = await createEmit<string>('getPrivateKey')("mvc")
 
   const ftManager = new FtManager({
     network: network.value as API_NET,

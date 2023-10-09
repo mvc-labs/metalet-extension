@@ -1,6 +1,4 @@
 import browser from 'webextension-polyfill'
-import { type Account } from '@/lib/account'
-import { generateRandomString } from '@/lib/helpers'
 
 interface EmitParams {
   fn: string
@@ -8,18 +6,10 @@ interface EmitParams {
 }
 
 async function emit<T>(params: EmitParams): Promise<T> {
-  const channel = 'from-extension'
-  const nonce = generateRandomString(16)
-  browser.runtime.sendMessage({ ...params, nonce, channel })
-  return await new Promise((resolve) => {
-    browser.runtime.onMessage.addListener((msg) => {
-      if (msg.nonce === nonce) {
-        resolve(msg.data)
-      }
-    })
-  })
+  const channel = 'inter-extension'
+  return await browser.runtime.sendMessage({ ...params, channel })
 }
 
-export async function getCurrentAccount(...args: unknown[]) {
-  return await emit<Account>({ fn: 'getCurrentAccount', args })
+export function createEmit<T>(fn: string) {
+  return (...args: unknown[]) => emit<T>({ fn, args })
 }

@@ -8,15 +8,8 @@ import { isLocked } from './lib/password'
 
 browser.runtime.onMessage.addListener(async (msg, sender) => {
   console.log('browser addListener', { msg, sender })
-  if (msg.channel === 'from-extension') {
-    const data = await exActions[msg.fn](...msg.args)
-    browser.runtime.sendMessage({
-      data,
-      nonce: msg.nonce,
-      channel: 'to-extension',
-      action: `respond-${msg.fn}`,
-    })
-    return
+  if (msg.channel === 'inter-extension') {
+    return await exActions[msg.fn](...msg.args)
   }
 
   const account = await getCurrentAccount()

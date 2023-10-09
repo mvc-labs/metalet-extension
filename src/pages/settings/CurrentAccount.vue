@@ -1,14 +1,18 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 
-import { getCurrentAccount, getAddress, type Account } from '@/lib/account'
+// import { getCurrentAccount, getAddress, type Account } from '@/lib/account'
+import {  type Account } from '@/lib/account'
+import { createEmit } from '@/lib/emitters'
 
 const address = ref<string>('')
 const account = ref<Account | null>(null)
 
 onMounted(async () => {
-  address.value = await getAddress()
-  account.value = await getCurrentAccount()
+  // address.value = await getAddress()
+  // account.value = await getCurrentAccount()
+  address.value = await createEmit<string>('getAddress')()
+  account.value = await createEmit<Account>('getCurrentAccount')()
 })
 </script>
 

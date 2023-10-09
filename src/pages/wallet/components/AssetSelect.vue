@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
 import { Switch } from '@headlessui/vue'
-
-import { addAssetsDisplay, getAssetsDisplay, removeAssetsDisplay } from '@/lib/assets'
+import { createEmit } from '@/lib/emitters'
+// import { addAssetsDisplay, getAssetsDisplay, removeAssetsDisplay } from '@/lib/assets'
 
 const props = defineProps<{
   asset: {
@@ -14,7 +14,11 @@ const props = defineProps<{
 
 const enabled = ref(false)
 const initializing = ref(true)
-getAssetsDisplay().then((assets) => {
+// getAssetsDisplay().then((assets) => {
+//   enabled.value = assets.includes(props.asset.symbol)
+//   initializing.value = false
+// })
+createEmit<string[]>('getAssetsDisplay')().then((assets) => {
   enabled.value = assets.includes(props.asset.symbol)
   initializing.value = false
 })
@@ -25,10 +29,12 @@ watch(enabled, async (value) => {
 
   if (value) {
     // 保存至显示列表
-    await addAssetsDisplay(props.asset.symbol)
+    // await addAssetsDisplay(props.asset.symbol)
+    await createEmit('addAssetsDisplay')(props.asset.symbol)
   } else {
     // 从显示列表中删除
-    await removeAssetsDisplay(props.asset.symbol)
+    // await removeAssetsDisplay(props.asset.symbol)
+    await createEmit('removeAssetsDisplay')(props.asset.symbol)
   }
 })
 </script>

@@ -4,12 +4,17 @@ import { useRouter } from 'vue-router'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/solid'
 import PasswordImg from '@/assets/images/password.svg?url'
 import passwordManager from '@/lib/password'
-import { type Account, getCurrentAccount } from '@/lib/account'
+// import { type Account, getCurrentAccount } from '@/lib/account'
+import { type Account } from '@/lib/account'
+import { createEmit } from '@/lib/emitters'
 
 const router = useRouter()
 
 const account = ref<Account | null>(null)
-getCurrentAccount().then((acc) => {
+// getCurrentAccount().then((acc) => {
+//   account.value = acc
+// })
+createEmit<Account>('getCurrentAccount')().then((acc) => {
   account.value = acc
 })
 

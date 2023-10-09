@@ -3,8 +3,10 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
-import { getAccounts, getCurrentAccount, migrateV2, needsMigrationV2 } from '@/lib/account'
+// import { getAccounts, getCurrentAccount, migrateV2, needsMigrationV2 } from '@/lib/account'
+import { getAccounts } from '@/lib/account'
 import { sleep } from '@/lib/helpers'
+import { createEmit } from '@/lib/emitters'
 
 const router = useRouter()
 
@@ -18,7 +20,28 @@ getAccounts().then((accounts) => {
 })
 
 const showingMigrationCover = ref(true)
-needsMigrationV2().then(async (needsMigration: boolean) => {
+// needsMigrationV2().then(async (needsMigration: boolean) => {
+//   if (!needsMigration) {
+//     showingMigrationCover.value = false
+//     return
+//   }
+
+//   if (needsMigration) {
+//     showingMigrationCover.value = true
+
+//     await migrateV2()
+//     await sleep(1000)
+
+//     showingMigrationCover.value = false
+
+//     if (await getCurrentAccount()) {
+//       router.push('/')
+//     } else {
+//       window.location.reload()
+//     }
+//   }
+// })
+createEmit<boolean>('needsMigrationV2')().then(async (needsMigration: boolean) => {
   if (!needsMigration) {
     showingMigrationCover.value = false
     return
@@ -27,12 +50,14 @@ needsMigrationV2().then(async (needsMigration: boolean) => {
   if (needsMigration) {
     showingMigrationCover.value = true
 
-    await migrateV2()
+    // await migrateV2()
+    await createEmit('migrateV2')()
     await sleep(1000)
 
     showingMigrationCover.value = false
 
-    if (await getCurrentAccount()) {
+    // if (await getCurrentAccount()) {
+    if (await createEmit('getCurrentAccount')()) {
       router.push('/')
     } else {
       window.location.reload()
