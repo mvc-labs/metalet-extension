@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import accountManager from '@/lib/account'
+import {getAccounts} from '@/lib/account'
 
 import AccountItem from './components/Item.vue'
 import { PlusIcon } from '@heroicons/vue/20/solid'
 import { toRaw } from 'vue'
 
 const accounts = ref()
-accountManager.all().then((res) => {
+getAccounts().then((res) => {
   accounts.value = Array.from(toRaw(res), ([key, value]) => value)
 })
 </script>

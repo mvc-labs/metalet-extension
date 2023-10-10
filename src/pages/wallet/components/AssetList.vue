@@ -7,7 +7,7 @@ import AssetItem from './AssetItem.vue'
 // import { getAddress } from '@/lib/account'
 import { createEmit } from '@/lib/emitters'
 import useTokensQuery from '@/queries/tokens'
-import { getAssetsDisplay } from '@/lib/assets'
+// import { getAssetsDisplay } from '@/lib/assets'
 import { useBTCAseetQuery } from '@/queries/btc'
 import { type Asset, BTCAssets, MVCAssets } from '@/data/assets'
 // import { toManageAssets, toNative, toWelcome } from '@/lib/router'
@@ -67,7 +67,10 @@ const { isLoading, data: userOwnedTokens } = useTokensQuery(mvcAddress, { enable
 type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
 
 const assetsDisplay = ref<string[]>([])
-getAssetsDisplay().then((display) => {
+// getAssetsDisplay().then((display) => {
+//   assetsDisplay.value = display
+// })
+createEmit<string[]>('getAssetsDisplay')().then((display) => {
   assetsDisplay.value = display
 })
 
