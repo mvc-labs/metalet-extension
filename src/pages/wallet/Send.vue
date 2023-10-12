@@ -8,14 +8,15 @@ import { useBalanceQuery } from '@/queries/balance'
 import { prettifyBalance } from '@/lib/formatters'
 // import { getAddress } from '@/lib/account'
 import { createEmit } from '@/lib/emitters'
-import { MVCAssets } from '@/data/assets'
+import { BtcWallet } from '@/lib/wallets/btc'
+import { allAssets } from '@/data/assets'
 
 import Modal from '@/components/Modal.vue'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
 const symbol: Ref<string> = ref(route.query.symbol as string)
-const asset = computed(() => MVCAssets.find((asset) => asset.symbol === symbol.value))
+const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol.value)!)
 const queryClient = useQueryClient()
 
 const address = ref('')
@@ -25,6 +26,10 @@ const address = ref('')
 createEmit<string>('getAddress')().then((addr) => {
   address.value = addr!
 })
+
+// balance
+const enabled = computed(() => !!address.value)
+const { isLoading, data: balance, error } = useBalanceQuery(address, asset.value.symbol, { enabled })
 
 // form
 const amount = ref('')
@@ -43,15 +48,11 @@ const popConfirm = () => {
 
 const isOpenResultModal = ref(false)
 
-const enabled = computed(() => !!address.value)
-const { isLoading, data: balance, error } = useBalanceQuery(address, 'SPACE', { enabled })
 const wallet = inject<Ref<Wallet>>('wallet')!
 
 const operationLock = ref(false)
-async function send() {
-  if (operationLock.value) return
 
-  operationLock.value = true
+async function sendSpace() {
   const walletInstance = toRaw(wallet.value)
   const sentRes = await walletInstance.send(recipient.value, amountInSats.value).catch((err) => {
     isOpenConfirmModal.value = false
@@ -62,6 +63,22 @@ async function send() {
 
     isOpenResultModal.value = true
   })
+
+  return sentRes
+}
+
+async function sendBtc() {
+  const wallet = await BtcWallet.create()
+  const sentRes = await wallet.send(recipient.value, amountInSats.value)
+}
+
+async function send() {
+  if (operationLock.value) return
+
+  operationLock.value = true
+
+  const sendProcessor = asset.value.symbol === 'SPACE' ? sendSpace : sendBtc
+  const sentRes = await sendProcessor()
 
   if (sentRes) {
     isOpenConfirmModal.value = false
@@ -80,7 +97,7 @@ async function send() {
 
     // 刷新query
     queryClient.invalidateQueries({
-      queryKey: ['balance', { address: address.value, symbol: 'SPACE' }],
+      queryKey: ['balance', { address: address.value, symbol: asset.value.symbol }],
     })
   }
 
@@ -89,20 +106,28 @@ async function send() {
 </script>
 
 <template>
-  <div class="mt-8 flex flex-col items-center gap-y-8">
+  <div class="mt-8 flex flex-col items-center gap-y-8" v-if="asset">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
-    <img :src="asset!.logo" alt="" class="h-16 w-16 rounded-xl" />
+    <img :src="asset.logo" alt="" class="h-16 w-16 rounded-xl" />
 
     <div class="space-y-3 self-stretch">
       <!-- address input -->
-      <input class="main-input w-full !rounded-xl !p-4 !text-xs" placeholder="Recipient's address" v-model="recipient" />
+      <input
+        class="main-input w-full !rounded-xl !p-4 !text-xs"
+        placeholder="Recipient's address"
+        v-model="recipient"
+      />
 
       <!-- amount input -->
       <div class="relative">
-        <input class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 text-sm" placeholder="Amount" v-model="amount" />
+        <input
+          class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 !text-xs"
+          placeholder="Amount"
+          v-model="amount"
+        />
         <!-- unit -->
         <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500">
-          <div class="border-l border-solid border-gray-500 px-4 py-1">SPACE</div>
+          <div class="border-l border-solid border-gray-500 px-4 py-1">{{ asset.symbol }}</div>
         </div>
       </div>
 
@@ -111,7 +136,7 @@ async function send() {
         <div class="">Your Balance:</div>
         <div class="" v-if="isLoading">--</div>
         <div class="" v-else-if="error">Error</div>
-        <div class="" v-else-if="balance">{{ prettifyBalance(balance.total) }}</div>
+        <div class="" v-else-if="balance">{{ prettifyBalance(balance.total, asset.symbol) }}</div>
       </div>
     </div>
 
@@ -125,7 +150,7 @@ async function send() {
         <div class="mt-4 space-y-4">
           <div class="space-y-1">
             <div class="label">Amount</div>
-            <div class="value">{{ amount }} SPACE</div>
+            <div class="value">{{ amount }} {{ asset.symbol }}</div>
           </div>
           <div class="space-y-1">
             <div class="label">Recipient Address</div>
@@ -143,8 +168,10 @@ async function send() {
           <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Operating...</div>
         </div>
         <div class="grid grid-cols-2 gap-x-4" v-else>
-          <button class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
-            @click="isOpenConfirmModal = false">
+          <button
+            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
+            @click="isOpenConfirmModal = false"
+          >
             Cancel
           </button>
           <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="send">

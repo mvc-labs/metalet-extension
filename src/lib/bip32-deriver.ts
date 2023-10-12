@@ -1,11 +1,13 @@
 import bip39 from 'bip39'
+import ECPairFactory from 'ecpair'
 import BIP32Factory, { BIP32Interface } from 'bip32'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { mvc } from 'meta-contract'
-import bitcoinjs from 'bitcoinjs-lib'
+import bitcoinjs, { type Payment, crypto } from 'bitcoinjs-lib'
 
 import { raise } from './helpers'
-import { type Network } from './network'
+import { type Network, getBtcNetwork } from './network'
+import { getPublicKey } from './account'
 
 export type AddressType = 'P2WPKH' | 'P2SH-P2WPKH' | 'P2TR' | 'P2PKH'
 
@@ -62,6 +64,12 @@ export function derivePrivateKey({
   return deriveBtcPrivateKey(mnemonic, path, network).toWIF()
 }
 
+// FIXME support MVC and discord ECPairFactory
+export async function deriveSigner(privateKey: string) {
+  const ECPair = ECPairFactory(ecc)
+  return ECPair.fromWIF(privateKey)
+}
+
 function deriveMvcPrivateKey(mnemonic: string, path: string, network: Network): mvc.PrivateKey {
   const mneObj = mvc.Mnemonic.fromString(mnemonic)
   const hdpk = mneObj.toHDPrivateKey('', network)
@@ -69,7 +77,7 @@ function deriveMvcPrivateKey(mnemonic: string, path: string, network: Network): 
   return hdpk.deriveChild(path).privateKey
 }
 
-function deriveBtcPrivateKey(mnemonic: string, path: string, network: Network): BIP32Interface {
+export function deriveBtcPrivateKey(mnemonic: string, path: string, network: Network): BIP32Interface {
   const bip32 = BIP32Factory(ecc)
   const btcNetwork = network === 'mainnet' ? bitcoinjs.networks.bitcoin : bitcoinjs.networks.testnet
   const seed = bip39.mnemonicToSeedSync(mnemonic)
@@ -185,6 +193,28 @@ function deriveBtcAddress(mnemonic: string, path: string, network: Network): str
         payments.p2tr({ internalPubkey: publicKey.subarray(1), network: btcNetwork }).address ??
         raise('Invalid address')
       )
+  }
+}
+
+// TODO support deriveBtcAddress function
+export async function createPayment(addressType: string): Promise<Payment> {
+  bitcoinjs.initEccLib(ecc)
+  const { payments } = bitcoinjs
+  const btcNetwork = await getBtcNetwork()
+  const publicKey = await getPublicKey('btc')
+  const pubkey = Buffer.from(publicKey, 'hex')
+
+  switch (addressType) {
+    case 'P2PKH':
+      return payments.p2pkh({ pubkey, network: btcNetwork }) ?? raise('Invalid Payment')
+    case 'P2SH-P2WPKH':
+      return payments.p2sh({ redeem: payments.p2wpkh({ pubkey }) }) ?? raise('Invalid Payment')
+    case 'P2WPKH':
+      return payments.p2wpkh({ pubkey, network: btcNetwork }) ?? raise('Invalid Payment')
+    case 'P2TR':
+      return payments.p2tr({ internalPubkey: pubkey.subarray(1), network: btcNetwork }) ?? raise('Invalid Payment')
+    default:
+      return payments.p2pkh({ pubkey, network: btcNetwork }) ?? raise('Invalid Payment')
   }
 }
 
