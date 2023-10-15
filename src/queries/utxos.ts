@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { metaletApi, mvcApi } from './request'
-=======
-import { metaletApi } from './request'
->>>>>>> 96a757471f129422411e5ed45744a29cd247eed2
 
 export type Utxo = {
   addressType: number
@@ -30,7 +26,6 @@ export async function fetchBtcUtxos(address: string): Promise<Utxo[]> {
 
   return utxos
 }
-<<<<<<< HEAD
 
 export const fetchUtxos = async (address: string): Promise<any[]> => {
   console.log('fetchUtxos', address)
@@ -38,5 +33,3 @@ export const fetchUtxos = async (address: string): Promise<any[]> => {
 
   return utxos
 }
-=======
->>>>>>> 96a757471f129422411e5ed45744a29cd247eed2

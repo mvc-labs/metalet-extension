@@ -69,7 +69,7 @@ async function sendSpace() {
 
 async function sendBtc() {
   const wallet = await BtcWallet.create()
-  const sentRes = await wallet.send(recipient.value, amountInSats.value)
+  const sentRes = await wallet.sendTest(recipient.value, amountInSats.value)
 }
 
 async function send() {

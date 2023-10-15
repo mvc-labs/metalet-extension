@@ -83,71 +83,87 @@ export class BtcWallet {
     return psbt
   }
 
-  async pay2(psbt: Psbt, targetAmount: number) {
+  async sendTest(recipient: string, amount: number) {
     // TODO put this logic in `account.ts`
     if (!this.account) throw new Error('no account')
+    const btcNetwork = await getBtcNetwork()
+    let psbt = new Psbt({ network: btcNetwork })
     const address = await getAddress('btc')
     const addressType = await getAddressType('btc')
     const payment = await createPayment(addressType)
     const utxos = await fetchBtcUtxos(address)
-    const selecedtUTXOs = selectUTXOs(utxos, targetAmount)
-    selecedtUTXOs.forEach(async (utxo) => {
-      const rawTx = await fetchBtcTxHex(utxo.txid)
-      const tx = Transaction.fromHex(rawTx)
 
-      const payInput: any = {
-        hash: utxo.txid,
-        index: utxo.outputIndex,
-      }
-
-      if (['P2SH-P2WPKH', 'P2WPKH'].includes(addressType)) {
-        payInput['witnessUtxo'] = getWitnessUtxo(tx.outs[utxo.outputIndex])
-      }
-
-      if (['P2TR'].includes(addressType)) {
-        payInput['tapInternalKey'] = await getXOnlyPublicKey()
-        payInput['witnessUtxo'] = { value: targetAmount, script: payment.output }
-      }
-
-      if (['P2PKH'].includes(addressType)) {
-        payInput['nonWitnessUtxo'] = Buffer.from(rawTx)
-      }
-
-      // redeemScript
-      if (['P2SH-P2WPKH'].includes(addressType)) {
-        payInput['redeemScript'] = payment.redeem?.output
-      }
-
-      psbt.addInput(payInput)
-    })
-
-    // add change output
-    const feeb = 10 // TODO: get feeb dynamically
-    let fee = calcFee(psbt, feeb)
-    const totalOutput = sumOrNaN(psbt.txOutputs)
-    const totalInput = sumOrNaN(psbt.data.inputs.map((input) => input.witnessUtxo!))
-    const changeValue = totalInput - totalOutput - fee
-
-    if (changeValue < 0) {
-      throw new Error('Insufficient balance')
-    }
-
-    if (changeValue >= DUST_UTXO_VALUE) {
-      psbt.addOutput({
-        address,
-        value: changeValue,
+    const buildPsbt = async (selectedUtxos: Utxo[]) => {
+      psbt = new Psbt({ network: btcNetwork }).addOutput({
+        value: 1,
+        address: recipient,
       })
-    } else {
-      fee += changeValue
+      for (const utxo of selectedUtxos) {
+        const rawTx = await fetchBtcTxHex(utxo.txid)
+        const tx = Transaction.fromHex(rawTx)
+
+        const payInput: any = {
+          hash: utxo.txid,
+          index: utxo.outputIndex,
+        }
+
+        if (['P2SH-P2WPKH', 'P2WPKH'].includes(addressType)) {
+          payInput['witnessUtxo'] = getWitnessUtxo(tx.outs[utxo.outputIndex])
+        }
+
+        if (['P2TR'].includes(addressType)) {
+          payInput['tapInternalKey'] = await getXOnlyPublicKey()
+          payInput['witnessUtxo'] = { value: amount, script: payment.output }
+        }
+
+        if (['P2PKH'].includes(addressType)) {
+          payInput['nonWitnessUtxo'] = Buffer.from(rawTx)
+        }
+
+        // redeemScript
+        if (['P2SH-P2WPKH'].includes(addressType)) {
+          payInput['redeemScript'] = payment.redeem?.output
+        }
+
+        psbt.addInput(payInput)
+      }
+      const signer = await getSigner('btc', addressType)
+      psbt.signAllInputs(signer).finalizeAllInputs()
+      return calculateFee(psbt)
     }
 
-    return psbt
+    let selecedtUTXOs = selectUTXOs(utxos, amount)
+    const fee = await buildPsbt(selecedtUTXOs)
 
-    // TODO sign and finalize pdbt
-    const signer = await getSigner('btc', addressType)
-    psbt.signAllInputs(signer).finalizeAllInputs()
-    const size = psbt.extractTransaction().virtualSize()
-    const cfee = size * feeb
+    while (getTotalSatoshis(selecedtUTXOs) < amount + fee) {
+      if (selecedtUTXOs.length === utxos.length) {
+        throw new Error('Insufficient funds')
+      }
+
+      selecedtUTXOs = selectUTXOs(utxos, amount + fee)
+      await buildPsbt(selecedtUTXOs)
+    }
+
+    // broadcast
+    const tx = psbt.finalizeAllInputs().extractTransaction()
+    const rawTx = tx.toHex()
+
+    try {
+      const response = await fetch('https://blockstream.info/testnet/api/tx', {
+        method: 'POST',
+        body: rawTx,
+        headers: { 'Content-Type': 'text/plain' },
+      })
+  
+      if (!response.ok) {
+        throw new Error('Failed to broadcast transaction')
+      }
+  
+      const txId = await response.text()
+      console.log('Transaction ID:', txId)
+    } catch (error) {
+      console.error('Error broadcasting transaction:', error)
+    }
   }
 }
 
@@ -168,7 +184,6 @@ const selectUTXOs = (utxos: Utxo[], targetAmount: number): Utxo[] => {
     totalAmount += utxo.satoshis
   }
 
-  // Check if the total amount is still less than the target amount
   if (totalAmount < targetAmount) {
     throw new Error('Insufficient funds to reach the target amount')
   }
@@ -180,4 +195,16 @@ function getWitnessUtxo(out: any): any {
   delete out.address
   out.script = Buffer.from(out.script, 'hex')
   return out
+}
+
+function calculateFee(psbt: Psbt): number {
+  const tx = psbt.extractTransaction()
+  const size = tx.virtualSize()
+  // TODO get feeb dynamically
+  const feeRate = 2
+  return size * feeRate
+}
+
+function getTotalSatoshis(utxos: Utxo[]): number {
+  return utxos.reduce((total, utxo) => total + utxo.satoshis, 0)
 }
