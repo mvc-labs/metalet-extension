@@ -19,6 +19,7 @@ import {
   previewTransaction,
   signTransaction,
   signTransactions,
+  pay,
 } from './actions'
 
 import { btcKeys, createAction, ActionType } from './actions'
@@ -37,6 +38,7 @@ type Metalet = {
   previewTransaction: any
   signTransaction: any
   signTransactions: any
+  pay: any
   signMessage: any
   verifySignature: any
   getUtxos: any
@@ -92,6 +94,7 @@ const metalet: any = {
   previewTransaction,
   signTransaction,
   signTransactions,
+  pay,
   signMessage,
   verifySignature,
 

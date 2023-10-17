@@ -131,6 +131,9 @@ export async function signTransaction(params: { transaction: SigningTransaction 
 export async function signTransactions(params: { transactions: SigningTransaction[] }) {
   return await createAction('SignTransactions', 'authorize', params)
 }
+export async function pay(params: { transactions: SigningTransaction[] }) {
+  return await createAction('Pay', 'authorize', params)
+}
 
 type TransferTask = {
   genesis?: string

@@ -73,6 +73,7 @@ type ToSignTransaction = {
   txHex: string
   scriptHex: string
   inputIndex: number
+  inputIndexes?: number[]
   satoshis: number
   sigtype?: number
   path?: string
@@ -244,4 +245,44 @@ export const signTransactions = async (
   }
 
   return signedTransactions
+}
+
+/**
+ * the core difference between signTransaction and payTransaction is that
+ * pay not only signs the transaction, but also tries to finish the transaction by adding payment UTXO and change accordingly
+ * That way, by using this api, application developers can avoid the hassle of looking for a appropriate paying utxo, calculating the change and adding the change output
+ * isn't that a cool idea?
+ *
+ */
+type ToPayTransaction = {
+  txHex: string
+  // scriptHex: string
+  // inputIndex: number
+  // inputIndexes?: number[]
+  // satoshis: number
+  // sigtype?: number
+  // path?: string
+  // hasMetaId?: boolean
+  // dataDependsOn?: number
+}
+export const payTransactions = async (
+  account: Account,
+  network: 'testnet' | 'mainnet',
+  toSignTransactions: ToPayTransaction[]
+) => {
+  // currently we only support one transaction
+  if (toSignTransactions.length !== 1) {
+    throw new Error('Currently we only support one transaction')
+  }
+
+  // first we finish the transaction by finding the appropriate utxo and calculating the change
+  const toSignTransaction = toSignTransactions[0]
+  const { txHex } = toSignTransaction
+  const tx = new mvc.Transaction(txHex)
+  // find out the total amount of the transaction (total output minus total input)
+  const totalAmount = tx.outputs.reduce((acc, output) => acc + output.satoshis, 0)
+
+  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+  const hdpk = mneObj.toHDPrivateKey('', network)
+  const rootPath = await getMvcRootPath()
 }

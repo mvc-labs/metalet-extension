@@ -7,6 +7,7 @@ import * as EciesEncrypt from '../lib/actions/ecies-encrypt'
 import * as EciesDecrypt from '../lib/actions/ecies-decrypt'
 import * as SignTransaction from '../lib/actions/sign-transaction'
 import * as SignTransactions from '../lib/actions/sign-transactions'
+import * as Pay from '../lib/actions/pay'
 import * as SignMessage from '../lib/actions/sign-message'
 import * as Merge from '../lib/actions/merge'
 
@@ -91,6 +92,14 @@ export default {
     title: 'Sign Multiple Transactions',
     description: ['Sign multiple transactions with my wallet as once'],
     process: SignTransactions.process,
+    estimate: doNothing,
+    closeAfterProcess: true,
+  },
+  Pay: {
+    name: 'Pay',
+    title: 'Pay for transactions',
+    description: ['Pay for transactions'],
+    process: Pay.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },
