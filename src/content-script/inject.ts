@@ -32,8 +32,8 @@ const callMetalet = async (params: MetaletParams) => {
 
       if (response?.channel === 'from-metaidwallet') {
         // post on console
-        console.log(`🚀 Reponse from Metalet on action ${response.action} 🚀`)
-        console.log(response?.res)
+        // console.log(`🚀 Response from Metalet on action ${response.action} 🚀`)
+        // console.log(response?.res)
 
         window.postMessage(response, '*')
       }
