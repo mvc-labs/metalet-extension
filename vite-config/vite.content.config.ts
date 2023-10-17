@@ -22,7 +22,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, '../src/content-script/main.ts'),
       name: 'Metalet',
-      formats: ['es'],
+      formats: ['iife'],
     },
     rollupOptions: {
       output: {
