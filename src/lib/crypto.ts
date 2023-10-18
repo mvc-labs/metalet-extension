@@ -1,8 +1,10 @@
-import { BN, mvc } from 'meta-contract'
+import { BN, TxComposer, mvc } from 'meta-contract'
 import { Buffer } from 'buffer'
 
 import { getMvcRootPath, type Account } from './account'
 import { parseLocalTransaction } from './metadata'
+import { DERIVE_MAX_DEPTH, FEEB, P2PKH_UNLOCK_SIZE } from '@/data/config'
+import { fetchUtxos } from '@/queries/utxos'
 
 export function eciesEncrypt(message: string, privateKey: mvc.PrivateKey): string {
   const publicKey = privateKey.toPublicKey()
@@ -268,21 +270,130 @@ type ToPayTransaction = {
 export const payTransactions = async (
   account: Account,
   network: 'testnet' | 'mainnet',
-  toSignTransactions: ToPayTransaction[]
+  toPayTransactions: ToPayTransaction[]
 ) => {
   // currently we only support one transaction
-  if (toSignTransactions.length !== 1) {
+  if (toPayTransactions.length !== 1) {
     throw new Error('Currently we only support one transaction')
   }
 
   // first we finish the transaction by finding the appropriate utxo and calculating the change
-  const toSignTransaction = toSignTransactions[0]
+  const toSignTransaction = toPayTransactions[0]
   const { txHex } = toSignTransaction
   const tx = new mvc.Transaction(txHex)
+  const txComposer = new TxComposer(tx)
+  // make sure that every input has an output
+  const inputs = tx.inputs
+  for (let i = 0; i < inputs.length; i++) {
+    if (!inputs[i].output) {
+      throw new Error('The output of every input of the transaction must be provided')
+    }
+  }
+
+  const address = account.mvc.mainnetAddress
+  const addressObj = new mvc.Address(address, network)
   // find out the total amount of the transaction (total output minus total input)
-  const totalAmount = tx.outputs.reduce((acc, output) => acc + output.satoshis, 0)
+  const totalOutput = tx.outputs.reduce((acc, output) => acc + output.satoshis, 0)
+  const totalInput = tx.inputs.reduce((acc, input) => acc + input.output!.satoshis, 0)
+  const difference = totalOutput - totalInput
+  const utxos = await fetchUtxos(address)
+  const pickedUtxos = pickUtxo(utxos, difference)
+
+  pickedUtxos.forEach((v) => {
+    txComposer.appendP2PKHInput({
+      address: addressObj,
+      txId: v.txId,
+      outputIndex: v.outputIndex,
+      satoshis: v.satoshis,
+    })
+  })
+  txComposer.appendP2PKHOutput({
+    address: addressObj,
+    satoshis: difference,
+  })
+  txComposer.appendChangeOutput(addressObj, FEEB)
+
+  // sign
 
   const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
   const hdpk = mneObj.toHDPrivateKey('', network)
+
   const rootPath = await getMvcRootPath()
+  const basePrivateKey = hdpk.deriveChild(rootPath)
+  const rootPrivateKey = hdpk.deriveChild(`${rootPath}/0/0`).privateKey
+
+  // now that we have root private key to sign other inputs
+  // we have to find out the private key of the 0-indexed input
+  const firstInputAddress = new mvc.Address(tx.inputs[0].output!.script, network)
+  let deriver = 0
+  let toUsePrivateKey: mvc.PrivateKey | undefined = undefined
+  while (deriver < DERIVE_MAX_DEPTH) {
+    const childPk = basePrivateKey.deriveChild(0).deriveChild(deriver)
+    const childAddress = childPk.publicKey.toAddress('mainnet' as any).toString()
+
+    if (childAddress === firstInputAddress.toString()) {
+      toUsePrivateKey = childPk.privateKey
+      break
+    }
+
+    deriver++
+  }
+  if (!toUsePrivateKey) {
+    throw new Error('Cannot find the private key of the first input')
+  }
+
+  // sign the first input with found private key
+  txComposer.unlockP2PKHInput(toUsePrivateKey, 0)
+
+  // txComposer.unlockP2PKHInput(firstInputPrivateKey, 0)
+
+  pickedUtxos.forEach((v, index) => {
+    txComposer.unlockP2PKHInput(rootPrivateKey, index)
+  })
+}
+
+type SA_utxo = {
+  txId: string
+  outputIndex: number
+  satoshis: number
+  address: string
+  height: number
+}
+function pickUtxo(utxos: SA_utxo[], amount: number) {
+  // amount + 2 outputs + buffer
+  let requiredAmount = amount + 34 * 2 * FEEB + 100
+  const candidateUtxos: SA_utxo[] = []
+  // split utxo to confirmed and unconfirmed and shuffle them
+  const confirmedUtxos = utxos
+    .filter((utxo) => {
+      return utxo.height > 0
+    })
+    .sort(() => Math.random() - 0.5)
+  const unconfirmedUtxos = utxos
+    .filter((utxo) => {
+      return utxo.height < 0
+    })
+    .sort(() => Math.random() - 0.5)
+
+  let current = 0
+  // use confirmed first
+  for (let utxo of confirmedUtxos) {
+    current += utxo.satoshis
+    // add input fee
+    requiredAmount += FEEB * P2PKH_UNLOCK_SIZE
+    candidateUtxos.push(utxo)
+    if (current > requiredAmount) {
+      return candidateUtxos
+    }
+  }
+  for (let utxo of unconfirmedUtxos) {
+    current += utxo.satoshis
+    // add input fee
+    requiredAmount += FEEB * P2PKH_UNLOCK_SIZE
+    candidateUtxos.push(utxo)
+    if (current > requiredAmount) {
+      return candidateUtxos
+    }
+  }
+  return candidateUtxos
 }

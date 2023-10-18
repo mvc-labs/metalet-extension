@@ -6,8 +6,8 @@ export async function process(params: any, host: string) {
   const account = await getCurrentAccount()
   const network = await getNetwork()
 
-  const signingTransactions = params.transactions
-  const signedTransactions = await payTransactions(account!, network, signingTransactions)
+  const toPayTransactions = params.transactions
+  const payedTransactions = await payTransactions(account!, network, toPayTransactions)
 
-  return { signedTransactions }
+  return { payedTransactions }
 }

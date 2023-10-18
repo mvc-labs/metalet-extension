@@ -58,13 +58,13 @@ async function q(n) {
 async function G(n) {
   return await t("GetPublicKey", "query", n);
 }
-async function S() {
+async function P() {
   return await t("GetXPublicKey", "query");
 }
 async function w(n) {
   return await t("GetBalance", "query", n);
 }
-async function P(n) {
+async function S(n) {
   return await t("GetUtxos", "query", n);
 }
 async function p(n) {
@@ -89,9 +89,12 @@ async function K(n) {
   return await t("SignTransactions", "authorize", n);
 }
 async function k(n) {
-  return await t("Transfer", "authorize", n);
+  return await t("Pay", "authorize", n);
 }
 async function x(n) {
+  return await t("Transfer", "authorize", n);
+}
+async function N(n) {
   return await t("Merge", "authorize", n);
 }
 async function g(n) {
@@ -116,14 +119,15 @@ const f = {
   switchNetwork: b,
   getAddress: q,
   getPublicKey: G,
-  getXPublicKey: S,
+  getXPublicKey: P,
   getBalance: w,
-  getUtxos: P,
-  transfer: k,
-  merge: x,
+  getUtxos: S,
+  transfer: x,
+  merge: N,
   previewTransaction: E,
   signTransaction: M,
   signTransactions: K,
+  pay: k,
   signMessage: A,
   verifySignature: C,
   eciesEncrypt: p,
