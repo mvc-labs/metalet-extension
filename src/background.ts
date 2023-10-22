@@ -8,7 +8,7 @@ import { isLocked } from './lib/password'
 browser.runtime.onMessage.addListener(async (msg, sender) => {
   const account = await getCurrentAccount()
   const walletLocked = await isLocked()
-  const actionName = msg.action.replace('authorize-', '').replace('query-', '')
+  const actionName = msg.action.replace('authorize-', '').replace('query-', '').replace('event-', '')
 
   // 如果连接状态为未连接，且请求的 action 不是connect或者IsConnected，则返回错误
   let failedStatus: string = ''
@@ -33,6 +33,18 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
 
     return response
   }
+  
+  // event actions
+  // if (msg.action?.startsWith('event')) {
+
+  //   if (msg.params?.type === 'on') {
+  //     console.log(`register ${actionName}`)
+  //     register(actionName)
+  //   } else if (msg.params?.type === 'removeListener') {
+  //     unregister(actionName)
+  //   }
+  //   return
+  // }
 
   // authorize actions
   if (msg.action?.startsWith('authorize')) {

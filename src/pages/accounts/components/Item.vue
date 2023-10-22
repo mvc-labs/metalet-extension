@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import { API_NET, API_TARGET, Wallet } from 'meta-contract'
 import { useQueryClient } from '@tanstack/vue-query'
 
-import accountManager, { type Account, getPrivateKey, getCurrentAccount } from '@/lib/account'
+import  { type Account, getPrivateKey, getCurrentAccount,connectAccount } from '@/lib/account'
 import { getNetwork, network } from '@/lib/network'
 import { shortestAddress } from '@/lib/formatters'
 import { FEEB } from '@/data/config'
@@ -63,7 +63,7 @@ const randomColor = (key: string) => {
 const queryClient = useQueryClient()
 const wallet = inject<Ref<Wallet>>('wallet')!
 const connect = async () => {
-  await accountManager.connect(props.account.id)
+  await connectAccount(props.account.id)
 
   // invalidate all queries
   await queryClient.invalidateQueries()

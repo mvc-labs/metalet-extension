@@ -1,6 +1,6 @@
-import { Ref, ref } from 'vue'
 import { fetchUtxos } from '../queries/utxos'
 import { mvc } from 'meta-contract'
+import { createEmit } from '@/data/event-actions'
 
 import {
   AddressType,
@@ -127,6 +127,8 @@ export async function connectAccount(accountId: string) {
   }
 
   await setStorage(CURRENT_ACCOUNT_ID, accountId)
+
+  createEmit('accountsChanged')(_currentAccount)
 
   return true
 }
