@@ -32,7 +32,6 @@ async function emit(params: EmitParams) {
   })
 
   if (tab[0].id) {
-    console.log('sendMessage', { ...params, channel })
     browser.tabs.sendMessage(tab[0].id, { ...params, channel })
   }
 }
