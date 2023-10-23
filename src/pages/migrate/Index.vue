@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
-import accountManager, { getAccounts, getLegacyAccounts } from '@/lib/account'
-import type { Account } from '@/lib/account'
+import { getAccounts, getLegacyAccounts } from '@/lib/account'
 import { mvc } from 'meta-contract'
 import { setNetwork } from '@/lib/network'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { deriveAllAddresses, type AddressType } from '@/lib/bip32-deriver'
+import { createEmit } from '@/lib/emitters'
 
 const router = useRouter()
 
@@ -76,7 +76,8 @@ const importWallet = async () => {
           },
         }
 
-        await accountManager.add(account)
+        // await accountManager.add(account)
+        await createEmit('addAccount')(account)
 
         // 根据用户使用的网络，设置当前网络环境
         await setNetwork(network)
@@ -110,10 +111,8 @@ const importWallet = async () => {
 
     <div class="flex flex-col items-stretch pb-4">
       <p class="mb-2 text-sm text-red-500" v-if="error">{{ error }}</p>
-      <button
-        class="gradient-bg rounded-md py-4 text-base font-bold leading-none tracking-wide text-blue-50"
-        @click="importWallet"
-      >
+      <button class="gradient-bg rounded-md py-4 text-base font-bold leading-none tracking-wide text-blue-50"
+        @click="importWallet">
         OK
       </button>
     </div>

@@ -3,11 +3,12 @@ import { ComputedRef, computed, ref, Ref } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import { API_NET, API_TARGET, NftManager } from 'meta-contract'
 
-import { getAddress, getCurrentAccount, getPrivateKey } from '@/lib/account'
+// import { getAddress, getCurrentAccount, getPrivateKey } from '@/lib/account'
 import { parseMetaFile, getResizeQuery } from '@/lib/metadata'
 import { useOneNftQuery } from '@/queries/nfts'
 import { useNftInfoQuery } from '@/queries/metadata'
 import { network } from '@/lib/network'
+import { createEmit } from '@/lib/emitters'
 
 import Modal from '@/components/Modal.vue'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
@@ -21,8 +22,11 @@ const { codehash, genesis, tokenIndex } = defineProps<{
 }>()
 
 const address = ref('')
-getCurrentAccount()
-getAddress().then((addr) => {
+// getCurrentAccount()
+// getAddress().then((addr) => {
+//   address.value = addr!
+// })
+createEmit<string>('getAddress')().then((addr) => {
   address.value = addr!
 })
 
@@ -58,7 +62,8 @@ async function transfer() {
 
   operationLock.value = true
 
-  const privateKey = await getPrivateKey("mvc")
+  // const privateKey = await getPrivateKey("mvc")
+  const privateKey = await createEmit<string>('getPrivateKey')("mvc")
 
   const nftManager = new NftManager({
     network: network.value as API_NET,

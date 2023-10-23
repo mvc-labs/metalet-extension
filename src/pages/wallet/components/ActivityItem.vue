@@ -6,7 +6,7 @@ import type { Activity } from '@/queries/activities'
 import { prettifyTimestamp, prettifyTxId } from '@/lib/formatters'
 import { toTx } from '@/lib/helpers'
 import { getBrowserHost } from '@/lib/host'
-import { Chain } from '@/lib/account'
+import { type Chain } from '@/lib/account'
 
 const props = defineProps<{
   activity: Activity

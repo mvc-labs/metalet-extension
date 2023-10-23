@@ -1,11 +1,17 @@
 import browser from 'webextension-polyfill'
 import actions from './data/query-actions'
+import exActions from './data/extension-actions'
 import { NOTIFICATION_HEIGHT, NOTIFICATION_WIDTH } from './data/config'
 import connector from './lib/connector'
 import { getCurrentAccount } from './lib/account'
 import { isLocked } from './lib/password'
 
 browser.runtime.onMessage.addListener(async (msg, sender) => {
+  console.log('browser addListener', { msg, sender })
+  if (msg.channel === 'inter-extension') {
+    return await exActions[msg.fn](...msg.args)
+  }
+
   const account = await getCurrentAccount()
   const walletLocked = await isLocked()
   const actionName = msg.action.replace('authorize-', '').replace('query-', '').replace('event-', '')

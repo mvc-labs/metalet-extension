@@ -7,12 +7,16 @@ import BtcLogoImg from '@/assets/images/btc-logo.svg?url'
 import MvcCollectionPanel from './components/MvcCollectionPanel.vue'
 import BtcCollectionPanel from './components/BtcCollectionPanel.vue'
 import AccountItem from '../accounts/components/Item.vue'
-import { type Account, getCurrentAccount } from '@/lib/account'
+import { type Account } from '@/lib/account'
+import { createEmit } from '@/lib/emitters'
 
 const account = ref<Account | null>(null)
-getCurrentAccount().then((acc) => {
+createEmit<Account>('getCurrentAccount')().then((acc) => {
   account.value = acc
 })
+// getCurrentAccount().then((acc) => {
+//   account.value = acc
+// })
 </script>
 
 <template>

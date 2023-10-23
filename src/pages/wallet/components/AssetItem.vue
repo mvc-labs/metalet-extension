@@ -7,9 +7,11 @@ import { isOfficialToken } from '@/lib/assets'
 import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import { type Asset, getTagInfo, Tag } from '@/data/assets'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
-import { getCurrentAccount } from '@/lib/account'
+// import { getCurrentAccount } from '@/lib/account'
 import { getNetwork } from '@/lib/network'
 import { updateAsset } from '@/lib/balance'
+import { createEmit } from '@/lib/emitters'
+import { type Account } from '@/lib/account'
 
 const { asset } = defineProps<{
   asset: Asset
@@ -19,7 +21,17 @@ const chain = computed(() => asset.chain)
 const address = ref('')
 const tag = ref<Tag>()
 
-getCurrentAccount().then(async (account) => {
+// getCurrentAccount().then(async (account) => {
+//   if (!account) return
+
+//   const network = await getNetwork()
+//   if (network === 'mainnet') {
+//     address.value = account[chain.value].mainnetAddress
+//   } else {
+//     address.value = account[chain.value].testnetAddress
+//   }
+// })
+createEmit<Account>("getCurrentAccount")().then(async (account) => {
   if (!account) return
 
   const network = await getNetwork()
@@ -62,25 +74,17 @@ const exchange = computed(() => {
         <img class="h-10 w-10 rounded-full" :src="asset.logo" v-if="asset.logo" />
         <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
         <div class="flex flex-col gap-y-1 items-start">
-          <div
-            :class="[
-              'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
-              asset.isNative ? 'text-lg' : 'text-sm',
-            ]"
-            :title="asset.tokenName"
-          >
+          <div :class="[
+            'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
+            asset.isNative ? 'text-lg' : 'text-sm',
+          ]" :title="asset.tokenName">
             {{ asset.tokenName }}
-            <CheckBadgeIcon
-              class="h-4 w-4 shrink-0 text-blue-500"
-              v-if="asset?.genesis && isOfficialToken(asset.genesis)"
-            />
+            <CheckBadgeIcon class="h-4 w-4 shrink-0 text-blue-500"
+              v-if="asset?.genesis && isOfficialToken(asset.genesis)" />
           </div>
 
-          <div
-            :style="`background-color:${tag.bg};color:${tag.color};`"
-            :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs', 'inline-block']"
-            v-if="tag"
-          >
+          <div :style="`background-color:${tag.bg};color:${tag.color};`"
+            :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs', 'inline-block']" v-if="tag">
             {{ tag.name }}
           </div>
         </div>

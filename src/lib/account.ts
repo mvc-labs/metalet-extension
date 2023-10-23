@@ -1,7 +1,11 @@
-import { fetchUtxos } from '../queries/utxos'
 import { mvc } from 'meta-contract'
 import { createEmit } from '@/data/event-actions'
-
+import { getNetwork } from './network'
+import { signMessage } from './crypto'
+import { fetchUtxos } from '../queries/utxos'
+import { getStorage, setStorage } from './storage'
+import { generateRandomString, raise } from './helpers'
+import { fetchSpaceBalance, fetchBtcBalance, doNothing } from '@/queries/balance'
 import {
   AddressType,
   deriveAddress,
@@ -10,16 +14,12 @@ import {
   derivePublicKey,
   inferAddressType,
 } from './bip32-deriver'
-import { fetchSpaceBalance, fetchBtcBalance, doNothing } from '@/queries/balance'
-import { getStorage, setStorage } from './storage'
-import { generateRandomString, raise } from './helpers'
-import { getNetwork } from './network'
-import { signMessage } from './crypto'
 
 const CURRENT_ACCOUNT_ID = 'currentAccountId'
 const ACCOUNT_STORAGE_CURRENT_KEY = 'accounts_v2'
 const ACCOUNT_STORAGE_HISTORY_KEYS = ['accounts']
 
+// TODO put in types.ts
 export type Chain = 'btc' | 'mvc'
 
 type DerivedAccountDetail = {
@@ -303,14 +303,13 @@ export async function getBalance(chain: Chain = 'mvc', address?: string) {
   }
 }
 
-export async function getUtxos(params?: { path?: string }) {
+export async function getUtxos(chain: Chain = 'mvc', params?: { path?: string }) {
   const account = await getCurrentAccount()
   if (!account) {
     return null
   }
-  const address = await getAddress('mvc', params?.path)
-
-  return await fetchUtxos(address)
+  const address = await getAddress(chain, params?.path)
+  return await fetchUtxos(chain, address)
 }
 
 export async function updateName(name: string) {
@@ -434,7 +433,7 @@ type AccountManager = {
   getBalance: (chain: Chain, address?: string) => Promise<Awaited<ReturnType<typeof fetchSpaceBalance>> | null>
   getAddress: (chain: Chain, path?: string) => Promise<any>
   getXPublicKey: () => Promise<string | null>
-  getUtxos: (params?: any) => Promise<any>
+  getUtxos: (chain: Chain, params?: any) => Promise<any>
   updateName: (name: string) => Promise<void>
 }
 

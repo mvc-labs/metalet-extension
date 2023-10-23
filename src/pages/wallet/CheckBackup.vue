@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { type Account, getCurrentAccount } from '@/lib/account'
+// import { type Account, getCurrentAccount } from '@/lib/account'
+import { type Account } from '@/lib/account'
+import { createEmit } from '@/lib/emitters'
 
 const router = useRouter()
 
@@ -9,7 +11,10 @@ const mnemonic = ref('')
 const isValid = ref(true)
 
 const account = ref<Account | null>(null)
-getCurrentAccount().then((acc) => {
+// getCurrentAccount().then((acc) => {
+//   account.value = acc
+// })
+createEmit<Account>('getCurrentAccount')().then((acc) => {
   account.value = acc
 })
 
@@ -39,13 +44,8 @@ const verify = async () => {
       Write down your seed phrase to make sure you have backed up your wallet.
     </p>
 
-    <textarea
-      name=""
-      rows="5"
-      class="mt-8 w-full resize-none rounded-md border bg-gray-100 p-4"
-      :class="isValid ? 'border-transparent' : 'border-red-500'"
-      v-model="mnemonic"
-    ></textarea>
+    <textarea name="" rows="5" class="mt-8 w-full resize-none rounded-md border bg-gray-100 p-4"
+      :class="isValid ? 'border-transparent' : 'border-red-500'" v-model="mnemonic"></textarea>
     <p v-if="!isValid" class="mt-2 text-sm text-red-500">The seed phrase you entered is incorrect.</p>
 
     <!-- buttons -->

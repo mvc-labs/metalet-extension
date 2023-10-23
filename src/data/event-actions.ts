@@ -1,4 +1,3 @@
-import { ref } from 'vue'
 import browser from 'webextension-polyfill'
 
 interface EmitParams {

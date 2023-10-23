@@ -5,10 +5,11 @@ import { useRouter } from 'vue-router'
 import { API_NET, API_TARGET, Wallet } from 'meta-contract'
 import { useQueryClient } from '@tanstack/vue-query'
 
-import  { type Account, getPrivateKey, getCurrentAccount,connectAccount } from '@/lib/account'
+import { type Account, connectAccount } from '@/lib/account'
 import { getNetwork, network } from '@/lib/network'
 import { shortestAddress } from '@/lib/formatters'
 import { FEEB } from '@/data/config'
+import { createEmit } from '@/lib/emitters'
 
 import EditName from './EditName.vue'
 
@@ -20,10 +21,6 @@ const props = defineProps<{
   showNetwork?: boolean
 }>()
 
-const currentAccount = ref<Account | null>(null)
-getCurrentAccount().then((acc) => {
-  currentAccount.value = acc
-})
 const mvcAddress = ref(
   network.value === 'mainnet' ? props.account.mvc.mainnetAddress : props.account.mvc.testnetAddress
 )
@@ -70,14 +67,15 @@ const connect = async () => {
 
   // update injected wallet
   const network = await getNetwork()
-  const wif = await getPrivateKey()
+  // const wif = await getPrivateKey()
+  const wif = await createEmit<string>('getPrivateKey')()
   wallet.value = new Wallet(wif, network as API_NET, FEEB, API_TARGET.MVC)
 
   router.push('/wallet')
 }
 
 const isCurrent = computed(() => {
-  return currentAccount.value && props.account.id === currentAccount.value.id
+  return !!props.account
 })
 
 const openEditNameModal = ref(false)
@@ -99,17 +97,11 @@ const openEditNameModal = ref(false)
             {{ account.name }}
           </div>
 
-          <PencilSquareIcon
-            class="hidden h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-500 group-hover:inline"
-            @click="openEditNameModal = true"
-            v-if="!showConnectButton"
-          />
+          <PencilSquareIcon class="hidden h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-500 group-hover:inline"
+            @click="openEditNameModal = true" v-if="!showConnectButton" />
 
-          <span
-            class="rounded-sm bg-gray-100 px-2 py-0.5 text-xs text-gray-500"
-            v-if="showNetwork && network === 'testnet'"
-            >{{ network }}</span
-          >
+          <span class="rounded-sm bg-gray-100 px-2 py-0.5 text-xs text-gray-500"
+            v-if="showNetwork && network === 'testnet'">{{ network }}</span>
         </div>
 
         <div class="mt-1 flex items-center gap-x-1">
@@ -141,11 +133,8 @@ const openEditNameModal = ref(false)
     <!-- connect button -->
     <template v-if="showConnectButton">
       <span v-if="isCurrent" class="text-sm text-gray-500">active</span>
-      <button
-        class="rounded-md bg-blue-100 px-2 py-1 text-sm text-blue-700 transition hover:bg-blue-200"
-        @click="connect"
-        v-else
-      >
+      <button class="rounded-md bg-blue-100 px-2 py-1 text-sm text-blue-700 transition hover:bg-blue-200" @click="connect"
+        v-else>
         Connect
       </button>
     </template>

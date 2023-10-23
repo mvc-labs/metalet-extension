@@ -4,7 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 
 import { MVCAssets } from '@/data/assets'
 import AssetItem from './components/AssetItem.vue'
-import { getAssetsDisplay } from '@/lib/assets'
+// import { getAssetsDisplay } from '@/lib/assets'
+import { createEmit } from '@/lib/emitters'
 
 const props = defineProps<{
   purpose: 'receive' | 'send'
@@ -14,7 +15,10 @@ const router = useRouter()
 
 const assets = ref(MVCAssets)
 const assetsDisplay: Ref<string[]> = ref([])
-getAssetsDisplay().then((display) => {
+// getAssetsDisplay().then((display) => {
+//   assetsDisplay.value = display
+// })
+createEmit<string[]>('getAssetsDisplay')().then((display) => {
   assetsDisplay.value = display
 })
 const displayingAssets = computed(() => {

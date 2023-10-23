@@ -4,12 +4,13 @@ import { useRouter } from 'vue-router'
 import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
 
 import AssetItem from './AssetItem.vue'
-import { getAddress } from '@/lib/account'
+// import { getAddress } from '@/lib/account'
+import { createEmit } from '@/lib/emitters'
 import useTokensQuery from '@/queries/tokens'
-import { getAssetsDisplay } from '@/lib/assets'
+// import { getAssetsDisplay } from '@/lib/assets'
 import { useBTCAseetQuery } from '@/queries/btc'
 import { type Asset, BTCAssets, MVCAssets } from '@/data/assets'
-import { toManageAssets, toNative, toWelcome } from '@/lib/router'
+// import { toManageAssets, toNative, toWelcome } from '@/lib/router'
 
 const router = useRouter()
 
@@ -27,25 +28,29 @@ const btcAssets = ref<Asset[]>(BTCAssets.filter((asset) => asset.symbol === 'BTC
 //   }
 // })
 
-getAddress('mvc').then(addr => {
+// getAddress('mvc').then(addr => {
+//   if (!addr) {
+//     toWelcome()
+//     return
+//   }
+//   mvcAddress.value = addr
+//   console.log("mvcAddress", mvcAddress.value);
+// })
+createEmit<string>('getAddress')('mvc').then(addr => {
   if (!addr) {
     toWelcome()
     return
   }
   mvcAddress.value = addr
-  console.log("mvcAddress", mvcAddress.value);
 })
 
-getAddress('btc').then(addr => {
+createEmit<string>('getAddress')('btc').then(addr => {
   if (!addr) {
     toWelcome()
     return
   }
   btcAddress.value = addr
-  console.log("btcAddress", btcAddress.value);
 })
-
-console.log("AssetList render");
 
 
 // FTXME fetchBTCAsset loop request
@@ -62,7 +67,10 @@ const { isLoading, data: userOwnedTokens } = useTokensQuery(mvcAddress, { enable
 type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
 
 const assetsDisplay = ref<string[]>([])
-getAssetsDisplay().then((display) => {
+// getAssetsDisplay().then((display) => {
+//   assetsDisplay.value = display
+// })
+createEmit<string[]>('getAssetsDisplay')().then((display) => {
   assetsDisplay.value = display
 })
 
@@ -70,7 +78,21 @@ const displayingAssets = computed(() => {
   return listedAssets.value.filter((asset) => assetsDisplay.value.includes(asset.symbol))
 })
 
-//TODO move to router.ts
+function toManageAssets() {
+  router.push('/wallet/manage-assets')
+}
+
+function toNative(asset: Asset) {
+  router.push({
+    name: 'asset',
+    params: { symbol: asset.symbol },
+  })
+}
+
+function toWelcome() {
+  router.push('/welcome')
+}
+
 function toToken(token: UserOwnedToken) {
   router.push({
     name: 'token',
