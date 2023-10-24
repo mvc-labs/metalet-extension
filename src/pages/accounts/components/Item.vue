@@ -17,8 +17,9 @@ const router = useRouter()
 
 const props = defineProps<{
   account: Account
-  showConnectButton?: boolean
+  currentAccount: Account
   showNetwork?: boolean
+  showConnectButton?: boolean
 }>()
 
 const mvcAddress = ref(
@@ -75,7 +76,7 @@ const connect = async () => {
 }
 
 const isCurrent = computed(() => {
-  return !!props.account
+  return props.account.id === props.currentAccount.id
 })
 
 const openEditNameModal = ref(false)

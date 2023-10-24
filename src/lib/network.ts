@@ -10,6 +10,7 @@ export async function setNetwork(_network: Network) {
   await storage.set('network', _network)
   network.value = _network
   createEmit('networkChanged')(_network)
+  console.log("createEmit('networkChanged')", _network)
 }
 
 export async function getNetwork(): Promise<Network> {

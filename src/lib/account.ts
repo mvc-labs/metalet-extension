@@ -127,10 +127,11 @@ export async function connectAccount(accountId: string) {
   }
 
   await setStorage(CURRENT_ACCOUNT_ID, accountId)
+
   const mvcAddress = await getAddress('mvc')
   const btcAddress = await getAddress('btc')
   createEmit('accountsChanged')({ mvcAddress, btcAddress })
-
+  
   return true
 }
 
