@@ -22,13 +22,13 @@ const fetchMVCUtxos = async (address: string): Promise<any[]> => {
 // Fetch BTC address non inscription UTXO utxos
 const fetchBTCUtxos = async (address: string): Promise<UTXO[]> => {
   const {
-    data: { utxos },
+    data: { utxo },
   } = await metaletApiV2(`/address/utxos`).get({
     address,
     chain: 'btc',
   })
 
-  return utxos
+  return utxo
 }
 
 export const fetchUtxos = async (chain: Chain = 'mvc', address: string): Promise<any[]> => {

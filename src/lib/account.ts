@@ -131,7 +131,7 @@ export async function connectAccount(accountId: string) {
   const mvcAddress = await getAddress('mvc')
   const btcAddress = await getAddress('btc')
   createEmit('accountsChanged')({ mvcAddress, btcAddress })
-  
+
   return true
 }
 
