@@ -3,7 +3,8 @@ import { Ref, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowDownLeftIcon } from '@heroicons/vue/20/solid'
 
-import { getAddress } from '@/lib/account'
+// import { getAddress } from '@/lib/account'
+import { createEmit } from '@/lib/emitters'
 import { useNftCollectionsQuery } from '@/queries/nfts'
 
 import NftCollectionItem from './CollectionItem.vue'
@@ -11,7 +12,13 @@ import NftCollectionItem from './CollectionItem.vue'
 const router = useRouter()
 
 const address: Ref<string> = ref('')
-getAddress().then((add) => {
+// getAddress().then((add) => {
+//   if (!add) return router.push('/welcome')
+
+//   address.value = add
+// })
+
+createEmit<string>('getAddress')().then((add) => {
   if (!add) return router.push('/welcome')
 
   address.value = add

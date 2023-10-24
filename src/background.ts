@@ -1,14 +1,19 @@
 import browser from 'webextension-polyfill'
 import actions from './data/query-actions'
+import exActions from './data/extension-actions'
 import { NOTIFICATION_HEIGHT, NOTIFICATION_WIDTH } from './data/config'
 import connector from './lib/connector'
 import { getCurrentAccount } from './lib/account'
 import { isLocked } from './lib/password'
 
 browser.runtime.onMessage.addListener(async (msg, sender) => {
+  if (msg.channel === 'inter-extension') {
+    return await exActions[msg.fn](...msg.args)
+  }
+
   const account = await getCurrentAccount()
   const walletLocked = await isLocked()
-  const actionName = msg.action.replace('authorize-', '').replace('query-', '')
+  const actionName = msg.action.replace('authorize-', '').replace('query-', '').replace('event-', '')
 
   // 如果连接状态为未连接，且请求的 action 不是connect或者IsConnected，则返回错误
   let failedStatus: string = ''
@@ -33,6 +38,18 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
 
     return response
   }
+  
+  // event actions
+  // if (msg.action?.startsWith('event')) {
+
+  //   if (msg.params?.type === 'on') {
+  //     console.log(`register ${actionName}`)
+  //     register(actionName)
+  //   } else if (msg.params?.type === 'removeListener') {
+  //     unregister(actionName)
+  //   }
+  //   return
+  // }
 
   // authorize actions
   if (msg.action?.startsWith('authorize')) {

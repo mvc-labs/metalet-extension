@@ -5,8 +5,10 @@ import { EyeIcon } from '@heroicons/vue/24/solid'
 import { useRouter } from 'vue-router'
 
 import LockIcon from '@/assets/icons/lock.svg?component'
-import { addAccount } from '@/lib/account'
-import { deriveAllAddresses, type AddressType } from '@/lib/bip32-deriver'
+// import { addAccount } from '@/lib/account'
+// import { deriveAllAddresses, type AddressType } from '@/lib/bip32-deriver'
+import { createEmit } from '@/lib/emitters'
+import { type AddressType } from '@/lib/bip32-deriver'
 
 const router = useRouter()
 
@@ -30,7 +32,12 @@ const saveAccount = async (backup: boolean) => {
     const fullPath = `m/44'/10001'/0'/0/0`
     const btcPath = fullPath
 
-    const allAddresses = deriveAllAddresses({
+    // const allAddresses = deriveAllAddresses({
+    //   mnemonic: mnemonicStr,
+    //   btcPath,
+    //   mvcPath: fullPath,
+    // })
+    const allAddresses = await createEmit<{ [key: string]: string }>('deriveAllAddresses')({
       mnemonic: mnemonicStr,
       btcPath,
       mvcPath: fullPath,
@@ -53,7 +60,8 @@ const saveAccount = async (backup: boolean) => {
         testnetAddress: allAddresses.btcTestnetAddress,
       },
     }
-    await addAccount(account)
+    // await addAccount(account)
+    await createEmit('addAccount')(account)
 
     console.log('addAccount')
     console.log('backup', backup)
@@ -88,14 +96,10 @@ const saveAccount = async (backup: boolean) => {
         {{ wordsDisplay }}
       </div>
 
-      <div
-        class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-100/30 backdrop-blur"
-        v-if="isCover"
-      >
-        <button
-          class="w- flex w-32 items-center justify-center gap-x-2 rounded-full border border-black py-2"
-          @click="isCover = false"
-        >
+      <div class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-100/30 backdrop-blur"
+        v-if="isCover">
+        <button class="w- flex w-32 items-center justify-center gap-x-2 rounded-full border border-black py-2"
+          @click="isCover = false">
           <EyeIcon class="h-5 w-5" />
           <span>Show</span>
         </button>

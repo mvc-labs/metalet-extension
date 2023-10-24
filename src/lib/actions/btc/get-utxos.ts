@@ -1,3 +1,5 @@
-export async function process(params: any, host: string) {
-  return 'getUtxos'
+import { getUtxos } from '@/lib/account'
+
+export async function process() {
+  return await getUtxos('btc')
 }
