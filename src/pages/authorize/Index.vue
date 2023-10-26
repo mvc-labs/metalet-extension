@@ -4,7 +4,6 @@ import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
 
 import { toTx } from '@/lib/helpers'
-import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
 import actions from '@/data/authorize-actions'
 import TransferToken from './TransferToken.vue'
 import Transfer from './Transfer.vue'
@@ -20,7 +19,6 @@ import Merge from './Merge.vue'
 import { getBrowserHost } from '@/lib/host'
 import { LinkIcon } from '@heroicons/vue/20/solid'
 import logos from '@/data/logos'
-import { Tab } from '@headlessui/vue'
 
 // 从query中获取数据
 const route = useRoute()

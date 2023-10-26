@@ -9,6 +9,7 @@ import {
   updateBtcPath,
   migrateV2,
   needsMigrationV2,
+  getAddressType,
 } from '@/lib/account'
 
 export default {
@@ -17,6 +18,7 @@ export default {
   addAccount,
   getAddress,
   getPrivateKey,
+  getAddressType,
   updateBtcPath,
   migrateV2,
   needsMigrationV2,

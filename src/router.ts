@@ -12,10 +12,6 @@ import accountManager, {
 const routes = [
   { path: '/', redirect: '/wallet' },
   {
-    path: '/dev',
-    component: () => import('./pages/Dev.vue'),
-  },
-  {
     path: '/welcome',
     component: () => import('./pages/welcome/Index.vue'),
     meta: {
