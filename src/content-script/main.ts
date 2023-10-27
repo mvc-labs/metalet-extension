@@ -22,7 +22,7 @@ import {
   pay,
 } from './actions'
 
-import { btcKeys, createAction, ActionType } from './actions'
+import { btcKeys, createAction, ActionType, on, removeListener } from './actions'
 
 type Metalet = {
   connect: any
@@ -109,12 +109,9 @@ const metalet: any = {
 
   btc: {},
 
-  // btc: {
-  //   getBalance: () => {},
-  //   getAddress: () => {},
-  //   getPublicKey: () => {},
-  //   getUtxos: () => {},
-  // },
+  // event
+  on,
+  removeListener,
 
   // Deprecating
   requestAccount: connect,
@@ -125,7 +122,7 @@ const metalet: any = {
 }
 
 Object.keys(btcKeys).forEach((type) => {
-  const actionType = type as ActionType
+  const actionType = type as Exclude<ActionType, 'event'>
   btcKeys[actionType].forEach((item) => {
     metalet['btc'][item.name] = async (params?: any) => {
       return await createAction(item.action, actionType, params)

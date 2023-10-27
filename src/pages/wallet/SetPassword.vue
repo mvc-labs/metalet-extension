@@ -4,7 +4,7 @@ import PasswordImg from '@/assets/images/password.svg?url'
 import { Ref, computed, ref } from 'vue'
 import { passwordStrength } from 'check-password-strength'
 import { useRouter } from 'vue-router'
-import accountManager from '@/lib/account'
+// import accountManager from '@/lib/account'
 import passwordManager from '@/lib/password'
 
 const router = useRouter()

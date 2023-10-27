@@ -68,6 +68,15 @@ export const metaletApi = (path: string) => {
   }
 }
 
+export const metaletApiV2 = (path: string) => {
+  // metalet api requires credential to pass authentication check
+  const metaletHost = METALET_HOST + '/wallet-api/v2'
+  return {
+    get: (params?: OptionParams) => request(`${metaletHost}${path}`, { method: 'GET', params, withCredential: true }),
+    post: (data?: OptionData) => request(`${metaletHost}${path}`, { method: 'POST', data, withCredential: true }),
+  }
+}
+
 export const ordersApi = (path: string) => {
   const ordersHost = ORDERS_HOST + '/api'
   return {

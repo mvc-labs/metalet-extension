@@ -24,8 +24,6 @@ const select = async (network: Network) => {
   // 存入存储
   await setNetwork(network.type)
 
-  //
-
   // force a reload
   window.location.reload()
 }

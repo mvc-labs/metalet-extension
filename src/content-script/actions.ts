@@ -8,12 +8,13 @@ type Echo = {
   res: any
 }
 
-export type ActionType = 'authorize' | 'query'
+export type ActionType = 'authorize' | 'query' | 'event'
 
 export async function createAction(
   actionName: string,
   actionType: ActionType = 'authorize',
-  params?: any
+  params?: any,
+  handler?: any
 ): Promise<any> {
   const action = `${actionType}-${actionName}`
   // nonce为32位随机字符串
@@ -165,6 +166,27 @@ export async function getTokenBalance(params?: { genesis: string; codehash: stri
   return await createAction('GetTokenBalance', 'query', params)
 }
 
+// event on
+export async function on(eventName: string, handler: Function) {
+  const handleFn = (event: MessageEvent) => {
+    if (event.data?.channel === 'removeListener' && event.data?.eventName === eventName) {
+      window.removeEventListener('message', handleFn)
+      return
+    }
+    if (event.source !== window || event.data?.channel !== 'from-metaidwallet' || event.data?.eventName !== eventName) {
+      return
+    }
+
+    handler(...event.data.args)
+  }
+  window.addEventListener('message', handleFn)
+}
+
+// event removeListener
+export async function removeListener(eventName: string) {
+  window.postMessage({ eventName, channel: 'removeListener' }, '*')
+}
+
 export interface ActionItem {
   name: string
   action: string
@@ -174,7 +196,7 @@ export type Keys = {
   [K in ActionType]: ActionItem[]
 }
 
-export const btcKeys: Keys = {
+export const btcKeys: Omit<Keys, 'event'> = {
   query: [
     { name: 'getBalance', action: 'GetBTCBalance' },
     { name: 'getAddress', action: 'GetBTCAddress' },
