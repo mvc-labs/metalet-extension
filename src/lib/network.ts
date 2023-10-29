@@ -1,6 +1,5 @@
 import { ref } from 'vue'
 import storage from './storage'
-import { networks } from 'bitcoinjs-lib'
 import { createEmit } from '@/data/event-actions'
 
 export type Network = 'mainnet' | 'testnet'
