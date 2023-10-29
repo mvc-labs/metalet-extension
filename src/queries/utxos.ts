@@ -1,4 +1,4 @@
-import { metaletApi, mvcApi } from './request'
+import { metaletApi, mvcApi, unisatApi } from './request'
 
 export type Utxo = {
   addressType: number
@@ -28,8 +28,19 @@ export async function fetchBtcUtxos(address: string): Promise<Utxo[]> {
 }
 
 export const fetchUtxos = async (address: string): Promise<any[]> => {
-  console.log('fetchUtxos', address)
   const utxos: any = await mvcApi(`/address/${address}/utxo`).get()
 
   return utxos
+}
+
+export async function getInscriptionUtxos(inscriptionIds: string[]): Promise<any> {
+  return await unisatApi('/inscription/utxos').post({ inscriptionIds })
+}
+
+export async function getInscriptionUtxo(inscriptionId: string): Promise<any> {
+  return await unisatApi('/inscription/utxo').get({ inscriptionId })
+}
+
+export async function getAddressInscriptions(address: string, cursor = 1, size = 10): Promise<any> {
+  return await unisatApi('/address/inscriptions').get({ address, cursor, size })
 }

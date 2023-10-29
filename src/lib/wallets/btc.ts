@@ -83,7 +83,8 @@ export class BtcWallet {
     return psbt
   }
 
-  async sendTest(recipient: string, amount: number) {
+  async sendBRC(recipient: string, brcUtxos: Utxo[]) {
+    const amount = brcUtxos.reduce((total, utxo) => total + utxo.satoshis, 0)
     // TODO put this logic in `account.ts`
     if (!this.account) throw new Error('no account')
     const btcNetwork = await getBtcNetwork()
@@ -93,9 +94,9 @@ export class BtcWallet {
     const payment = await createPayment(addressType)
     const utxos = await fetchBtcUtxos(address)
 
-    const buildPsbt = async (selectedUtxos: Utxo[]) => {
+    const buildPsbt = async (selectedUtxos: Utxo[], amount = 1) => {
       psbt = new Psbt({ network: btcNetwork }).addOutput({
-        value: 1,
+        value: amount,
         address: recipient,
       })
       for (const utxo of selectedUtxos) {
@@ -133,16 +134,17 @@ export class BtcWallet {
     }
 
     let selecedtUTXOs = selectUTXOs(utxos, amount)
-    const fee = await buildPsbt(selecedtUTXOs)
+    let fee = await buildPsbt(selecedtUTXOs)
 
     while (getTotalSatoshis(selecedtUTXOs) < amount + fee) {
       if (selecedtUTXOs.length === utxos.length) {
         throw new Error('Insufficient funds')
       }
-
       selecedtUTXOs = selectUTXOs(utxos, amount + fee)
-      await buildPsbt(selecedtUTXOs)
+      fee = await buildPsbt(selecedtUTXOs)
     }
+
+    buildPsbt(selecedtUTXOs, amount)
 
     // broadcast
     const tx = psbt.finalizeAllInputs().extractTransaction()
@@ -154,11 +156,95 @@ export class BtcWallet {
         body: rawTx,
         headers: { 'Content-Type': 'text/plain' },
       })
-  
+
       if (!response.ok) {
         throw new Error('Failed to broadcast transaction')
       }
-  
+
+      const txId = await response.text()
+      console.log('Transaction ID:', txId)
+    } catch (error) {
+      console.error('Error broadcasting transaction:', error)
+    }
+  }
+
+  async sendTest(recipient: string, amount: number) {
+    // TODO put this logic in `account.ts`
+    if (!this.account) throw new Error('no account')
+    const btcNetwork = await getBtcNetwork()
+    let psbt = new Psbt({ network: btcNetwork })
+    const address = await getAddress('btc')
+    const addressType = await getAddressType('btc')
+    const payment = await createPayment(addressType)
+    const utxos = await fetchBtcUtxos(address)
+
+    const buildPsbt = async (selectedUtxos: Utxo[], amount = 1) => {
+      psbt = new Psbt({ network: btcNetwork }).addOutput({
+        value: amount,
+        address: recipient,
+      })
+      for (const utxo of selectedUtxos) {
+        const rawTx = await fetchBtcTxHex(utxo.txid)
+        const tx = Transaction.fromHex(rawTx)
+
+        const payInput: any = {
+          hash: utxo.txid,
+          index: utxo.outputIndex,
+        }
+
+        if (['P2SH-P2WPKH', 'P2WPKH'].includes(addressType)) {
+          payInput['witnessUtxo'] = getWitnessUtxo(tx.outs[utxo.outputIndex])
+        }
+
+        if (['P2TR'].includes(addressType)) {
+          payInput['tapInternalKey'] = await getXOnlyPublicKey()
+          payInput['witnessUtxo'] = { value: amount, script: payment.output }
+        }
+
+        if (['P2PKH'].includes(addressType)) {
+          payInput['nonWitnessUtxo'] = Buffer.from(rawTx)
+        }
+
+        // redeemScript
+        if (['P2SH-P2WPKH'].includes(addressType)) {
+          payInput['redeemScript'] = payment.redeem?.output
+        }
+
+        psbt.addInput(payInput)
+      }
+      const signer = await getSigner('btc', addressType)
+      psbt.signAllInputs(signer).finalizeAllInputs()
+      return calculateFee(psbt)
+    }
+
+    let selecedtUTXOs = selectUTXOs(utxos, amount)
+    let fee = await buildPsbt(selecedtUTXOs)
+
+    while (getTotalSatoshis(selecedtUTXOs) < amount + fee) {
+      if (selecedtUTXOs.length === utxos.length) {
+        throw new Error('Insufficient funds')
+      }
+      selecedtUTXOs = selectUTXOs(utxos, amount + fee)
+      fee = await buildPsbt(selecedtUTXOs)
+    }
+
+    buildPsbt(selecedtUTXOs, amount)
+
+    // broadcast
+    const tx = psbt.finalizeAllInputs().extractTransaction()
+    const rawTx = tx.toHex()
+
+    try {
+      const response = await fetch('https://blockstream.info/testnet/api/tx', {
+        method: 'POST',
+        body: rawTx,
+        headers: { 'Content-Type': 'text/plain' },
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to broadcast transaction')
+      }
+
       const txId = await response.text()
       console.log('Transaction ID:', txId)
     } catch (error) {

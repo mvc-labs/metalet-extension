@@ -7,7 +7,6 @@ import { getCurrentAccount } from './lib/account'
 import { isLocked } from './lib/password'
 
 browser.runtime.onMessage.addListener(async (msg, sender) => {
-  console.log('browser addListener', { msg, sender })
   if (msg.channel === 'inter-extension') {
     return await exActions[msg.fn](...msg.args)
   }

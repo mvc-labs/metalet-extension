@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
+import { createEmit } from '@/lib/emitters'
+import { type Account } from '@/lib/account'
 import Balance from './components/Balance.vue'
 import AssetList from './components/AssetList.vue'
 import AccountItem from '../accounts/components/Item.vue'
-import { type Account } from '@/lib/account'
-import { createEmit } from '@/lib/emitters'
 
 const currentAccount = ref<Account | null>(null)
 createEmit<Account>('getCurrentAccount')().then((acc) => {

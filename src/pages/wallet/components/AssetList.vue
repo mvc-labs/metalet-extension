@@ -1,46 +1,38 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
-
 import AssetItem from './AssetItem.vue'
-import { getAddress } from '@/lib/account'
+import { createEmit } from '@/lib/emitters'
 import useTokensQuery from '@/queries/tokens'
-import { getAssetsDisplay } from '@/lib/assets'
+import { useBTCAseetQuery } from '@/queries/btc'
+import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
 import { type Asset, BTCAssets, MVCAssets } from '@/data/assets'
-
-import { fetchBTCAsset } from '@/queries/btc'
-import { deriveAllAddresses } from '@/lib/bip32-deriver'
 
 const router = useRouter()
 
 const mvcAddress = ref<string>('')
 const btcAddress = ref<string>('')
-const btcAssets = ref<Asset[]>(BTCAssets.filter((asset) => asset.symbol === 'BTC') || [])
 
-// TODO Refactor into hooks
-getAddress('mvc').then((addr) => {
+createEmit<string>('getAddress')('mvc').then((addr) => {
   mvcAddress.value = addr
 })
-getAddress('btc').then((addr) => {
-  if (!addr) return router.push('/welcome')
+createEmit<string>('getAddress')('btc').then((addr) => {
   btcAddress.value = addr
-  fetchBTCAsset(addr).then((userBRC20Asset) => {
-    btcAssets.value = BTCAssets.filter((asset) => asset.symbol === 'BTC' || userBRC20Asset.includes(asset.symbol))
-  })
 })
 
-const listedAssets = ref(MVCAssets)
-
-const { isLoading, data: userOwnedTokens } = useTokensQuery(mvcAddress, { enabled: computed(() => !!mvcAddress.value) })
-type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
+const { data: userBRC20Asset } = useBTCAseetQuery(btcAddress, { enabled: computed(() => !!btcAddress.value) })
+const btcAssets = computed(() => {
+  return BTCAssets.filter((asset) => asset.symbol === 'BTC' || userBRC20Asset.value && userBRC20Asset.value.includes(asset.symbol))
+})
 
 const assetsDisplay = ref<string[]>([])
-getAssetsDisplay().then((display) => {
+createEmit<string[]>('getAssetsDisplay')().then((display) => {
   assetsDisplay.value = display
 })
+
+const { data: userOwnedTokens } = useTokensQuery(mvcAddress, { enabled: computed(() => !!mvcAddress.value) })
 const displayingAssets = computed(() => {
-  return listedAssets.value.filter((asset) => assetsDisplay.value.includes(asset.symbol))
+  return MVCAssets.filter((asset) => assetsDisplay.value.includes(asset.symbol))
 })
 
 function toManageAssets() {
@@ -54,6 +46,8 @@ function toNative(asset: Asset) {
   })
 }
 
+type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
+
 function toToken(token: UserOwnedToken) {
   router.push({
     name: 'token',
@@ -66,13 +60,16 @@ function toToken(token: UserOwnedToken) {
   <div class="mt-8 space-y-5 text-black">
     <div class="space-y-2">
       <div class="text-base font-bold text-gray-900">BTC</div>
-      <AssetItem v-for="asset in btcAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)" />
+      <AssetItem v-if="btcAddress" v-for="asset in btcAssets" :key="asset.symbol" :asset="asset" :address="btcAddress"
+        @click="toNative(asset)" />
     </div>
 
     <div class="space-y-2">
       <div class="text-base font-bold text-gray-900">MVC</div>
-      <AssetItem v-for="asset in displayingAssets" :key="asset.symbol" :asset="asset" @click="toNative(asset)" />
-      <AssetItem v-for="token in userOwnedTokens" :key="token.genesis" :asset="token" @click="toToken(token)" />
+      <AssetItem v-if="mvcAddress" v-for="asset in displayingAssets" :key="asset.symbol" :asset="asset"
+        :address="mvcAddress" @click="toNative(asset)" />
+      <AssetItem v-if="mvcAddress" v-for="token in userOwnedTokens" :key="token.genesis" :asset="token"
+        :address="mvcAddress" @click="toToken(token)" />
     </div>
 
     <!-- Manage Token List -->
