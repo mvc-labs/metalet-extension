@@ -1,30 +1,42 @@
 <script lang="ts" setup>
-import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
+import { ref, computed, Ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { Wallet } from 'meta-contract'
-import { useQueryClient } from '@tanstack/vue-query'
-import { prettifyBalance } from '@/lib/formatters'
+import { useBRCTickerAseetQuery } from '@/queries/btc'
 import { useBalanceQuery } from '@/queries/balance'
+import { prettifyBalance } from '@/lib/formatters'
 import { createEmit } from '@/lib/emitters'
 import { BtcWallet } from '@/lib/wallets/btc'
-import { allAssets } from '@/data/assets'
+import { BTCAssets } from '@/data/assets'
 
 import Modal from '@/components/Modal.vue'
+import { Utxo, getInscriptionUtxos } from '@/queries/utxos'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
+const inscriptionIds = ref<string[]>([])
+
+const selectTicker = (inscriptionId: string) => {
+  if (inscriptionIds.value.includes(inscriptionId)) {
+    inscriptionIds.value.splice(inscriptionIds.value.findIndex(id => id === inscriptionId)!, 1)
+  } else {
+    inscriptionIds.value.push(inscriptionId)
+  }
+}
+
 const symbol = ref<string>(route.query.symbol as string)
-const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol.value)!)
-const queryClient = useQueryClient()
+const asset = computed(() => BTCAssets.find((asset) => asset.symbol === symbol.value)!)
 
 const address = ref('')
-createEmit<string>('getAddress')(route.query.chain).then((addr) => {
+createEmit<string>('getAddress')('btc').then((addr) => {
   address.value = addr!
 })
 
 // balance
 const enabled = computed(() => !!address.value)
 const { isLoading, data: balance, error } = useBalanceQuery(address, asset.value.symbol, { enabled })
+
+// tickers
+const { isLoading: tokenLoading, data: tokenData } = useBRCTickerAseetQuery(address, asset.value.symbol, { enabled: computed(() => !!address.value) })
 
 // form
 const amount = ref('')
@@ -34,7 +46,7 @@ const amountInSats = computed(() => {
   return _amount * 1e8
 })
 const recipient = ref('')
-const transactionResult = ref<TransactionResult | undefined>()
+const transactionResult: Ref<undefined | TransactionResult> = ref()
 
 const isOpenConfirmModal = ref(false)
 const popConfirm = () => {
@@ -43,28 +55,11 @@ const popConfirm = () => {
 
 const isOpenResultModal = ref(false)
 
-const wallet = inject<Ref<Wallet>>('wallet')!
-
 const operationLock = ref(false)
 
-async function sendSpace() {
-  const walletInstance = toRaw(wallet.value)
-  const sentRes = await walletInstance.send(recipient.value, amountInSats.value).catch((err) => {
-    isOpenConfirmModal.value = false
-    transactionResult.value = {
-      status: 'failed',
-      message: err.message,
-    }
-
-    isOpenResultModal.value = true
-  })
-
-  return sentRes
-}
-
-async function sendBtc() {
+async function sendBrc(utxos: Utxo[]) {
   const wallet = await BtcWallet.create()
-  const sentRes = await wallet.sendTest(recipient.value, amountInSats.value)
+  const sentRes = await wallet.sendBRC(recipient.value, utxos)
 }
 
 async function send() {
@@ -72,29 +67,9 @@ async function send() {
 
   operationLock.value = true
 
-  const sendProcessor = asset.value.symbol === 'SPACE' ? sendSpace : sendBtc
-  const sentRes = await sendProcessor()
+  const utxos = await getInscriptionUtxos(inscriptionIds.value)
 
-  if (sentRes) {
-    isOpenConfirmModal.value = false
-    transactionResult.value = {
-      status: 'success',
-      txId: sentRes.txId,
-      recipient: recipient.value,
-      amount: amountInSats.value,
-      token: {
-        symbol: 'SPACE',
-        decimal: 8,
-      },
-    }
-
-    isOpenResultModal.value = true
-
-    // 刷新query
-    queryClient.invalidateQueries({
-      queryKey: ['balance', { address: address.value, symbol: asset.value.symbol }],
-    })
-  }
+  await sendBrc(utxos)
 
   operationLock.value = false
 }
@@ -109,15 +84,6 @@ async function send() {
       <!-- address input -->
       <input class="main-input w-full !rounded-xl !p-4 !text-xs" placeholder="Recipient's address" v-model="recipient" />
 
-      <!-- amount input -->
-      <div class="relative">
-        <input class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 !text-xs" placeholder="Amount" v-model="amount" />
-        <!-- unit -->
-        <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500">
-          <div class="border-l border-solid border-gray-500 px-4 py-1">{{ asset.symbol }}</div>
-        </div>
-      </div>
-
       <!-- balance -->
       <div class="flex items-center gap-x-2 text-xs text-gray-500">
         <div class="">Your Balance:</div>
@@ -125,28 +91,35 @@ async function send() {
         <div class="" v-else-if="error">Error</div>
         <div class="" v-else-if="balance">{{ prettifyBalance(balance.total, asset.symbol) }}</div>
       </div>
+
+      <div class="grid grid-cols-3 gap-2 mt-4" v-if="!tokenLoading && tokenData && tokenData.transferableList.length
+        ">
+        <div class="flex flex-col items-center rounded-md p-2 cursor-pointer"
+          v-for="(token) in tokenData.transferableList" @click="selectTicker(token.inscriptionId)"
+          :class="inscriptionIds.includes(token.inscriptionId) ? 'main-btn-bg text-white' : 'bg-gray-100'">
+          <div>{{ token.ticker }}</div>
+          <div>{{ token.amount }}</div>
+          <div>#{{ token.inscriptionNumber }}</div>
+        </div>
+      </div>
     </div>
 
     <!-- send -->
-    <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="popConfirm">Send</button>
+    <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="popConfirm"
+      :disabled="!inscriptionIds.length">Send</button>
 
     <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
       <template #title>Confirm Transaction</template>
 
       <template #body>
-        <div class="mt-4 space-y-4">
-          <div class="space-y-1">
-            <div class="label">Amount</div>
-            <div class="value">{{ amount }} {{ asset.symbol }}</div>
+        <div class="grid grid-cols-3 gap-2 mt-4" v-if="!tokenLoading && tokenData && tokenData.transferableList.length
+          ">
+          <div class="flex flex-col items-center rounded-md bg-gray-100 p-2" v-for="token in tokenData.transferableList"
+            :key="token.inscriptionId">
+            <div>{{ token.ticker }}</div>
+            <div>{{ token.amount }}</div>
+            <div>#{{ token.inscriptionNumber }}</div>
           </div>
-          <div class="space-y-1">
-            <div class="label">Recipient Address</div>
-            <div class="value break-all text-sm">{{ recipient }}</div>
-          </div>
-          <!-- <div class="space-y-1">
-            <div class="label">Network Fee</div>
-            <div class="value">100 SPACE</div>
-          </div> -->
         </div>
       </template>
 

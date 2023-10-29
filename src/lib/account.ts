@@ -13,7 +13,10 @@ import {
   derivePrivateKey,
   derivePublicKey,
   inferAddressType,
+  deriveSigner,
+  deriveBtcPrivateKey,
 } from './bip32-deriver'
+import { crypto } from 'bitcoinjs-lib'
 
 const CURRENT_ACCOUNT_ID = 'currentAccountId'
 const ACCOUNT_STORAGE_CURRENT_KEY = 'accounts_v2'
@@ -214,6 +217,19 @@ export async function getPrivateKey(chain: Chain = 'mvc') {
   const path = await getAccountProperty(chain, 'path')
 
   return derivePrivateKey({ mnemonic, chain, network, path })
+}
+
+export async function getSigner(chain: Chain = 'mvc', addressType: string) {
+  if (addressType === 'P2TR') {
+    const network = await getNetwork()
+    const mnemonic = await getCurrentAccount().then((account) => account!.mnemonic)
+    const path = await getAccountProperty(chain, 'path')
+    const node = deriveBtcPrivateKey(mnemonic, path, network)
+    const nodeXOnlyPubkey = node.publicKey.subarray(1)
+    node.tweak(crypto.taggedHash('TapTweak', nodeXOnlyPubkey))
+  }
+  const privateKey = await getPrivateKey(chain)
+  return deriveSigner(privateKey)
 }
 
 export async function getCredential(

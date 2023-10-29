@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import storage from './storage'
 import { createEmit } from '@/data/event-actions'
+import { networks } from 'bitcoinjs-lib'
 
 export type Network = 'mainnet' | 'testnet'
 
@@ -16,6 +17,6 @@ export async function getNetwork(): Promise<Network> {
   return network.value
 }
 
-export async function getBtcNetwork(): Promise<Network> {
-  return network.value
+export async function getBtcNetwork() {
+  return network.value === 'mainnet' ? networks.bitcoin : networks.testnet
 }

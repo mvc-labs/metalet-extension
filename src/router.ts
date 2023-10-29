@@ -100,6 +100,15 @@ const routes = [
       noFooter: true,
     },
   },
+  {
+    path: '/wallet/sendBRC',
+    component: () => import('./pages/wallet/SendBRC.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Send',
+      noFooter: true,
+    },
+  },
 
   {
     path: '/wallet/send-token/:symbol/:genesis',

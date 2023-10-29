@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import { ref, Ref, ComputedRef } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { BRC20_Symbol_UC } from '@/lib/asset-symbol'
-import { ordersApi, metaletApi } from '@/queries/request'
+import { ordersApi, metaletApi, unisatApi } from '@/queries/request'
 
 interface Tick {
   token: BRC20_Symbol_UC
@@ -67,27 +67,68 @@ export const getBTCPrice = () => {
 type TokenType = 'BRC20'
 
 export const fetchBTCAsset = async (address: string): Promise<string[]> => {
-  console.log('fetchBtcAsset address', address)
   if (!address) {
     return []
   }
   return await metaletApi(`/address/brc20/asset`)
     .get({ address, chain: 'btc' })
     .then((res) => {
-      // brc20TickList.value = res?.data?.tickList || []
-      console.log('tickList', res.data.tickList)
-
       return res?.data?.tickList.map((tick: Tick) => tick.token) || []
     })
 }
 
 export const useBTCAseetQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
-  const address = addressRef.value
-  console.log('useBTCAseetQuery address', address, options.enabled.value)
-
   return useQuery({
-    queryKey: ['BTCAsset', { address }],
-    queryFn: () => fetchBTCAsset(address),
+    queryKey: ['BTCAsset', { address: addressRef.value }],
+    queryFn: () => fetchBTCAsset(addressRef.value),
+    ...options,
+  })
+}
+
+export interface TokenInfo {
+  totalSupply: string
+  totalMinted: string
+}
+
+export interface TokenBalance {
+  availableBalance: string
+  overallBalance: string
+  ticker: string
+  transferableBalance: string
+  availableBalanceSafe: string
+  availableBalanceUnSafe: string
+}
+
+export interface TokenTransfer {
+  ticker: string
+  amount: string
+  inscriptionId: string
+  inscriptionNumber: number
+  timestamp: number
+}
+
+export interface AddressTokenSummary {
+  tokenInfo: TokenInfo
+  tokenBalance: TokenBalance
+  historyList: TokenTransfer[]
+  transferableList: TokenTransfer[]
+}
+
+export async function getAddressTokenSummary(address: string, ticker: string): Promise<AddressTokenSummary> {
+  return await unisatApi<AddressTokenSummary>('/brc20/token-summary').get({
+    address,
+    ticker: encodeURIComponent(ticker),
+  })
+}
+
+export const useBRCTickerAseetQuery = (
+  addressRef: Ref<string>,
+  ticker: string,
+  options: { enabled: ComputedRef<boolean> }
+) => {
+  return useQuery({
+    queryKey: ['BRCTicker', { address: addressRef.value, ticker }],
+    queryFn: () => getAddressTokenSummary(addressRef.value, ticker),
     ...options,
   })
 }

@@ -14,3 +14,5 @@ export const MVC_API_HOST = 'https://api.microvisionchain.com'
 export const METAFILE_API_HOST = 'https://filecdn.showpay.top'
 
 export const API2_ORDERS_EXCHANGE = 'https://api2.orders.exchange/api'
+
+export const UNISAT_HOST = 'https://api.unisat.io/wallet-v4'

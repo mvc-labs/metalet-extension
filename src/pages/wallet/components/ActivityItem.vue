@@ -21,7 +21,6 @@ const isConfirmed = computed(() => {
 })
 
 const difference = computed(() => {
-  // 通过outcome和income来判断是收入还是支出
   const { outcome, income } = props.activity
   const { symbol, decimal } = props.asset
   let display

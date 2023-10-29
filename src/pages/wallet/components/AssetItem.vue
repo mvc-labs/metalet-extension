@@ -1,55 +1,28 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
-
-import { useBalanceQuery } from '@/queries/balance'
+import { updateAsset } from '@/lib/balance'
 import { isOfficialToken } from '@/lib/assets'
-import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
+import { useBalanceQuery } from '@/queries/balance'
+import { prettifyTokenBalance } from '@/lib/formatters'
 import { type Asset, getTagInfo, Tag } from '@/data/assets'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
-// import { getCurrentAccount } from '@/lib/account'
-import { getNetwork } from '@/lib/network'
-import { updateAsset } from '@/lib/balance'
-import { createEmit } from '@/lib/emitters'
-import { type Account } from '@/lib/account'
+import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
-const { asset } = defineProps<{
+const { asset, address } = defineProps<{
   asset: Asset
+  address: string
 }>()
 
-const chain = computed(() => asset.chain)
-const address = ref('')
 const tag = ref<Tag>()
-
-// getCurrentAccount().then(async (account) => {
-//   if (!account) return
-
-//   const network = await getNetwork()
-//   if (network === 'mainnet') {
-//     address.value = account[chain.value].mainnetAddress
-//   } else {
-//     address.value = account[chain.value].testnetAddress
-//   }
-// })
-createEmit<Account>("getCurrentAccount")().then(async (account) => {
-  if (!account) return
-
-  const network = await getNetwork()
-  if (network === 'mainnet') {
-    address.value = account[chain.value].mainnetAddress
-  } else {
-    address.value = account[chain.value].testnetAddress
-  }
-})
 
 if (asset?.contract) {
   tag.value = getTagInfo(asset.contract)
 }
 
-const enabled = computed(() => !!address.value && asset.queryable)
-const rateEnabled = computed(() => !!address.value)
+const enabled = computed(() => !!address && asset.queryable)
+const rateEnabled = computed(() => !!address)
 
-const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
+const { isLoading, data: balance } = useBalanceQuery(ref(address), asset.symbol, { enabled })
 const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(asset.symbol, {
   enabled: rateEnabled,
 })
