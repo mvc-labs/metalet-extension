@@ -95,10 +95,7 @@ export class BtcWallet {
     const utxos = await fetchBtcUtxos(address)
 
     const buildPsbt = async (selectedUtxos: Utxo[], amount = 1) => {
-      psbt = new Psbt({ network: btcNetwork }).addOutput({
-        value: amount,
-        address: recipient,
-      })
+      psbt = new Psbt({ network: btcNetwork })
 
       for (const utxo of brcUtxos) {
         const rawTx = await fetchBtcTxHex(utxo.txid)
@@ -128,6 +125,10 @@ export class BtcWallet {
         }
 
         psbt.addInput(payInput)
+        psbt.addOutput({
+          value: utxo.satoshis,
+          address: recipient,
+        })
       }
 
       for (const utxo of selectedUtxos) {
@@ -209,11 +210,16 @@ export class BtcWallet {
     const payment = await createPayment(addressType)
     const utxos = await fetchBtcUtxos(address)
 
-    const buildPsbt = async (selectedUtxos: Utxo[], amount = 1) => {
-      psbt = new Psbt({ network: btcNetwork }).addOutput({
-        value: amount,
-        address: recipient,
-      })
+    const buildPsbt = async (selectedUtxos: Utxo[], leave = 1) => {
+      psbt = new Psbt({ network: btcNetwork })
+        .addOutput({
+          value: amount,
+          address: recipient,
+        })
+        .addOutput({
+          value: leave,
+          address,
+        })
       for (const utxo of selectedUtxos) {
         const rawTx = await fetchBtcTxHex(utxo.txid)
         const tx = Transaction.fromHex(rawTx)
@@ -259,7 +265,7 @@ export class BtcWallet {
       fee = await buildPsbt(selecedtUTXOs)
     }
 
-    buildPsbt(selecedtUTXOs, amount)
+    buildPsbt(selecedtUTXOs, getTotalSatoshis(selecedtUTXOs) - amount)
 
     // broadcast
     const tx = psbt.finalizeAllInputs().extractTransaction()
