@@ -36,7 +36,7 @@ const btcAssets = ref<Asset[]>(BTCAssets.filter((asset) => asset.symbol === 'BTC
 //   mvcAddress.value = addr
 //   console.log("mvcAddress", mvcAddress.value);
 // })
-createEmit<string>('getAddress')('mvc').then(addr => {
+createEmit<string>('getAddress')('mvc').then((addr) => {
   if (!addr) {
     toWelcome()
     return
@@ -44,7 +44,7 @@ createEmit<string>('getAddress')('mvc').then(addr => {
   mvcAddress.value = addr
 })
 
-createEmit<string>('getAddress')('btc').then(addr => {
+createEmit<string>('getAddress')('btc').then((addr) => {
   if (!addr) {
     toWelcome()
     return
@@ -52,14 +52,12 @@ createEmit<string>('getAddress')('btc').then(addr => {
   btcAddress.value = addr
 })
 
-
 // FTXME fetchBTCAsset loop request
 const enabledBTCAseetQuery = computed(() => !!btcAddress.value)
 // if(enabledBTCAseetQuery)
 const { data: userBRC20Asset } = useBTCAseetQuery(btcAddress, { enabled: enabledBTCAseetQuery })
-console.log({ userBRC20Asset });
-btcAssets.value = BTCAssets.filter((asset) =>
-  asset.symbol === 'BTC' || userBRC20Asset.value?.includes(asset.symbol))
+console.log({ userBRC20Asset })
+btcAssets.value = BTCAssets.filter((asset) => asset.symbol === 'BTC' || userBRC20Asset.value?.includes(asset.symbol))
 
 const listedAssets = ref(MVCAssets)
 

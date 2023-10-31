@@ -256,100 +256,117 @@ export const signTransactions = async (
  * isn't that a cool idea?
  *
  */
-type ToPayTransaction = {
-  txHex: string
-  // scriptHex: string
-  // inputIndex: number
-  // inputIndexes?: number[]
-  // satoshis: number
-  // sigtype?: number
-  // path?: string
-  // hasMetaId?: boolean
-  // dataDependsOn?: number
-}
 export const payTransactions = async (
   account: Account,
   network: 'testnet' | 'mainnet',
-  toPayTransactions: ToPayTransaction[]
+  toPayTransactions: string[]
 ) => {
-  // currently we only support one transaction
-  if (toPayTransactions.length !== 1) {
-    throw new Error('Currently we only support one transaction')
-  }
+  const address = account.mvc.mainnetAddress
+  let usableUtxos = await fetchUtxos('mvc', address)
+
+  // find out if transactions other than the first one are dependent on previous ones
+  // if so, we need to sign them in order, and sequentially update the prevTxId of the later ones
+  // so that the signature of the previous one can be calculated correctly
+  const prePayTxids = toPayTransactions.map((txComposerSerialized: string) =>
+    TxComposer.deserialize(txComposerSerialized).getTxId()
+  )
 
   // first we finish the transaction by finding the appropriate utxo and calculating the change
-  const toSignTransaction = toPayTransactions[0]
-  const { txHex } = toSignTransaction
-  const tx = new mvc.Transaction(txHex)
-  const txComposer = new TxComposer(tx)
-  // make sure that every input has an output
-  const inputs = tx.inputs
-  for (let i = 0; i < inputs.length; i++) {
-    if (!inputs[i].output) {
-      throw new Error('The output of every input of the transaction must be provided')
+  const payedTransactions = []
+
+  for (let i = 0; i < toPayTransactions.length; i++) {
+    const toPayTransaction = toPayTransactions[i]
+
+    const txComposer = TxComposer.deserialize(toPayTransaction)
+    const tx = txComposer.tx
+
+    // make sure that every input has an output
+    const inputs = tx.inputs
+    const existingInputsLength = tx.inputs.length
+    for (let i = 0; i < inputs.length; i++) {
+      if (!inputs[i].output) {
+        throw new Error('The output of every input of the transaction must be provided')
+      }
     }
-  }
 
-  const address = account.mvc.mainnetAddress
-  const addressObj = new mvc.Address(address, network)
-  // find out the total amount of the transaction (total output minus total input)
-  const totalOutput = tx.outputs.reduce((acc, output) => acc + output.satoshis, 0)
-  const totalInput = tx.inputs.reduce((acc, input) => acc + input.output!.satoshis, 0)
-  const difference = totalOutput - totalInput
-  const utxos = await fetchUtxos(address)
-  const pickedUtxos = pickUtxo(utxos, difference)
+    const addressObj = new mvc.Address(address, network)
+    // find out the total amount of the transaction (total output minus total input)
+    const totalOutput = tx.outputs.reduce((acc, output) => acc + output.satoshis, 0)
+    const totalInput = tx.inputs.reduce((acc, input) => acc + input.output!.satoshis, 0)
+    const difference = totalOutput - totalInput
 
-  pickedUtxos.forEach((v) => {
-    txComposer.appendP2PKHInput({
-      address: addressObj,
-      txId: v.txId,
-      outputIndex: v.outputIndex,
-      satoshis: v.satoshis,
+    const pickedUtxos = pickUtxo(usableUtxos, difference)
+
+    pickedUtxos.forEach((v) => {
+      txComposer.appendP2PKHInput({
+        address: addressObj,
+        txId: v.txId,
+        outputIndex: v.outputIndex,
+        satoshis: v.satoshis,
+      })
+
+      // remove it from usableUtxos
+      usableUtxos = usableUtxos.filter((u) => {
+        return u.txId !== v.txId || u.outputIndex !== v.outputIndex
+      })
     })
-  })
-  txComposer.appendP2PKHOutput({
-    address: addressObj,
-    satoshis: difference,
-  })
-  txComposer.appendChangeOutput(addressObj, FEEB)
+    const changeIndex = txComposer.appendChangeOutput(addressObj, FEEB)
 
-  // sign
+    const changeOutput = txComposer.getOutput(changeIndex)
 
-  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
-  const hdpk = mneObj.toHDPrivateKey('', network)
+    // sign
+    const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+    const hdpk = mneObj.toHDPrivateKey('', network)
 
-  const rootPath = await getMvcRootPath()
-  const basePrivateKey = hdpk.deriveChild(rootPath)
-  const rootPrivateKey = hdpk.deriveChild(`${rootPath}/0/0`).privateKey
+    const rootPath = await getMvcRootPath()
+    const basePrivateKey = hdpk.deriveChild(rootPath)
+    const rootPrivateKey = hdpk.deriveChild(`${rootPath}/0/0`).privateKey
 
-  // now that we have root private key to sign other inputs
-  // we have to find out the private key of the 0-indexed input
-  const firstInputAddress = new mvc.Address(tx.inputs[0].output!.script, network)
-  let deriver = 0
-  let toUsePrivateKey: mvc.PrivateKey | undefined = undefined
-  while (deriver < DERIVE_MAX_DEPTH) {
-    const childPk = basePrivateKey.deriveChild(0).deriveChild(deriver)
-    const childAddress = childPk.publicKey.toAddress('mainnet' as any).toString()
+    // we have to find out the private key of existing inputs
+    for (let i = 0; i < existingInputsLength; i++) {
+      const input = txComposer.getInput(i)
+      const inputAddress = new mvc.Address(input.output!.script, network)
+      let deriver = 0
+      let toUsePrivateKey: mvc.PrivateKey | undefined = undefined
+      while (deriver < DERIVE_MAX_DEPTH) {
+        const childPk = basePrivateKey.deriveChild(0).deriveChild(deriver)
+        const childAddress = childPk.publicKey.toAddress('mainnet' as any).toString()
 
-    if (childAddress === firstInputAddress.toString()) {
-      toUsePrivateKey = childPk.privateKey
-      break
+        if (childAddress === inputAddress.toString()) {
+          toUsePrivateKey = childPk.privateKey
+          break
+        }
+
+        deriver++
+      }
+
+      if (!toUsePrivateKey) {
+        throw new Error(`Cannot find the private key of index #${i} input`)
+      }
+
+      // sign this input with found private key
+      txComposer.unlockP2PKHInput(toUsePrivateKey, i)
     }
 
-    deriver++
+    // then we use root private key to sign the new inputs (those we just added to pay)
+    pickedUtxos.forEach((v, index) => {
+      txComposer.unlockP2PKHInput(rootPrivateKey, index + existingInputsLength)
+    })
+
+    // return the payed transactions
+    payedTransactions.push(txComposer.serialize())
+
+    // add changeOutput to usableUtxos
+    usableUtxos.push({
+      txId: txComposer.getTxId(),
+      outputIndex: changeIndex,
+      satoshis: changeOutput.satoshis,
+      address,
+      height: -1,
+    })
   }
-  if (!toUsePrivateKey) {
-    throw new Error('Cannot find the private key of the first input')
-  }
 
-  // sign the first input with found private key
-  txComposer.unlockP2PKHInput(toUsePrivateKey, 0)
-
-  // txComposer.unlockP2PKHInput(firstInputPrivateKey, 0)
-
-  pickedUtxos.forEach((v, index) => {
-    txComposer.unlockP2PKHInput(rootPrivateKey, index)
-  })
+  return payedTransactions
 }
 
 type SA_utxo = {
@@ -362,6 +379,11 @@ type SA_utxo = {
 function pickUtxo(utxos: SA_utxo[], amount: number) {
   // amount + 2 outputs + buffer
   let requiredAmount = amount + 34 * 2 * FEEB + 100
+
+  if (requiredAmount <= 0) {
+    return []
+  }
+
   const candidateUtxos: SA_utxo[] = []
   // split utxo to confirmed and unconfirmed and shuffle them
   const confirmedUtxos = utxos
