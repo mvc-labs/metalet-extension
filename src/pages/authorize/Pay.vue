@@ -25,5 +25,11 @@ const props = defineProps<{
   <div class="mt-6">
     <div class="label">Transactions Count</div>
     <div class="value text-sm">{{ params.transactions.length }}</div>
+    <ul>
+      <li v-for="tx in params.transactions" class="mt-4">
+        <div class="label">Message</div>
+        <div class="value break-all">{{ tx?.message }}</div>
+      </li>
+    </ul>
   </div>
 </template>

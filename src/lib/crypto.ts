@@ -4,7 +4,7 @@ import { Buffer } from 'buffer'
 import { getMvcRootPath, type Account } from './account'
 import { parseLocalTransaction } from './metadata'
 import { DERIVE_MAX_DEPTH, FEEB, P2PKH_UNLOCK_SIZE } from '@/data/config'
-import { fetchUtxos } from '@/queries/utxos'
+import { MvcUtxo, fetchUtxos } from '@/queries/utxos'
 
 export function eciesEncrypt(message: string, privateKey: mvc.PrivateKey): string {
   const publicKey = privateKey.toPublicKey()
@@ -259,25 +259,41 @@ export const signTransactions = async (
 export const payTransactions = async (
   account: Account,
   network: 'testnet' | 'mainnet',
-  toPayTransactions: string[]
+  toPayTransactions: {
+    txComposer: string
+    message?: string
+  }[]
 ) => {
   const address = account.mvc.mainnetAddress
-  let usableUtxos = await fetchUtxos('mvc', address)
+  let usableUtxos = ((await fetchUtxos('mvc', address)) as MvcUtxo[]).map((u) => {
+    return {
+      txId: u.txid,
+      outputIndex: u.outIndex,
+      satoshis: u.value,
+      address,
+      height: u.height,
+    }
+  })
 
   // find out if transactions other than the first one are dependent on previous ones
   // if so, we need to sign them in order, and sequentially update the prevTxId of the later ones
   // so that the signature of the previous one can be calculated correctly
-  const prePayTxids = toPayTransactions.map((txComposerSerialized: string) =>
-    TxComposer.deserialize(txComposerSerialized).getTxId()
-  )
 
-  // first we finish the transaction by finding the appropriate utxo and calculating the change
+  // first we gather all txids using a map for future mutations
+  const txids = new Map<string, string>()
+  toPayTransactions.forEach(({ txComposer: txComposerSerialized }) => {
+    const txid = TxComposer.deserialize(txComposerSerialized).getTxId()
+    txids.set(txid, txid)
+  })
+
+  // we finish the transaction by finding the appropriate utxo and calculating the change
   const payedTransactions = []
-
   for (let i = 0; i < toPayTransactions.length; i++) {
     const toPayTransaction = toPayTransactions[i]
+    // record current txid
+    const currentTxid = TxComposer.deserialize(toPayTransaction.txComposer).getTxId()
 
-    const txComposer = TxComposer.deserialize(toPayTransaction)
+    const txComposer = TxComposer.deserialize(toPayTransaction.txComposer)
     const tx = txComposer.tx
 
     // make sure that every input has an output
@@ -311,7 +327,6 @@ export const payTransactions = async (
       })
     })
     const changeIndex = txComposer.appendChangeOutput(addressObj, FEEB)
-
     const changeOutput = txComposer.getOutput(changeIndex)
 
     // sign
@@ -325,6 +340,13 @@ export const payTransactions = async (
     // we have to find out the private key of existing inputs
     for (let i = 0; i < existingInputsLength; i++) {
       const input = txComposer.getInput(i)
+      // gotta change the prevTxId of the input to the correct one, if there's some kind of dependency to previous txs
+      const prevTxId = input.prevTxId.toString('hex')
+      if (txids.has(prevTxId)) {
+        input.prevTxId = Buffer.from(txids.get(prevTxId)!, 'hex')
+      }
+
+      // find out the path corresponding to this input's prev output's address
       const inputAddress = new mvc.Address(input.output!.script, network)
       let deriver = 0
       let toUsePrivateKey: mvc.PrivateKey | undefined = undefined
@@ -353,17 +375,23 @@ export const payTransactions = async (
       txComposer.unlockP2PKHInput(rootPrivateKey, index + existingInputsLength)
     })
 
+    // change txids map to reflect the new txid
+    const txid = txComposer.getTxId()
+    txids.set(currentTxid, txid)
+
     // return the payed transactions
     payedTransactions.push(txComposer.serialize())
 
     // add changeOutput to usableUtxos
-    usableUtxos.push({
-      txId: txComposer.getTxId(),
-      outputIndex: changeIndex,
-      satoshis: changeOutput.satoshis,
-      address,
-      height: -1,
-    })
+    if (changeIndex >= 0) {
+      usableUtxos.push({
+        txId: txComposer.getTxId(),
+        outputIndex: changeIndex,
+        satoshis: changeOutput.satoshis,
+        address,
+        height: -1,
+      })
+    }
   }
 
   return payedTransactions

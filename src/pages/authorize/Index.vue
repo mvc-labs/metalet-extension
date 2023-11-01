@@ -72,7 +72,6 @@ const runAction = async () => {
       error: e.message,
     }
   } finally {
-    console.log('finally')
     running.value = false
     isFinished.value = true
   }
