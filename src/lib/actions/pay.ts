@@ -7,7 +7,7 @@ export async function process(params: any, host: string) {
   const network = await getNetwork()
 
   const toPayTransactions = params.transactions
-  const payedTransactions = await payTransactions(account!, network, toPayTransactions)
+  const payedTransactions = await payTransactions(account!, network, toPayTransactions, params.hasMetaid)
 
   return { payedTransactions }
 }

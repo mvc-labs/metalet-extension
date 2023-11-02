@@ -262,7 +262,8 @@ export const payTransactions = async (
   toPayTransactions: {
     txComposer: string
     message?: string
-  }[]
+  }[],
+  hasMetaid: boolean = false
 ) => {
   const address = account.mvc.mainnetAddress
   let usableUtxos = ((await fetchUtxos('mvc', address)) as MvcUtxo[]).map((u) => {
@@ -337,7 +338,38 @@ export const payTransactions = async (
     const basePrivateKey = hdpk.deriveChild(rootPath)
     const rootPrivateKey = hdpk.deriveChild(`${rootPath}/0/0`).privateKey
 
+    // change wrong txid in metaid's metadata to the correct one
+    if (hasMetaid) {
+      const { messages: metaIdMessages, outputIndex } = await parseLocalTransaction(tx)
+
+      if (outputIndex !== null) {
+        // find out if any of the messages contains the wrong txid
+        // how to find out the wrong txid?
+        // it's the keys of txids Map
+        const prevTxids = Array.from(txids.keys())
+
+        // we use a nested loops here to find out the wrong txid
+        for (let i = 0; i < metaIdMessages.length; i++) {
+          for (let j = 0; j < prevTxids.length; j++) {
+            if (metaIdMessages[i].includes(prevTxids[j])) {
+              metaIdMessages[i] = metaIdMessages[i].replace(prevTxids[j], txids.get(prevTxids[j])!)
+            }
+          }
+        }
+
+        // update the OP_RETURN
+        const opReturnOutput = new mvc.Transaction.Output({
+          script: mvc.Script.buildSafeDataOut(metaIdMessages),
+          satoshis: 0,
+        })
+
+        // update the OP_RETURN output in tx
+        tx.outputs[outputIndex] = opReturnOutput
+      }
+    }
+
     // we have to find out the private key of existing inputs
+    const toUsePrivateKeys = new Map<number, mvc.PrivateKey>()
     for (let i = 0; i < existingInputsLength; i++) {
       const input = txComposer.getInput(i)
       // gotta change the prevTxId of the input to the correct one, if there's some kind of dependency to previous txs
@@ -366,9 +398,14 @@ export const payTransactions = async (
         throw new Error(`Cannot find the private key of index #${i} input`)
       }
 
-      // sign this input with found private key
-      txComposer.unlockP2PKHInput(toUsePrivateKey, i)
+      // record the private key
+      toUsePrivateKeys.set(i, toUsePrivateKey)
     }
+
+    // sign the existing inputs
+    toUsePrivateKeys.forEach((privateKey, index) => {
+      txComposer.unlockP2PKHInput(privateKey, index)
+    })
 
     // then we use root private key to sign the new inputs (those we just added to pay)
     pickedUtxos.forEach((v, index) => {
