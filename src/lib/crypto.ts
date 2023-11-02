@@ -449,6 +449,12 @@ function pickUtxo(utxos: SA_utxo[], amount: number) {
     return []
   }
 
+  // if the sum of utxos is less than requiredAmount, throw error
+  const sum = utxos.reduce((acc, utxo) => acc + utxo.satoshis, 0)
+  if (sum < requiredAmount) {
+    throw new Error('Not enough balance')
+  }
+
   const candidateUtxos: SA_utxo[] = []
   // split utxo to confirmed and unconfirmed and shuffle them
   const confirmedUtxos = utxos
