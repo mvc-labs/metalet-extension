@@ -21,7 +21,7 @@ import Merge from './Merge.vue'
 import { getBrowserHost } from '@/lib/host'
 import { LinkIcon } from '@heroicons/vue/20/solid'
 import logos from '@/data/logos'
-import { Tab } from '@headlessui/vue'
+import { DEBUG } from '@/data/config'
 
 // 从query中获取数据
 const route = useRoute()
@@ -43,7 +43,9 @@ const action = actions[actionName as ActionType]
 const params: any = JSON.parse(route.query.params as string)
 
 const exit = () => {
-  window.close()
+  if (!DEBUG) {
+    window.close()
+  }
 }
 
 const getHostAndToTx = async (txid: string) => {

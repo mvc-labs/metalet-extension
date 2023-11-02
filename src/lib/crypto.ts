@@ -205,8 +205,10 @@ export const signTransactions = async (
           // find out if prevTxId is already in the messages;
           // if so, we need to replace it with the new one
           for (let i = 0; i < metaIdMessages.length; i++) {
+            if (typeof metaIdMessages[i] !== 'string') continue
+
             if (metaIdMessages[i].includes(wrongDataTxId)) {
-              metaIdMessages[i] = metaIdMessages[i].replace(wrongDataTxId, prevDataTxId)
+              metaIdMessages[i] = (metaIdMessages[i] as string).replace(wrongDataTxId, prevDataTxId)
               break
             }
           }
@@ -306,39 +308,7 @@ export const payTransactions = async (
       }
     }
 
-    const addressObj = new mvc.Address(address, network)
-    // find out the total amount of the transaction (total output minus total input)
-    const totalOutput = tx.outputs.reduce((acc, output) => acc + output.satoshis, 0)
-    const totalInput = tx.inputs.reduce((acc, input) => acc + input.output!.satoshis, 0)
-    const difference = totalOutput - totalInput
-
-    const pickedUtxos = pickUtxo(usableUtxos, difference)
-
-    pickedUtxos.forEach((v) => {
-      txComposer.appendP2PKHInput({
-        address: addressObj,
-        txId: v.txId,
-        outputIndex: v.outputIndex,
-        satoshis: v.satoshis,
-      })
-
-      // remove it from usableUtxos
-      usableUtxos = usableUtxos.filter((u) => {
-        return u.txId !== v.txId || u.outputIndex !== v.outputIndex
-      })
-    })
-    const changeIndex = txComposer.appendChangeOutput(addressObj, FEEB)
-    const changeOutput = txComposer.getOutput(changeIndex)
-
-    // sign
-    const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
-    const hdpk = mneObj.toHDPrivateKey('', network)
-
-    const rootPath = await getMvcRootPath()
-    const basePrivateKey = hdpk.deriveChild(rootPath)
-    const rootPrivateKey = hdpk.deriveChild(`${rootPath}/0/0`).privateKey
-
-    // change wrong txid in metaid's metadata to the correct one
+    // update metaid metadata
     if (hasMetaid) {
       const { messages: metaIdMessages, outputIndex } = await parseLocalTransaction(tx)
 
@@ -351,8 +321,10 @@ export const payTransactions = async (
         // we use a nested loops here to find out the wrong txid
         for (let i = 0; i < metaIdMessages.length; i++) {
           for (let j = 0; j < prevTxids.length; j++) {
+            if (typeof metaIdMessages[i] !== 'string') continue
+
             if (metaIdMessages[i].includes(prevTxids[j])) {
-              metaIdMessages[i] = metaIdMessages[i].replace(prevTxids[j], txids.get(prevTxids[j])!)
+              metaIdMessages[i] = (metaIdMessages[i] as string).replace(prevTxids[j], txids.get(prevTxids[j])!)
             }
           }
         }
@@ -367,6 +339,43 @@ export const payTransactions = async (
         tx.outputs[outputIndex] = opReturnOutput
       }
     }
+
+    const addressObj = new mvc.Address(address, network)
+    // find out the total amount of the transaction (total output minus total input)
+    const totalOutput = tx.outputs.reduce((acc, output) => acc + output.satoshis, 0)
+    const totalInput = tx.inputs.reduce((acc, input) => acc + input.output!.satoshis, 0)
+    const currentSize = tx.toBuffer().length
+    const currentFee = FEEB * currentSize
+    const difference = totalOutput - totalInput + currentFee
+
+    const pickedUtxos = pickUtxo(usableUtxos, difference)
+
+    // append inputs
+    for (let i = 0; i < pickedUtxos.length; i++) {
+      const utxo = pickedUtxos[i]
+      txComposer.appendP2PKHInput({
+        address: addressObj,
+        txId: utxo.txId,
+        outputIndex: utxo.outputIndex,
+        satoshis: utxo.satoshis,
+      })
+
+      // remove it from usableUtxos
+      usableUtxos = usableUtxos.filter((u) => {
+        return u.txId !== utxo.txId || u.outputIndex !== utxo.outputIndex
+      })
+    }
+
+    const changeIndex = txComposer.appendChangeOutput(addressObj, FEEB)
+    const changeOutput = txComposer.getOutput(changeIndex)
+
+    // sign
+    const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+    const hdpk = mneObj.toHDPrivateKey('', network)
+
+    const rootPath = await getMvcRootPath()
+    const basePrivateKey = hdpk.deriveChild(rootPath)
+    const rootPrivateKey = hdpk.deriveChild(`${rootPath}/0/0`).privateKey
 
     // we have to find out the private key of existing inputs
     const toUsePrivateKeys = new Map<number, mvc.PrivateKey>()
