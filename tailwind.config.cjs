@@ -22,6 +22,9 @@ module.exports = {
         90: '22.5rem',
         150: '37.5rem',
       },
+      fontFamily: {
+        sans: ['"Geist"', ...defaultTheme.fontFamily.sans],
+      },
     },
   },
   plugins: [require('@headlessui/tailwindcss')],
