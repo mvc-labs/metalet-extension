@@ -77,7 +77,7 @@ export const fetchBTCAsset = async (address: string): Promise<string[]> => {
     })
 }
 
-export const useBTCAseetQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
+export const useBTCAssetQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
     queryKey: ['BTCAsset', { address: addressRef.value }],
     queryFn: () => fetchBTCAsset(addressRef.value),
