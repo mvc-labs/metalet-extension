@@ -31,10 +31,6 @@ const callMetalet = async (params: MetaletParams) => {
       const response = await browser.runtime.sendMessage(params)
 
       if (response?.channel === 'from-metaidwallet') {
-        // post on console
-        // console.log(`🚀 Response from Metalet on action ${response.action} 🚀`)
-        // console.log(response?.res)
-
         window.postMessage(response, '*')
       }
     } catch (e: any) {
@@ -68,10 +64,24 @@ window.addEventListener(
   false
 )
 
+// call metalet every 29 seconds to keep it alive
+setInterval(async () => {
+  await callMetalet({
+    nonce: '',
+    channel: 'to-metaidwallet',
+    action: 'query-Ping',
+    host: '',
+    res: '',
+  })
+}, 29000)
+
 const node = document.getElementsByTagName('body')[0]
 const script = document.createElement('script')
 script.setAttribute('type', 'text/javascript')
 script.setAttribute('src', browser.runtime.getURL('content.js'))
 node.appendChild(script)
 
-console.log('Metalet is ready. Happy coding! 🎉')
+// console log when we're in localhost
+if (window.location.host.includes('localhost')) {
+  console.log('Metalet is ready. Happy coding! 🎉')
+}

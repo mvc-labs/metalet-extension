@@ -7,4 +7,4 @@ export const DERIVE_MAX_DEPTH = 1000
 export const NOTIFICATION_WIDTH = 360
 export const NOTIFICATION_HEIGHT = 620
 
-export const DEBUG = true
+export const DEBUG = false

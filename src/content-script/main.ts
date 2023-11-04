@@ -1,4 +1,5 @@
 import {
+  ping,
   connect,
   isConnected,
   disconnect,
@@ -25,6 +26,7 @@ import {
 import { btcKeys, createAction, ActionType, on, removeListener } from './actions'
 
 type Metalet = {
+  ping: any
   connect: any
   disconnect: any
   isConnected: any
@@ -79,6 +81,7 @@ type Metalet = {
 }
 
 const metalet: any = {
+  ping,
   connect,
   isConnected,
   disconnect,

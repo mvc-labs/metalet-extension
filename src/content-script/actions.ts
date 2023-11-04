@@ -58,6 +58,10 @@ export async function createAction(
   })
 }
 
+export async function ping() {
+  return await createAction('Ping', 'query')
+}
+
 export async function connect() {
   return await createAction('Connect')
 }

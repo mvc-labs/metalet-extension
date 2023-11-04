@@ -21,7 +21,7 @@ createEmit<Account>('getCurrentAccount')().then((acc) => {
 
 <template>
   <!-- 账号信息 -->
-  <AccountItem :account="account" :current-account="account" v-if="account" :show-network="true" class="mb-4" />
+  <AccountItem :account="account" :current-account="account" v-if="account" :show-network="true" class="mb-4 -mt-4" />
 
   <MvcCollectionPanel />
 
