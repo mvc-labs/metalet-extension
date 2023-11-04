@@ -1,7 +1,7 @@
 {
   "name": "metalet",
   "private": true,
-  "version": "2.2.0",
+  "version": "2.2.1",
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.dev.config.ts",
@@ -42,7 +42,7 @@
     "decimal.js": "^10.4.3",
     "ecpair": "^2.1.0",
     "memfs": "^4.5.0",
-    "meta-contract": "^0.3.34",
+    "meta-contract": "^0.3.35",
     "mvc-std-lib": "^1.1.4",
     "object-hash": "^3.0.0",
     "qrcode": "^1.5.3",

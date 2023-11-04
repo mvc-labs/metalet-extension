@@ -229,6 +229,7 @@ export const signTransactions = async (
     const subPath = toSign.path || '0/0'
     const privateKey = hdpk.deriveChild(`${rootPath}/${subPath}`).privateKey
     const publicKey = privateKey.toPublicKey()
+    console.log({ BN })
 
     // Build signature of this input
     const signature = mvc.Transaction.Sighash.sign(
