@@ -1,4 +1,4 @@
-# Metalet v2
+# Metalet Extension API Docs
 
 # Overview
 
