@@ -226,7 +226,7 @@ export async function getSigner(chain: Chain = 'mvc', addressType: string) {
     const path = await getAccountProperty(chain, 'path')
     const node = deriveBtcPrivateKey(mnemonic, path, network)
     const nodeXOnlyPubkey = node.publicKey.subarray(1)
-    node.tweak(crypto.taggedHash('TapTweak', nodeXOnlyPubkey))
+    return node.tweak(crypto.taggedHash('TapTweak', nodeXOnlyPubkey))
   }
   const privateKey = await getPrivateKey(chain)
   return deriveSigner(privateKey)

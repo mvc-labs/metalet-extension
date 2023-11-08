@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import Decimal from 'decimal.js'
 import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Wallet } from 'meta-contract'
@@ -29,9 +30,9 @@ const { isLoading, data: balance, error } = useBalanceQuery(address, asset.value
 // form
 const amount = ref('')
 const amountInSats = computed(() => {
-  const _amount = Number(amount.value)
-  if (Number.isNaN(amount)) return 0
-  return _amount * 1e8
+  const _amount = new Decimal(amount.value || 0);
+  if (_amount.isNaN()) return new Decimal(0);
+  return _amount.times(new Decimal('1e8'));
 })
 const recipient = ref('')
 const transactionResult = ref<TransactionResult | undefined>()
@@ -49,7 +50,7 @@ const operationLock = ref(false)
 
 async function sendSpace() {
   const walletInstance = toRaw(wallet.value)
-  const sentRes = await walletInstance.send(recipient.value, amountInSats.value).catch((err) => {
+  const sentRes = await walletInstance.send(recipient.value, amountInSats.value.toNumber()).catch((err) => {
     isOpenConfirmModal.value = false
     transactionResult.value = {
       status: 'failed',
@@ -81,7 +82,7 @@ async function send() {
       status: 'success',
       txId: sentRes.txId,
       recipient: recipient.value,
-      amount: amountInSats.value,
+      amount: amountInSats.value.toNumber(),
       token: {
         symbol: 'SPACE',
         decimal: 8,

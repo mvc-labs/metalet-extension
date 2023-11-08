@@ -35,7 +35,10 @@ export type Utxo = {
   addressType: number
   outputIndex: number
   satoshis: number
+  satoshi: number
   txid: string
+  txId: string
+  vout: number
 }
 
 type RawBtcUtxo = {
@@ -47,14 +50,7 @@ type RawBtcUtxo = {
 export async function fetchBtcUtxos(address: string): Promise<Utxo[]> {
   const utxos = await metaletApiV2('/address/utxos')
     .get({ address, chain: 'btc' })
-    .then((res) => res.data?.utxoList || [])
-    .then((utxos: RawBtcUtxo[]) =>
-      utxos.map((utxo) => ({
-        ...utxo,
-        txid: utxo.txId,
-      }))
-    )
-
+    .then((res) => res.data?.utxo || [])
   return utxos
 }
 
