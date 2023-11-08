@@ -1,10 +1,15 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
+import { LinkIcon } from '@heroicons/vue/20/solid'
 import { computed, ref } from 'vue'
 
 import { toTx } from '@/lib/helpers'
 import actions from '@/data/authorize-actions'
+import { getBrowserHost } from '@/lib/host'
+import logos from '@/data/logos'
+import { DEBUG } from '@/data/config'
+
 import TransferToken from './TransferToken.vue'
 import Transfer from './Transfer.vue'
 import Connect from './Connect.vue'
@@ -14,11 +19,9 @@ import EciesEncrypt from './EciesEncrypt.vue'
 import EciesDecrypt from './EciesDecrypt.vue'
 import SignTransaction from './SignTransaction.vue'
 import SignTransactions from './SignTransactions.vue'
+import Pay from './Pay.vue'
 import SignMessage from './SignMessage.vue'
 import Merge from './Merge.vue'
-import { getBrowserHost } from '@/lib/host'
-import { LinkIcon } from '@heroicons/vue/20/solid'
-import logos from '@/data/logos'
 
 // 从query中获取数据
 const route = useRoute()
@@ -40,7 +43,9 @@ const action = actions[actionName as ActionType]
 const params: any = JSON.parse(route.query.params as string)
 
 const exit = () => {
-  window.close()
+  if (!DEBUG) {
+    window.close()
+  }
 }
 
 const getHostAndToTx = async (txid: string) => {
@@ -69,7 +74,6 @@ const runAction = async () => {
       error: e.message,
     }
   } finally {
-    console.log('finally')
     running.value = false
     isFinished.value = true
   }
@@ -178,6 +182,7 @@ const cancelAction = async () => {
       <EciesDecrypt v-if="actionName === 'EciesDecrypt'" :params="params" />
       <SignTransaction v-if="actionName === 'SignTransaction'" :params="params" />
       <SignTransactions v-if="actionName === 'SignTransactions'" :params="params" />
+      <Pay v-if="actionName === 'Pay'" :params="params" />
       <SignMessage v-if="actionName === 'SignMessage'" :params="params" />
     </div>
 

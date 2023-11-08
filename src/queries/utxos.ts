@@ -15,7 +15,15 @@ export interface UTXO {
   vout: number
 }
 
-const fetchMVCUtxos = async (address: string): Promise<any[]> => {
+export type MvcUtxo = {
+  flag: string
+  address: string
+  txid: string
+  outIndex: number
+  value: number
+  height: number
+}
+const fetchMVCUtxos = async (address: string): Promise<MvcUtxo[]> => {
   return await mvcApi(`/address/${address}/utxo`).get()
 }
 

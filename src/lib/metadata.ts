@@ -1,4 +1,5 @@
 import { mvc } from 'meta-contract'
+
 import { mvcApi } from '../queries/request'
 import { METAFILE_API_HOST } from '../data/hosts'
 
@@ -104,7 +105,10 @@ export async function parse(txid: string, outputIndex: number): Promise<string[]
   return messages
 }
 
-export async function parseLocalTransaction(transaction: mvc.Transaction) {
+export async function parseLocalTransaction(transaction: mvc.Transaction): Promise<{
+  messages: (string | Buffer)[]
+  outputIndex: number | null
+}> {
   // loop through all outputs and find the one with OP_RETURN
   const outputs = transaction.outputs
   const outputIndex = outputs.findIndex((output) => output.script.toASM().includes('OP_RETURN'))
@@ -117,9 +121,15 @@ export async function parseLocalTransaction(transaction: mvc.Transaction) {
 
   const outputAsm = outputs[outputIndex].script.toASM()
   const asmFractions = outputAsm.split('OP_RETURN')[1].trim().split(' ')
-  let messages = asmFractions.map((fraction: string) => {
+  let messages: any = asmFractions.map((fraction: string) => {
     return Buffer.from(fraction, 'hex').toString()
   })
+
+  // if data type is binary, revert data to buffer
+  const isBinary = messages[messages.length - 1] === 'binary'
+  if (isBinary) {
+    messages[5] = Buffer.from(asmFractions[5], 'hex')
+  }
 
   return {
     messages,
