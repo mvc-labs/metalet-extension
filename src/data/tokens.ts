@@ -2,6 +2,7 @@ import UsdtLogoImg from '../assets/images/usdt-logo.jpg?url'
 import ScLogoImage from '../assets/images/sc-logo.svg?url'
 import McLogoImage from '../assets/images/mc-logo.svg?url'
 import SwapTokenLogoImage from '../assets/images/swap-logo.png?url'
+import vemspLogoImage from '../assets/images/vemsp-logo.png?url'
 
 export default [
   {
@@ -19,5 +20,9 @@ export default [
   {
     genesis: 'b2d75931958114e48c9927160f80363eae78e2dc',
     logo: SwapTokenLogoImage,
+  },
+  {
+    genesis: 'fad7b10812fa76718127e084bb71cdb87853261c',
+    logo: vemspLogoImage,
   },
 ]

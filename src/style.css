@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Geist';
+  /* set 2 weights, regular and bold */
+  src:
+    url('./assets/fonts/Geist-Regular.otf') format('opentype'),
+    url('./assets/fonts/Geist-Bold.otf') format('opentype');
+}
+
 .gradient-text {
   @apply bg-gradient-to-r from-primary-teal to-primary-blue bg-clip-text text-transparent;
 }
@@ -38,7 +46,9 @@
 }
 
 .mor-shadow {
-  box-shadow: 8px 8px 16px #e5e6e7, -8px -8px 16px #ffffff;
+  box-shadow:
+    8px 8px 16px #e5e6e7,
+    -8px -8px 16px #ffffff;
 }
 
 .label {

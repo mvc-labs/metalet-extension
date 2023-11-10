@@ -17,7 +17,7 @@ const inscriptionIds = ref<string[]>([])
 
 const selectTicker = (inscriptionId: string) => {
   if (inscriptionIds.value.includes(inscriptionId)) {
-    inscriptionIds.value.splice(inscriptionIds.value.findIndex(id => id === inscriptionId)!, 1)
+    inscriptionIds.value.splice(inscriptionIds.value.findIndex((id) => id === inscriptionId)!, 1)
   } else {
     inscriptionIds.value.push(inscriptionId)
   }
@@ -36,7 +36,9 @@ const enabled = computed(() => !!address.value)
 const { isLoading, data: balance, error } = useBalanceQuery(address, asset.value.symbol, { enabled })
 
 // tickers
-const { isLoading: tokenLoading, data: tokenData } = useBRCTickerAseetQuery(address, asset.value.symbol, { enabled: computed(() => !!address.value) })
+const { isLoading: tokenLoading, data: tokenData } = useBRCTickerAseetQuery(address, asset.value.symbol, {
+  enabled: computed(() => !!address.value),
+})
 
 // form
 const amount = ref('')
@@ -68,6 +70,7 @@ async function send() {
   operationLock.value = true
 
   const utxos = await getInscriptionUtxos(inscriptionIds.value)
+  console.log({ utxos })
 
   await sendBrc(utxos)
 
@@ -82,7 +85,11 @@ async function send() {
 
     <div class="space-y-3 self-stretch">
       <!-- address input -->
-      <input class="main-input w-full !rounded-xl !p-4 !text-xs" placeholder="Recipient's address" v-model="recipient" />
+      <input
+        class="main-input w-full !rounded-xl !p-4 !text-xs"
+        placeholder="Recipient's address"
+        v-model="recipient"
+      />
 
       <!-- balance -->
       <div class="flex items-center gap-x-2 text-xs text-gray-500">
@@ -92,11 +99,13 @@ async function send() {
         <div class="" v-else-if="balance">{{ prettifyBalance(balance.total, asset.symbol) }}</div>
       </div>
 
-      <div class="grid grid-cols-3 gap-2 mt-4" v-if="!tokenLoading && tokenData && tokenData.transferableList.length
-        ">
-        <div class="flex flex-col items-center rounded-md p-2 cursor-pointer"
-          v-for="(token) in tokenData.transferableList" @click="selectTicker(token.inscriptionId)"
-          :class="inscriptionIds.includes(token.inscriptionId) ? 'main-btn-bg text-white' : 'bg-gray-100'">
+      <div class="grid grid-cols-3 gap-2 mt-4" v-if="!tokenLoading && tokenData && tokenData.transferableList.length">
+        <div
+          class="flex flex-col items-center rounded-md p-2 cursor-pointer"
+          v-for="token in tokenData.transferableList"
+          @click="selectTicker(token.inscriptionId)"
+          :class="inscriptionIds.includes(token.inscriptionId) ? 'main-btn-bg text-white' : 'bg-gray-100'"
+        >
           <div>{{ token.ticker }}</div>
           <div>{{ token.amount }}</div>
           <div>#{{ token.inscriptionNumber }}</div>
@@ -105,17 +114,24 @@ async function send() {
     </div>
 
     <!-- send -->
-    <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="popConfirm"
-      :disabled="!inscriptionIds.length">Send</button>
+    <button
+      class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
+      @click="popConfirm"
+      :disabled="!inscriptionIds.length"
+    >
+      Send
+    </button>
 
     <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
       <template #title>Confirm Transaction</template>
 
       <template #body>
-        <div class="grid grid-cols-3 gap-2 mt-4" v-if="!tokenLoading && tokenData && tokenData.transferableList.length
-          ">
-          <div class="flex flex-col items-center rounded-md bg-gray-100 p-2" v-for="token in tokenData.transferableList"
-            :key="token.inscriptionId">
+        <div class="grid grid-cols-3 gap-2 mt-4" v-if="!tokenLoading && tokenData && tokenData.transferableList.length">
+          <div
+            class="flex flex-col items-center rounded-md bg-gray-100 p-2"
+            v-for="token in tokenData.transferableList"
+            :key="token.inscriptionId"
+          >
             <div>{{ token.ticker }}</div>
             <div>{{ token.amount }}</div>
             <div>#{{ token.inscriptionNumber }}</div>
@@ -128,8 +144,10 @@ async function send() {
           <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Operating...</div>
         </div>
         <div class="grid grid-cols-2 gap-x-4" v-else>
-          <button class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
-            @click="isOpenConfirmModal = false">
+          <button
+            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
+            @click="isOpenConfirmModal = false"
+          >
             Cancel
           </button>
           <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="send">

@@ -1,6 +1,6 @@
 import { network } from '@/lib/network'
 import { getCredential } from '@/lib/account'
-import { METASV_TESTNET_HOST, METASV_HOST, METALET_HOST, ORDERS_HOST, UNISAT_HOST } from '@/data/hosts'
+import { METASV_TESTNET_HOST, METASV_HOST, METALET_HOST, ORDERS_HOST, UNISAT_HOST, MEMPOOL_HOST } from '@/data/hosts'
 
 type OptionParams = Record<string, string>
 
@@ -10,7 +10,7 @@ interface OptionData {
 
 interface RequestOption {
   method: 'GET' | 'POST'
-  data?: OptionData
+  data?: OptionData | string
   params?: OptionParams
   headers?: Headers
   mode?: RequestMode
@@ -41,7 +41,9 @@ async function request<T = any>(url: string, options: RequestOption): Promise<T>
 
   if (options?.data) {
     options.body = JSON.stringify(options.data)
-    options.headers.set('Content-Type', 'application/json')
+    if (!options.headers.has('Content-Type')) {
+      options.headers.set('Content-Type', 'application/json')
+    }
     delete options.data
   }
 
@@ -83,6 +85,15 @@ export const ordersApi = (path: string) => {
   return {
     get: (params?: OptionParams) => request(`${ordersHost}${path}`, { method: 'GET', params }),
     post: (data?: OptionData) => request(`${ordersHost}${path}`, { method: 'POST', data }),
+  }
+}
+
+export const mempoolApi = (path: string) => {
+  const mempoolHost = MEMPOOL_HOST + '/api'
+  return {
+    get: (params?: OptionParams) => request(`${mempoolHost}${path}`, { method: 'GET', params }),
+    post: (data?: OptionData | string, headers?: Headers) =>
+      request(`${mempoolHost}${path}`, { method: 'POST', headers, data }),
   }
 }
 

@@ -1,7 +1,7 @@
 {
   "name": "Metalet",
   "description": "An MVC Crypto Wallet Extension",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "manifest_version": 3,
   "action": {
     "default_popup": "index.html",
@@ -21,8 +21,7 @@
     }
   ],
   "externally_connectable": {
-    "matches": ["https://blank.org/*", "*://localhost/*", "*://metalet.space/*", "*://mvcswap.com/*"],
-    "ids": ["*"]
+    "matches": ["*://metalet.space/*", "*://mvcswap.com/*"]
   },
   "permissions": ["storage", "tabs", "activeTab"],
   "background": {

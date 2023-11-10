@@ -5,15 +5,28 @@ import { NOTIFICATION_HEIGHT, NOTIFICATION_WIDTH } from './data/config'
 import connector from './lib/connector'
 import { getCurrentAccount } from './lib/account'
 import { isLocked } from './lib/password'
+import { sleep } from './lib/helpers'
 
 browser.runtime.onMessage.addListener(async (msg, sender) => {
   if (msg.channel === 'inter-extension') {
+    await sleep(100)
     return await exActions[msg.fn](...msg.args)
+  }
+
+  const actionName = msg.action.replace('authorize-', '').replace('query-', '').replace('event-', '')
+  if (msg.action?.startsWith('query') && actionName === 'Ping') {
+    const response = {
+      nonce: msg.nonce,
+      channel: 'from-metaidwallet',
+      action: `respond-${actionName}`,
+      host: msg.host as string,
+      res: 'pong',
+    }
+    return response
   }
 
   const account = await getCurrentAccount()
   const walletLocked = await isLocked()
-  const actionName = msg.action.replace('authorize-', '').replace('query-', '').replace('event-', '')
 
   // 如果连接状态为未连接，且请求的 action 不是connect或者IsConnected，则返回错误
   let failedStatus: string = ''
@@ -38,7 +51,7 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
 
     return response
   }
-  
+
   // event actions
   // if (msg.action?.startsWith('event')) {
 
