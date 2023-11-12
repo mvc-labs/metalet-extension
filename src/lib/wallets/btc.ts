@@ -207,9 +207,11 @@ export class BtcWallet {
     console.log({ tx })
 
     const rawTx = tx.toHex()
-    await broadcastBTCTx(rawTx)
-    // const res = await broadcastBTCTx(rawTx)
-    // console.log({ res })
+    console.log({ rawTx })
+
+    // await broadcastBTCTx(rawTx)
+    const res = await broadcastBTCTx(rawTx)
+    console.log({ res })
   }
 }
 

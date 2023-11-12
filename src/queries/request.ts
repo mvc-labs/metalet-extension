@@ -1,6 +1,14 @@
 import { network } from '@/lib/network'
 import { getCredential } from '@/lib/account'
-import { METASV_TESTNET_HOST, METASV_HOST, METALET_HOST, ORDERS_HOST, UNISAT_HOST, MEMPOOL_HOST } from '@/data/hosts'
+import {
+  METASV_TESTNET_HOST,
+  METASV_HOST,
+  METALET_HOST,
+  ORDERS_HOST,
+  UNISAT_HOST,
+  MEMPOOL_HOST,
+  BLOCKSTREAM_HOST,
+} from '@/data/hosts'
 
 type OptionParams = Record<string, string>
 
@@ -40,9 +48,13 @@ async function request<T = any>(url: string, options: RequestOption): Promise<T>
   }
 
   if (options?.data) {
-    options.body = JSON.stringify(options.data)
-    if (!options.headers.has('Content-Type')) {
-      options.headers.set('Content-Type', 'application/json')
+    if (options.headers.get('Content-Type') === 'text/plain') {
+      options.body = options.data as string
+    } else {
+      options.body = JSON.stringify(options.data)
+      if (!options.headers.has('Content-Type')) {
+        options.headers.set('Content-Type', 'application/json')
+      }
     }
     delete options.data
   }
@@ -51,7 +63,12 @@ async function request<T = any>(url: string, options: RequestOption): Promise<T>
   if (!response.ok) {
     throw new Error(response.statusText)
   }
-  return response.json()
+  const data = await response.text()
+  try {
+    return JSON.parse(data)
+  } catch (error) {
+    return data as T
+  }
 }
 
 export const mvcApi = (path: string) => {
@@ -94,6 +111,14 @@ export const mempoolApi = (path: string) => {
     get: (params?: OptionParams) => request(`${mempoolHost}${path}`, { method: 'GET', params }),
     post: (data?: OptionData | string, headers?: Headers) =>
       request(`${mempoolHost}${path}`, { method: 'POST', headers, data }),
+  }
+}
+
+export const blockstreamApi = (path: string) => {
+  const blockstreamHost = BLOCKSTREAM_HOST + '/api'
+  return {
+    get: (params?: OptionParams) => request(`${blockstreamHost}${path}`, { method: 'GET', params }),
+    post: (data?: OptionData | string) => request(`${blockstreamHost}${path}`, { method: 'POST', data }),
   }
 }
 
