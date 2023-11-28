@@ -1,12 +1,15 @@
 import { resolve } from 'path'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
+import wasm from 'vite-plugin-wasm'
+
 import baseConfig from './vite.base.config'
 
-import wasm from 'vite-plugin-wasm'
+const env = loadEnv('', process.cwd())
 
 export default defineConfig({
   ...baseConfig,
   build: {
+    minify: env.VITE_ENVIRONMENT !== 'development',
     emptyOutDir: false,
     outDir: resolve(__dirname, '../dist'),
     lib: {

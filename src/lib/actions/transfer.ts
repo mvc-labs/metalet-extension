@@ -14,9 +14,8 @@ export type TransferTask = {
   receivers: Receiver[]
 }
 export async function process({ tasks, broadcast = true }: { tasks: TransferTask[]; broadcast?: boolean }) {
-  console.log('here')
   const network: API_NET = (await getNetwork()) as API_NET
-  const purse = await getPrivateKey("mvc")
+  const purse = await getPrivateKey('mvc')
   const address = (await getAddress())!
   const apiHost = await getApiHost()
 

@@ -52,18 +52,6 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
     return response
   }
 
-  // event actions
-  // if (msg.action?.startsWith('event')) {
-
-  //   if (msg.params?.type === 'on') {
-  //     console.log(`register ${actionName}`)
-  //     register(actionName)
-  //   } else if (msg.params?.type === 'removeListener') {
-  //     unregister(actionName)
-  //   }
-  //   return
-  // }
-
   // authorize actions
   if (msg.action?.startsWith('authorize')) {
     const icon = sender.tab?.favIconUrl || msg.icon || ''
@@ -89,7 +77,7 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
     const lastFocused = await browser.windows.getLastFocused()
     top = lastFocused.top!
     left = lastFocused.left! + lastFocused.width! - NOTIFICATION_WIDTH
-    // 创建浏览器窗口打开 popup 页面
+    // open authorize page in a popup window
     const popupWindow = await browser.windows.create({
       url: popupUrl,
       type: 'popup',
@@ -131,6 +119,7 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
 
   // query actions
   if (msg.action?.startsWith('query')) {
+    console.log(msg.action)
     // call corresponding process function
     const action = actions[actionName]
     if (action) {

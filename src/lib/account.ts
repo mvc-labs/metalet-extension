@@ -1,5 +1,6 @@
 import { mvc } from 'meta-contract'
-import { createEmit } from '@/data/event-actions'
+
+import { notifyContent } from '@/lib/notify-content'
 import { getNetwork } from './network'
 import { signMessage } from './crypto'
 import { fetchUtxos } from '../queries/utxos'
@@ -130,7 +131,7 @@ export async function connectAccount(accountId: string) {
 
   const mvcAddress = await getAddress('mvc')
   const btcAddress = await getAddress('btc')
-  createEmit('accountsChanged')({ mvcAddress, btcAddress })
+  notifyContent('accountsChanged')({ mvcAddress, btcAddress })
 
   return true
 }

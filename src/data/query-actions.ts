@@ -1,4 +1,5 @@
 import * as IsConnected from '../lib/actions/is-connected'
+import * as Listen from '../lib/actions/listen'
 import * as GetAddress from '../lib/actions/get-address'
 import * as GetUtxos from '../lib/actions/get-utxos'
 import * as GetPublicKey from '../lib/actions/get-public-key'
@@ -21,6 +22,7 @@ type QueryAction = {
 
 export default {
   IsConnected,
+  Listen,
   GetNetwork,
   GetAddress,
   GetPublicKey,

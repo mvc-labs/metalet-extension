@@ -5,8 +5,7 @@ import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
 
 import { type Asset, allAssets, getTags } from '@/data/assets'
 import { useBalanceQuery } from '@/queries/balance'
-// import { getAddress } from '@/lib/account'
-import { createEmit } from '@/lib/emitters'
+import { getAddress } from '@/lib/account'
 
 import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
@@ -27,10 +26,7 @@ const router = useRouter()
 const tags = getTags(asset)
 
 const address: Ref<string> = ref('')
-// getAddress(asset.chain).then((add) => {
-//   address.value = add!
-// })
-createEmit<string>('getAddress')(asset.chain).then((add) => {
+getAddress(asset.chain).then((add) => {
   address.value = add!
 })
 

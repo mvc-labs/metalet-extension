@@ -6,12 +6,12 @@ import { useQueryClient } from '@tanstack/vue-query'
 
 import { useBalanceQuery } from '@/queries/balance'
 import { prettifyBalance } from '@/lib/formatters'
-// import { getAddress } from '@/lib/account'
-import { createEmit } from '@/lib/emitters'
+import { getAddress } from '@/lib/account'
 import { MVCAssets } from '@/data/assets'
+import type { TransactionResult } from '@/global-types'
 
 import Modal from '@/components/Modal.vue'
-import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
+import TransactionResultModal from './components/TransactionResultModal.vue'
 
 const route = useRoute()
 const symbol: Ref<string> = ref(route.query.symbol as string)
@@ -19,10 +19,7 @@ const asset = computed(() => MVCAssets.find((asset) => asset.symbol === symbol.v
 const queryClient = useQueryClient()
 
 const address = ref('')
-// getAddress().then((addr) => {
-//   address.value = addr!
-// })
-createEmit<string>('getAddress')().then((addr) => {
+getAddress().then((addr) => {
   address.value = addr!
 })
 
@@ -95,7 +92,11 @@ async function send() {
 
     <div class="space-y-3 self-stretch">
       <!-- address input -->
-      <input class="main-input w-full !rounded-xl !p-4 !text-xs" placeholder="Recipient's address" v-model="recipient" />
+      <input
+        class="main-input w-full !rounded-xl !p-4 !text-xs"
+        placeholder="Recipient's address"
+        v-model="recipient"
+      />
 
       <!-- amount input -->
       <div class="relative">
@@ -143,8 +144,10 @@ async function send() {
           <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Operating...</div>
         </div>
         <div class="grid grid-cols-2 gap-x-4" v-else>
-          <button class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
-            @click="isOpenConfirmModal = false">
+          <button
+            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
+            @click="isOpenConfirmModal = false"
+          >
             Cancel
           </button>
           <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="send">

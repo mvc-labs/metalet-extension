@@ -31,10 +31,14 @@ async function emit(params: EmitParams) {
   })
 
   if (tab[0].id) {
-    browser.tabs.sendMessage(tab[0].id, { ...params, channel })
+    browser.tabs.sendMessage(tab[0].id, { ...params, channel }).catch((e) => {
+      if (!e.message.includes('Could not establish connection.')) {
+        throw e
+      }
+    })
   }
 }
 
-export function createEmit(eventName: string) {
+export function notifyContent(eventName: string) {
   return (...args: unknown[]) => emit({ eventName, args })
 }

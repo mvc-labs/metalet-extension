@@ -40,6 +40,15 @@ const routes = [
     },
   },
   {
+    path: '/connected-dapps',
+    component: () => import('./pages/connected-dapps/Index.vue'),
+    meta: {
+      noFooter: true,
+      secondaryHeader: true,
+      headerTitle: 'Connected Dapps',
+    },
+  },
+  {
     path: '/authorize',
     component: () => import('./pages/authorize/Index.vue'),
     meta: {

@@ -67,7 +67,6 @@ export const getBTCPrice = () => {
 type TokenType = 'BRC20'
 
 export const fetchBTCAsset = async (address: string): Promise<string[]> => {
-  console.log('fetchBtcAsset address', address)
   if (!address) {
     return []
   }
@@ -75,7 +74,6 @@ export const fetchBTCAsset = async (address: string): Promise<string[]> => {
     .get({ address, chain: 'btc' })
     .then((res) => {
       // brc20TickList.value = res?.data?.tickList || []
-      console.log('tickList', res.data.tickList)
 
       return res?.data?.tickList.map((tick: Tick) => tick.token) || []
     })
@@ -83,7 +81,6 @@ export const fetchBTCAsset = async (address: string): Promise<string[]> => {
 
 export const useBTCAseetQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
   const address = addressRef.value
-  console.log('useBTCAseetQuery address', address, options.enabled.value)
 
   return useQuery({
     queryKey: ['BTCAsset', { address }],

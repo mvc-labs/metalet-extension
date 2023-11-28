@@ -1,16 +1,24 @@
 import browser from 'webextension-polyfill'
 import { raise } from './helpers'
 
-export async function setStorage(key: string, value: any) {
+export async function setStorage(key: string, value: any, useSession: boolean = false) {
   if (typeof value === 'object') {
     value = JSON.stringify(value)
+  }
+
+  if (useSession) {
+    await browser.storage.session.set({ [key]: value })
+    return
   }
 
   await browser.storage.local.set({ [key]: value })
 }
 
-export async function getStorage(key: string, option?: { defaultValue?: unknown; isParse?: boolean }) {
-  const res = await browser.storage.local.get(key)
+export async function getStorage(
+  key: string,
+  option?: { defaultValue?: unknown; isParse?: boolean; useSession?: boolean }
+) {
+  const res = option?.useSession ? await browser.storage.session.get(key) : await browser.storage.local.get(key)
   const value = res[key]
 
   if (typeof value === 'string') {
@@ -42,8 +50,8 @@ export async function deleteStorage(key: string): Promise<void> {
 }
 
 type Storage = {
-  get: (key: string, option?: { defaultValue?: unknown; isParse?: boolean }) => Promise<any>
-  set: (key: string, value: any) => Promise<void>
+  get: (key: string, option?: { defaultValue?: unknown; isParse?: boolean; useSession?: boolean }) => Promise<any>
+  set: (key: string, value: any, useSession?: boolean) => Promise<void>
   delete: (key: string) => Promise<void>
 }
 

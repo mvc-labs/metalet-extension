@@ -2,8 +2,7 @@
 import { Ref, ref, computed } from 'vue'
 import { InboxIcon } from '@heroicons/vue/24/solid'
 
-// import { getAddress } from '@/lib/account'
-import { createEmit } from '@/lib/emitters'
+import { getAddress } from '@/lib/account'
 import { useActivitiesQuery } from '@/queries/activities'
 import type { Token } from '@/queries/tokens'
 
@@ -15,10 +14,7 @@ const props = defineProps<{
 }>()
 
 const address: Ref<string> = ref('')
-// getAddress(props.asset.chain).then((add) => {
-//   address.value = add!
-// })
-createEmit<string>('getAddress')(props.asset.chain).then((add) => {
+getAddress(props.asset.chain).then((add) => {
   address.value = add!
 })
 const enabled = computed(() => !!address.value)

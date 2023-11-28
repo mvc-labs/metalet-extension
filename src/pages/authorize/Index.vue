@@ -187,7 +187,7 @@ const cancelAction = async () => {
     </div>
 
     <!-- buttons -->
-    <div class="mt-8 grid grid-cols-2 gap-x-4 self-stretch">
+    <div class="mt-4 grid grid-cols-2 gap-x-4 self-stretch">
       <button
         class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-500"
         @click="cancelAction"

@@ -229,7 +229,6 @@ export const signTransactions = async (
     const subPath = toSign.path || '0/0'
     const privateKey = hdpk.deriveChild(`${rootPath}/${subPath}`).privateKey
     const publicKey = privateKey.toPublicKey()
-    console.log({ BN })
 
     // Build signature of this input
     const signature = mvc.Transaction.Sighash.sign(
@@ -342,6 +341,7 @@ export const payTransactions = async (
     }
 
     const addressObj = new mvc.Address(address, network)
+    console.log({ addressObj })
     // find out the total amount of the transaction (total output minus total input)
     const totalOutput = tx.outputs.reduce((acc, output) => acc + output.satoshis, 0)
     const totalInput = tx.inputs.reduce((acc, input) => acc + input.output!.satoshis, 0)
@@ -389,7 +389,7 @@ export const payTransactions = async (
       }
 
       // find out the path corresponding to this input's prev output's address
-      const inputAddress = new mvc.Address(input.output!.script, network)
+      const inputAddress = mvc.Address.fromString(input.output!.script.toAddress().toString(), network).toString()
       let deriver = 0
       let toUsePrivateKey: mvc.PrivateKey | undefined = undefined
       while (deriver < DERIVE_MAX_DEPTH) {

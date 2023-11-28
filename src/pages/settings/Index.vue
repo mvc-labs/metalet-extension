@@ -54,6 +54,10 @@ const toBackup = () => {
   router.push('/wallet/backup')
 }
 
+const toConnectedDapps = () => {
+  router.push('/connected-dapps')
+}
+
 const showResetModal = ref(false)
 </script>
 
@@ -96,13 +100,6 @@ const showResetModal = ref(false)
       <div class="text-base font-bold">Security</div>
 
       <div class="divide-y divide-gray-100">
-        <!-- <div class="setting-item group cursor-pointer" @click="toCurrentAccount">
-          <div class="text-gray-500 group-hover:underline">Change Password</div>
-          <div class="">
-            <ChevronRightIcon class="link-icon" />
-          </div>
-        </div> -->
-
         <div class="setting-item group cursor-pointer" @click="toBackup" v-if="hasPassword">
           <div class="text-gray-500 group-hover:underline">Backup</div>
           <div class="">
@@ -123,6 +120,13 @@ const showResetModal = ref(false)
             <ChevronRightIcon class="link-icon" />
           </div>
         </div>
+
+        <!-- <div class="setting-item group cursor-pointer" @click="toConnectedDapps">
+          <div class="text-gray-500 group-hover:underline">Connected Dapps</div>
+          <div class="">
+            <ChevronRightIcon class="link-icon" />
+          </div>
+        </div> -->
       </div>
     </div>
 
