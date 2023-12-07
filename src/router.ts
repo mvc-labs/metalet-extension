@@ -109,6 +109,15 @@ const routes = [
       noFooter: true,
     },
   },
+  {
+    path: '/wallet/inscribe',
+    component: () => import('./pages/wallet/Inscribe.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Inscribe',
+      noFooter: true,
+    },
+  },
 
   {
     path: '/wallet/send-token/:symbol/:genesis',

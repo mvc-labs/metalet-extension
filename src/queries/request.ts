@@ -97,6 +97,37 @@ export const metaletApiV2 = (path: string) => {
   }
 }
 
+enum MetaletV3_CODE {
+  SUCCESS = 0,
+  FAILED = 1,
+}
+
+interface MetaletV3Result<T> {
+  code: MetaletV3_CODE
+  message: string
+  data: T
+  processingTime: number
+}
+
+const metaletV3Request = <T>(url: string, options: RequestOption): Promise<T> =>
+  request<MetaletV3Result<T>>(url, options).then((result) => {
+    if (result.code === MetaletV3_CODE.FAILED) {
+      throw new Error(result.message)
+    }
+    return result.data
+  })
+
+export const metaletApiV3 = <T>(path: string) => {
+  // metalet api requires credential to pass authentication check
+  const metaletHost = METALET_HOST + '/wallet-api/v3'
+  return {
+    get: (params?: OptionParams) =>
+      metaletV3Request<T>(`${metaletHost}${path}`, { method: 'GET', params, withCredential: true }),
+    post: (data?: OptionData) =>
+      metaletV3Request<T>(`${metaletHost}${path}`, { method: 'POST', data, withCredential: true }),
+  }
+}
+
 export const ordersApi = (path: string) => {
   const ordersHost = ORDERS_HOST + '/api'
   return {
@@ -105,10 +136,10 @@ export const ordersApi = (path: string) => {
   }
 }
 
-export const mempoolApi = (path: string) => {
+export const mempoolApi = <T>(path: string) => {
   const mempoolHost = MEMPOOL_HOST + '/api'
   return {
-    get: (params?: OptionParams) => request(`${mempoolHost}${path}`, { method: 'GET', params }),
+    get: (params?: OptionParams) => request<T>(`${mempoolHost}${path}`, { method: 'GET', params }),
     post: (data?: OptionData | string, headers?: Headers) =>
       request(`${mempoolHost}${path}`, { method: 'POST', headers, data }),
   }

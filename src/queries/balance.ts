@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/vue-query'
-import { metaletApi, mvcApi } from './request'
+import { metaletApi, mvcApi, unisatApi } from './request'
 import { ComputedRef, Ref } from 'vue'
 import { SymbolUC, BRC20_SYMBOLS } from '@/lib/asset-symbol'
 import { brc20TickList } from './btc'
@@ -102,4 +102,21 @@ export const useBalanceQuery = (address: Ref, symbol: SymbolUC, options: { enabl
     },
     ...options,
   })
+}
+
+export interface BitcoinBalance {
+  confirm_amount: string
+  pending_amount: string
+  amount: string
+  confirm_btc_amount: string
+  pending_btc_amount: string
+  btc_amount: string
+  confirm_inscription_amount: string
+  pending_inscription_amount: string
+  inscription_amount: string
+  usd_value: string
+}
+
+export async function getAddressBalance(address: string): Promise<BitcoinBalance> {
+  return await unisatApi<BitcoinBalance>('/address/balance').get({ address })
 }

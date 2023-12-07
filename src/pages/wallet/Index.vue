@@ -7,7 +7,7 @@ import AssetList from './components/AssetList.vue'
 import AccountItem from '../accounts/components/Item.vue'
 
 const currentAccount = ref<Account | undefined>()
-createEmit<Account>('getCurrentAccount')().then((acc) => {
+createEmit<Account>('getCurrentAccount')().then(async (acc) => {
   currentAccount.value = acc
 })
 </script>
@@ -15,7 +15,12 @@ createEmit<Account>('getCurrentAccount')().then((acc) => {
 <template>
   <div class="-mt-4">
     <!-- Account Info -->
-    <AccountItem :account="currentAccount" :currentAccount="currentAccount" v-if="currentAccount" :show-network="true" />
+    <AccountItem
+      :show-network="true"
+      v-if="currentAccount"
+      :account="currentAccount"
+      :currentAccount="currentAccount"
+    />
 
     <Balance />
 

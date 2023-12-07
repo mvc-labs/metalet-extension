@@ -1,12 +1,13 @@
 import Decimal from 'decimal.js'
-import { Payment, Psbt, Transaction } from 'bitcoinjs-lib'
-import { getBtcNetwork, getNetwork } from '../network'
-import { type Utxo, fetchBtcUtxos } from '@/queries/utxos'
-import { createPayment, deriveAddress, deriveBtcPrivateKey, derivePublicKey } from '../bip32-deriver'
-import { Account, getAccount, getCurrentAccount, getAddressType, getAddress, getSigner } from '@/lib/account'
 import { raise } from '../helpers'
-import { fetchBtcTxHex, broadcastBTCTx, getBTCTRate } from '@/queries/transaction'
-import { getTweakedPrivateKey, getXOnlyPublicKey, calcFee, sumOrNaN, DUST_UTXO_VALUE } from '../btc-util'
+import { getBtcNetwork } from '../network'
+import { createPayment } from '../bip32-deriver'
+import { getXOnlyPublicKey } from '../btc-util'
+import { commitInscribe } from '@/queries/inscribe'
+import { getBtcUtxos, type UTXO } from '@/queries/utxos'
+import { Payment, Psbt, Transaction } from 'bitcoinjs-lib'
+import { fetchBtcTxHex, broadcastBTCTx } from '@/queries/transaction'
+import { Account, getCurrentAccount, getAddressType, getAddress, getSigner } from '@/lib/account'
 
 export class BtcWallet {
   private account?: Account = undefined
@@ -21,70 +22,7 @@ export class BtcWallet {
     return wallet
   }
 
-  // send method
-  public async send(recipient: string, amount: number) {
-    if (!this.account) throw new Error('no account')
-
-    const btcNetwork = await getBtcNetwork()
-    const tweakedSigner = await getTweakedPrivateKey()
-    console.log({ btcNetwork })
-
-    let sendPsbt = new Psbt({ network: btcNetwork }).addOutput({
-      value: amount,
-      address: recipient,
-    })
-
-    sendPsbt = await this.pay(sendPsbt)
-
-    sendPsbt.signInput(0, tweakedSigner).finalizeAllInputs()
-
-    console.log('send psbt', sendPsbt)
-  }
-
-  async pay(psbt: Psbt) {
-    if (!this.account) throw new Error('no account')
-
-    const network = await getNetwork()
-    const address = network === 'testnet' ? this.account.btc.testnetAddress : this.account.btc.mainnetAddress
-    const utxos = await fetchBtcUtxos(address)
-    const biggestUtxo = utxos.reduce((acc, utxo) => (utxo.satoshi > acc.satoshi ? utxo : acc))
-    const rawTx = await fetchBtcTxHex(biggestUtxo.txid)
-    const tx = Transaction.fromHex(rawTx)
-    const xOnlyPublicKey = await getXOnlyPublicKey()
-
-    const payInput = {
-      hash: biggestUtxo.txid,
-      index: biggestUtxo.outputIndex,
-      witnessUtxo: tx.outs[biggestUtxo.outputIndex],
-      tapInternalKey: xOnlyPublicKey,
-    }
-
-    psbt.addInput(payInput)
-
-    // add change output
-    const feeb = 10 // TODO: get feeb dynamically
-    let fee = calcFee(psbt, feeb)
-    const totalOutput = sumOrNaN(psbt.txOutputs)
-    const totalInput = sumOrNaN(psbt.data.inputs.map((input) => input.witnessUtxo!))
-    const changeValue = totalInput - totalOutput - fee
-
-    if (changeValue < 0) {
-      throw new Error('Insufficient balance')
-    }
-
-    if (changeValue >= DUST_UTXO_VALUE) {
-      psbt.addOutput({
-        address,
-        value: changeValue,
-      })
-    } else {
-      fee += changeValue
-    }
-
-    return psbt
-  }
-
-  async sendBRC(recipient: string, brcUtxos: Utxo[]) {
+  async sendBRC(recipient: string, brcUtxos: UTXO[], feeRate = 2) {
     const amount = new Decimal(0)
     // TODO put this logic in `account.ts`
     if (!this.account) throw new Error('no account')
@@ -92,17 +30,17 @@ export class BtcWallet {
     const address = await getAddress('btc')
     const addressType = await getAddressType('btc')
     const payment = await createPayment(addressType)
-    const utxos = await fetchBtcUtxos(address)
+    const utxos = await getBtcUtxos(address)
     if (!utxos.length) {
       throw new Error('your account currently has no available UTXO.')
     }
     utxos.sort((a, b) => b.satoshi - a.satoshi)
 
-    const buildPsbt = async (selectedUtxos: Utxo[], change = new Decimal(1)) => {
+    const buildPsbt = async (selectedUtxos: UTXO[], change = new Decimal(1)) => {
       const psbt = new Psbt({ network: btcNetwork })
 
       for (const utxo of brcUtxos) {
-        const payInput = await createPayInput({ utxo, payment, addressType })
+        const payInput = await createPayInput({ utxo: utxo as any, payment, addressType })
         psbt.addInput(payInput)
         psbt.addOutput({
           value: utxo.satoshi,
@@ -121,7 +59,7 @@ export class BtcWallet {
 
     let selecedtUTXOs = [utxos[0]]
     let psbt = await buildPsbt(selecedtUTXOs)
-    let fee = calculateFee(psbt)
+    let fee = calculateFee(psbt, feeRate)
 
     while (getTotalSatoshi(selecedtUTXOs).lt(amount.add(fee))) {
       if (selecedtUTXOs.length === utxos.length) {
@@ -129,95 +67,125 @@ export class BtcWallet {
       }
       selecedtUTXOs = selectUTXOs(utxos, amount.add(fee))
       const psbt = await buildPsbt(selecedtUTXOs)
-      fee = calculateFee(psbt)
+      fee = calculateFee(psbt, feeRate)
     }
 
     psbt = await buildPsbt(selecedtUTXOs, getTotalSatoshi(selecedtUTXOs).minus(amount).minus(fee))
 
-    // const fee1 = calculateFee(psbt)
-    // console.log({ fee, fee1 })
-
-    // broadcast
-    const tx = psbt.extractTransaction()
-    const rawTx = tx.toHex()
-    await broadcastBTCTx(rawTx)
-    // const res = await broadcastBTCTx(rawTx)
-    // console.log({ res })
+    broadcast(psbt)
   }
 
-  async sendTest(recipient: string, amount: Decimal) {
+  async send(recipient: string, amount: number | Decimal, feeRate = 2) {
+    if (typeof amount === 'number') {
+      amount = new Decimal(amount)
+    }
     if (!this.account) throw new Error('no account')
-    const btcNetwork = await getBtcNetwork()
-    const address = await getAddress('btc')
-    const addressType = await getAddressType('btc')
-    const payment = await createPayment(addressType)
-    const utxos = await fetchBtcUtxos(address)
-    utxos.sort((a, b) => b.satoshi - a.satoshi)
+    const psbt = await getPsbt(recipient, amount, feeRate)
+    const fee = calculateFee(psbt, feeRate)
+    console.log({ fee })
 
-    const buildPsbt = async (selectedUtxos: Utxo[], change = new Decimal(1)) => {
-      const psbt = new Psbt({ network: btcNetwork })
-        .addOutput({
-          value: amount.toNumber(),
-          address: recipient,
-        })
-        .addOutput({
-          value: change.toNumber(),
-          address,
-        })
+    broadcast(psbt)
+  }
 
-      for (const utxo of selectedUtxos) {
-        const payInput = await createPayInput({ utxo, payment, addressType })
-        console.log({ payInput })
-
-        psbt.addInput(payInput)
-      }
-
-      console.log({ psbt })
-
-      const signer = await getSigner('btc', addressType)
-      psbt.signAllInputs(signer).finalizeAllInputs()
-      return psbt
+  async getFeeAndPsbt(recipient: string, amount: number | Decimal, feeRate = 2) {
+    if (typeof amount === 'number') {
+      amount = new Decimal(amount)
     }
+    const psbt = await getPsbt(recipient, amount, feeRate)
+    const fee = calculateFee(psbt, feeRate)
+    return { fee, psbt }
+  }
 
-    let selecedtUTXOs = selectUTXOs(utxos, amount)
-    let psbt = await buildPsbt(selecedtUTXOs)
-    const rateList = await getBTCTRate()
-    console.log({ rateList })
-
-    let fee = calculateFee(psbt)
-
-    console.log('while', getTotalSatoshi(selecedtUTXOs).lt(amount.add(fee)))
-
-    while (getTotalSatoshi(selecedtUTXOs).lt(amount.add(fee))) {
-      if (selecedtUTXOs.length === utxos.length) {
-        throw new Error('Insufficient funds')
-      }
-      selecedtUTXOs = selectUTXOs(utxos, amount.add(fee))
-      const psbt = await buildPsbt(selecedtUTXOs)
-      fee = calculateFee(psbt)
-    }
-
-    psbt = await buildPsbt(selecedtUTXOs, getTotalSatoshi(selecedtUTXOs).minus(amount).minus(fee))
-
-    // const fee1 = calculateFee(psbt)
-    // console.log({ fee, fee1 })
-
-    // broadcast
+  async commitInscribe(orderId: string, psbt: Psbt) {
     const tx = psbt.extractTransaction()
-    console.log({ tx })
-
     const rawTx = tx.toHex()
-    console.log({ rawTx })
-
-    // await broadcastBTCTx(rawTx)
-    const res = await broadcastBTCTx(rawTx)
-    console.log({ res })
+    const address = await getAddress('btc')
+    return await commitInscribe(address, orderId, rawTx)
   }
 }
 
-const selectUTXOs = (utxos: Utxo[], targetAmount: Decimal): Utxo[] => {
+async function getPsbt(recipient: string, amount: Decimal, feeRate: number) {
+  const btcNetwork = await getBtcNetwork()
+  const address = await getAddress('btc')
+  const addressType = await getAddressType('btc')
+  const payment = await createPayment(addressType)
+  const utxos = await getBtcUtxos(address)
+  utxos.sort((a, b) => b.satoshi - a.satoshi)
+  console.log({ utxos, amount })
+
+  const buildPsbt = async (selectedUtxos: UTXO[], change = new Decimal(1)) => {
+    const psbt = new Psbt({ network: btcNetwork }).addOutput({
+      value: amount.toNumber(),
+      address: recipient,
+    })
+    if (change.gt(0)) {
+      psbt.addOutput({
+        value: change.toNumber(),
+        address,
+      })
+    }
+
+    for (const utxo of selectedUtxos) {
+      const payInput = await createPayInput({ utxo, payment, addressType })
+      console.log({ payInput })
+
+      psbt.addInput(payInput)
+    }
+
+    console.log({ psbt })
+
+    const signer = await getSigner('btc', addressType)
+    psbt.signAllInputs(signer).finalizeAllInputs()
+    return psbt
+  }
+
+  let selecedtUTXOs = selectUTXOs(utxos, amount)
+  let psbt = await buildPsbt(selecedtUTXOs)
+
+  let fee = calculateFee(psbt, feeRate)
+
+  const total = getTotalSatoshi(selecedtUTXOs).toNumber()
+  const total1 = amount.add(fee).toNumber()
+  const amount1 = amount.toNumber()
+  console.log({ total, total1, amount1, fee })
+
+  while (getTotalSatoshi(selecedtUTXOs).lt(amount.add(fee))) {
+    if (selecedtUTXOs.length === utxos.length) {
+      throw new Error('Insufficient funds')
+    }
+    selecedtUTXOs = selectUTXOs(utxos, amount.add(fee))
+    const psbt = await buildPsbt(selecedtUTXOs)
+    fee = calculateFee(psbt, feeRate)
+    const total = getTotalSatoshi(selecedtUTXOs).toNumber()
+    const total1 = amount.add(fee).toNumber()
+    const amount1 = amount.toNumber()
+    console.log({ total, total1, amount1, fee })
+  }
+
+  let change = getTotalSatoshi(selecedtUTXOs).minus(amount).minus(fee)
+  if (change.lt(546)) {
+    change = new Decimal(0)
+  }
+
+  psbt = await buildPsbt(selecedtUTXOs, change)
+
+  return psbt
+}
+
+async function broadcast(psbt: Psbt) {
+  const tx = psbt.extractTransaction()
+  console.log({ tx })
+
+  const rawTx = tx.toHex()
+  console.log({ rawTx })
+
+  const res = await broadcastBTCTx(rawTx)
+  console.log({ res })
+}
+
+const selectUTXOs = (utxos: UTXO[], targetAmount: Decimal): UTXO[] => {
   let totalAmount = new Decimal(0)
-  const selectedUtxos: Utxo[] = []
+  const selectedUtxos: typeof utxos = []
   for (const utxo of utxos) {
     selectedUtxos.push(utxo)
     totalAmount = totalAmount.add(utxo.satoshi)
@@ -241,15 +209,13 @@ function getWitnessUtxo(out: any): any {
   return out
 }
 
-function calculateFee(psbt: Psbt): number {
+function calculateFee(psbt: Psbt, feeRate: number): number {
   const tx = psbt.extractTransaction()
   const size = tx.virtualSize()
-  // TODO get feeb dynamically
-  const feeRate = 2
   return size * feeRate
 }
 
-function getTotalSatoshi(utxos: Utxo[]): Decimal {
+function getTotalSatoshi(utxos: UTXO[]): Decimal {
   return utxos.reduce((total, utxo) => total.add(utxo.satoshi), new Decimal(0))
 }
 
@@ -259,7 +225,7 @@ async function createPayInput({
   payment,
 }: {
   payment: Payment
-  utxo: Utxo
+  utxo: UTXO
   addressType: string
 }): Promise<any> {
   const rawTx = await fetchBtcTxHex(utxo.txId)

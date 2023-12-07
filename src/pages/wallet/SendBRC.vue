@@ -9,7 +9,7 @@ import { BtcWallet } from '@/lib/wallets/btc'
 import { BTCAssets } from '@/data/assets'
 
 import Modal from '@/components/Modal.vue'
-import { Utxo, getInscriptionUtxos } from '@/queries/utxos'
+import { UnisatUTXO } from '@/queries/utxos'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
@@ -42,11 +42,6 @@ const { isLoading: tokenLoading, data: tokenData } = useBRCTickerAseetQuery(addr
 
 // form
 const amount = ref('')
-const amountInSats = computed(() => {
-  const _amount = Number(amount.value)
-  if (Number.isNaN(amount)) return 0
-  return _amount * 1e8
-})
 const recipient = ref('')
 const transactionResult: Ref<undefined | TransactionResult> = ref()
 
@@ -59,20 +54,20 @@ const isOpenResultModal = ref(false)
 
 const operationLock = ref(false)
 
-async function sendBrc(utxos: Utxo[]) {
-  const wallet = await BtcWallet.create()
-  const sentRes = await wallet.sendBRC(recipient.value, utxos)
-}
+// async function sendBrc(utxos: UTXO[]) {
+//   const wallet = await BtcWallet.create()
+//   const sentRes = await wallet.sendBRC(recipient.value, utxos)
+// }
 
 async function send() {
   if (operationLock.value) return
 
   operationLock.value = true
 
-  const utxos = await getInscriptionUtxos(inscriptionIds.value)
-  console.log({ utxos })
+  // const utxos = await getInscriptionUtxos(inscriptionIds.value)
+  // console.log({ utxos })
 
-  await sendBrc(utxos)
+  // await sendBrc(utxos)
 
   operationLock.value = false
 }
