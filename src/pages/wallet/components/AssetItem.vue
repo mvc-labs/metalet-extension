@@ -47,17 +47,25 @@ const exchange = computed(() => {
         <img class="h-10 w-10 rounded-full" :src="asset.logo" v-if="asset.logo" />
         <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
         <div class="flex flex-col gap-y-1 items-start">
-          <div :class="[
-            'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
-            asset.isNative ? 'text-lg' : 'text-sm',
-          ]" :title="asset.tokenName">
+          <div
+            :class="[
+              'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
+              asset.isNative ? 'text-lg' : 'text-sm',
+            ]"
+            :title="asset.tokenName"
+          >
             {{ asset.tokenName }}
-            <CheckBadgeIcon class="h-4 w-4 shrink-0 text-blue-500"
-              v-if="asset?.genesis && isOfficialToken(asset.genesis)" />
+            <CheckBadgeIcon
+              class="h-4 w-4 shrink-0 text-blue-500"
+              v-if="asset?.genesis && isOfficialToken(asset.genesis)"
+            />
           </div>
 
-          <div :style="`background-color:${tag.bg};color:${tag.color};`"
-            :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs', 'inline-block']" v-if="tag">
+          <div
+            :style="`background-color:${tag.bg};color:${tag.color};`"
+            :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs', 'inline-block']"
+            v-if="tag"
+          >
             {{ tag.name }}
           </div>
         </div>
@@ -67,10 +75,7 @@ const exchange = computed(() => {
         <template v-if="asset.queryable">
           <div class="" v-if="isLoading">--</div>
           <div class="" v-else-if="balance">
-            <span v-if="asset.isNative">
-              {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
-            </span>
-            <span v-else-if="asset.contract === 'BRC-20'">
+            <span v-if="asset.isNative || asset.contract === 'BRC-20'">
               {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
             </span>
             <span v-else>

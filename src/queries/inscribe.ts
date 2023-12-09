@@ -1,5 +1,7 @@
-import { metaletApiV3 } from './request'
+import { Ref, ComputedRef } from 'vue'
 import { getNetwork } from '@/lib/network'
+import { useQuery } from '@tanstack/vue-query'
+import { metaletApiV3, unisatApi } from './request'
 
 export interface PreInscribe {
   count: number
@@ -46,18 +48,57 @@ export const commitInscribe = async (
 ): Promise<CommitInscribe | void> => {
   const network = await getNetwork()
   const net = network === 'mainnet' ? 'livenet' : network
-  return await metaletApiV3<CommitInscribe>(`/inscribe/commit`)
-    .post({
-      feeAddress: address,
-      net,
-      orderId,
-      rawTx,
-      version: 0,
-    })
+  return await metaletApiV3<CommitInscribe>(`/inscribe/commit`).post({
+    feeAddress: address,
+    net,
+    orderId,
+    rawTx,
+    version: 0,
+  })
 }
 
 export const getInscribeInfo = async (orderId: string): Promise<CommitInscribe> => {
   return await metaletApiV3<CommitInscribe>(`/inscribe/info`).post({
     orderId,
+  })
+}
+
+export interface Inscription {
+  inscriptionId: string
+  inscriptionNumber: number
+  address: string
+  outputValue: number
+  preview: string
+  content: string
+  contentType: string
+  contentLength: number
+  timestamp: number
+  genesisTransaction: string
+  location: string
+  output: string
+  offset: number
+  contentBody: string
+  utxoHeight: number
+  utxoConfirmation: number
+}
+
+export async function getBRCInscriptions(
+  address: string,
+  cursor = 0,
+  size = 10
+): Promise<{ list: Inscription[]; total: number }> {
+  return await unisatApi<{ list: Inscription[]; total: number }>('/address/inscriptions').get({ address, cursor, size })
+}
+
+export const useBRCInscriptionsQuery = (
+  address: Ref<string>,
+  cursor: Ref<number>,
+  size: Ref<number>,
+  options: { enabled: ComputedRef<boolean> }
+) => {
+  return useQuery({
+    queryKey: ['BRCInscriptions', { address: address.value, cursor: cursor.value, size: size.value }],
+    queryFn: () => getBRCInscriptions(address.value, cursor.value, size.value),
+    ...options,
   })
 }

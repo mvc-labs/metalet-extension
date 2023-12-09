@@ -118,7 +118,6 @@ const routes = [
       noFooter: true,
     },
   },
-
   {
     path: '/wallet/send-token/:symbol/:genesis',
     component: () => import('./pages/wallet/SendToken.vue'),
@@ -188,6 +187,16 @@ const routes = [
     },
   },
   { path: '/collections', component: () => import('./pages/nfts/Index.vue'), name: 'collections' },
+  {
+    name: 'brc20Detail',
+    path: '/nft/brc20/detail',
+    component: () => import('./pages/nfts/BRCTokenDetail.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: '',
+      noFooter: true,
+    },
+  },
   {
     path: '/nfts/transfer-nft/:codehash/:genesis/:tokenIndex',
     component: () => import('./pages/nfts/Transfer.vue'),

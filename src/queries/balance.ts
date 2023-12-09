@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/vue-query'
-import { metaletApi, mvcApi, unisatApi } from './request'
+import { metaletApi, metaletApiV3, mvcApi, unisatApi } from './request'
 import { ComputedRef, Ref } from 'vue'
 import { SymbolUC, BRC20_SYMBOLS } from '@/lib/asset-symbol'
 import { brc20TickList } from './btc'
@@ -29,14 +29,27 @@ export const fetchSpaceBalance = async (address: string): Promise<Balance> => {
   return balance
 }
 
+interface BTCBalance {
+  balance: number
+  block: {
+    incomeFee: number
+    spendFee: number
+  }
+  mempool: {
+    incomeFee: number
+    spendFee: number
+  }
+}
+
 export const fetchBtcBalance = async (address: string): Promise<Balance> => {
-  const balance: any = await metaletApi(`/address/balance`)
-    .get({ address, chain: 'btc' })
-    .then((res) => res.data)
+  const data = await metaletApiV3<BTCBalance>(`/address/btc-balance`).get({ address })
 
-  balance.total = balance.confirmed + balance.unconfirmed
-
-  return balance
+  return {
+    address,
+    total: data.balance * 10 ** 8,
+    confirmed: data.block.incomeFee * 10 ** 8,
+    unconfirmed: data.mempool.incomeFee * 10 ** 8,
+  }
 }
 
 export const fetchBRC20Balance = async (address: string, symbol: SymbolUC): Promise<Balance> => {

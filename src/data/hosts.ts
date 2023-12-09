@@ -9,6 +9,8 @@ export const BLOCKSTREAM_HOST = 'https://blockstream.info'
 export const METALET_HOST = 'https://www.metalet.space'
 export const ORDERS_HOST = 'https://api2.orders.exchange'
 
+export const ORDINALS_HOST = 'https://ordinals.com'
+
 export const TX_BROWSER_HOST = 'https://mvcscan.com'
 export const TX_BROWSER_TESTNET_HOST = 'https://test.mvcscan.com'
 

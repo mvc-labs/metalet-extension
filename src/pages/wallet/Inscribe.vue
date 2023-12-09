@@ -3,15 +3,15 @@ import { useRoute } from 'vue-router'
 import { getTags } from '@/data/assets'
 import { ref, computed, Ref } from 'vue'
 import { BTCAssets } from '@/data/assets'
+import { type Psbt } from 'bitcoinjs-lib'
 import Modal from '@/components/Modal.vue'
 import { createEmit } from '@/lib/emitters'
 import { BtcWallet } from '@/lib/wallets/btc'
 import { prettifyBalance } from '@/lib/formatters'
 import { useBalanceQuery } from '@/queries/balance'
 import { useBRCTickerAseetQuery } from '@/queries/btc'
-import { type Psbt } from 'bitcoinjs-lib'
+import { useBTCRateQuery } from '@/queries/transaction'
 import { preInscribe, PreInscribe, getInscribeInfo } from '@/queries/inscribe'
-import { useBTCRateQuery, inscribeBRC20Transfer, type InscribeOrder } from '@/queries/transaction'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
@@ -74,26 +74,11 @@ const popConfirm = async () => {
   if (!currentRateFee.value) {
     throw new Error('No rate fee')
   }
-  // const order1 = await inscribeBRC20Transfer(
-  //   address.value,
-  //   tokenData.value?.tokenBalance?.ticker,
-  //   inscribeAmount.value.toString(),
-  //   currentRateFee.value
-  // )
-  // console.log({ order1 })
-  // const wallet = await BtcWallet.create()
-  // paymentNetworkFee.value = await wallet.getFee(order.payAddress, order.totalFee, currentRateFee.value)
-  // console.log('paymentNetworkFee', paymentNetworkFee.value, order.minerFee)
-  // inscribeOrder.value = order
-  // total.value = paymentNetworkFee.value + order.totalFee
-  // console.log('total', total.value)
-  // inscriptionNetworkFee.value = total.value - order.serviceFee - order.outputValue
-  // console.log('inscriptionNetworkFee', inscriptionNetworkFee.value)
-  // isOpenConfirmModal.value = true
   operationLock.value = true
   const order = await preInscribe(
     address.value,
     currentRateFee.value,
+    // TODO make it to function
     `{"p":"brc-20","op":"transfer","tick":"${tokenData.value.tokenBalance.ticker}","amt":"${inscribeAmount.value}"}`
   )
   console.log({ order })

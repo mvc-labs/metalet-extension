@@ -9,14 +9,12 @@ import BtcCollectionPanel from './components/BtcCollectionPanel.vue'
 import AccountItem from '../accounts/components/Item.vue'
 import { type Account } from '@/lib/account'
 import { createEmit } from '@/lib/emitters'
+import BRCTokenList from './BRCTokenList.vue'
 
 const account = ref<Account | null>(null)
 createEmit<Account>('getCurrentAccount')().then((acc) => {
   account.value = acc
 })
-// getCurrentAccount().then((acc) => {
-//   account.value = acc
-// })
 </script>
 
 <template>
@@ -24,6 +22,9 @@ createEmit<Account>('getCurrentAccount')().then((acc) => {
   <AccountItem :account="account" :current-account="account" v-if="account" :show-network="true" class="mb-4 -mt-4" />
 
   <MvcCollectionPanel />
+
+  <!-- BRC Token -->
+  <BRCTokenList />
 
   <!-- 链切换标签 -->
   <!-- <TabGroup>

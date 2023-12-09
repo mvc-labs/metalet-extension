@@ -8,6 +8,7 @@ import {
   UNISAT_HOST,
   MEMPOOL_HOST,
   BLOCKSTREAM_HOST,
+  ORDINALS_HOST,
 } from '@/data/hosts'
 
 type OptionParams = Record<string, string>
@@ -118,7 +119,6 @@ const metaletV3Request = <T>(url: string, options: RequestOption): Promise<T> =>
   })
 
 export const metaletApiV3 = <T>(path: string) => {
-  // metalet api requires credential to pass authentication check
   const metaletHost = METALET_HOST + '/wallet-api/v3'
   return {
     get: (params?: OptionParams) =>
@@ -133,6 +133,14 @@ export const ordersApi = (path: string) => {
   return {
     get: (params?: OptionParams) => request(`${ordersHost}${path}`, { method: 'GET', params }),
     post: (data?: OptionData) => request(`${ordersHost}${path}`, { method: 'POST', data }),
+  }
+}
+
+export const ordinalsApi = (path: string) => {
+  const url = path.includes(ORDINALS_HOST) ? path : `${ORDINALS_HOST}${path}`
+  return {
+    get: (params?: OptionParams) => request(url, { method: 'GET', params }),
+    post: (data?: OptionData) => request(url, { method: 'POST', data }),
   }
 }
 

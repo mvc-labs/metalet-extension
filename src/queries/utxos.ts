@@ -1,15 +1,17 @@
 import { Chain } from '@/lib/account'
-import { mvcApi, metaletApiV2, unisatApi, mempoolApi } from './request'
+import { mvcApi, metaletApiV2, unisatApi, mempoolApi, metaletApiV3 } from './request'
 
 export interface UTXO {
   txId: string
   vout: number
   satoshi: number
   confirmed: boolean
-  inscriptions?: {
-    id: string
-    num: number
-  }[]
+  inscriptions:
+    | {
+        id: string
+        num: number
+      }[]
+    | null
 }
 
 export type MvcUtxo = {
@@ -62,33 +64,6 @@ export const fetchUtxos = async (chain: Chain = 'mvc', address: string): Promise
   }
 }
 
-export interface Inscription {
-  inscriptionId: string
-  inscriptionNumber: number
-  address: string
-  outputValue: number
-  preview: string
-  content: string
-  contentType: string
-  contentLength: number
-  timestamp: number
-  genesisTransaction: string
-  location: string
-  output: string
-  offset: number
-  contentBody: string
-  utxoHeight: number
-  utxoConfirmation: number
-}
-
-export async function getAddressInscriptions(
-  address: string,
-  cursor = 0,
-  size = 100000
-): Promise<{ list: Inscription[]; total: number }> {
-  return await unisatApi<{ list: Inscription[]; total: number }>('/address/inscriptions').get({ address, cursor, size })
-}
-
 export enum AddressType {
   P2PKH,
   P2WPKH,
@@ -122,21 +97,20 @@ function formatUnisatUTXO(utxo: UnisatUTXO & { confirmed: boolean }): UTXO {
 }
 
 export async function getBtcUtxos(address: string): Promise<UTXO[]> {
-  const utxos = await unisatApi<UnisatUTXO[]>('/address/btc-utxo').get({ address })
-  return utxos.map((utxo) => formatUnisatUTXO({ ...utxo, confirmed: true })).sort((a, b) => b.satoshi - a.satoshi)
+  return metaletApiV3<UTXO[]>('/address/btc-utxo').get({ address })
 }
 
-export async function getInscriptionUtxos(inscriptions: Inscription[]): Promise<UTXO[]> {
-  const unisatUtxos = await unisatApi<UnisatUTXO[]>('/inscription/utxos').post({
-    inscriptionIds: inscriptions.map((inscription) => inscription.inscriptionId),
-  })
-  const utxos = unisatUtxos.map((utxo) => {
-    const inscriptionIds = utxo.inscriptions.map((inscription) => inscription.id)
-    const inscription = inscriptions.find((inscription) => inscriptionIds.includes(inscription.inscriptionId))!
-    return { ...utxo, confirmed: !!inscription.utxoConfirmation }
-  })
-  return utxos.map((utxo) => formatUnisatUTXO(utxo))
-}
+// export async function getInscriptionUtxos(inscriptions: Inscription[]): Promise<UTXO[]> {
+//   const unisatUtxos = await unisatApi<UnisatUTXO[]>('/inscription/utxos').post({
+//     inscriptionIds: inscriptions.map((inscription) => inscription.inscriptionId),
+//   })
+//   const utxos = unisatUtxos.map((utxo) => {
+//     const inscriptionIds = utxo.inscriptions.map((inscription) => inscription.id)
+//     const inscription = inscriptions.find((inscription) => inscriptionIds.includes(inscription.inscriptionId))!
+//     return { ...utxo, confirmed: !!inscription.utxoConfirmation }
+//   })
+//   return utxos.map((utxo) => formatUnisatUTXO(utxo))
+// }
 
 export async function getInscriptionUtxo(inscriptionId: string, confirmed = false): Promise<UTXO> {
   const utxo = await unisatApi<UnisatUTXO>('/inscription/utxo').get({ inscriptionId })
