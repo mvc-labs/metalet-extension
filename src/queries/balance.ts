@@ -80,8 +80,6 @@ export const fetchBRC20Balance = async (address: string, symbol: SymbolUC): Prom
   if (brc20TickList.value?.length) {
     const brc20TickAsset = brc20TickList.value.find((tick) => tick.token === symbol)
     if (brc20TickAsset) {
-      console.log({ brc20TickAsset })
-
       return {
         address,
         total: Number(brc20TickAsset.balance),
@@ -122,7 +120,11 @@ export const doNothing = async (): Promise<Balance> => {
   }
 }
 
-export const useBalanceQuery = (address: Ref, symbol: Ref<SymbolUC>, options: { enabled: ComputedRef<boolean> }) => {
+export const useBalanceQuery = (
+  address: Ref<string>,
+  symbol: Ref<SymbolUC>,
+  options: { enabled: ComputedRef<boolean> }
+) => {
   return useQuery({
     queryKey: ['balance', { address: address.value, symbol: symbol.value }],
     queryFn: () => {
@@ -130,7 +132,7 @@ export const useBalanceQuery = (address: Ref, symbol: Ref<SymbolUC>, options: { 
         case 'SPACE':
           return fetchSpaceBalance(address.value)
         case 'BTC':
-          return fetchUnisatBtcBalance(address.value)
+          return fetchBtcBalance(address.value)
         default: {
           if (BRC20_SYMBOLS.includes(symbol.value)) {
             return fetchBRC20Balance(address.value, symbol.value)

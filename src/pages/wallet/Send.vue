@@ -24,9 +24,11 @@ createEmit<string>('getAddress')(route.query.chain).then((addr) => {
   address.value = addr!
 })
 
+const error = ref<Error | undefined>()
+
 // balance
 const enabled = computed(() => !!address.value)
-const { isLoading, data: balance, error } = useBalanceQuery(address, symbol, { enabled })
+const { isLoading, data: balance } = useBalanceQuery(address, symbol, { enabled })
 
 // rate list query
 const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({ enabled: computed(() => !!address.value) })
@@ -59,6 +61,30 @@ const transactionResult = ref<TransactionResult | undefined>()
 
 const isOpenConfirmModal = ref(false)
 const popConfirm = () => {
+  if (!recipient.value) {
+    transactionResult.value = {
+      status: 'warning',
+      message: "Please input recipient's address.",
+    }
+    isOpenResultModal.value = true
+    return
+  }
+  if (!amountInSats.value) {
+    transactionResult.value = {
+      status: 'warning',
+      message: 'Please input amount.',
+    }
+    isOpenResultModal.value = true
+    return
+  }
+  if (!currentRateFee.value) {
+    transactionResult.value = {
+      status: 'warning',
+      message: 'Please select fee rate.',
+    }
+    isOpenResultModal.value = true
+    return
+  }
   isOpenConfirmModal.value = true
 }
 
@@ -76,25 +102,23 @@ async function sendSpace() {
       status: 'failed',
       message: err.message,
     }
-
     isOpenResultModal.value = true
   })
 
   return sentRes
 }
 
-async function sendBtc() {
+async function sendBTC() {
   const wallet = await BtcWallet.create()
-  if (recipient.value && amountInSats.value && currentRateFee.value) {
-    const txId = await wallet.send(recipient.value, amountInSats.value, currentRateFee.value).catch((err) => {
-      console.log({ err })
-      return ''
-    })
-    if (txId) {
-      return { txId }
+  const sentRes = await wallet.send(recipient.value, amountInSats.value, currentRateFee.value).catch((err: Error) => {
+    isOpenConfirmModal.value = false
+    transactionResult.value = {
+      status: 'failed',
+      message: err.message,
     }
-  }
-  return false
+    isOpenResultModal.value = true
+  })
+  return sentRes
 }
 
 async function send() {
@@ -102,7 +126,7 @@ async function send() {
 
   operationLock.value = true
 
-  const sendProcessor = asset.value.symbol === 'SPACE' ? sendSpace : sendBtc
+  const sendProcessor = asset.value.symbol === 'SPACE' ? sendSpace : sendBTC
   const sentRes = await sendProcessor()
 
   if (sentRes) {
@@ -113,8 +137,8 @@ async function send() {
       recipient: recipient.value,
       amount: amountInSats.value.toNumber(),
       token: {
-        symbol: 'SPACE',
-        decimal: 8,
+        symbol: asset.value.symbol,
+        decimal: asset.value.symbol === 'SPACE' ? 8 : 18,
       },
     }
 
@@ -160,7 +184,6 @@ async function send() {
       <div class="flex items-center gap-x-2 text-xs text-gray-500">
         <div class="">Your Balance:</div>
         <div class="" v-if="isLoading">--</div>
-        <div class="" v-else-if="error">Error</div>
         <div class="" v-else-if="balance">{{ prettifyBalance(balance.total, asset.symbol) }}</div>
       </div>
 
@@ -199,6 +222,9 @@ async function send() {
     <!-- send -->
     <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="popConfirm">Send</button>
 
+    <!-- error info -->
+    <p v-if="error">{{ error.message }}</p>
+
     <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
       <template #title>Confirm Transaction</template>
 
@@ -212,10 +238,6 @@ async function send() {
             <div class="label">Recipient Address</div>
             <div class="value break-all text-sm">{{ recipient }}</div>
           </div>
-          <!-- <div class="space-y-1">
-            <div class="label">Network Fee</div>
-            <div class="value">100 SPACE</div>
-          </div> -->
         </div>
       </template>
 

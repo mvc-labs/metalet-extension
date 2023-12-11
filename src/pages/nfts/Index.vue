@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 import { ref } from 'vue'
-
 import SpaceLogoImg from '@/assets/images/space-logo.svg?url'
 import BtcLogoImg from '@/assets/images/btc-logo.svg?url'
 import MvcCollectionPanel from './components/MvcCollectionPanel.vue'
@@ -21,19 +20,14 @@ createEmit<Account>('getCurrentAccount')().then((acc) => {
   <!-- 账号信息 -->
   <AccountItem :account="account" :current-account="account" v-if="account" :show-network="true" class="mb-4 -mt-4" />
 
-  <MvcCollectionPanel />
-
-  <!-- BRC Token -->
-  <BRCTokenList />
-
   <!-- 链切换标签 -->
-  <!-- <TabGroup>
+  <TabGroup>
     <TabList class="mx-auto flex w-5/6 rounded-md bg-gray-100">
       <Tab class="tab">
         <img :src="SpaceLogoImg" class="h-6 w-6" />
         <span>MVC</span>
       </Tab>
-      <Tab class="tab" disabled>
+      <Tab class="tab">
         <img :src="BtcLogoImg" />
         <span>BTC</span>
       </Tab>
@@ -43,10 +37,12 @@ createEmit<Account>('getCurrentAccount')().then((acc) => {
         <MvcCollectionPanel />
       </TabPanel>
       <TabPanel>
-        <BtcCollectionPanel />
+        <!-- <BtcCollectionPanel /> -->
+        <!-- BRC Token -->
+        <BRCTokenList />
       </TabPanel>
     </TabPanels>
-  </TabGroup> -->
+  </TabGroup>
 </template>
 
 <style scoped lang="scss">

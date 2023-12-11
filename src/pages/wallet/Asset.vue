@@ -105,7 +105,15 @@ const toInscribe = () => {
         <div v-if="isLoading">--</div>
         <template v-else-if="balance">
           <div class="mb-1 text-center text-3xl text-[#141416]">
-            {{ prettifyTokenBalance(balance.total, asset.decimal, false, symbol) }}
+            <span v-if="asset.isNative">
+              {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
+            </span>
+            <span v-else-if="asset.contract === 'BRC-20'">
+              {{ `${balance.total} ${asset.symbol}` }}
+            </span>
+            <span v-else>
+              {{ prettifyTokenBalance(balance.total, asset.decimal, true) }}
+            </span>
           </div>
           <div style="color: #909399">{{ exchange }}</div>
         </template>

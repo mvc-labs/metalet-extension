@@ -73,16 +73,36 @@ const inscribeOrder = ref<PreInscribe | undefined>()
 const isOpenConfirmModal = ref(false)
 const popConfirm = async () => {
   if (!address.value) {
-    throw new Error('No Address')
+    transactionResult.value = {
+      status: 'warning',
+      message: 'No address.',
+    }
+    isOpenResultModal.value = true
+    return
   }
   if (!tokenData.value?.tokenBalance?.ticker) {
-    throw new Error('No ticker')
+    transactionResult.value = {
+      status: 'warning',
+      message: 'No ticker.',
+    }
+    isOpenResultModal.value = true
+    return
   }
   if (!inscribeAmount.value) {
-    throw new Error('No amount')
+    transactionResult.value = {
+      status: 'warning',
+      message: 'No amount.',
+    }
+    isOpenResultModal.value = true
+    return
   }
   if (!currentRateFee.value) {
-    throw new Error('No rate fee')
+    transactionResult.value = {
+      status: 'warning',
+      message: 'No rate fee.',
+    }
+    isOpenResultModal.value = true
+    return
   }
   operationLock.value = true
   const order = await preInscribe(
@@ -116,21 +136,25 @@ async function send() {
   operationLock.value = true
   const wallet = await BtcWallet.create()
   // await wallet.send(inscribeOrder.value!.payAddress, inscribeOrder.value!.totalFee, currentRateFee.value)
-  let resStatus = await wallet.commitInscribe(inscribeOrder.value!.orderId, inscribePsbt.value!).catch((e) => {
-    console.error(e)
-  })
-  if (resStatus === undefined) {
-    return
-  }
-  const timer = setInterval(async () => {
-    if (resStatus!.inscriptionState === 4) {
-      clearInterval(timer)
-      operationLock.value = false
-      isOpenConfirmModal.value = false
-      return
+  let resStatus = await wallet.commitInscribe(inscribeOrder.value!.orderId, inscribePsbt.value!).catch((err) => {
+    isOpenConfirmModal.value = false
+    transactionResult.value = {
+      status: 'failed',
+      message: err.message,
     }
-    resStatus = await getInscribeInfo(inscribeOrder.value!.orderId)
-  }, 1000)
+    isOpenResultModal.value = true
+  })
+  if(resStatus){
+    const timer = setInterval(async () => {
+      if (resStatus!.inscriptionState === 4) {
+        clearInterval(timer)
+        operationLock.value = false
+        isOpenConfirmModal.value = false
+        return
+      }
+      resStatus = await getInscribeInfo(inscribeOrder.value!.orderId)
+    }, 1000)
+  }
 }
 </script>
 
