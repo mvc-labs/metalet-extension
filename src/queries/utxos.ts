@@ -28,16 +28,16 @@ const fetchMVCUtxos = async (address: string): Promise<MvcUtxo[]> => {
 }
 
 // Fetch BTC address non inscription UTXO utxos
-const fetchBTCUtxos = async (address: string): Promise<UTXO[]> => {
-  const {
-    data: { utxo },
-  } = await metaletApiV2(`/address/utxos`).get({
-    address,
-    chain: 'btc',
-  })
+// const fetchBTCUtxos = async (address: string): Promise<UTXO[]> => {
+//   const {
+//     data: { utxo },
+//   } = await metaletApiV2(`/address/utxos`).get({
+//     address,
+//     chain: 'btc',
+//   })
 
-  return utxo
-}
+//   return utxo
+// }
 
 export type Utxo = {
   addressType: number
@@ -49,18 +49,18 @@ export type Utxo = {
   vout: number
 }
 
-export async function fetchBtcUtxos(address: string): Promise<Utxo[]> {
-  const utxos = await metaletApiV2('/address/utxos')
-    .get({ address, chain: 'btc' })
-    .then((res) => res.data?.utxo || [])
-  return utxos
-}
+// export async function fetchBtcUtxos(address: string): Promise<Utxo[]> {
+//   const utxos = await metaletApiV2('/address/utxos')
+//     .get({ address, chain: 'btc' })
+//     .then((res) => res.data?.utxo || [])
+//   return utxos
+// }
 
 export const fetchUtxos = async (chain: Chain = 'mvc', address: string): Promise<any[]> => {
   if (chain === 'mvc') {
     return await fetchMVCUtxos(address)
   } else {
-    return await fetchBTCUtxos(address)
+    return await getBtcUtxos(address)
   }
 }
 
