@@ -1,4 +1,4 @@
-import { ComputedRef } from 'vue'
+import { ComputedRef, Ref } from 'vue'
 import { metaletApi } from './request'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolUC, DEFAULT_SYMBOLS, BRC20_SYMBOLS } from '@/lib/asset-symbol'
@@ -19,26 +19,26 @@ export const fetchTickExchangeRates = async (): Promise<RawRates> => {
 }
 
 export const doNothing = async (symbol: SymbolUC): Promise<RawRates> => ({
-  [symbol.toLowerCase()]: 0
+  [symbol.toLowerCase()]: 0,
 })
 
-export const useExchangeRatesQuery = (symbol: SymbolUC, options?: { enabled: ComputedRef<boolean> }) => {
+export const useExchangeRatesQuery = (symbolRef: Ref<SymbolUC>, options?: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
-    queryKey: ['exchangeRates', { symbol }],
+    queryKey: ['exchangeRates', { symbol: symbolRef.value }],
     queryFn: () => {
-      if (BRC20_SYMBOLS.includes(symbol)) {
+      if (BRC20_SYMBOLS.includes(symbolRef.value)) {
         return fetchTickExchangeRates()
       }
 
-      if (DEFAULT_SYMBOLS.includes(symbol)) {
+      if (DEFAULT_SYMBOLS.includes(symbolRef.value)) {
         return fetchExchangeRates()
       }
 
-      return doNothing(symbol)
+      return doNothing(symbolRef.value)
     },
     select: (rates: RawRates) => {
-      const rate = rates[symbol.toLowerCase()]
-      return { symbol, price: rate }
+      const rate = rates[symbolRef.value.toLowerCase()]
+      return { symbol: symbolRef.value, price: rate }
     },
     ...options,
   })

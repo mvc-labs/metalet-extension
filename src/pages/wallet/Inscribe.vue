@@ -2,27 +2,36 @@
 import { useRoute } from 'vue-router'
 import { getTags } from '@/data/assets'
 import { ref, computed, Ref } from 'vue'
-import { BTCAssets } from '@/data/assets'
+import { SymbolUC } from '@/lib/asset-symbol'
 import { type Psbt } from 'bitcoinjs-lib'
 import Modal from '@/components/Modal.vue'
 import { createEmit } from '@/lib/emitters'
 import { BtcWallet } from '@/lib/wallets/btc'
 import { prettifyBalance } from '@/lib/formatters'
 import { useBalanceQuery } from '@/queries/balance'
-import { useBRCTickerAseetQuery } from '@/queries/btc'
 import { useBTCRateQuery } from '@/queries/transaction'
 import { preInscribe, PreInscribe, getInscribeInfo } from '@/queries/inscribe'
+import { useBRCTickerAseetQuery, useBTCAssetQuery } from '@/queries/btc'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
 
-const symbol = ref<string>(route.query.symbol as string)
-const asset = computed(() => BTCAssets.find((asset) => asset.symbol === symbol.value)!)
-const tags = getTags(asset.value)
-
 const address = ref('')
 createEmit<string>('getAddress')('btc').then((addr) => {
   address.value = addr!
+})
+
+const symbol = ref<SymbolUC>(route.query.symbol as SymbolUC)
+const { data: btcAssets } = useBTCAssetQuery(address, { enabled: computed(() => !!address.value) })
+const asset = computed(() => {
+  if (btcAssets.value && btcAssets.value.length > 0) {
+    return btcAssets.value.find((asset) => asset.symbol === symbol.value)
+  }
+})
+const tags = computed(() => {
+  if (asset.value) {
+    return getTags(asset.value)
+  }
 })
 
 const isCustom = ref(false)
@@ -38,12 +47,13 @@ const selectCustom = () => {
   isCustom.value = true
 }
 
-// balance query
-const enabled = computed(() => !!address.value)
-const { isLoading, data: balance, error: balanceError } = useBalanceQuery(address, asset.value.symbol, { enabled })
+const {
+  isLoading,
+  data: balance,
+  error: balanceError,
+} = useBalanceQuery(address, symbol, { enabled: computed(() => !!address.value && !!symbol.value) })
 
-// tickers query
-const { isLoading: tokenLoading, data: tokenData } = useBRCTickerAseetQuery(address, asset.value.symbol, {
+const { data: tokenData } = useBRCTickerAseetQuery(address, symbol, {
   enabled: computed(() => !!address.value),
 })
 

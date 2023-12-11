@@ -9,12 +9,13 @@ import { useBalanceQuery } from '@/queries/balance'
 import { createEmit } from '@/lib/emitters'
 import { BtcWallet } from '@/lib/wallets/btc'
 import { allAssets } from '@/data/assets'
-
+import { type SymbolUC } from '@/lib/asset-symbol'
 import Modal from '@/components/Modal.vue'
+import { useBTCRateQuery } from '@/queries/transaction'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
-const symbol = ref<string>(route.query.symbol as string)
+const symbol = ref<SymbolUC>(route.query.symbol as SymbolUC)
 const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol.value)!)
 const queryClient = useQueryClient()
 
@@ -25,7 +26,26 @@ createEmit<string>('getAddress')(route.query.chain).then((addr) => {
 
 // balance
 const enabled = computed(() => !!address.value)
-const { isLoading, data: balance, error } = useBalanceQuery(address, asset.value.symbol, { enabled })
+const { isLoading, data: balance, error } = useBalanceQuery(address, symbol, { enabled })
+
+// rate list query
+const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({ enabled: computed(() => !!address.value) })
+
+const isCustom = ref(false)
+const currentTitle = ref<string>('')
+const currentRateFee = ref<number | undefined>()
+
+const selectRateFee = (rateFee: number, title: string) => {
+  currentTitle.value = title
+  currentRateFee.value = rateFee
+  isCustom.value = false
+}
+
+const selectCustom = () => {
+  currentTitle.value = 'Custom'
+  currentRateFee.value = undefined
+  isCustom.value = true
+}
 
 // form
 const amount = ref('')
@@ -65,7 +85,16 @@ async function sendSpace() {
 
 async function sendBtc() {
   const wallet = await BtcWallet.create()
-  const sentRes = await wallet.send(recipient.value, amountInSats.value)
+  if (recipient.value && amountInSats.value && currentRateFee.value) {
+    const txId = await wallet.send(recipient.value, amountInSats.value, currentRateFee.value).catch((err) => {
+      console.log({ err })
+      return ''
+    })
+    if (txId) {
+      return { txId }
+    }
+  }
+  return false
 }
 
 async function send() {
@@ -134,6 +163,37 @@ async function send() {
         <div class="" v-else-if="error">Error</div>
         <div class="" v-else-if="balance">{{ prettifyBalance(balance.total, asset.symbol) }}</div>
       </div>
+
+      <!-- rate list -->
+      <div class="grid grid-cols-4 gap-2 mt-4 text-xs" v-if="!rateLoading && rateList.list">
+        <div
+          v-for="rate in rateList.list"
+          @click="selectRateFee(rate.feeRate, rate.title)"
+          class="flex flex-col items-center justify-center rounded-md p-2 cursor-pointer"
+          :class="rate.title === currentTitle ? 'main-btn-bg text-white' : 'bg-gray-100'"
+        >
+          <div>{{ rate.title }}</div>
+          <div>{{ rate.feeRate }} sat/vB</div>
+          <div>#{{ rate.desc }}</div>
+        </div>
+        <div
+          @click="selectCustom()"
+          :class="isCustom ? 'main-btn-bg text-white' : 'bg-gray-100'"
+          class="flex flex-col items-center justify-center rounded-md p-2 cursor-pointer"
+        >
+          <div>Custom</div>
+        </div>
+      </div>
+
+      <!-- custom rate input -->
+      <input
+        min="0"
+        type="number"
+        v-if="isCustom"
+        placeholder="sat/vB"
+        v-model="currentRateFee"
+        class="main-input w-full !rounded-xl !p-4 !text-xs mt-1"
+      />
     </div>
 
     <!-- send -->

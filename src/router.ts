@@ -158,7 +158,7 @@ const routes = [
     },
   },
   {
-    path: '/wallet/assets/:symbol',
+    path: '/wallet/assets/:address/:symbol',
     component: () => import('./pages/wallet/Asset.vue'),
     name: 'asset',
     props: true,

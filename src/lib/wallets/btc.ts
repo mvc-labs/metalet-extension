@@ -82,9 +82,9 @@ export class BtcWallet {
     if (!this.account) throw new Error('no account')
     const psbt = await getPsbt(recipient, amount, feeRate)
     const fee = calculateFee(psbt, feeRate)
-    console.log({ fee })
+    console.log({ fee,feeRate })
 
-    broadcast(psbt)
+    return await broadcast(psbt)
   }
 
   async getFeeAndPsbt(recipient: string, amount: number | Decimal, feeRate = 2) {
@@ -179,8 +179,7 @@ async function broadcast(psbt: Psbt) {
   const rawTx = tx.toHex()
   console.log({ rawTx })
 
-  const res = await broadcastBTCTx(rawTx)
-  console.log({ res })
+  return await broadcastBTCTx(rawTx)
 }
 
 const selectUTXOs = (utxos: UTXO[], targetAmount: Decimal): UTXO[] => {

@@ -1,6 +1,5 @@
 import { SymbolUC } from '@/lib/asset-symbol'
 import BtcLogoImg from '../assets/images/btc-logo.svg?url'
-import OrdiLogoImg from '../assets/images/ordi-logo.svg?url'
 import SpaceLogoImg from '../assets/images/space-logo.svg?url'
 
 export type Asset = {
@@ -64,37 +63,15 @@ function getTags(asset: Asset): Tag[] {
   return tagList
 }
 
-const BTCAssets: Asset[] = [
-  {
-    symbol: 'BTC',
-    logo: BtcLogoImg,
-    tokenName: 'BTC',
-    isNative: true,
-    chain: 'btc',
-    queryable: true,
-    decimal: 8,
-  },
-  {
-    symbol: 'ORDI',
-    logo: OrdiLogoImg,
-    tokenName: 'ORDI',
-    isNative: false,
-    chain: 'btc',
-    queryable: true,
-    decimal: 0,
-    contract: 'BRC-20',
-  },
-  {
-    symbol: 'ORXC',
-    logo: OrdiLogoImg,
-    tokenName: 'ORXC',
-    isNative: false,
-    chain: 'btc',
-    queryable: true,
-    decimal: 0,
-    contract: 'BRC-20',
-  },
-]
+const BTCAsset: Asset = {
+  symbol: 'BTC',
+  logo: BtcLogoImg,
+  tokenName: 'BTC',
+  isNative: true,
+  chain: 'btc',
+  queryable: true,
+  decimal: 8,
+}
 
 const MVCAssets: Asset[] = [
   {
@@ -108,6 +85,6 @@ const MVCAssets: Asset[] = [
   },
 ]
 
-const allAssets = [...BTCAssets, ...MVCAssets]
+const allAssets = [BTCAsset, ...MVCAssets]
 
-export { BTCAssets, MVCAssets, allAssets, getTags, getTagInfo }
+export { BTCAsset, MVCAssets, allAssets, getTags, getTagInfo }

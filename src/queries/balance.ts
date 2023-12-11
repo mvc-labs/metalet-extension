@@ -52,10 +52,36 @@ export const fetchBtcBalance = async (address: string): Promise<Balance> => {
   }
 }
 
+interface BitcoinBalance {
+  confirm_amount: string
+  pending_amount: string
+  amount: string
+  confirm_btc_amount: string
+  pending_btc_amount: string
+  btc_amount: string
+  confirm_inscription_amount: string
+  pending_inscription_amount: string
+  inscription_amount: string
+  usd_value: string
+}
+
+export const fetchUnisatBtcBalance = async (address: string): Promise<Balance> => {
+  const data = await unisatApi<BitcoinBalance>(`/address/balance`).get({ address })
+
+  return {
+    address,
+    total: Number(data.amount) * 10 ** 8,
+    confirmed: Number(data.confirm_amount) * 10 ** 8,
+    unconfirmed: Number(data.pending_amount) * 10 ** 8,
+  }
+}
+
 export const fetchBRC20Balance = async (address: string, symbol: SymbolUC): Promise<Balance> => {
   if (brc20TickList.value?.length) {
     const brc20TickAsset = brc20TickList.value.find((tick) => tick.token === symbol)
     if (brc20TickAsset) {
+      console.log({ brc20TickAsset })
+
       return {
         address,
         total: Number(brc20TickAsset.balance),
@@ -96,18 +122,18 @@ export const doNothing = async (): Promise<Balance> => {
   }
 }
 
-export const useBalanceQuery = (address: Ref, symbol: SymbolUC, options: { enabled: ComputedRef<boolean> }) => {
+export const useBalanceQuery = (address: Ref, symbol: Ref<SymbolUC>, options: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
-    queryKey: ['balance', { address, symbol }],
+    queryKey: ['balance', { address: address.value, symbol: symbol.value }],
     queryFn: () => {
-      switch (symbol) {
+      switch (symbol.value) {
         case 'SPACE':
           return fetchSpaceBalance(address.value)
         case 'BTC':
-          return fetchBtcBalance(address.value)
+          return fetchUnisatBtcBalance(address.value)
         default: {
-          if (BRC20_SYMBOLS.includes(symbol)) {
-            return fetchBRC20Balance(address.value, symbol)
+          if (BRC20_SYMBOLS.includes(symbol.value)) {
+            return fetchBRC20Balance(address.value, symbol.value)
           }
           return doNothing()
         }
@@ -115,21 +141,4 @@ export const useBalanceQuery = (address: Ref, symbol: SymbolUC, options: { enabl
     },
     ...options,
   })
-}
-
-export interface BitcoinBalance {
-  confirm_amount: string
-  pending_amount: string
-  amount: string
-  confirm_btc_amount: string
-  pending_btc_amount: string
-  btc_amount: string
-  confirm_inscription_amount: string
-  pending_inscription_amount: string
-  inscription_amount: string
-  usd_value: string
-}
-
-export async function getAddressBalance(address: string): Promise<BitcoinBalance> {
-  return await unisatApi<BitcoinBalance>('/address/balance').get({ address })
 }

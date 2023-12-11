@@ -1,48 +1,60 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { createEmit } from '@/lib/emitters'
+import { getTags } from '@/data/assets'
+import { useRoute, useRouter } from 'vue-router'
 import { useBalanceQuery } from '@/queries/balance'
-import { allAssets, getTags } from '@/data/assets'
-import { useBRCTickerAseetQuery } from '@/queries/btc'
+import { useBRCTickerAseetQuery, useBTCAssetQuery } from '@/queries/btc'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
-
 import Activities from './components/Activities.vue'
+import { SymbolUC } from '@/lib/asset-symbol'
 
-const { symbol } = defineProps({
-  symbol: {
-    type: String,
-    required: true,
-  },
-})
-
-const asset = allAssets.find((asset) => asset.symbol === symbol)!
-
+const route = useRoute()
 const router = useRouter()
 
-const tags = getTags(asset)
+if (!route.params.address) {
+  router.go(-1)
+}
+const address = ref<string>(route.params.address as string)
 
-const address = ref<string>('')
-createEmit<string>('getAddress')(asset.chain).then((add) => {
-  address.value = add!
+const symbol = ref<SymbolUC>(route.params.symbol as SymbolUC)
+const { data: btcAssets } = useBTCAssetQuery(address, { enabled: computed(() => !!address.value) })
+const asset = computed(() => {
+  if (btcAssets.value && btcAssets.value.length > 0) {
+    const asset = btcAssets.value.find((asset) => asset.symbol === symbol.value)
+    if (!asset) {
+      router.go(-1)
+      return
+    }
+    return asset
+  }
 })
+
+const {
+  isLoading,
+  data: balance,
+  error,
+} = useBalanceQuery(address, symbol, { enabled: computed(() => !!address.value && !!symbol.value) })
 
 const { isLoading: tokenLoading, data: tokenData } = useBRCTickerAseetQuery(address, symbol, {
-  enabled: computed(() => !!address.value && !asset.isNative),
+  enabled: computed(() => !!address.value),
 })
 
-const enabled = computed(() => !!address.value && asset.queryable)
-const rateEnabled = computed(() => !!address.value && asset.isNative)
+const tags = computed(() => {
+  if (asset.value) {
+    return getTags(asset.value)
+  }
+})
 
-const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
-const { data: exchangeRate } = useExchangeRatesQuery(asset.symbol, { enabled: rateEnabled })
+const rateEnabled = computed(() => !!symbol.value)
+
+const { data: exchangeRate } = useExchangeRatesQuery(symbol, { enabled: rateEnabled })
 
 const exchange = computed(() => {
-  if (balance.value && exchangeRate.value) {
+  if (balance.value && exchangeRate.value && asset.value) {
     const usdRate: number = Number(exchangeRate.value.price)
-    const balanceInStandardUnit = balance.value.total / 10 ** asset.decimal
+    const balanceInStandardUnit = balance.value.total / 10 ** asset.value.decimal
     const exchanged = balanceInStandardUnit * usdRate
 
     // 保留两位
@@ -53,28 +65,28 @@ const exchange = computed(() => {
 })
 
 const toSend = () => {
-  const { contract } = asset
+  const { contract } = asset.value!
   if (contract === 'BRC-20') {
-    router.push(`/wallet/sendBRC?symbol=${symbol}`)
+    router.push(`/wallet/sendBRC?symbol=${symbol.value}`)
     return
   }
-  router.push(`/wallet/send?symbol=${symbol}&chain=${asset.chain}`)
+  router.push(`/wallet/send?symbol=${symbol.value}&chain=${asset.value!.chain}`)
 }
 
 const toReceive = () => {
-  router.push(`/wallet/receive?chain=${asset.chain}`)
+  router.push(`/wallet/receive?chain=${asset.value!.chain}`)
 }
 
 const toInscribe = () => {
-  const { contract } = asset
+  const { contract } = asset.value!
   if (contract === 'BRC-20') {
-    router.push(`/wallet/inscribe?symbol=${symbol}`)
+    router.push(`/wallet/inscribe?symbol=${symbol.value}`)
   }
 }
 </script>
 
 <template>
-  <div class="mt-8 flex flex-col items-center">
+  <div class="mt-8 flex flex-col items-center" v-if="asset">
     <img :src="asset!.logo" alt="" class="h-20 w-20 rounded-xl" />
 
     <div class="mt-1.5 flex items-center gap-x-1.5">

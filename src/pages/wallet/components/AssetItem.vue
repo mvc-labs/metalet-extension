@@ -22,16 +22,20 @@ if (asset?.contract) {
 const enabled = computed(() => !!address && asset.queryable)
 const rateEnabled = computed(() => !!address)
 
-const { isLoading, data: balance } = useBalanceQuery(ref(address), asset.symbol, { enabled })
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(asset.symbol, {
+const { isLoading, data: balance } = useBalanceQuery(ref(address), ref(asset.symbol), { enabled })
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(ref(asset.symbol), {
   enabled: rateEnabled,
 })
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
     const usdRate: number = Number(exchangeRate.value.price)
+
     const balanceInStandardUnit = balance.value.total / 10 ** asset.decimal
+
     const exchanged = balanceInStandardUnit * usdRate
+    console.log({ asset, balance: balance.value, exchangeRate: exchangeRate.value, balanceInStandardUnit, exchanged })
+
     updateAsset({ name: asset.symbol, value: exchanged })
     return `$${exchanged.toFixed(2)} USD`
   }
@@ -75,8 +79,11 @@ const exchange = computed(() => {
         <template v-if="asset.queryable">
           <div class="" v-if="isLoading">--</div>
           <div class="" v-else-if="balance">
-            <span v-if="asset.isNative || asset.contract === 'BRC-20'">
+            <span v-if="asset.isNative">
               {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
+            </span>
+            <span v-else-if="asset.contract === 'BRC-20'">
+              {{ `${balance.total} ${asset.symbol}` }}
             </span>
             <span v-else>
               {{ prettifyTokenBalance(balance.total, asset.decimal, true) }}

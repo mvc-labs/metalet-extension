@@ -1,15 +1,12 @@
 <script lang="ts" setup>
-import { ref, computed, Ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useBRCTickerAseetQuery } from '@/queries/btc'
-import { useBalanceQuery } from '@/queries/balance'
-import { prettifyBalance } from '@/lib/formatters'
-import { createEmit } from '@/lib/emitters'
-import { BtcWallet } from '@/lib/wallets/btc'
-import { BTCAssets } from '@/data/assets'
-
+import { ref, computed, Ref } from 'vue'
 import Modal from '@/components/Modal.vue'
-import { UnisatUTXO } from '@/queries/utxos'
+import { createEmit } from '@/lib/emitters'
+import { SymbolUC } from '@/lib/asset-symbol'
+import { prettifyBalance } from '@/lib/formatters'
+import { useBalanceQuery } from '@/queries/balance'
+import { useBRCTickerAseetQuery, useBTCAssetQuery } from '@/queries/btc'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
@@ -23,20 +20,26 @@ const selectTicker = (inscriptionId: string) => {
   }
 }
 
-const symbol = ref<string>(route.query.symbol as string)
-const asset = computed(() => BTCAssets.find((asset) => asset.symbol === symbol.value)!)
-
 const address = ref('')
 createEmit<string>('getAddress')('btc').then((addr) => {
   address.value = addr!
 })
 
-// balance
-const enabled = computed(() => !!address.value)
-const { isLoading, data: balance, error } = useBalanceQuery(address, asset.value.symbol, { enabled })
+const symbol = ref<SymbolUC>(route.query.symbol as SymbolUC)
+const { data: btcAssets } = useBTCAssetQuery(address, { enabled: computed(() => !!address.value) })
+const asset = computed(() => {
+  if (btcAssets.value && btcAssets.value.length > 0) {
+    return btcAssets.value.find((asset) => asset.symbol === symbol.value)
+  }
+})
 
-// tickers
-const { isLoading: tokenLoading, data: tokenData } = useBRCTickerAseetQuery(address, asset.value.symbol, {
+const {
+  isLoading,
+  data: balance,
+  error,
+} = useBalanceQuery(address, symbol, { enabled: computed(() => !!address.value && !!symbol.value) })
+
+const { isLoading: tokenLoading, data: tokenData } = useBRCTickerAseetQuery(address, symbol, {
   enabled: computed(() => !!address.value),
 })
 

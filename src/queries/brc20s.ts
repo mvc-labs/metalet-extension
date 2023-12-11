@@ -1,8 +1,11 @@
-import { useQuery } from '@tanstack/vue-query'
+import { PageResult } from './types'
 import { ComputedRef, Ref } from 'vue'
-
+import { type Asset } from '@/data/assets'
 import { SymbolUC } from '@/lib/asset-symbol'
-import { metaletApi, metaletApiV3 } from './request'
+import { useQuery } from '@tanstack/vue-query'
+import { NO_ADDRESS_ERROR_MESSAGE } from '@/lib/errorMsg'
+import OrdiLogoImg from '../assets/images/ordi-logo.svg?url'
+import { metaletApi, metaletApiV3, unisatApi } from './request'
 
 export type Brc20 = {
   symbol: SymbolUC
@@ -46,6 +49,62 @@ interface TickerInfo {
 
 export const getTickerInfo = async (tick: string): Promise<TickerInfo> => {
   return await metaletApiV3<TickerInfo>(`/brc20/tick/info`).get({ tick })
+}
+
+interface TokenBalance {
+  ticker: string
+  overallBalance: string
+  transferableBalance: string
+  availableBalance: string
+  decimal: number
+}
+
+export const fetchBRC20Token = async (address: string): Promise<Asset[]> => {
+  if (!address) {
+    throw Error(NO_ADDRESS_ERROR_MESSAGE)
+  }
+  return (
+    await unisatApi<PageResult<TokenBalance>>(`/brc20/tokens`).get({ address, cursor: 0, size: 100000 })
+  ).list.map(
+    (token) =>
+      ({
+        symbol: token.ticker,
+        logo: OrdiLogoImg,
+        tokenName: token.ticker,
+        isNative: false,
+        chain: 'btc',
+        queryable: true,
+        decimal: token.decimal,
+        contract: 'BRC-20',
+      }) as Asset
+  )
+}
+
+export interface TokenInfo {
+  totalSupply: string
+  totalMinted: string
+}
+
+export interface TokenTransfer {
+  ticker: string
+  amount: string
+  inscriptionId: string
+  inscriptionNumber: number
+  timestamp: number
+}
+
+interface AddressTokenSummary {
+  tokenInfo: TokenInfo
+  tokenBalance: TokenBalance
+  historyList: TokenTransfer[]
+  transferableList: TokenTransfer[]
+}
+
+const fetchBRC20TokenDetail = async (address: string, ticker: string): Promise<AddressTokenSummary> => {
+  if (!address) {
+    throw Error(NO_ADDRESS_ERROR_MESSAGE)
+  }
+  return await unisatApi<AddressTokenSummary>(`/brc20/token-summary`).get({ address, ticker })
 }
 
 export const fetchBrc20s = async (address: string): Promise<RawBrc20[]> => {

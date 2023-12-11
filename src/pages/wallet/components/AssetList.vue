@@ -1,14 +1,12 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
-
+import AssetItem from './AssetItem.vue'
 import { createEmit } from '@/lib/emitters'
 import useTokensQuery from '@/queries/tokens'
 import { useBTCAssetQuery } from '@/queries/btc'
-import { type Asset, BTCAssets, MVCAssets } from '@/data/assets'
-
-import AssetItem from './AssetItem.vue'
+import { type Asset, MVCAssets } from '@/data/assets'
+import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
 
@@ -18,16 +16,12 @@ const btcAddress = ref<string>('')
 createEmit<string>('getAddress')('mvc').then((addr) => {
   mvcAddress.value = addr
 })
+
 createEmit<string>('getAddress')('btc').then((addr) => {
   btcAddress.value = addr
 })
 
-const { data: userBRC20Asset } = useBTCAssetQuery(btcAddress, { enabled: computed(() => !!btcAddress.value) })
-const btcAssets = computed(() => {
-  return BTCAssets.filter(
-    (asset) => asset.symbol === 'BTC' || (userBRC20Asset.value && userBRC20Asset.value.includes(asset.symbol))
-  )
-})
+const { data: btcAssets } = useBTCAssetQuery(btcAddress, { enabled: computed(() => !!btcAddress.value) })
 
 const assetsDisplay = ref<string[]>([])
 createEmit<string[]>('getAssetsDisplay')().then((display) => {
@@ -43,10 +37,10 @@ function toManageAssets() {
   router.push('/wallet/manage-assets')
 }
 
-function toNative(asset: Asset) {
+function toNative(asset: Asset, address: string) {
   router.push({
     name: 'asset',
-    params: { symbol: asset.symbol },
+    params: { symbol: asset.symbol, address },
   })
 }
 
@@ -70,7 +64,7 @@ function toToken(token: UserOwnedToken) {
         :key="asset.symbol"
         :asset="asset"
         :address="btcAddress"
-        @click="toNative(asset)"
+        @click="toNative(asset, btcAddress)"
       />
     </div>
 
@@ -82,7 +76,7 @@ function toToken(token: UserOwnedToken) {
         :key="asset.symbol"
         :asset="asset"
         :address="mvcAddress"
-        @click="toNative(asset)"
+        @click="toNative(asset, mvcAddress)"
       />
       <AssetItem
         v-if="mvcAddress"
