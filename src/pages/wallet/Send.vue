@@ -9,13 +9,13 @@ import { useBalanceQuery } from '@/queries/balance'
 import { createEmit } from '@/lib/emitters'
 import { BtcWallet } from '@/lib/wallets/btc'
 import { allAssets } from '@/data/assets'
-import { type SymbolUC } from '@/lib/asset-symbol'
+import { type SymbolTicker } from '@/lib/asset-symbol'
 import Modal from '@/components/Modal.vue'
 import { useBTCRateQuery } from '@/queries/transaction'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
-const symbol = ref<SymbolUC>(route.query.symbol as SymbolUC)
+const symbol = ref<SymbolTicker>(route.query.symbol as SymbolTicker)
 const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol.value)!)
 const queryClient = useQueryClient()
 
@@ -28,7 +28,7 @@ const error = ref<Error | undefined>()
 
 // balance
 const enabled = computed(() => !!address.value)
-const { isLoading, data: balance } = useBalanceQuery(address, symbol, { enabled })
+const { isLoading, data: balance } = useBalanceQuery(address, symbol, { enabled }, asset.value?.contract)
 
 // rate list query
 const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({ enabled: computed(() => !!address.value) })

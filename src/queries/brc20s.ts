@@ -1,21 +1,20 @@
 import { PageResult } from './types'
 import { ComputedRef, Ref } from 'vue'
 import { type Asset } from '@/data/assets'
-import { SymbolUC } from '@/lib/asset-symbol'
 import { useQuery } from '@tanstack/vue-query'
-import { NO_ADDRESS_ERROR_MESSAGE } from '@/lib/errorMsg'
+import { SymbolTicker } from '@/lib/asset-symbol'
 import OrdiLogoImg from '../assets/images/ordi-logo.svg?url'
 import { metaletApi, metaletApiV3, unisatApi } from './request'
 
 export type Brc20 = {
-  symbol: SymbolUC
+  symbol: SymbolTicker
   balance: string
   availableBalance: string
   transferBalance: string
 }
 
 type RawBrc20 = {
-  token: SymbolUC
+  token: SymbolTicker
   balance: string
   tokenType: 'BRC20'
   availableBalance: string
@@ -60,9 +59,6 @@ interface TokenBalance {
 }
 
 export const fetchBRC20Token = async (address: string): Promise<Asset[]> => {
-  if (!address) {
-    throw Error(NO_ADDRESS_ERROR_MESSAGE)
-  }
   return (
     await unisatApi<PageResult<TokenBalance>>(`/brc20/tokens`).get({ address, cursor: 0, size: 100000 })
   ).list.map(
@@ -74,7 +70,7 @@ export const fetchBRC20Token = async (address: string): Promise<Asset[]> => {
         isNative: false,
         chain: 'btc',
         queryable: true,
-        decimal: token.decimal,
+        decimal: 0,
         contract: 'BRC-20',
       }) as Asset
   )
@@ -101,9 +97,6 @@ interface AddressTokenSummary {
 }
 
 const fetchBRC20TokenDetail = async (address: string, ticker: string): Promise<AddressTokenSummary> => {
-  if (!address) {
-    throw Error(NO_ADDRESS_ERROR_MESSAGE)
-  }
   return await unisatApi<AddressTokenSummary>(`/brc20/token-summary`).get({ address, ticker })
 }
 

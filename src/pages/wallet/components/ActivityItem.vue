@@ -1,20 +1,20 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { BRC20_SYMBOLS } from '@/lib/asset-symbol';
 
 import type { Activity } from '@/queries/activities'
 import { prettifyTimestamp, prettifyTxId } from '@/lib/formatters'
 import { toTx } from '@/lib/helpers'
 import { getBrowserHost } from '@/lib/host'
 import { type Chain } from '@/lib/account'
+import { type Asset } from '@/data/assets'
 
 const props = defineProps<{
+  asset: Asset
   activity: Activity
-  asset: any
 }>()
 
 const isConfirmed = computed(() => {
-  if (BRC20_SYMBOLS.includes(props.asset.symbol)) {
+  if (props.asset?.contract === 'BRC-20') {
     return true
   }
   return props.activity.height !== -1

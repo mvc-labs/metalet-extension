@@ -8,8 +8,9 @@ import { useQueryClient } from '@tanstack/vue-query'
 import { prettifyTokenBalance } from '@/lib/formatters'
 // import { getAddress, getCurrentAccount, getPrivateKey } from '@/lib/account'
 import { createEmit } from '@/lib/emitters'
-import { useTokenQuery } from '@/queries/tokens'
+import { useMVCTokenQuery } from '@/queries/tokens'
 import { network } from '@/lib/network'
+import { type Asset } from '@/data/assets'
 
 import Modal from '@/components/Modal.vue'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
@@ -46,8 +47,22 @@ const transactionResult: Ref<undefined | TransactionResult> = ref()
 
 const enabled = computed(() => !!address.value)
 // 用户拥有的代币资产
-const { isLoading, data: token } = useTokenQuery(address, genesis, { enabled })
+const { isLoading, data: token } = useMVCTokenQuery(address, genesis, { enabled })
 
+const asset = computed(() => {
+  if (token.value) {
+    return {
+      symbol: token.value.symbol,
+      tokenName: token.value.name,
+      isNative: false,
+      chain: 'mvc',
+      queryable: true,
+      decimal: token.value.decimal,
+      contract: 'MetaContract',
+      codeHash: token.value.codeHash,
+    } as Asset
+  }
+})
 const operationLock = ref(false)
 async function send() {
   if (operationLock.value) return
@@ -55,7 +70,7 @@ async function send() {
   operationLock.value = true
 
   // const privateKey = await getPrivateKey("mvc")
-  const privateKey = await createEmit<string>('getPrivateKey')("mvc")
+  const privateKey = await createEmit<string>('getPrivateKey')('mvc')
 
   const ftManager = new FtManager({
     network: network.value as API_NET,
@@ -81,7 +96,7 @@ async function send() {
 
   const transferRes = await ftManager
     .transfer({
-      codehash: token.value?.codehash!,
+      codehash: token.value?.codeHash!,
       genesis: token.value?.genesis!,
       senderWif: privateKey,
       receivers: [
@@ -129,7 +144,7 @@ async function send() {
 <template>
   <div class="mt-8 flex flex-col items-center gap-y-8">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
-    <img :src="token?.logo" alt="" class="h-16 w-16 rounded-xl" v-if="token?.logo" />
+    <img :src="asset?.logo" alt="" class="h-16 w-16 rounded-xl" v-if="asset?.logo" />
     <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
 
     <div class="space-y-3 self-stretch">
@@ -140,8 +155,10 @@ async function send() {
       <div class="relative">
         <input class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 text-sm" placeholder="Amount" v-model="amount" />
         <!-- unit -->
-        <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500"
-          v-if="token?.symbol">
+        <div
+          class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500"
+          v-if="token?.symbol"
+        >
           <div class="border-l border-solid border-gray-500 px-4 py-1">{{ token.symbol }}</div>
         </div>
       </div>
@@ -151,7 +168,7 @@ async function send() {
         <div class="">Your Balance:</div>
         <div class="" v-if="isLoading">--</div>
         <div class="" v-else-if="token">
-          {{ prettifyTokenBalance(token.total, token.decimal) + ' ' + token.symbol }}
+          {{ prettifyTokenBalance(token.confirmed + token.unconfirmed, token.decimal) + ' ' + token.symbol }}
         </div>
       </div>
     </div>
@@ -184,8 +201,10 @@ async function send() {
           <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Operating...</div>
         </div>
         <div class="grid grid-cols-2 gap-x-4" v-else>
-          <button class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
-            @click="isOpenConfirmModal = false">
+          <button
+            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
+            @click="isOpenConfirmModal = false"
+          >
             Cancel
           </button>
           <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="send">

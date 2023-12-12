@@ -2,7 +2,7 @@
 import { useRoute } from 'vue-router'
 import { getTags } from '@/data/assets'
 import { ref, computed, Ref } from 'vue'
-import { SymbolUC } from '@/lib/asset-symbol'
+import { SymbolTicker } from '@/lib/asset-symbol'
 import { type Psbt } from 'bitcoinjs-lib'
 import Modal from '@/components/Modal.vue'
 import { createEmit } from '@/lib/emitters'
@@ -21,7 +21,7 @@ createEmit<string>('getAddress')('btc').then((addr) => {
   address.value = addr!
 })
 
-const symbol = ref<SymbolUC>(route.query.symbol as SymbolUC)
+const symbol = ref<SymbolTicker>(route.query.symbol as SymbolTicker)
 const { data: btcAssets } = useBTCAssetQuery(address, { enabled: computed(() => !!address.value) })
 const asset = computed(() => {
   if (btcAssets.value && btcAssets.value.length > 0) {
@@ -51,7 +51,12 @@ const {
   isLoading,
   data: balance,
   error: balanceError,
-} = useBalanceQuery(address, symbol, { enabled: computed(() => !!address.value && !!symbol.value) })
+} = useBalanceQuery(
+  address,
+  symbol,
+  { enabled: computed(() => !!address.value && !!symbol.value) },
+  asset.value?.contract
+)
 
 const { data: tokenData } = useBRCTickerAseetQuery(address, symbol, {
   enabled: computed(() => !!address.value),
@@ -144,7 +149,7 @@ async function send() {
     }
     isOpenResultModal.value = true
   })
-  if(resStatus){
+  if (resStatus) {
     const timer = setInterval(async () => {
       if (resStatus!.inscriptionState === 4) {
         clearInterval(timer)

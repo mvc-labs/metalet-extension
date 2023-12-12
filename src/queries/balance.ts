@@ -1,13 +1,12 @@
 import { useQuery } from '@tanstack/vue-query'
 import { metaletApi, metaletApiV3, mvcApi, unisatApi } from './request'
 import { ComputedRef, Ref } from 'vue'
-import { SymbolUC, BRC20_SYMBOLS } from '@/lib/asset-symbol'
-import { brc20TickList } from './btc'
+import { SymbolTicker } from '@/lib/asset-symbol'
 
 type TokenType = 'BRC20'
 
 interface Tick {
-  token: SymbolUC
+  token: SymbolTicker
   tokenType: TokenType
   balance: string
   availableBalance: string
@@ -76,18 +75,8 @@ export const fetchUnisatBtcBalance = async (address: string): Promise<Balance> =
   }
 }
 
-export const fetchBRC20Balance = async (address: string, symbol: SymbolUC): Promise<Balance> => {
-  if (brc20TickList.value?.length) {
-    const brc20TickAsset = brc20TickList.value.find((tick) => tick.token === symbol)
-    if (brc20TickAsset) {
-      return {
-        address,
-        total: Number(brc20TickAsset.balance),
-        transferBalance: Number(brc20TickAsset.transferBalance),
-        availableBalance: Number(brc20TickAsset.availableBalance),
-      }
-    }
-  }
+// TODO Test to avoid request /address/brc20/asset
+export const fetchBRC20Balance = async (address: string, symbol: SymbolTicker): Promise<Balance> => {
   const { tickList } = await metaletApi(`/address/brc20/asset`)
     .get({ address, chain: 'btc', tick: symbol.toLowerCase() })
     .then((res) => res.data)
@@ -122,8 +111,9 @@ export const doNothing = async (): Promise<Balance> => {
 
 export const useBalanceQuery = (
   address: Ref<string>,
-  symbol: Ref<SymbolUC>,
-  options: { enabled: ComputedRef<boolean> }
+  symbol: Ref<SymbolTicker>,
+  options: { enabled: ComputedRef<boolean> },
+  contract?: string
 ) => {
   return useQuery({
     queryKey: ['balance', { address: address.value, symbol: symbol.value }],
@@ -134,7 +124,7 @@ export const useBalanceQuery = (
         case 'BTC':
           return fetchBtcBalance(address.value)
         default: {
-          if (BRC20_SYMBOLS.includes(symbol.value)) {
+          if (contract === 'BRC-20') {
             return fetchBRC20Balance(address.value, symbol.value)
           }
           return doNothing()

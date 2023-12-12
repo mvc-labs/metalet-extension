@@ -22,10 +22,14 @@ if (asset?.contract) {
 const enabled = computed(() => !!address && asset.queryable)
 const rateEnabled = computed(() => !!address)
 
-const { isLoading, data: balance } = useBalanceQuery(ref(address), ref(asset.symbol), { enabled })
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(ref(asset.symbol), {
-  enabled: rateEnabled,
-})
+const { isLoading, data: balance } = useBalanceQuery(ref(address), ref(asset.symbol), { enabled }, asset?.contract)
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(
+  ref(asset.symbol),
+  asset?.contract,
+  {
+    enabled: rateEnabled,
+  }
+)
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {

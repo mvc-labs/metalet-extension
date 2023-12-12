@@ -24,7 +24,7 @@ export type MvcUtxo = {
 }
 
 const fetchMVCUtxos = async (address: string): Promise<MvcUtxo[]> => {
-  return await mvcApi(`/address/${address}/utxo`).get()
+  return await mvcApi<MvcUtxo[]>(`/address/${address}/utxo`).get()
 }
 
 // Fetch BTC address non inscription UTXO utxos

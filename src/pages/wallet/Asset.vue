@@ -2,13 +2,13 @@
 import { computed, ref } from 'vue'
 import { getTags } from '@/data/assets'
 import { useRoute, useRouter } from 'vue-router'
+import { SymbolTicker } from '@/lib/asset-symbol'
 import { useBalanceQuery } from '@/queries/balance'
-import { useBRCTickerAseetQuery, useBTCAssetQuery } from '@/queries/btc'
+import Activities from './components/Activities.vue'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
-import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
-import Activities from './components/Activities.vue'
-import { SymbolUC } from '@/lib/asset-symbol'
+import { useBRCTickerAseetQuery, useBTCAssetQuery } from '@/queries/btc'
+import { ArrowUpRightIcon, QrCodeIcon, ArrowsRightLeftIcon } from '@heroicons/vue/20/solid'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,7 +18,7 @@ if (!route.params.address) {
 }
 const address = ref<string>(route.params.address as string)
 
-const symbol = ref<SymbolUC>(route.params.symbol as SymbolUC)
+const symbol = ref<SymbolTicker>(route.params.symbol as SymbolTicker)
 const { data: btcAssets } = useBTCAssetQuery(address, { enabled: computed(() => !!address.value) })
 const asset = computed(() => {
   if (btcAssets.value && btcAssets.value.length > 0) {
@@ -31,13 +31,14 @@ const asset = computed(() => {
   }
 })
 
-const {
-  isLoading,
-  data: balance,
-  error,
-} = useBalanceQuery(address, symbol, { enabled: computed(() => !!address.value && !!symbol.value) })
+const { isLoading, data: balance } = useBalanceQuery(
+  address,
+  symbol,
+  { enabled: computed(() => !!address.value && !!symbol.value) },
+  asset.value?.contract
+)
 
-const { isLoading: tokenLoading, data: tokenData } = useBRCTickerAseetQuery(address, symbol, {
+const { isLoading: tickersLoading, data: tickersData } = useBRCTickerAseetQuery(address, symbol, {
   enabled: computed(() => !!address.value),
 })
 
@@ -49,7 +50,7 @@ const tags = computed(() => {
 
 const rateEnabled = computed(() => !!symbol.value)
 
-const { data: exchangeRate } = useExchangeRatesQuery(symbol, { enabled: rateEnabled })
+const { data: exchangeRate } = useExchangeRatesQuery(symbol, asset.value?.contract, { enabled: rateEnabled })
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value && asset.value) {
@@ -120,35 +121,57 @@ const toInscribe = () => {
 
         <!-- buttons -->
         <div class="mt-4 grid grid-cols-2 gap-x-3 self-stretch">
-          <button class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3" @click="toSend">
+          <button
+            v-if="asset.isNative"
+            class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3"
+            @click="toSend"
+          >
             <ArrowUpRightIcon class="mr-1 h-4 w-4" />Send
+          </button>
+          <button
+            v-if="asset.contract === 'BRC-20'"
+            class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3"
+            @click="toInscribe"
+          >
+            <ArrowsRightLeftIcon class="mr-1 h-4 w-4" />Transfer
           </button>
           <button class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3" @click="toReceive">
             <QrCodeIcon class="mr-1 h-4 w-4" />Receive
           </button>
         </div>
-        <div class="mt-8 grid grid-cols-2 gap-x-3 self-stretch" v-if="asset.contract === 'BRC-20'">
-          <button class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3" @click="toSend">
-            <ArrowUpRightIcon class="mr-1 h-4 w-4" />Mint
-          </button>
-          <button class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3" @click="toInscribe">
-            <QrCodeIcon class="mr-1 h-4 w-4" />Inscribe
-          </button>
-        </div>
 
-        <div class="grid grid-cols-3 gap-2 mt-4" v-if="!tokenLoading && tokenData && tokenData.transferableList.length">
-          <div
-            class="flex flex-col items-center rounded-md bg-gray-100 p-2"
-            v-for="token in tokenData.transferableList"
-            :key="token.inscriptionId"
-          >
-            <div>{{ token.ticker }}</div>
-            <div>{{ token.amount }}</div>
-            <div>#{{ token.inscriptionNumber }}</div>
+        <div v-if="asset.contract === 'BRC-20'" class="mt-8 w-full">
+          <div class="flex items-end justify-between text-[#303133]">
+            <span class="text-base">Transferable</span
+            ><span class="text-lg"
+              >{{ (tickersData && tickersData.tokenBalance.transferableBalance) || 0 }} {{ asset.symbol }}</span
+            >
+          </div>
+          <div class="text-gray-500" v-if="tickersLoading">Loading BRC Tickers.</div>
+          <div v-else class="grid grid-cols-3 gap-2 w-full mt-3" v-if="tickersData && tickersData.transferableList">
+            <div
+              :key="ticker.inscriptionId"
+              v-for="ticker in tickersData.transferableList"
+              class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative"
+            >
+              <div class="mt-2.5 text-[#909399] text-sm">{{ ticker.ticker }}</div>
+              <div class="mt-3 text-[#141416] text-lg font-bold">{{ ticker.amount }}</div>
+              <div
+                class="text-white text-xs bg-[#1E2BFF] rounded-b-md absolute bottom-0 w-full text-center pt-[5px] pb-[4px]"
+              >
+                #{{ ticker.inscriptionNumber }}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-end justify-between text-[#303133] mt-3">
+            <span class="text-base">Available</span
+            ><span class="text-lg"
+              >{{ (tickersData && tickersData.tokenBalance.availableBalance) || 0 }} {{ asset.symbol }}</span
+            >
           </div>
         </div>
 
-        <Activities class="mt-8 self-stretch" :asset="asset" :exchangeRate="Number(exchangeRate)" />
+        <Activities class="mt-8 self-stretch" :asset="asset" :exchangeRate="Number(exchangeRate)" :address="address" />
       </template>
 
       <div class="text-gray-500" v-else>No Service for {{ asset?.symbol }} yet.</div>

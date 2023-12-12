@@ -1,6 +1,11 @@
 <script lang="ts" setup>
-import { computed, ref, Ref } from 'vue'
+import { computed, ref } from 'vue'
+import { type Asset } from '@/data/assets'
+import { isOfficialToken } from '@/lib/assets'
 import { useRoute, useRouter } from 'vue-router'
+import { useMVCTokenQuery } from '@/queries/tokens'
+import Activities from './components/Activities.vue'
+import { prettifyTokenBalance, prettifyTokenGenesis } from '@/lib/formatters'
 import {
   CheckBadgeIcon,
   CircleStackIcon,
@@ -8,30 +13,30 @@ import {
   ClipboardDocumentListIcon,
 } from '@heroicons/vue/24/solid'
 
-// import { getAddress } from '@/lib/account'
-import { createEmit } from '@/lib/emitters'
-import { prettifyTokenBalance, prettifyTokenGenesis } from '@/lib/formatters'
-import { useTokenQuery } from '@/queries/tokens'
-import { isOfficialToken } from '@/lib/assets'
-
-import Activities from './components/Activities.vue'
-
 const route = useRoute()
 const router = useRouter()
-const genesis = route.params.genesis as string
-const symbol = route.params.symbol as string
 
-const address: Ref<string> = ref('')
-// getAddress().then((add) => {
-//   address.value = add!
-// })
-createEmit<string>('getAddress')().then((add) => {
-  address.value = add!
-})
-const enabled = computed(() => !!address.value)
+const symbol = route.params.symbol as string
+const address = route.params.address as string
+const genesis = route.params.genesis as string
+const enabled = computed(() => !!address && !!symbol && !!genesis)
 
 // 用户拥有的代币资产
-const { isLoading, data: token } = useTokenQuery(address, genesis, { enabled })
+const { isLoading, data: token } = useMVCTokenQuery(ref(address), genesis, { enabled })
+const asset = computed(() => {
+  if (token.value) {
+    return {
+      symbol: token.value.symbol,
+      tokenName: token.value.name,
+      isNative: false,
+      chain: 'mvc',
+      queryable: true,
+      decimal: token.value.decimal,
+      contract: 'MetaContract',
+      codeHash: token.value.codeHash,
+    } as Asset
+  }
+})
 
 const toSend = () => {
   router.push({
@@ -40,7 +45,7 @@ const toSend = () => {
   })
 }
 const toReceive = () => {
-  router.push(`/wallet/receive?chain=${token.value!.chain}`)
+  router.push(`/wallet/receive?chain=mvc`)
 }
 
 const isCopied = ref(false)
@@ -52,14 +57,14 @@ const copyGenesis = () => {
 
 <template>
   <div class="mt-8 flex flex-col items-center">
-    <img :src="token.logo" alt="" class="h-20 w-20 rounded-xl" v-if="token && token.logo" />
+    <!-- <img :src="token.logo" alt="" class="h-20 w-20 rounded-xl" v-if="token && token.logo" /> -->
 
-    <CircleStackIcon v-else class="h-20 w-20 text-gray-300" />
+    <CircleStackIcon class="h-20 w-20 text-gray-300" />
 
     <div v-if="isLoading" class="mt-4">--</div>
     <div v-else-if="token" class="mt-4 flex flex-col items-center self-stretch">
       <div class="mb-1 text-center text-xl">
-        {{ prettifyTokenBalance(token.total, token.decimal) + ' ' + token.symbol }}
+        {{ prettifyTokenBalance(token.confirmed + token.unconfirmed, token.decimal) + ' ' + token.symbol }}
       </div>
 
       <!-- Contract ID -->
@@ -82,7 +87,7 @@ const copyGenesis = () => {
         <button class="secondary-btn col-span-1 py-3" @click="toReceive">RECEIVE</button>
       </div>
 
-      <Activities class="mt-8 self-stretch" :asset="token" />
+      <Activities class="mt-8 self-stretch" v-if="asset" :asset="asset" :address="address" />
     </div>
   </div>
 </template>

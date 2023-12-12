@@ -1,46 +1,20 @@
 <script lang="ts" setup>
-import { Ref, ref, computed } from 'vue'
-import { InboxIcon } from '@heroicons/vue/24/solid'
-
-// import { getAddress } from '@/lib/account'
-import { createEmit } from '@/lib/emitters'
-import { useActivitiesQuery } from '@/queries/activities'
-import type { Token } from '@/queries/tokens'
-
+import { ref, computed } from 'vue'
+import type { Asset } from '@/data/assets'
 import ActivityItem from './ActivityItem.vue'
+import { InboxIcon } from '@heroicons/vue/24/solid'
+import { useActivitiesQuery } from '@/queries/activities'
 
 const props = defineProps<{
-  asset?: Token | any
+  address: string
+  asset: Asset
   exchangeRate?: number
 }>()
 
-const address: Ref<string> = ref('')
-// getAddress(props.asset.chain).then((add) => {
-//   address.value = add!
-// })
-createEmit<string>('getAddress')(props.asset.chain).then((add) => {
-  address.value = add!
-})
+const address = ref(props.address)
 const enabled = computed(() => !!address.value)
 
-const {
-  isLoading,
-  isError,
-  data: activities,
-  error,
-} = useActivitiesQuery(
-  address,
-  props.asset.isNative
-    ? {
-        type: 'native',
-        asset: props.asset,
-      }
-    : {
-        type: 'token',
-        token: props.asset,
-      },
-  { enabled }
-)
+const { isLoading, isError, data: activities, error } = useActivitiesQuery(address, props.asset, { enabled })
 </script>
 
 <template>

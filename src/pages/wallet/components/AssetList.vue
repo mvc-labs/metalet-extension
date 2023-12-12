@@ -3,10 +3,10 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import AssetItem from './AssetItem.vue'
 import { createEmit } from '@/lib/emitters'
-import useTokensQuery from '@/queries/tokens'
 import { useBTCAssetQuery } from '@/queries/btc'
-import { type Asset, MVCAssets } from '@/data/assets'
+import { useMVCAssetsQuery } from '@/queries/tokens'
 import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
+import { type Asset, MVCAsset, BTCAsset } from '@/data/assets'
 
 const router = useRouter()
 
@@ -21,17 +21,15 @@ createEmit<string>('getAddress')('btc').then((addr) => {
   btcAddress.value = addr
 })
 
-const { data: btcAssets } = useBTCAssetQuery(btcAddress, { enabled: computed(() => !!btcAddress.value) })
-
+// TODO asset display
 const assetsDisplay = ref<string[]>([])
 createEmit<string[]>('getAssetsDisplay')().then((display) => {
   assetsDisplay.value = display
 })
 
-const { data: userOwnedTokens } = useTokensQuery(mvcAddress, { enabled: computed(() => !!mvcAddress.value) })
-const displayingAssets = computed(() => {
-  return MVCAssets.filter((asset) => assetsDisplay.value.includes(asset.symbol))
-})
+const { data: btcAssets } = useBTCAssetQuery(btcAddress, { enabled: computed(() => !!btcAddress.value) })
+
+const { data: mvcAssets } = useMVCAssetsQuery(mvcAddress, { enabled: computed(() => !!mvcAddress.value) })
 
 function toManageAssets() {
   router.push('/wallet/manage-assets')
@@ -44,12 +42,10 @@ function toNative(asset: Asset, address: string) {
   })
 }
 
-type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
-
-function toToken(token: UserOwnedToken) {
+function toToken(token: Asset, address: string) {
   router.push({
     name: 'token',
-    params: { genesis: token.genesis, symbol: token.symbol },
+    query: { genesis: token.genesis, symbol: token.symbol, address },
   })
 }
 </script>
@@ -60,7 +56,7 @@ function toToken(token: UserOwnedToken) {
       <div class="text-base font-bold text-gray-900">BTC</div>
       <AssetItem
         v-if="btcAddress"
-        v-for="asset in btcAssets"
+        v-for="asset in btcAssets || [BTCAsset]"
         :key="asset.symbol"
         :asset="asset"
         :address="btcAddress"
@@ -72,19 +68,11 @@ function toToken(token: UserOwnedToken) {
       <div class="text-base font-bold text-gray-900">MVC</div>
       <AssetItem
         v-if="mvcAddress"
-        v-for="asset in displayingAssets"
-        :key="asset.symbol"
+        v-for="asset in mvcAssets || [MVCAsset]"
+        :key="asset.genesis"
         :asset="asset"
         :address="mvcAddress"
-        @click="toNative(asset, mvcAddress)"
-      />
-      <AssetItem
-        v-if="mvcAddress"
-        v-for="token in userOwnedTokens"
-        :key="token.genesis"
-        :asset="token"
-        :address="mvcAddress"
-        @click="toToken(token)"
+        @click="asset.contract === 'MetaContract' ? toToken(asset, mvcAddress) : toNative(asset, mvcAddress)"
       />
     </div>
 

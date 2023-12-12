@@ -2,19 +2,16 @@ import dayjs from 'dayjs'
 import { fetchBRC20Token } from './brc20s'
 import { ref, Ref, ComputedRef } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
-import { BRC20_Symbol_UC } from '@/lib/asset-symbol'
 import { type Asset, BTCAsset } from '@/data/assets'
 import { ordersApi, metaletApi, unisatApi } from '@/queries/request'
 
 interface Tick {
-  token: BRC20_Symbol_UC
+  token: string
   tokenType: TokenType
   balance: string
   availableBalance: string
   transferBalance: string
 }
-
-export const brc20TickList = ref<Tick[]>()
 
 export const getBTCBalance = (address: string) => {
   return ordersApi('/balance').get({ address })
@@ -81,7 +78,7 @@ export const fetchBTCAsset = async (address: string): Promise<string[]> => {
 
 export const useBTCAssetQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
-    queryKey: ['BTCAsset', { address: addressRef.value }],
+    queryKey: ['BTCAssets', { address: addressRef.value }],
     queryFn: () => fetchBRC20Token(addressRef.value),
     select: (assets: Asset[]) => [BTCAsset, ...assets],
     ...options,
@@ -132,6 +129,7 @@ export const useBRCTickerAseetQuery = (
   return useQuery({
     queryKey: ['BRCTicker', { address: addressRef.value, ticker: tickerRef.value }],
     queryFn: () => getAddressTokenSummary(addressRef.value, tickerRef.value),
+    // select: (result) => result.transferableList,
     ...options,
   })
 }

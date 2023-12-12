@@ -1,6 +1,4 @@
-export const DEFAULT_SYMBOLS = ["SPACE", "BTC"]
-export const BRC20_SYMBOLS = ["MEME", "ORDI", "PEPE", "RDEX", "SATS", "ORXC"]
+export const DEFAULT_SYMBOLS = ['SPACE', 'BTC']
 
-export type DEFAULT_Symbol_UC = 'SPACE' | 'BTC'
-export type BRC20_Symbol_UC = "MEME" | "ORDI" | "PEPE" | "RDEX" | "SATS" | "ORXC"
-export type SymbolUC = DEFAULT_Symbol_UC | BRC20_Symbol_UC
+export type DEFAULT_Symbol_Ticker = 'SPACE' | 'BTC'
+export type SymbolTicker = DEFAULT_Symbol_Ticker | string

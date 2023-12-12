@@ -1,10 +1,10 @@
-import { SymbolUC } from '@/lib/asset-symbol'
+import { SymbolTicker } from '@/lib/asset-symbol'
 import BtcLogoImg from '../assets/images/btc-logo.svg?url'
 import SpaceLogoImg from '../assets/images/space-logo.svg?url'
 
 export type Asset = {
-  symbol: SymbolUC
-  logo: string
+  symbol: SymbolTicker
+  logo?: string
   tokenName: string
   isNative: boolean
   chain: 'btc' | 'mvc'
@@ -13,6 +13,7 @@ export type Asset = {
   total?: number
   genesis?: string
   contract?: string
+  codeHash?: string
 }
 
 export interface Tag {
@@ -73,18 +74,16 @@ const BTCAsset: Asset = {
   decimal: 8,
 }
 
-const MVCAssets: Asset[] = [
-  {
-    symbol: 'SPACE',
-    logo: SpaceLogoImg,
-    tokenName: 'SPACE',
-    isNative: true,
-    chain: 'mvc',
-    queryable: true,
-    decimal: 8,
-  },
-]
+const MVCAsset: Asset = {
+  symbol: 'SPACE',
+  logo: SpaceLogoImg,
+  tokenName: 'SPACE',
+  isNative: true,
+  chain: 'mvc',
+  queryable: true,
+  decimal: 8,
+}
 
-const allAssets = [BTCAsset, ...MVCAssets]
+const allAssets = [BTCAsset, MVCAsset]
 
-export { BTCAsset, MVCAssets, allAssets, getTags, getTagInfo }
+export { BTCAsset, MVCAsset, allAssets, getTags, getTagInfo }
