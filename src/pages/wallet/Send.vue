@@ -188,9 +188,9 @@ async function send() {
       </div>
 
       <!-- rate list -->
-      <div class="grid grid-cols-4 gap-2 mt-4 text-xs" v-if="!rateLoading && rateList.list">
+      <div class="grid grid-cols-4 gap-2 mt-4 text-xs" v-if="!rateLoading && rateList">
         <div
-          v-for="rate in rateList.list"
+          v-for="rate in rateList"
           @click="selectRateFee(rate.feeRate, rate.title)"
           class="flex flex-col items-center justify-center rounded-md p-2 cursor-pointer"
           :class="rate.title === currentTitle ? 'main-btn-bg text-white' : 'bg-gray-100'"

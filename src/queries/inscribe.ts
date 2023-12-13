@@ -17,7 +17,7 @@ export interface PreInscribe {
   serviceFee: number
 }
 
-export const preInscribe = async (address: string, feeRate: number, filename: string): Promise<PreInscribe> => {
+export const preInscribe = async (receiveAddress: string, feeRate: number, filename: string): Promise<PreInscribe> => {
   const network = await getNetwork()
   const net = network === 'mainnet' ? 'livenet' : network
   return await metaletApiV3<PreInscribe>(`/inscribe/pre`).post({
@@ -29,7 +29,7 @@ export const preInscribe = async (address: string, feeRate: number, filename: st
       },
     ],
     net,
-    receiveAddress: address,
+    receiveAddress,
   })
 }
 

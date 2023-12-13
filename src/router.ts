@@ -114,7 +114,7 @@ const routes = [
     component: () => import('./pages/wallet/Inscribe.vue'),
     meta: {
       secondaryHeader: true,
-      headerTitle: 'Inscribe',
+      headerTitle: 'Inscribe Transfer',
       noFooter: true,
     },
   },

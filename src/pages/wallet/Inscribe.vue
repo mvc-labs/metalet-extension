@@ -1,20 +1,19 @@
 <script lang="ts" setup>
-import { useRoute } from 'vue-router'
-import { getTags } from '@/data/assets'
 import { ref, computed, Ref } from 'vue'
-import { SymbolTicker } from '@/lib/asset-symbol'
 import { type Psbt } from 'bitcoinjs-lib'
-import Modal from '@/components/Modal.vue'
 import { createEmit } from '@/lib/emitters'
 import { BtcWallet } from '@/lib/wallets/btc'
-import { prettifyBalance } from '@/lib/formatters'
-import { useBalanceQuery } from '@/queries/balance'
+import { useRoute, useRouter } from 'vue-router'
+import { SymbolTicker } from '@/lib/asset-symbol'
+import { prettifyBalance, shortestAddress } from '@/lib/formatters'
 import { useBTCRateQuery } from '@/queries/transaction'
 import { preInscribe, PreInscribe, getInscribeInfo } from '@/queries/inscribe'
 import { useBRCTickerAseetQuery, useBTCAssetQuery } from '@/queries/btc'
+import CopyIcon from '@/assets/icons/copy.svg'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
+const router = useRouter()
 
 const address = ref('')
 createEmit<string>('getAddress')('btc').then((addr) => {
@@ -26,11 +25,6 @@ const { data: btcAssets } = useBTCAssetQuery(address, { enabled: computed(() => 
 const asset = computed(() => {
   if (btcAssets.value && btcAssets.value.length > 0) {
     return btcAssets.value.find((asset) => asset.symbol === symbol.value)
-  }
-})
-const tags = computed(() => {
-  if (asset.value) {
-    return getTags(asset.value)
   }
 })
 
@@ -47,23 +41,17 @@ const selectCustom = () => {
   isCustom.value = true
 }
 
-const {
-  isLoading,
-  data: balance,
-  error: balanceError,
-} = useBalanceQuery(
-  address,
-  symbol,
-  { enabled: computed(() => !!address.value && !!symbol.value) },
-  asset.value?.contract
-)
-
 const { data: tokenData } = useBRCTickerAseetQuery(address, symbol, {
   enabled: computed(() => !!address.value),
 })
 
-// rate list query
 const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({ enabled: computed(() => !!address.value) })
+
+const nextStep = ref(0)
+
+const isOpenResultModal = ref(false)
+
+const operationLock = ref(false)
 
 const inscribeAmount = ref<number | undefined>()
 const inscribePsbt = ref<Psbt | undefined>()
@@ -71,11 +59,13 @@ const total = ref<number | undefined>()
 const paymentNetworkFee = ref<number | undefined>()
 const inscriptionNetworkFee = ref<number | undefined>()
 const transactionResult: Ref<undefined | TransactionResult> = ref()
-// const wallet = await BtcWallet.create()
-
-// const inscribeOrder = ref<InscribeOrder | undefined>()
 const inscribeOrder = ref<PreInscribe | undefined>()
-const isOpenConfirmModal = ref(false)
+const psbtHex = ref('')
+const copied = ref(false)
+const copyHex = () => {
+  navigator.clipboard.writeText(psbtHex.value)
+  copied.value = true
+}
 const popConfirm = async () => {
   if (!address.value) {
     transactionResult.value = {
@@ -85,40 +75,40 @@ const popConfirm = async () => {
     isOpenResultModal.value = true
     return
   }
-  if (!tokenData.value?.tokenBalance?.ticker) {
-    transactionResult.value = {
-      status: 'warning',
-      message: 'No ticker.',
-    }
-    isOpenResultModal.value = true
-    return
-  }
-  if (!inscribeAmount.value) {
-    transactionResult.value = {
-      status: 'warning',
-      message: 'No amount.',
-    }
-    isOpenResultModal.value = true
-    return
-  }
-  if (!currentRateFee.value) {
-    transactionResult.value = {
-      status: 'warning',
-      message: 'No rate fee.',
-    }
-    isOpenResultModal.value = true
-    return
-  }
   operationLock.value = true
   const order = await preInscribe(
     address.value,
-    currentRateFee.value,
+    currentRateFee.value!,
     // TODO make it to function
-    `{"p":"brc-20","op":"transfer","tick":"${tokenData.value.tokenBalance.ticker}","amt":"${inscribeAmount.value}"}`
-  )
+    `{"p":"brc-20","op":"transfer","tick":"${asset.value!.symbol}","amt":"${inscribeAmount.value}"}`
+  ).catch((err) => {
+    transactionResult.value = {
+      status: 'failed',
+      message: err.message,
+    }
+    isOpenResultModal.value = true
+    return
+  })
   console.log({ order })
+  if (!order) {
+    operationLock.value = false
+    return
+  }
   const wallet = await BtcWallet.create()
-  const { fee, psbt } = await wallet.getFeeAndPsbt(order.payAddress, order.needAmount, currentRateFee.value)
+  const data = await wallet.getFeeAndPsbt(order.payAddress, order.needAmount, currentRateFee.value).catch((err) => {
+    transactionResult.value = {
+      status: 'failed',
+      message: err.message,
+    }
+    isOpenResultModal.value = true
+    return
+  })
+  if (!data) {
+    operationLock.value = false
+    return
+  }
+  const { fee, psbt } = data
+  psbtHex.value = psbt.extractTransaction().toHex()
   paymentNetworkFee.value = fee
   inscribePsbt.value = psbt
   console.log('paymentNetworkFee', paymentNetworkFee.value, order.minerFee)
@@ -128,21 +118,18 @@ const popConfirm = async () => {
   inscriptionNetworkFee.value = total.value - order.serviceFee - 546
   console.log('inscriptionNetworkFee', inscriptionNetworkFee.value)
   operationLock.value = false
-  isOpenConfirmModal.value = true
+  nextStep.value = 1
 }
 
-const isOpenResultModal = ref(false)
-
-const operationLock = ref(false)
+function toConfirm() {
+  nextStep.value = 2
+}
 
 async function send() {
   if (operationLock.value) return
-
   operationLock.value = true
   const wallet = await BtcWallet.create()
-  // await wallet.send(inscribeOrder.value!.payAddress, inscribeOrder.value!.totalFee, currentRateFee.value)
   let resStatus = await wallet.commitInscribe(inscribeOrder.value!.orderId, inscribePsbt.value!).catch((err) => {
-    isOpenConfirmModal.value = false
     transactionResult.value = {
       status: 'failed',
       message: err.message,
@@ -154,145 +141,183 @@ async function send() {
       if (resStatus!.inscriptionState === 4) {
         clearInterval(timer)
         operationLock.value = false
-        isOpenConfirmModal.value = false
         return
       }
       resStatus = await getInscribeInfo(inscribeOrder.value!.orderId)
     }, 1000)
   }
 }
+
+function cancel() {
+  nextStep.value = 1
+}
+
+const tabIdx = ref<number>(0)
+const changeTabIdx = (idx: number) => {
+  tabIdx.value = idx
+}
 </script>
 
 <template>
-  <div class="mt-8 flex flex-col items-center gap-y-8" v-if="asset">
+  <div class="pt-8 h-full" v-if="asset">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
-    <img :src="asset.logo" alt="" class="h-16 w-16 rounded-xl" />
-
-    <!-- TODO reusable component -->
-    <div class="mt-1.5 flex items-center gap-x-1.5">
-      <div
-        v-for="tag in tags"
-        :key="tag.name"
-        :style="`background-color:${tag.bg};color:${tag.color};`"
-        :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs']"
-      >
-        {{ tag.name }}
+    <div v-if="nextStep === 0" class="relative h-full">
+      <div class="flex items-end justify-between w-full text-[#141416]">
+        <span class="text-xs">Available</span>
+        <span class="text-sm">
+          {{ (tokenData && tokenData.tokenBalance.availableBalance) || 0 }} {{ asset.symbol }}</span
+        >
       </div>
-    </div>
 
-    <div class="space-y-3 self-stretch">
-      <!-- inscribe amount input -->
+      <div class="self-stretch mt-3">
+        <input
+          min="0"
+          type="number"
+          v-model="inscribeAmount"
+          placeholder="Inscribe amount"
+          :max="tokenData?.tokenBalance.availableBalance || 0"
+          class="main-input w-full !rounded-xl !p-4 !text-xs"
+        />
+
+        <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
+
+        <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-[#141416]" v-if="!rateLoading && rateList">
+          <div
+            v-for="rate in rateList"
+            @click="selectRateFee(rate.feeRate)"
+            :class="rate.feeRate === currentRateFee ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
+            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
+          >
+            <div class="tex-sm">{{ rate.title }}</div>
+            <div class="mt-1.5 text-base font-bold">{{ rate.feeRate }} sat/vB</div>
+            <div class="mt-1 text-sm text-[#999999]">About</div>
+            <div class="text-sm text-[#999999]">{{ rate.desc.replace('About', '') }}</div>
+          </div>
+          <div
+            @click="selectCustom()"
+            :class="isCustom ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
+            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
+          >
+            <div>Custom</div>
+          </div>
+        </div>
+      </div>
+
       <input
         min="0"
         type="number"
-        v-model="inscribeAmount"
-        placeholder="Inscribe amount"
-        :max="tokenData?.tokenBalance.availableBalance || 0"
-        class="main-input w-full !rounded-xl !p-4 !text-xs"
+        v-if="isCustom"
+        placeholder="sat/vB"
+        v-model="currentRateFee"
+        class="main-input w-full !rounded-xl !p-4 !text-xs mt-4"
       />
 
-      <!-- TODO reusable component -->
-      <div class="text-xs text-gray-500">
-        <div class="" v-if="isLoading">--</div>
-        <div class="" v-else-if="balanceError">Error</div>
-        <div class="" v-else-if="balance">
-          Available: {{ tokenData?.tokenBalance.availableBalance || 0 }} {{ tokenData?.tokenBalance.ticker }}
-        </div>
+      <div
+        v-if="operationLock"
+        class="w-full py-3 text-center text-sm font-bold text-gray-500 absolute bottom-4 left-0"
+      >
+        Loading...
       </div>
-
-      <div class="grid grid-cols-4 gap-2 mt-4 text-xs" v-if="!rateLoading && rateList.list">
-        <div
-          v-for="rate in rateList.list"
-          @click="selectRateFee(rate.feeRate)"
-          class="flex flex-col items-center justify-center rounded-md p-2 cursor-pointer"
-          :class="rate.feeRate === currentRateFee ? 'main-btn-bg text-white' : 'bg-gray-100'"
-        >
-          <div>{{ rate.title }}</div>
-          <div>{{ rate.feeRate }} sat/vB</div>
-          <div>#{{ rate.desc }}</div>
-        </div>
-        <div
-          @click="selectCustom()"
-          :class="isCustom ? 'main-btn-bg text-white' : 'bg-gray-100'"
-          class="flex flex-col items-center justify-center rounded-md p-2 cursor-pointer"
-        >
-          <div>Custom</div>
-        </div>
-      </div>
+      <button
+        v-else
+        @click="popConfirm"
+        :disabled="!currentRateFee || !inscribeAmount"
+        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100 absolute bottom-4 left-0"
+      >
+        Next
+      </button>
     </div>
 
-    <input
-      min="0"
-      type="number"
-      v-if="isCustom"
-      placeholder="sat/vB"
-      v-model="currentRateFee"
-      class="main-input w-full !rounded-xl !p-4 !text-xs mt-1"
-    />
-
-    <!-- send -->
-    <div class="" v-if="operationLock">
-      <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Loading...</div>
+    <div v-else-if="nextStep === 1" class="text-[#141416] relative h-full">
+      <div class="text-center text-3xl font-bold">{{ inscribeAmount }} {{ asset.symbol }}</div>
+      <div class="mt-[30px] text-sm w-full">Preview</div>
+      <div class="w-full h-[76px] rounded-sm bg-[#F5F5F5] mt-2 p-3 text-sm">
+        {{ `{"p":"brc-20","op":"transfer","tick":"${asset.symbol}","amt":"${inscribeAmount}"}` }}
+      </div>
+      <div class="mt-8 space-y-5">
+        <div class="flex items-center justify-between">
+          <span>Payment Network Fee</span><span>{{ prettifyBalance(paymentNetworkFee || 0, 'BTC') }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span>Need Amount</span><span>{{ prettifyBalance(inscribeOrder?.needAmount || 0, 'BTC') }}</span>
+        </div>
+        <hr />
+        <div class="flex items-center justify-between">
+          <span>Total</span><span>{{ prettifyBalance(total || 0, 'BTC') }}</span>
+        </div>
+      </div>
+      <button
+        @click="toConfirm"
+        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100 absolute bottom-4 left-0"
+      >
+        Next
+      </button>
     </div>
-    <button
-      v-else
-      @click="popConfirm"
-      :disabled="!(currentRateFee && inscribeAmount)"
-      class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
-    >
-      Inscribe
-    </button>
-
-    <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
-      <template #title>Inscribe TRANSFER</template>
-
-      <template #body>
-        <div class="space-y-1">
-          <div>{{ inscribeAmount }} {{ tokenData?.tokenBalance.ticker }}</div>
-          <div>Preview</div>
-          <div>
-            {{ `{"p":"brc-20","op":"transfer","tick":"${tokenData?.tokenBalance.ticker}","amt":"${inscribeAmount}"}` }}
-          </div>
-          <div class="flex items-center justify-between">
-            <span>Payment Network Fee</span><span>{{ prettifyBalance(paymentNetworkFee || 0, 'BTC') }}</span>
-          </div>
-          <!-- <div class="flex items-center justify-between">
-            <span>Inscription Output Value</span> -->
-          <!-- <span>{{ prettifyBalance(inscribeOrder?.outputValue || 0, 'BTC') }} </span> -->
-          <!-- <span>{{ prettifyBalance(546, 'BTC') }} </span>
-          </div> -->
-          <!-- <div class="flex items-center justify-between">
-            <span>Inscription Network Fee</span><span>{{ prettifyBalance(inscriptionNetworkFee || 0, 'BTC') }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span>Service Fee</span><span>{{ prettifyBalance(inscribeOrder?.serviceFee || 0, 'BTC') }}</span>
-          </div> -->
-          <div class="flex items-center justify-between">
-            <span>Need Amount</span><span>{{ prettifyBalance(inscribeOrder?.needAmount || 0, 'BTC') }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span>Total</span><span>{{ prettifyBalance(total || 0, 'BTC') }}</span>
+    <div v-if="nextStep === 2" class="text-[#141416] relative h-full">
+      <div class="text-center text-base text-[#909399]">Spend Amount</div>
+      <div class="text-center text-3xl font-bold mt-3">{{ inscribeAmount }} {{ asset.symbol }}</div>
+      <div class="mt-3 text-center text-base text-[#909399]">
+        {{ prettifyBalance(paymentNetworkFee || 0, 'BTC') }} (network fee)
+      </div>
+      <div class="border-b mt-3 space-x-3 text-base">
+        <span
+          @click="changeTabIdx(0)"
+          class="inline-block pb-[2px] border-b-4 cursor-pointer"
+          :class="tabIdx === 0 ? 'border-[#141416] text-[#141416]' : 'border-white text-[#909399]'"
+          >Data</span
+        >
+        <span
+          @click="changeTabIdx(1)"
+          class="inline-block pb-[2px] border-b-4 cursor-pointer"
+          :class="tabIdx === 1 ? 'border-[#141416] text-[#141416]' : 'border-white text-[#909399]'"
+          >Hex</span
+        >
+      </div>
+      <div class="space-y-[18px]" v-show="tabIdx === 0">
+        <div class="space-y-2 rounded-md">
+          <div class="text-[#141416]">Inputs</div>
+          <div class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
+            <span>{{ shortestAddress(address || '') }}</span
+            ><span>{{ prettifyBalance(total || 0, 'BTC') }}</span>
           </div>
         </div>
-      </template>
-
-      <template #control>
-        <div class="" v-if="operationLock">
-          <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Operating...</div>
+        <div class="space-y-2 rounded-md">
+          <div class="text-[#141416]">Outputs</div>
+          <div class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
+            <span>{{ shortestAddress(inscribeOrder?.payAddress || '') }}</span>
+            <span>{{ prettifyBalance(inscribeOrder?.needAmount || 0, 'BTC') }}</span>
+          </div>
         </div>
-        <div class="grid grid-cols-2 gap-x-4" v-else>
-          <button
-            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
-            @click="isOpenConfirmModal = false"
-          >
-            Cancel
-          </button>
-          <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="send">
-            Confirm
-          </button>
+        <div class="space-y-2 rounded-md">
+          <div class="text-[#141416]">Network Fee Rate</div>
+          <div class="w-full p-2 bg-[#F5F5F5]">{{ prettifyBalance(paymentNetworkFee || 0, 'BTC') }}</div>
         </div>
-      </template>
-    </Modal>
+      </div>
+      <div class="space-y-[18px]" v-show="tabIdx === 1">
+        <div class="space-y-2 rounded-md">
+          <div class="text-[#141416]">Outputs</div>
+          <div class="w-full px-1,5 p-3 bg-[#F5F5F5] h-40 rounded-md overflow-scroll break-all">
+            {{ psbtHex }}
+          </div>
+        </div>
+        <div class="space-x-2.5 flex items-center justify-center">
+          <CopyIcon :class="copied ? 'text-blue-500' : ''" />
+          <span class="text-sm" @click="copyHex">Copy psbt transaction data</span>
+        </div>
+      </div>
+      <div class="absolute bottom-4 w-full left-0 flex items-center justify-between">
+        <button
+          @click="cancel"
+          class="border w-[133px] rounded-lg py-3 text-sm font-bold text-[#141416]"
+          style="border-image: 'linear-gradient(105deg, #72F5F6 4%, #171AFF 94%) 1'"
+        >
+          Cancel
+        </button>
+        <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm font-bold text-sky-100">
+          Confirm
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
