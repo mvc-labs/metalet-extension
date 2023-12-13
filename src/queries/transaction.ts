@@ -11,20 +11,19 @@ export const fetchBtcTxHex = async (txId: string): Promise<string> => {
     })
 }
 
-export const broadcastBTCTx = async (rawTx: string): Promise<string> => {
-  return metaletApiV2<{ code: number; data: string; msg: string }>(`/tx/broadcast`)
-    .post({
-      chain: 'btc',
-      net: 'livenet',
-      rawTx,
-    })
-    .then((result) => {
-      if (result.code === 0) {
-        return result.data
-      } else {
-        throw Error(result.msg)
-      }
-    })
+export const broadcastBTCTx = async (rawTx: string) => {
+  return await metaletApiV3<string>(`/tx/broadcast`).post({
+    chain: 'btc',
+    net: 'livenet',
+    rawTx,
+  })
+  // .then((result) => {
+  //   if (result.code === 0) {
+  //     return result.data
+  //   } else {
+  //     throw Error(result.msg)
+  //   }
+  // })
 }
 
 // export const broadcastBTCTx = async (rawtx: string): Promise<string> => {

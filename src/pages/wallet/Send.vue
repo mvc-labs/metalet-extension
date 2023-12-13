@@ -37,8 +37,7 @@ const isCustom = ref(false)
 const currentTitle = ref<string>('')
 const currentRateFee = ref<number | undefined>()
 
-const selectRateFee = (rateFee: number, title: string) => {
-  currentTitle.value = title
+const selectRateFee = (rateFee: number) => {
   currentRateFee.value = rateFee
   isCustom.value = false
 }
@@ -187,22 +186,24 @@ async function send() {
         <div class="" v-else-if="balance">{{ prettifyBalance(balance.total, asset.symbol) }}</div>
       </div>
 
-      <!-- rate list -->
-      <div class="grid grid-cols-4 gap-2 mt-4 text-xs" v-if="!rateLoading && rateList">
+      <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
+
+      <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-[#141416]" v-if="!rateLoading && rateList">
         <div
           v-for="rate in rateList"
-          @click="selectRateFee(rate.feeRate, rate.title)"
-          class="flex flex-col items-center justify-center rounded-md p-2 cursor-pointer"
-          :class="rate.title === currentTitle ? 'main-btn-bg text-white' : 'bg-gray-100'"
+          @click="selectRateFee(rate.feeRate)"
+          :class="rate.feeRate === currentRateFee ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
+          class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
         >
-          <div>{{ rate.title }}</div>
-          <div>{{ rate.feeRate }} sat/vB</div>
-          <div>#{{ rate.desc }}</div>
+          <div class="tex-sm">{{ rate.title }}</div>
+          <div class="mt-1.5 text-base font-bold">{{ rate.feeRate }} sat/vB</div>
+          <div class="mt-1 text-sm text-[#999999]">About</div>
+          <div class="text-sm text-[#999999]">{{ rate.desc.replace('About', '') }}</div>
         </div>
         <div
           @click="selectCustom()"
-          :class="isCustom ? 'main-btn-bg text-white' : 'bg-gray-100'"
-          class="flex flex-col items-center justify-center rounded-md p-2 cursor-pointer"
+          :class="isCustom ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
+          class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
         >
           <div>Custom</div>
         </div>
