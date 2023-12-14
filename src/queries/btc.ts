@@ -1,8 +1,7 @@
 import dayjs from 'dayjs'
+import { Ref, ComputedRef } from 'vue'
 import { fetchBRC20Token } from './brc20s'
-import { ref, Ref, ComputedRef } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
-import { type Asset, BTCAsset } from '@/data/assets'
 import { ordersApi, metaletApi, unisatApi } from '@/queries/request'
 
 interface Tick {
@@ -76,11 +75,10 @@ export const fetchBTCAsset = async (address: string): Promise<string[]> => {
     })
 }
 
-export const useBTCAssetQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
+export const useBRC20AssetQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
-    queryKey: ['BTCAssets', { address: addressRef.value }],
+    queryKey: ['BRC20Assets', { address: addressRef.value }],
     queryFn: () => fetchBRC20Token(addressRef.value),
-    select: (assets: Asset[]) => [BTCAsset, ...assets],
     ...options,
   })
 }

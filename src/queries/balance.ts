@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/vue-query'
-import { metaletApi, metaletApiV3, mvcApi, unisatApi } from './request'
 import { ComputedRef, Ref } from 'vue'
+import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker } from '@/lib/asset-symbol'
+import { metaletApi, metaletApiV3, mvcApi } from './request'
 import { fetchTokenBalance, useMVCTokenQuery } from '@/queries/tokens'
 
 type TokenType = 'BRC20'
@@ -50,19 +50,6 @@ export const fetchBtcBalance = async (address: string): Promise<Balance> => {
     confirmed: data.block.incomeFee * 10 ** 8,
     unconfirmed: data.mempool.incomeFee * 10 ** 8,
   }
-}
-
-interface BitcoinBalance {
-  confirm_amount: string
-  pending_amount: string
-  amount: string
-  confirm_btc_amount: string
-  pending_btc_amount: string
-  btc_amount: string
-  confirm_inscription_amount: string
-  pending_inscription_amount: string
-  inscription_amount: string
-  usd_value: string
 }
 
 // TODO Test to avoid request /address/brc20/asset

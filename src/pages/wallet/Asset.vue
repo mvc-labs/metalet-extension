@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getTags, MVCAsset } from '@/data/assets'
 import { SymbolTicker } from '@/lib/asset-symbol'
 import { useBalanceQuery } from '@/queries/balance'
 import Activities from './components/Activities.vue'
 import { prettifyTokenBalance } from '@/lib/formatters'
+import { getTags, BTCAsset, MVCAsset } from '@/data/assets'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
-import { useBRCTickerAseetQuery, useBTCAssetQuery } from '@/queries/btc'
+import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
 import { ArrowUpRightIcon, QrCodeIcon, ArrowsRightLeftIcon } from '@heroicons/vue/20/solid'
 
 const route = useRoute()
@@ -19,9 +19,12 @@ if (!route.params.address) {
 const address = ref<string>(route.params.address as string)
 
 const symbol = ref<SymbolTicker>(route.params.symbol as SymbolTicker)
-const { data: btcAssets } = useBTCAssetQuery(address, { enabled: computed(() => !!address.value) })
+const { data: btcAssets } = useBRC20AssetQuery(address, { enabled: computed(() => !!address.value) })
 
 const asset = computed(() => {
+  if (symbol.value === 'BTC') {
+    return BTCAsset
+  }
   if (symbol.value === 'SPACE') {
     return MVCAsset
   }

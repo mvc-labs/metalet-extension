@@ -21,12 +21,9 @@ const address = route.params.address as string
 const genesis = route.params.genesis as string
 const enabled = computed(() => !!address && !!symbol && !!genesis)
 
-// 用户拥有的代币资产
 const { isLoading, data: token } = useMVCTokenQuery(ref(address), genesis, { enabled })
 const asset = computed(() => {
   if (token.value) {
-    console.log('token', token.value)
-
     return {
       symbol: token.value.symbol,
       tokenName: token.value.name,

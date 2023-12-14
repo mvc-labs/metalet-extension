@@ -13,10 +13,7 @@ const route = useRoute()
 const chain: Ref<Chain> = ref(route.query.chain as Chain)
 const asset = computed(() => allAssets.find((asset) => asset.chain === chain.value))
 
-const address = ref<string>('')
-// getAddress(chain.value).then((add) => {
-//   address.value = add!
-// })
+const address = ref('')
 createEmit<string>('getAddress')(chain.value).then((add) => {
   address.value = add!
 })

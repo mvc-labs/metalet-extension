@@ -6,7 +6,7 @@ import { createEmit } from '@/lib/emitters'
 import { SymbolTicker } from '@/lib/asset-symbol'
 import { prettifyBalance } from '@/lib/formatters'
 import { useBalanceQuery } from '@/queries/balance'
-import { useBRCTickerAseetQuery, useBTCAssetQuery } from '@/queries/btc'
+import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
@@ -26,7 +26,7 @@ createEmit<string>('getAddress')('btc').then((addr) => {
 })
 
 const symbol = ref<SymbolTicker>(route.query.symbol as SymbolTicker)
-const { data: btcAssets } = useBTCAssetQuery(address, { enabled: computed(() => !!address.value) })
+const { data: btcAssets } = useBRC20AssetQuery(address, { enabled: computed(() => !!address.value) })
 const asset = computed(() => {
   if (btcAssets.value && btcAssets.value.length > 0) {
     return btcAssets.value.find((asset) => asset.symbol === symbol.value)

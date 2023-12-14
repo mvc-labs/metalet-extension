@@ -1,9 +1,10 @@
 import { mvcApi } from './request'
+import { Balance } from './balance'
 import { ComputedRef, Ref } from 'vue'
+import { getFTLogo } from '@/data/logos'
+import { type Asset } from '@/data/assets'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker } from '@/lib/asset-symbol'
-import { type Asset, MVCAsset } from '@/data/assets'
-import { Balance } from './balance'
 
 export type Token = {
   codeHash: string
@@ -27,9 +28,8 @@ export const useMVCAssetsQuery = (addressRef: Ref<string>, options: { enabled: C
   return useQuery({
     queryKey: ['MVCTokens', { address: addressRef.value }],
     queryFn: () => fetchMVCTokens(addressRef.value),
-    select: (tokens: Token[]) => [
-      MVCAsset,
-      ...tokens.map(
+    select: (tokens: Token[]) =>
+      tokens.map(
         (token) =>
           ({
             symbol: token.symbol,
@@ -41,9 +41,9 @@ export const useMVCAssetsQuery = (addressRef: Ref<string>, options: { enabled: C
             contract: 'MetaContract',
             codeHash: token.codeHash,
             genesis: token.genesis,
+            logo: getFTLogo(token.name),
           }) as Asset
       ),
-    ],
     ...options,
   })
 }

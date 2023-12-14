@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import AssetItem from './AssetItem.vue'
 import { createEmit } from '@/lib/emitters'
-import { useBTCAssetQuery } from '@/queries/btc'
+import { useBRC20AssetQuery } from '@/queries/btc'
 import { useMVCAssetsQuery } from '@/queries/tokens'
 import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
 import { type Asset, MVCAsset, BTCAsset } from '@/data/assets'
@@ -27,7 +27,7 @@ createEmit<string[]>('getAssetsDisplay')().then((display) => {
   assetsDisplay.value = display
 })
 
-const { data: btcAssets } = useBTCAssetQuery(btcAddress, { enabled: computed(() => !!btcAddress.value) })
+const { data: btcAssets } = useBRC20AssetQuery(btcAddress, { enabled: computed(() => !!btcAddress.value) })
 
 const { data: mvcAssets } = useMVCAssetsQuery(mvcAddress, { enabled: computed(() => !!mvcAddress.value) })
 
@@ -55,29 +55,31 @@ function toToken(token: Asset, address: string) {
 
 <template>
   <div class="mt-8 space-y-5 text-black">
-    <div class="space-y-2">
-      <div class="text-base font-bold text-gray-900">BTC</div>
+    <div class="text-base font-bold text-gray-900">BTC</div>
+    <div class="space-y-2" v-if="btcAddress">
+      <AssetItem :asset="BTCAsset" :address="btcAddress" @click="toNative(BTCAsset, btcAddress)" />
       <AssetItem
-        v-if="btcAddress"
-        v-for="asset in btcAssets || [BTCAsset]"
-        :key="asset.symbol"
         :asset="asset"
+        :key="asset.symbol"
         :address="btcAddress"
+        v-for="asset in btcAssets"
         @click="toNative(asset, btcAddress)"
       />
     </div>
+    <div v-else class="text-center text-gray-500 text-sm">BTC Asset Loading...</div>
 
-    <div class="space-y-2">
-      <div class="text-base font-bold text-gray-900">MVC</div>
+    <div class="text-base font-bold text-gray-900">MVC</div>
+    <div class="space-y-2" v-if="mvcAddress">
+      <AssetItem :asset="MVCAsset" :address="mvcAddress" @click="toNative(MVCAsset, mvcAddress)" />
       <AssetItem
-        v-if="mvcAddress"
-        v-for="asset in mvcAssets || [MVCAsset]"
-        :key="asset.genesis"
         :asset="asset"
+        :key="asset.genesis"
         :address="mvcAddress"
-        @click="asset.contract === 'MetaContract' ? toToken(asset, mvcAddress) : toNative(asset, mvcAddress)"
+        v-for="asset in mvcAssets"
+        @click="toToken(asset, mvcAddress)"
       />
     </div>
+    <div v-else class="text-center text-gray-500 text-sm">MVC Asset Loading...</div>
 
     <!-- Manage Token List -->
     <div class="flex items-center justify-center pb-4">
