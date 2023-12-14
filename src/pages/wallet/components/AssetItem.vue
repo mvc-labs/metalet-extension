@@ -64,10 +64,7 @@ const exchange = computed(() => {
         <div class="flex flex-col gap-y-1 items-start">
           <div
             :title="asset.tokenName"
-            :class="[
-              asset.isNative ? 'text-lg' : 'text-sm',
-              'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
-            ]"
+            :class="[asset.isNative ? 'text-lg' : 'text-sm', 'flex items-center gap-x-0.5']"
           >
             {{ asset.tokenName }}
             <CheckBadgeIcon

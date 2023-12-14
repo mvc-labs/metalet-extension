@@ -14,7 +14,7 @@ export const getFTLogo = (name: string) => {
   switch (name) {
     case 'MVC USDT':
       return MVCUSDTLogo
-    case 'MVCSWAP Tok':
+    case 'MVCSWAP Token':
       return MvcSwapLogo
     case 'ShowCoin':
       return ShowCoinLogo
