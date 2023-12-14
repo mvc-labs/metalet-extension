@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { metaletApi, metaletApiV3, mvcApi, unisatApi } from './request'
 import { ComputedRef, Ref } from 'vue'
 import { SymbolTicker } from '@/lib/asset-symbol'
+import { useMVCTokenQuery } from '@/queries/tokens'
 
 type TokenType = 'BRC20'
 
@@ -64,17 +65,6 @@ interface BitcoinBalance {
   usd_value: string
 }
 
-export const fetchUnisatBtcBalance = async (address: string): Promise<Balance> => {
-  const data = await unisatApi<BitcoinBalance>(`/address/balance`).get({ address })
-
-  return {
-    address,
-    total: Number(data.amount) * 10 ** 8,
-    confirmed: Number(data.confirm_amount) * 10 ** 8,
-    unconfirmed: Number(data.pending_amount) * 10 ** 8,
-  }
-}
-
 // TODO Test to avoid request /address/brc20/asset
 export const fetchBRC20Balance = async (address: string, symbol: SymbolTicker): Promise<Balance> => {
   const { tickList } = await metaletApi(`/address/brc20/asset`)
@@ -100,9 +90,9 @@ export const fetchBRC20Balance = async (address: string, symbol: SymbolTicker): 
   }
 }
 
-export const doNothing = async (): Promise<Balance> => {
+export const doNothing = async (address: string): Promise<Balance> => {
   return {
-    address: '',
+    address,
     confirmed: 0,
     unconfirmed: 0,
     total: 0,
@@ -113,7 +103,7 @@ export const useBalanceQuery = (
   address: Ref<string>,
   symbol: Ref<SymbolTicker>,
   options: { enabled: ComputedRef<boolean> },
-  contract?: string
+  params?: { contract?: string; genesis?: string }
 ) => {
   return useQuery({
     queryKey: ['balance', { address: address.value, symbol: symbol.value }],
@@ -124,10 +114,20 @@ export const useBalanceQuery = (
         case 'BTC':
           return fetchBtcBalance(address.value)
         default: {
-          if (contract === 'BRC-20') {
+          console.log({ params }, params?.contract === 'MetaContract')
+
+          if (params?.contract === 'BRC-20') {
             return fetchBRC20Balance(address.value, symbol.value)
+          } else if (params?.contract === 'MetaContract') {
+            const { data: token } = useMVCTokenQuery(address, params?.genesis || '', options)
+            return {
+              address: address.value,
+              confirmed: token.value?.confirmed || 0,
+              unconfirmed: token.value?.unconfirmed || 0,
+              total: (token.value?.unconfirmed || 0) + (token.value?.confirmed || 0),
+            }
           }
-          return doNothing()
+          return doNothing(address.value)
         }
       }
     },

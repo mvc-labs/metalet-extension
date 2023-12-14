@@ -13,6 +13,8 @@ const { asset, address } = defineProps<{
   address: string
 }>()
 
+console.log({ address, asset })
+
 const tag = ref<Tag>()
 
 if (asset?.contract) {
@@ -22,7 +24,12 @@ if (asset?.contract) {
 const enabled = computed(() => !!address && asset.queryable)
 const rateEnabled = computed(() => !!address)
 
-const { isLoading, data: balance } = useBalanceQuery(ref(address), ref(asset.symbol), { enabled }, asset?.contract)
+const { isLoading, data: balance } = useBalanceQuery(
+  ref(address),
+  ref(asset.symbol),
+  { enabled },
+  { contract: asset?.contract, genesis: asset?.genesis }
+)
 const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(
   ref(asset.symbol),
   asset?.contract,
@@ -33,7 +40,7 @@ const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRate
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
-    const usdRate: number = Number(exchangeRate.value.price)
+    const usdRate = Number(exchangeRate.value.price)
 
     const balanceInStandardUnit = balance.value.total / 10 ** asset.decimal
 
@@ -56,11 +63,11 @@ const exchange = computed(() => {
         <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
         <div class="flex flex-col gap-y-1 items-start">
           <div
-            :class="[
-              'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
-              asset.isNative ? 'text-lg' : 'text-sm',
-            ]"
             :title="asset.tokenName"
+            :class="[
+              asset.isNative ? 'text-lg' : 'text-sm',
+              'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
+            ]"
           >
             {{ asset.tokenName }}
             <CheckBadgeIcon
@@ -70,9 +77,9 @@ const exchange = computed(() => {
           </div>
 
           <div
-            :style="`background-color:${tag.bg};color:${tag.color};`"
-            :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs', 'inline-block']"
             v-if="tag"
+            :style="`background-color:${tag.bg};color:${tag.color};`"
+            :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs', 'inline-block', 'scale-75', 'origin-left']"
           >
             {{ tag.name }}
           </div>

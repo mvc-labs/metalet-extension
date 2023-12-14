@@ -315,7 +315,7 @@ export async function getBalance(chain: Chain = 'mvc', address?: string) {
     case 'btc':
       return fetchBtcBalance(address)
     default: {
-      return doNothing()
+      return doNothing(address)
     }
   }
 }

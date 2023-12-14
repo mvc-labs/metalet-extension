@@ -28,7 +28,12 @@ const error = ref<Error | undefined>()
 
 // balance
 const enabled = computed(() => !!address.value)
-const { isLoading, data: balance } = useBalanceQuery(address, symbol, { enabled }, asset.value?.contract)
+const { isLoading, data: balance } = useBalanceQuery(
+  address,
+  symbol,
+  { enabled },
+  { contract: asset.value?.contract, genesis: asset.value?.genesis }
+)
 
 // rate list query
 const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({ enabled: computed(() => !!address.value) })

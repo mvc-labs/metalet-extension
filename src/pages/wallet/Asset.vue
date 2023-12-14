@@ -35,7 +35,7 @@ const { isLoading, data: balance } = useBalanceQuery(
   address,
   symbol,
   { enabled: computed(() => !!address.value && !!symbol.value) },
-  asset.value?.contract
+  { contract: asset.value?.contract, genesis: asset.value?.genesis }
 )
 
 const { isLoading: tickersLoading, data: tickersData } = useBRCTickerAseetQuery(address, symbol, {

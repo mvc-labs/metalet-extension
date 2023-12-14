@@ -41,7 +41,7 @@ const {
   address,
   symbol,
   { enabled: computed(() => !!address.value && !!symbol.value) },
-  asset.value?.contract
+  { contract: asset.value?.contract, genesis: asset.value?.genesis }
 )
 
 const { isLoading: tokenLoading, data: tokenData } = useBRCTickerAseetQuery(address, symbol, {

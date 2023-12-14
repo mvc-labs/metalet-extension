@@ -39,6 +39,7 @@ export const useMVCAssetsQuery = (addressRef: Ref<string>, options: { enabled: C
             decimal: token.decimal,
             contract: 'MetaContract',
             codeHash: token.codeHash,
+            genesis: token.genesis,
           }) as Asset
       ),
     ],
