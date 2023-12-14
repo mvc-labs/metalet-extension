@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { getTags } from '@/data/assets'
 import { useRoute, useRouter } from 'vue-router'
+import { getTags, MVCAsset } from '@/data/assets'
 import { SymbolTicker } from '@/lib/asset-symbol'
 import { useBalanceQuery } from '@/queries/balance'
 import Activities from './components/Activities.vue'
@@ -20,13 +20,13 @@ const address = ref<string>(route.params.address as string)
 
 const symbol = ref<SymbolTicker>(route.params.symbol as SymbolTicker)
 const { data: btcAssets } = useBTCAssetQuery(address, { enabled: computed(() => !!address.value) })
+
 const asset = computed(() => {
+  if (symbol.value === 'SPACE') {
+    return MVCAsset
+  }
   if (btcAssets.value && btcAssets.value.length > 0) {
     const asset = btcAssets.value.find((asset) => asset.symbol === symbol.value)
-    if (!asset) {
-      router.go(-1)
-      return
-    }
     return asset
   }
 })
@@ -177,4 +177,5 @@ const toInscribe = () => {
       <div class="text-gray-500" v-else>No Service for {{ asset?.symbol }} yet.</div>
     </div>
   </div>
+  <div v-else>No Asset</div>
 </template>

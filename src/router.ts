@@ -168,7 +168,7 @@ const routes = [
     },
   },
   {
-    path: '/wallet/tokens/:symbol/:genesis',
+    path: '/wallet/tokens/:address/:symbol/:genesis',
     component: () => import('./pages/wallet/Token.vue'),
     name: 'token',
     meta: {

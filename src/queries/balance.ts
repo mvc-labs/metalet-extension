@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { metaletApi, metaletApiV3, mvcApi, unisatApi } from './request'
 import { ComputedRef, Ref } from 'vue'
 import { SymbolTicker } from '@/lib/asset-symbol'
-import { useMVCTokenQuery } from '@/queries/tokens'
+import { fetchTokenBalance, useMVCTokenQuery } from '@/queries/tokens'
 
 type TokenType = 'BRC20'
 
@@ -119,13 +119,14 @@ export const useBalanceQuery = (
           if (params?.contract === 'BRC-20') {
             return fetchBRC20Balance(address.value, symbol.value)
           } else if (params?.contract === 'MetaContract') {
-            const { data: token } = useMVCTokenQuery(address, params?.genesis || '', options)
-            return {
-              address: address.value,
-              confirmed: token.value?.confirmed || 0,
-              unconfirmed: token.value?.unconfirmed || 0,
-              total: (token.value?.unconfirmed || 0) + (token.value?.confirmed || 0),
-            }
+            // const { data: token } = useMVCTokenQuery(address, params?.genesis || '', options)
+            // return {
+            //   address: address.value,
+            //   confirmed: token.value?.confirmed || 0,
+            //   unconfirmed: token.value?.unconfirmed || 0,
+            //   total: (token.value?.unconfirmed || 0) + (token.value?.confirmed || 0),
+            // }
+            return fetchTokenBalance(address.value, params?.genesis || '')
           }
           return doNothing(address.value)
         }

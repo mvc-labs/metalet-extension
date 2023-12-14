@@ -3,6 +3,7 @@ import { ComputedRef, Ref } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker } from '@/lib/asset-symbol'
 import { type Asset, MVCAsset } from '@/data/assets'
+import { Balance } from './balance'
 
 export type Token = {
   codeHash: string
@@ -69,4 +70,18 @@ export const fetchTokens = async (address: string): Promise<Token[]> => {
     delete token.codeHash
     return token
   })
+}
+
+export const fetchTokenBalance = async (address: string, genesis: string): Promise<Balance> => {
+  const tokens = await mvcApi<Token[]>(`/contract/ft/address/${address}/balance`).get()
+
+  const token = tokens.find((token) => token.genesis === genesis)
+  const confirmed = token?.confirmed || 0
+  const unconfirmed = token?.unconfirmed || 0
+  return {
+    address,
+    confirmed,
+    unconfirmed,
+    total: confirmed + unconfirmed,
+  }
 }

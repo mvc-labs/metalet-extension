@@ -25,6 +25,8 @@ const enabled = computed(() => !!address && !!symbol && !!genesis)
 const { isLoading, data: token } = useMVCTokenQuery(ref(address), genesis, { enabled })
 const asset = computed(() => {
   if (token.value) {
+    console.log('token', token.value)
+
     return {
       symbol: token.value.symbol,
       tokenName: token.value.name,
@@ -34,6 +36,7 @@ const asset = computed(() => {
       decimal: token.value.decimal,
       contract: 'MetaContract',
       codeHash: token.value.codeHash,
+      genesis: token.value.genesis,
     } as Asset
   }
 })

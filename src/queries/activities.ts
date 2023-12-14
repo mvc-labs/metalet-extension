@@ -152,7 +152,7 @@ export const useActivitiesQuery = (
         return fetchSpaceActivities(addressRef.value)
       } else if (asset.contract === 'BRC-20') {
         return fetchBRC20Activities(addressRef.value, asset.symbol)
-      } else if (asset.contract === 'BRC-20') {
+      } else if (asset.contract === 'MetaContract') {
         return fetchTokenActivities(addressRef.value, asset)
       }
     },
