@@ -119,6 +119,16 @@ const routes = [
     },
   },
   {
+    path: '/wallet/inscribe-success',
+    component: () => import('./pages/wallet/InscribeSuccess.vue'),
+    name:'inscribe-success',
+    meta: {
+      secondaryHeader: true,
+      headerTitle: '',
+      noFooter: true,
+    },
+  },
+  {
     path: '/wallet/send-token/:symbol/:genesis',
     component: () => import('./pages/wallet/SendToken.vue'),
     name: 'send-token',

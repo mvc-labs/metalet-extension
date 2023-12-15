@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-import { ref, computed, Ref } from 'vue'
 import { type Psbt } from 'bitcoinjs-lib'
 import { createEmit } from '@/lib/emitters'
 import { BtcWallet } from '@/lib/wallets/btc'
+import CopyIcon from '@/assets/icons/copy.svg'
+import { ref, computed, Ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
+import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
 import { prettifyBalance, shortestAddress } from '@/lib/formatters'
-import { useBTCRateQuery } from '@/queries/transaction'
-import { preInscribe, PreInscribe, getInscribeInfo } from '@/queries/inscribe'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
-import CopyIcon from '@/assets/icons/copy.svg'
+import { preInscribe, PreInscribe, getInscribeInfo } from '@/queries/inscribe'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
@@ -47,6 +47,12 @@ const { data: tokenData } = useBRCTickerAseetQuery(address, symbol, {
 
 const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({ enabled: computed(() => !!address.value) })
 
+watch(rateList, (newRateList?: FeeRate[]) => {
+  if (newRateList && newRateList[1]) {
+    selectRateFee(newRateList[1].feeRate)
+  }
+})
+
 const nextStep = ref(0)
 
 const isOpenResultModal = ref(false)
@@ -71,6 +77,22 @@ const popConfirm = async () => {
     transactionResult.value = {
       status: 'warning',
       message: 'No address.',
+    }
+    isOpenResultModal.value = true
+    return
+  }
+  if (!inscribeAmount.value) {
+    transactionResult.value = {
+      status: 'warning',
+      message: 'No input amount.',
+    }
+    isOpenResultModal.value = true
+    return
+  }
+  if (inscribeAmount.value > Number(tokenData.value?.tokenBalance.availableBalance || 0)) {
+    transactionResult.value = {
+      status: 'warning',
+      message: 'Insufficient Balance.',
     }
     isOpenResultModal.value = true
     return
@@ -141,6 +163,7 @@ async function send() {
       if (resStatus!.inscriptionState === 4) {
         clearInterval(timer)
         operationLock.value = false
+        toSuceess()
         return
       }
       resStatus = await getInscribeInfo(inscribeOrder.value!.orderId)
@@ -155,6 +178,10 @@ function cancel() {
 const tabIdx = ref<number>(0)
 const changeTabIdx = (idx: number) => {
   tabIdx.value = idx
+}
+
+function toSuceess() {
+  router.push({ name: 'inscribe-success' })
 }
 </script>
 
@@ -222,7 +249,8 @@ const changeTabIdx = (idx: number) => {
         v-else
         @click="popConfirm"
         :disabled="!currentRateFee || !inscribeAmount"
-        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100 absolute bottom-4 left-0"
+        class="w-full rounded-lg py-3 text-sm font-bold text-sky-100 absolute bottom-4 left-0"
+        :class="!currentRateFee || !inscribeAmount ? 'bg-gray-500 cursor-not-allowed' : 'main-btn-bg'"
       >
         Next
       </button>
@@ -231,7 +259,7 @@ const changeTabIdx = (idx: number) => {
     <div v-else-if="nextStep === 1" class="text-[#141416] relative h-full">
       <div class="text-center text-3xl font-bold">{{ inscribeAmount }} {{ asset.symbol }}</div>
       <div class="mt-[30px] text-sm w-full">Preview</div>
-      <div class="w-full h-[76px] rounded-sm bg-[#F5F5F5] mt-2 p-3 text-sm">
+      <div class="w-full h-[76px] rounded-sm bg-[#F5F5F5] mt-2 p-3 text-sm truncate">
         {{ `{"p":"brc-20","op":"transfer","tick":"${asset.symbol}","amt":"${inscribeAmount}"}` }}
       </div>
       <div class="mt-8 space-y-5">

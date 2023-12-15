@@ -40,11 +40,14 @@ const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRate
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
-    const usdRate = Number(exchangeRate.value.price)
+    let usdRate = Number(exchangeRate.value.price)
 
     const balanceInStandardUnit = balance.value.total / 10 ** asset.decimal
 
-    const exchanged = balanceInStandardUnit * usdRate
+    let exchanged = balanceInStandardUnit * usdRate
+    if (typeof exchanged !== 'number') {
+      exchanged = 0
+    }
     console.log({ asset, balance: balance.value, exchangeRate: exchangeRate.value, balanceInStandardUnit, exchanged })
 
     updateAsset({ name: asset.symbol, value: exchanged })

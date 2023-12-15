@@ -3,8 +3,8 @@ import { ComputedRef, Ref } from 'vue'
 import { type Asset } from '@/data/assets'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker } from '@/lib/asset-symbol'
-import OrdiLogoImg from '../assets/images/ordi-logo.svg?url'
 import { metaletApi, metaletApiV3, unisatApi } from './request'
+import { getBRC20Logo } from '@/data/logos'
 
 export type Brc20 = {
   symbol: SymbolTicker
@@ -65,7 +65,7 @@ export const fetchBRC20Token = async (address: string): Promise<Asset[]> => {
     (token) =>
       ({
         symbol: token.ticker,
-        logo: OrdiLogoImg,
+        logo: getBRC20Logo(token.ticker),
         tokenName: token.ticker,
         isNative: false,
         chain: 'btc',

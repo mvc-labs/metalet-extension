@@ -91,7 +91,8 @@ const toInscribe = () => {
 
 <template>
   <div class="mt-8 flex flex-col items-center" v-if="asset">
-    <img :src="asset!.logo" alt="" class="h-20 w-20 rounded-xl" />
+    <img v-if="asset!.logo" :src="asset.logo" alt="" class="h-20 w-20 rounded-xl" />
+    <CircleStackIcon class="h-20 w-20 text-gray-300 transition-all group-hover:text-blue-500" v-else />
 
     <div class="mt-1.5 flex items-center gap-x-1.5">
       <div
@@ -158,7 +159,7 @@ const toInscribe = () => {
               class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative"
             >
               <div class="mt-2.5 text-[#909399] text-sm">{{ ticker.ticker }}</div>
-              <div class="mt-3 text-[#141416] text-lg font-bold">{{ ticker.amount }}</div>
+              <div class="mt-3 text-[#141416] text-lg font-bold truncate">{{ ticker.amount }}</div>
               <div
                 class="text-white text-xs bg-[#1E2BFF] rounded-b-md absolute bottom-0 w-full text-center pt-[5px] pb-[4px]"
               >

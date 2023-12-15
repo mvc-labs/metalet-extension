@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import Decimal from 'decimal.js'
-import { ref, computed, Ref, inject, toRaw } from 'vue'
+import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Wallet } from 'meta-contract'
 import { useQueryClient } from '@tanstack/vue-query'
@@ -11,7 +11,7 @@ import { BtcWallet } from '@/lib/wallets/btc'
 import { allAssets } from '@/data/assets'
 import { type SymbolTicker } from '@/lib/asset-symbol'
 import Modal from '@/components/Modal.vue'
-import { useBTCRateQuery } from '@/queries/transaction'
+import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
@@ -36,7 +36,15 @@ const { isLoading, data: balance } = useBalanceQuery(
 )
 
 // rate list query
-const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({ enabled: computed(() => !!address.value) })
+const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({
+  enabled: computed(() => !!address.value && asset.value.chain === 'btc'),
+})
+
+watch(rateList, (newRateList?: FeeRate[]) => {
+  if (newRateList && newRateList[1]) {
+    selectRateFee(newRateList[1].feeRate)
+  }
+})
 
 const isCustom = ref(false)
 const currentTitle = ref<string>('')
@@ -81,7 +89,7 @@ const popConfirm = () => {
     isOpenResultModal.value = true
     return
   }
-  if (!currentRateFee.value) {
+  if (!currentRateFee.value && asset.value.chain === 'btc') {
     transactionResult.value = {
       status: 'warning',
       message: 'Please select fee rate.',
@@ -191,26 +199,29 @@ async function send() {
         <div class="" v-else-if="balance">{{ prettifyBalance(balance.total, asset.symbol) }}</div>
       </div>
 
-      <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
+      <!-- fee rate -->
+      <div v-if="asset.chain === 'btc' && !rateLoading && rateList">
+        <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
 
-      <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-[#141416]" v-if="!rateLoading && rateList">
-        <div
-          v-for="rate in rateList"
-          @click="selectRateFee(rate.feeRate)"
-          :class="rate.feeRate === currentRateFee ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-          class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
-        >
-          <div class="tex-sm">{{ rate.title }}</div>
-          <div class="mt-1.5 text-base font-bold">{{ rate.feeRate }} sat/vB</div>
-          <div class="mt-1 text-sm text-[#999999]">About</div>
-          <div class="text-sm text-[#999999]">{{ rate.desc.replace('About', '') }}</div>
-        </div>
-        <div
-          @click="selectCustom()"
-          :class="isCustom ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-          class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
-        >
-          <div>Custom</div>
+        <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-[#141416]">
+          <div
+            v-for="rate in rateList"
+            @click="selectRateFee(rate.feeRate)"
+            :class="rate.feeRate === currentRateFee ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
+            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
+          >
+            <div class="tex-sm">{{ rate.title }}</div>
+            <div class="mt-1.5 text-base font-bold">{{ rate.feeRate }} sat/vB</div>
+            <div class="mt-1 text-sm text-[#999999]">About</div>
+            <div class="text-sm text-[#999999]">{{ rate.desc.replace('About', '') }}</div>
+          </div>
+          <div
+            @click="selectCustom()"
+            :class="isCustom ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
+            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
+          >
+            <div>Custom</div>
+          </div>
         </div>
       </div>
 
@@ -226,7 +237,14 @@ async function send() {
     </div>
 
     <!-- send -->
-    <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="popConfirm">Send</button>
+    <button
+      @click="popConfirm"
+      :disabled="!recipient || !amountInSats"
+      class="w-full rounded-lg py-3 text-sm font-bold text-sky-100"
+      :class="!recipient || !amountInSats ? 'bg-gray-500 cursor-not-allowed' : 'main-btn-bg'"
+    >
+      Send
+    </button>
 
     <!-- error info -->
     <p v-if="error">{{ error.message }}</p>

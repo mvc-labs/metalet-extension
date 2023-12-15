@@ -132,7 +132,7 @@ const toResultOrder = async () => {
         </div>
 
         <div class="space-y-1">
-          <div class="label">Transaction ID</div>
+          <div class="label">Order ID</div>
           <div class="group cursor-pointer break-all text-xs" @click="toResultOrder">
             <span class="group-hover:underline">{{ result.orderId }}</span>
             <ArrowTopRightOnSquareIcon
