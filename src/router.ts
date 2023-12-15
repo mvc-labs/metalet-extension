@@ -101,8 +101,9 @@ const routes = [
     },
   },
   {
-    path: '/wallet/sendBRC',
+    path: '/wallet/sendBRC20',
     component: () => import('./pages/wallet/SendBRC.vue'),
+    name: 'sendBRC20',
     meta: {
       secondaryHeader: true,
       headerTitle: 'Send',
@@ -110,7 +111,7 @@ const routes = [
     },
   },
   {
-    path: '/wallet/inscribe',
+    path: '/wallet/inscribe/:symbol/:address',
     component: () => import('./pages/wallet/Inscribe.vue'),
     name: 'inscribe',
     meta: {
@@ -120,7 +121,7 @@ const routes = [
     },
   },
   {
-    path: '/wallet/transfer',
+    path: '/wallet/transfer/:symbol/:address',
     component: () => import('./pages/wallet/Transfer.vue'),
     name: 'transfer',
     meta: {

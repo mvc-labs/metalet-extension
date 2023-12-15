@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { type Psbt } from 'bitcoinjs-lib'
-import { createEmit } from '@/lib/emitters'
 import { BtcWallet } from '@/lib/wallets/btc'
 import CopyIcon from '@/assets/icons/copy.svg'
 import { ref, computed, Ref, watch } from 'vue'
@@ -15,12 +14,12 @@ import TransactionResultModal, { type TransactionResult } from './components/Tra
 const route = useRoute()
 const router = useRouter()
 
-const address = ref('')
-createEmit<string>('getAddress')('btc').then((addr) => {
-  address.value = addr!
-})
+if (!route.params.address || !route.params.symbol) {
+  router.go(-1)
+}
+const address = ref<string>(route.params.address as string)
+const symbol = ref<SymbolTicker>(route.params.symbol as SymbolTicker)
 
-const symbol = ref<SymbolTicker>(route.query.symbol as SymbolTicker)
 const { data: btcAssets } = useBRC20AssetQuery(address, { enabled: computed(() => !!address.value) })
 const asset = computed(() => {
   if (btcAssets.value && btcAssets.value.length > 0) {

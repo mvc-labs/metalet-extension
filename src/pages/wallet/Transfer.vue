@@ -10,12 +10,20 @@ const router = useRouter()
 if (!route.params.address || !route.params.symbol) {
   router.go(-1)
 }
+
 const address = ref<string>(route.params.address as string)
 const symbol = ref<SymbolTicker>(route.params.symbol as SymbolTicker)
 
 const { isLoading, data: tickersData } = useBRCTickerAseetQuery(address, symbol, {
   enabled: computed(() => !!address.value),
 })
+
+const toSendBRC20 = (inscriptionId: string, amount: number) => {
+  router.push({
+    name: 'sendBRC20',
+    query: { address: address.value, symbol: symbol.value, inscriptionId, amount },
+  })
+}
 
 const toInscribe = () => {
   router.push({ name: 'inscribe', params: { address: address.value, symbol: symbol.value } })
@@ -33,8 +41,9 @@ const toInscribe = () => {
       <div class="grid grid-cols-3 gap-2 w-full mt-3">
         <div
           :key="ticker.inscriptionId"
+          @click="toSendBRC20(ticker.inscriptionId, Number(ticker.amount))"
           v-for="ticker in tickersData.transferableList"
-          class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative"
+          class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative cursor-pointer"
         >
           <div class="mt-2.5 text-[#909399] text-sm">{{ ticker.ticker }}</div>
           <div class="mt-3 text-[#141416] text-lg font-bold truncate">{{ ticker.amount }}</div>
@@ -46,13 +55,18 @@ const toInscribe = () => {
         </div>
       </div>
     </div>
-    <div class="border border-[#D8D8D8] flex items-center justify-center gap-3 mt-[30px] py-[18px]" @click="toInscribe">
+    <div
+      @click="toInscribe"
+      class="border border-[#D8D8D8] rounded-lg flex flex-col items-center justify-center gap-3 mt-[30px] py-[18px] cursor-pointer"
+    >
       <div class="text-[#141416] text-center text-lg font-bold">Inscribe TRANSFER</div>
       <div class="text-[#909399] text-center text-lg">
         Available {{ tickersData.tokenBalance.availableBalance }} {{ symbol }}
       </div>
     </div>
-    <div class="mt-2 text-[#909399] text-sm">* To send BRC-20, you have to inscribe a TRANSFER inscription first</div>
+    <div class="mt-2 text-[#909399] text-sm text-center">
+      * To send BRC-20, you have to inscribe a TRANSFER inscription first
+    </div>
   </div>
   <div v-else-if="isLoading" class="text-center text-sm font-bold text-gray-500">BRC20 Asset Loading...</div>
 </template>

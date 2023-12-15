@@ -22,7 +22,7 @@ export class BtcWallet {
     return wallet
   }
 
-  async sendBRC(recipient: string, brcUtxos: UTXO[], feeRate = 2) {
+  async sendBRC(recipient: string, utxo: UTXO, feeRate = 2) {
     const amount = new Decimal(0)
     // TODO put this logic in `account.ts`
     if (!this.account) throw new Error('no account')
@@ -39,14 +39,28 @@ export class BtcWallet {
     const buildPsbt = async (selectedUtxos: UTXO[], change = new Decimal(1)) => {
       const psbt = new Psbt({ network: btcNetwork })
 
-      for (const utxo of brcUtxos) {
-        const payInput = await createPayInput({ utxo: utxo as any, payment, addressType })
-        psbt.addInput(payInput)
+      const payInput = await createPayInput({ utxo, payment, addressType })
+      psbt.addInput(payInput)
+      psbt.addOutput({
+        value: utxo.satoshi,
+        address: recipient,
+      })
+
+      if (change.gt(0)) {
         psbt.addOutput({
-          value: utxo.satoshi,
-          address: recipient,
+          value: change.toNumber(),
+          address,
         })
       }
+
+      // for (const utxo of brcUtxos) {
+      //   const payInput = await createPayInput({ utxo: utxo as any, payment, addressType })
+      //   psbt.addInput(payInput)
+      //   psbt.addOutput({
+      //     value: utxo.satoshi,
+      //     address: recipient,
+      //   })
+      // }
 
       for (const utxo of selectedUtxos) {
         const payInput = await createPayInput({ utxo, payment, addressType })
@@ -72,7 +86,8 @@ export class BtcWallet {
 
     psbt = await buildPsbt(selecedtUTXOs, getTotalSatoshi(selecedtUTXOs).minus(amount).minus(fee))
 
-    broadcast(psbt)
+    const txId = await broadcast(psbt)
+    return { txId }
   }
 
   async send(recipient: string, amount: number | Decimal, feeRate = 2) {
