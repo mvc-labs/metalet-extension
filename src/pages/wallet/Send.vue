@@ -1,16 +1,16 @@
 <script lang="ts" setup>
 import Decimal from 'decimal.js'
-import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Wallet } from 'meta-contract'
-import { useQueryClient } from '@tanstack/vue-query'
-import { prettifyBalance } from '@/lib/formatters'
-import { useBalanceQuery } from '@/queries/balance'
+import { allAssets } from '@/data/assets'
+import Modal from '@/components/Modal.vue'
 import { createEmit } from '@/lib/emitters'
 import { BtcWallet } from '@/lib/wallets/btc'
-import { allAssets } from '@/data/assets'
+import { prettifyBalance } from '@/lib/formatters'
+import { useBalanceQuery } from '@/queries/balance'
+import { useQueryClient } from '@tanstack/vue-query'
 import { type SymbolTicker } from '@/lib/asset-symbol'
-import Modal from '@/components/Modal.vue'
+import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
 import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
@@ -40,11 +40,15 @@ const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({
   enabled: computed(() => !!address.value && asset.value.chain === 'btc'),
 })
 
-watch(rateList, (newRateList?: FeeRate[]) => {
-  if (newRateList && newRateList[1]) {
-    selectRateFee(newRateList[1].feeRate)
-  }
-})
+watch(
+  rateList,
+  (newRateList?: FeeRate[]) => {
+    if (newRateList && newRateList[1]) {
+      selectRateFee(newRateList[1].feeRate)
+    }
+  },
+  { immediate: true }
+)
 
 const isCustom = ref(false)
 const currentTitle = ref<string>('')
@@ -240,8 +244,8 @@ async function send() {
     <button
       @click="popConfirm"
       :disabled="!recipient || !amountInSats"
-      class="w-full rounded-lg py-3 text-sm font-bold text-sky-100"
-      :class="!recipient || !amountInSats ? 'bg-gray-500 cursor-not-allowed' : 'main-btn-bg'"
+      class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
+      :class="!recipient || !amountInSats ? 'opacity-50 cursor-not-allowed' : ''"
     >
       Send
     </button>

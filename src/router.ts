@@ -112,6 +112,7 @@ const routes = [
   {
     path: '/wallet/inscribe',
     component: () => import('./pages/wallet/Inscribe.vue'),
+    name: 'inscribe',
     meta: {
       secondaryHeader: true,
       headerTitle: 'Inscribe Transfer',
@@ -119,9 +120,19 @@ const routes = [
     },
   },
   {
+    path: '/wallet/transfer',
+    component: () => import('./pages/wallet/Transfer.vue'),
+    name: 'transfer',
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Transfer',
+      noFooter: true,
+    },
+  },
+  {
     path: '/wallet/inscribe-success',
     component: () => import('./pages/wallet/InscribeSuccess.vue'),
-    name:'inscribe-success',
+    name: 'inscribe-success',
     meta: {
       secondaryHeader: true,
       headerTitle: '',

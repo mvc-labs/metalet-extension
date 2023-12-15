@@ -81,10 +81,10 @@ const toReceive = () => {
   router.push(`/wallet/receive?chain=${asset.value!.chain}`)
 }
 
-const toInscribe = () => {
+const toTransfer = () => {
   const { contract } = asset.value!
   if (contract === 'BRC-20') {
-    router.push(`/wallet/inscribe?symbol=${symbol.value}`)
+    router.push({ name: 'transfer', params: { address: address.value, symbol: symbol.value } })
   }
 }
 </script>
@@ -135,7 +135,7 @@ const toInscribe = () => {
           <button
             v-if="asset.contract === 'BRC-20'"
             class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3"
-            @click="toInscribe"
+            @click="toTransfer"
           >
             <ArrowsRightLeftIcon class="mr-1 h-4 w-4" />Transfer
           </button>

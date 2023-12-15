@@ -47,11 +47,15 @@ const { data: tokenData } = useBRCTickerAseetQuery(address, symbol, {
 
 const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({ enabled: computed(() => !!address.value) })
 
-watch(rateList, (newRateList?: FeeRate[]) => {
-  if (newRateList && newRateList[1]) {
-    selectRateFee(newRateList[1].feeRate)
-  }
-})
+watch(
+  rateList,
+  (newRateList?: FeeRate[]) => {
+    if (newRateList && newRateList[1]) {
+      selectRateFee(newRateList[1].feeRate)
+    }
+  },
+  { immediate: true }
+)
 
 const nextStep = ref(0)
 
@@ -249,8 +253,8 @@ function toSuceess() {
         v-else
         @click="popConfirm"
         :disabled="!currentRateFee || !inscribeAmount"
-        class="w-full rounded-lg py-3 text-sm font-bold text-sky-100 absolute bottom-4 left-0"
-        :class="!currentRateFee || !inscribeAmount ? 'bg-gray-500 cursor-not-allowed' : 'main-btn-bg'"
+        :class="!currentRateFee || !inscribeAmount ? 'opacity-50 cursor-not-allowed' : ''"
+        class="main-btn-bg w-full rounded-lg py-3 teFxt-sm font-bold text-sky-100 absolute bottom-4 left-0"
       >
         Next
       </button>
