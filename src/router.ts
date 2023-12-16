@@ -1,6 +1,6 @@
 import * as VueRouter from 'vue-router'
 import Wallet from './pages/wallet/Index.vue'
-import { getStorage, useStorage } from './lib/storage'
+import { getStorage } from './lib/storage'
 import accountManager, {
   Account,
   getAccounts,
@@ -264,8 +264,7 @@ router.beforeEach(async (to, from) => {
 // 检查账号状态；如果没有当前账号，跳转到账号页面
 router.beforeEach(async (to, from) => {
   // 如果是老用户（sync存储中有助记词），且该账号在localStorage中不存在，则说明需要迁移，跳转至新版本迁移页面
-  const syncStorage = await useStorage('sync')
-  const v0Record = await syncStorage.get('currentAccount')
+  const v0Record = await chrome.storage.sync.get('currentAccount')
   const v1Records = await getLegacyAccounts()
   if (v0Record && v0Record.currentAccount && v1Records.length === 0) {
     const mneStr = v0Record.currentAccount.mnemonicStr

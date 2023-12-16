@@ -8,15 +8,13 @@ import { setNetwork } from '@/lib/network'
 import { deriveAllAddresses, type AddressType } from '@/lib/bip32-deriver'
 
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
-import { useStorage } from '@/lib/storage'
 
 const router = useRouter()
 
 const error = ref('')
 const importWallet = async () => {
   // 如果是老用户（sync存储中有助记词），且该账号在localStorage中不存在，则说明需要迁移，跳转至新版本迁移页面
-  const syncStorage = await useStorage('sync')
-  const oldRecord = await syncStorage.get('currentAccount')
+  const oldRecord = await chrome.storage.sync.get('currentAccount')
   const v1Records = await getLegacyAccounts()
   if (oldRecord && oldRecord.currentAccount && oldRecord.currentAccount.mnemonicStr && !v1Records.length) {
     const mneStr = oldRecord.currentAccount.mnemonicStr

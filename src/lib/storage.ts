@@ -1,11 +1,14 @@
 import { IS_DEV } from '@/data/config'
+// import browser from 'webextension-polyfill'
+console.log({ IS_DEV })
+let browser = IS_DEV ? ({} as any) : import('webextension-polyfill').then((m) => m.default)
 
 export async function useStorage(location: 'local' | 'session' | 'sync' = 'local') {
   if (IS_DEV) {
     const storage = location === 'local' ? window.localStorage : window.sessionStorage
 
     return {
-      get(key: string) {
+      async get(key: string) {
         const value = storage.getItem(key)
         if (value === null) {
           return undefined
@@ -16,34 +19,41 @@ export async function useStorage(location: 'local' | 'session' | 'sync' = 'local
           return value
         }
       },
-      set(key: string, value: any) {
+      async set(key: string, value: any) {
         if (typeof value === 'object') {
           value = JSON.stringify(value)
         }
         storage.setItem(key, value)
       },
-      delete(key: string) {
+      async delete(key: string) {
         storage.removeItem(key)
       },
     }
   }
 
   // otherwise, dynamically import browser.storage module
-  const ext = await import('webextension-polyfill').then((m) => m.default)
-  const storage = ext.storage[location]
+  // const ext = await import('webextension-poylyfill').then((m) => m.default)
+  // console.log(ext)
+  // const storage = ext.storage[location]
+  console.log('here')
+  console.log(browser)
+  console.log(2)
+  const storage = (await browser).storage[location]
+  console.log({ storage })
 
   return {
-    get(key: string) {
-      return storage.get(key)
+    async get(key: string) {
+      return ((await storage.get(key)) as any)[key]
     },
-    set(key: string, value: any) {
+    async set(key: string, value: any) {
+      console.log('whwat')
       if (typeof value === 'object') {
         value = JSON.stringify(value)
       }
-      return storage.set({ [key]: value })
+      return await storage.set({ [key]: value })
     },
-    delete(key: string) {
-      return storage.remove(key)
+    async delete(key: string) {
+      return await storage.remove(key)
     },
   }
 }
@@ -65,6 +75,7 @@ export async function getStorage(
   const storage = await useStorage(option?.useSession ? 'session' : 'local')
 
   const value = await storage.get(key)
+  console.log(value)
 
   if (typeof value === 'string') {
     try {
@@ -81,7 +92,6 @@ export async function getStorage(
 
   return value
 }
-
 // export async function deleteStorage(key: string): Promise<void> {
 //   const res = await browser.storage.local.get(key)
 //   if (res[key] === undefined) {
