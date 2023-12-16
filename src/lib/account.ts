@@ -17,6 +17,7 @@ import {
   deriveBtcPrivateKey,
 } from './bip32-deriver'
 import { crypto } from 'bitcoinjs-lib'
+import { DEBUG } from '@/data/config'
 
 const CURRENT_ACCOUNT_ID = 'currentAccountId'
 const ACCOUNT_STORAGE_CURRENT_KEY = 'accounts_v2'
