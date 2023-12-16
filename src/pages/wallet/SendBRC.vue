@@ -16,9 +16,9 @@ if (!route.query.address || !route.query.symbol || !route.query.inscriptionId ||
 }
 
 const amount = ref(Number(route.query.amount))
-const address = ref<string>(route.params.address as string)
+const address = ref<string>(route.query.address as string)
 const symbol = ref<SymbolTicker>(route.query.symbol as SymbolTicker)
-const inscriptionId = ref<string>(route.params.inscriptionId as string)
+const inscriptionId = ref<string>(route.query.inscriptionId as string)
 
 const recipient = ref('')
 
@@ -78,7 +78,7 @@ async function send() {
 </script>
 
 <template>
-  <div class="pt-[30px] space-y-[30px] h-full relative">
+  <div class="pt-[30px] space-y-[30px] h-full relative overflow-y-auto">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
 
     <div class="space-y-2">
@@ -101,7 +101,7 @@ async function send() {
         <div
           v-for="rate in rateList"
           @click="selectRateFee(rate.feeRate)"
-          :class="rate.feeRate === currentRateFee ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
+          :class="rate.feeRate === currentRateFee ? 'border-[#9da1eb]' : 'border-[#D8D8D8]'"
           class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
         >
           <div class="tex-sm">{{ rate.title }}</div>
@@ -119,6 +119,15 @@ async function send() {
       </div>
     </div>
 
+    <input
+      min="0"
+      type="number"
+      v-if="isCustom"
+      placeholder="sat/vB"
+      v-model="currentRateFee"
+      class="main-input w-full !rounded-xl !py-4 !text-xs mt-1"
+    />
+
     <div v-if="operationLock" class="w-full py-3 text-center text-sm font-bold text-gray-500 absolute bottom-4 left-0">
       Loading...
     </div>
@@ -127,7 +136,7 @@ async function send() {
       @click="send"
       :disabled="!recipient"
       :class="!recipient ? 'opacity-50 cursor-not-allowed' : ''"
-      class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100 absolute bottom-4"
+      class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
     >
       Send
     </button>
