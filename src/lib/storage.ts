@@ -1,25 +1,70 @@
-import browser from 'webextension-polyfill'
-import { raise } from './helpers'
+import { IS_DEV } from '@/data/config'
+
+export async function useStorage(location: 'local' | 'session' | 'sync' = 'local') {
+  if (IS_DEV) {
+    const storage = location === 'local' ? window.localStorage : window.sessionStorage
+
+    return {
+      get(key: string) {
+        const value = storage.getItem(key)
+        if (value === null) {
+          return undefined
+        }
+        try {
+          return JSON.parse(value)
+        } catch (e) {
+          return value
+        }
+      },
+      set(key: string, value: any) {
+        if (typeof value === 'object') {
+          value = JSON.stringify(value)
+        }
+        storage.setItem(key, value)
+      },
+      delete(key: string) {
+        storage.removeItem(key)
+      },
+    }
+  }
+
+  // otherwise, dynamically import browser.storage module
+  const ext = await import('webextension-polyfill').then((m) => m.default)
+  const storage = ext.storage[location]
+
+  return {
+    get(key: string) {
+      return storage.get(key)
+    },
+    set(key: string, value: any) {
+      if (typeof value === 'object') {
+        value = JSON.stringify(value)
+      }
+      return storage.set({ [key]: value })
+    },
+    delete(key: string) {
+      return storage.remove(key)
+    },
+  }
+}
 
 export async function setStorage(key: string, value: any, useSession: boolean = false) {
   if (typeof value === 'object') {
     value = JSON.stringify(value)
   }
 
-  if (useSession) {
-    await browser.storage.session.set({ [key]: value })
-    return
-  }
+  const storage = await useStorage(useSession ? 'session' : 'local')
 
-  await browser.storage.local.set({ [key]: value })
+  return storage.set(key, value)
 }
 
 export async function getStorage(
   key: string,
   option?: { defaultValue?: unknown; isParse?: boolean; useSession?: boolean }
 ) {
-  const res = option?.useSession ? await browser.storage.session.get(key) : await browser.storage.local.get(key)
-  const value = res[key]
+  const storage = await useStorage(option?.useSession ? 'session' : 'local')
+
+  const value = await storage.get(key)
 
   if (typeof value === 'string') {
     try {
@@ -37,27 +82,27 @@ export async function getStorage(
   return value
 }
 
-export async function deleteStorage(key: string): Promise<void> {
-  const res = await browser.storage.local.get(key)
-  if (res[key] === undefined) {
-    return
-  }
-  try {
-    await browser.storage.local.remove(key)
-  } catch (e) {
-    raise(`browser local storage delete ${key} failed`)
-  }
-}
+// export async function deleteStorage(key: string): Promise<void> {
+//   const res = await browser.storage.local.get(key)
+//   if (res[key] === undefined) {
+//     return
+//   }
+//   try {
+//     await browser.storage.local.remove(key)
+//   } catch (e) {
+//     raise(`browser local storage delete ${key} failed`)
+//   }
+// }
 
 type Storage = {
   get: (key: string, option?: { defaultValue?: unknown; isParse?: boolean; useSession?: boolean }) => Promise<any>
   set: (key: string, value: any, useSession?: boolean) => Promise<void>
-  delete: (key: string) => Promise<void>
+  // delete: (key: string) => Promise<void>
 }
 
 let storage = {} as Storage
 storage.get = getStorage
 storage.set = setStorage
-storage.delete = deleteStorage
+// storage.delete = deleteStorage
 
 export default storage

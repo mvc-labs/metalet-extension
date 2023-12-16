@@ -4,7 +4,7 @@
   "version": "2.2.2",
   "type": "module",
   "scripts": {
-    "dev": "vite --config vite.dev.config.ts",
+    "dev": "vite --config ./vite-config/vite.dev.config.ts",
     "type-check": "vue-tsc --noEmit",
     "clear": "rimraf dist",
     "build:content": "vite build --config ./vite-config/vite.content.config.ts",

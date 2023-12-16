@@ -8,3 +8,5 @@ export const NOTIFICATION_WIDTH = 360
 export const NOTIFICATION_HEIGHT = 600
 
 export const DEBUG = false
+
+export const IS_DEV = process.env.NODE_ENV === 'development'

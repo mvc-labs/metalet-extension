@@ -55,15 +55,4 @@ connector.registerListen = async function (accountId, host) {
   return
 }
 
-// connector.list = function (address) {
-//   return new Promise((resolve) => {
-//     chrome.storage.local.get(getKey(), (result) => {
-//       let connectedWallets = result[getKey()] || {}
-//       console.log(result, connectedWallets, address)
-//       if (address) resolve(connectedWallets[address] || {})
-//       else resolve(connectedWallets)
-//     })
-//   })
-// }
-
 export default connector
