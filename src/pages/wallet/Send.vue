@@ -189,7 +189,7 @@ async function send() {
       amount: amountInSats.value.toNumber(),
       token: {
         symbol: asset.value.symbol,
-        decimal: asset.value.symbol === 'SPACE' ? 8 : 18,
+        decimal: asset.value.decimal,
       },
     }
 

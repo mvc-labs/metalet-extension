@@ -18,11 +18,6 @@ type SuccessResult = {
     decimal: number
   }
 }
-type InscribeSuccessResult = {
-  status: 'inscribeSuccess'
-  orderId: string
-  amount: number
-}
 type FailedResult = {
   status: 'failed'
   message: string
@@ -31,7 +26,7 @@ type WarningResult = {
   status: 'warning'
   message: string
 }
-export type TransactionResult = SuccessResult | FailedResult | WarningResult | InscribeSuccessResult
+export type TransactionResult = SuccessResult | FailedResult | WarningResult
 const props = defineProps({
   isOpenResult: {
     type: Boolean,
@@ -54,11 +49,6 @@ const toResultTx = async () => {
   const host = await getBrowserHost()
   toTx(props.result.txId, host as string)
 }
-
-const toResultOrder = async () => {
-  if (!props.result || props.result.status !== 'inscribeSuccess') return
-  window.open('https://www.metalet.space/wallet-api/v3/inscribe/info?orderId=' + props.result.orderId, '_blank')
-}
 </script>
 
 <template>
@@ -78,12 +68,6 @@ const toResultOrder = async () => {
     <template #title v-if="result && result.status === 'success'">
       <div class="flex items-center gap-2">
         <span class="gradient-text">Sent Successfully</span>
-        <span class="">🚀</span>
-      </div>
-    </template>
-    <template #title v-if="result && result.status === 'inscribeSuccess'">
-      <div class="flex items-center gap-2">
-        <span class="gradient-text">Inscribed Successfully</span>
         <span class="">🚀</span>
       </div>
     </template>
@@ -114,27 +98,6 @@ const toResultOrder = async () => {
           <div class="label">Transaction ID</div>
           <div class="group cursor-pointer break-all text-xs" @click="toResultTx">
             <span class="group-hover:underline">{{ result.txId }}</span>
-            <ArrowTopRightOnSquareIcon
-              class="ml-1 inline-block h-4 w-4 text-gray-500 transition duration-200 group-hover:text-blue-500"
-            ></ArrowTopRightOnSquareIcon>
-          </div>
-        </div>
-      </div>
-    </template>
-
-    <template #body v-if="result && result.status === 'inscribeSuccess'">
-      <div class="mt-4 space-y-4">
-        <div class="space-y-1">
-          <div class="label">Amount</div>
-          <div class="text-sm">
-            {{ result.amount }}
-          </div>
-        </div>
-
-        <div class="space-y-1">
-          <div class="label">Order ID</div>
-          <div class="group cursor-pointer break-all text-xs" @click="toResultOrder">
-            <span class="group-hover:underline">{{ result.orderId }}</span>
             <ArrowTopRightOnSquareIcon
               class="ml-1 inline-block h-4 w-4 text-gray-500 transition duration-200 group-hover:text-blue-500"
             ></ArrowTopRightOnSquareIcon>
