@@ -97,8 +97,7 @@ export class BtcWallet {
     if (!this.account) throw new Error('no account')
     const psbt = await getPsbt(recipient, amount, feeRate)
     const fee = calculateFee(psbt, feeRate)
-    const txId = await broadcast(psbt)
-    return { txId }
+    return await this.broadcast(psbt)
   }
 
   async getFeeAndPsbt(recipient: string, amount: number | Decimal, feeRate = 2) {
@@ -115,6 +114,17 @@ export class BtcWallet {
     const rawTx = tx.toHex()
     const address = await getAddress('btc')
     return await commitInscribe(address, orderId, rawTx)
+  }
+
+  async broadcast(psbt: Psbt) {
+    const tx = psbt.extractTransaction()
+    console.log({ tx })
+
+    const rawTx = tx.toHex()
+    console.log({ rawTx })
+
+    const txId =  await broadcastBTCTx(rawTx)
+    return { txId }
   }
 }
 
@@ -188,7 +198,7 @@ async function getPsbt(recipient: string, amount: Decimal, feeRate: number) {
   return psbt
 }
 
-async function broadcast(psbt: Psbt) {
+export async function broadcast(psbt: Psbt) {
   const tx = psbt.extractTransaction()
   console.log({ tx })
 

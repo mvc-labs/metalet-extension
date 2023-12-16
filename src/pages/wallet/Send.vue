@@ -13,6 +13,7 @@ import { type SymbolTicker } from '@/lib/asset-symbol'
 import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
 import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
+import { Psbt } from 'bitcoinjs-lib'
 
 const route = useRoute()
 const symbol = ref<SymbolTicker>(route.query.symbol as SymbolTicker)
@@ -65,6 +66,10 @@ const selectCustom = () => {
   isCustom.value = true
 }
 
+// fee
+const txPsbt = ref<Psbt>()
+const totalFee = ref<number>()
+
 // form
 const amount = ref('')
 const amountInSats = computed(() => {
@@ -76,7 +81,7 @@ const recipient = ref('')
 const transactionResult = ref<TransactionResult | undefined>()
 
 const isOpenConfirmModal = ref(false)
-const popConfirm = () => {
+const popConfirm = async () => {
   if (!recipient.value) {
     transactionResult.value = {
       status: 'warning',
@@ -101,7 +106,29 @@ const popConfirm = () => {
     isOpenResultModal.value = true
     return
   }
-  isOpenConfirmModal.value = true
+  if (symbol.value === 'BTC') {
+    operationLock.value = true
+    const wallet = await BtcWallet.create()
+    const result = await wallet
+      .getFeeAndPsbt(recipient.value, amountInSats.value, currentRateFee.value)
+      .catch((err: Error) => {
+        isOpenConfirmModal.value = false
+        transactionResult.value = {
+          status: 'failed',
+          message: err.message,
+        }
+        isOpenResultModal.value = true
+      })
+    operationLock.value = false
+    if (result) {
+      const { fee, psbt } = result
+      txPsbt.value = psbt
+      totalFee.value = fee
+      isOpenConfirmModal.value = true
+    }
+  } else {
+    isOpenConfirmModal.value = true
+  }
 }
 
 const isOpenResultModal = ref(false)
@@ -126,15 +153,23 @@ async function sendSpace() {
 
 async function sendBTC() {
   const wallet = await BtcWallet.create()
-  const sentRes = await wallet.send(recipient.value, amountInSats.value, currentRateFee.value).catch((err: Error) => {
+  if (txPsbt.value) {
+    return await wallet.broadcast(txPsbt.value).catch((err: Error) => {
+      isOpenConfirmModal.value = false
+      transactionResult.value = {
+        status: 'failed',
+        message: err.message,
+      }
+      isOpenResultModal.value = true
+    })
+  } else {
     isOpenConfirmModal.value = false
     transactionResult.value = {
       status: 'failed',
-      message: err.message,
+      message: 'No Psbt',
     }
     isOpenResultModal.value = true
-  })
-  return sentRes
+  }
 }
 
 async function send() {
@@ -241,14 +276,29 @@ async function send() {
     </div>
 
     <!-- send -->
-    <button
-      @click="popConfirm"
-      :disabled="!recipient || !amountInSats"
-      class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
-      :class="!recipient || !amountInSats ? 'opacity-50 cursor-not-allowed' : ''"
-    >
-      Send
-    </button>
+    <template v-if="!operationLock">
+      <button
+        @click="popConfirm"
+        v-if="symbol === 'SPACE'"
+        :disabled="!recipient || !amountInSats"
+        :class="!recipient || !amountInSats ? 'opacity-50 cursor-not-allowed' : ''"
+        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
+      >
+        Next
+      </button>
+      <button
+        @click="popConfirm"
+        v-else-if="symbol === 'BTC'"
+        :disabled="!recipient || !amountInSats || !currentRateFee"
+        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
+        :class="!recipient || !amountInSats || !currentRateFee ? 'opacity-50 cursor-not-allowed' : ''"
+      >
+        Next
+      </button>
+    </template>
+    <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">
+      Loading...
+    </div>
 
     <!-- error info -->
     <p v-if="error">{{ error.message }}</p>
@@ -265,6 +315,10 @@ async function send() {
           <div class="space-y-1">
             <div class="label">Recipient Address</div>
             <div class="value break-all text-sm">{{ recipient }}</div>
+          </div>
+          <div class="space-y-1" v-if="totalFee">
+            <div class="label">BTC Total Fee</div>
+            <div class="value break-all text-sm">{{ totalFee / 10 ** 8 }} BTC</div>
           </div>
         </div>
       </template>

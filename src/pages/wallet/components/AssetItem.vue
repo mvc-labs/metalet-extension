@@ -13,8 +13,6 @@ const { asset, address } = defineProps<{
   address: string
 }>()
 
-console.log({ address, asset })
-
 const tag = ref<Tag>()
 
 if (asset?.contract) {
@@ -30,6 +28,7 @@ const { isLoading, data: balance } = useBalanceQuery(
   { enabled },
   { contract: asset?.contract, genesis: asset?.genesis }
 )
+
 const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(
   ref(asset.symbol),
   asset?.contract,
@@ -48,7 +47,6 @@ const exchange = computed(() => {
     if (typeof exchanged !== 'number') {
       exchanged = 0
     }
-    console.log({ asset, balance: balance.value, exchangeRate: exchangeRate.value, balanceInStandardUnit, exchanged })
 
     updateAsset({ name: asset.symbol, value: exchanged })
     return `$${exchanged.toFixed(2)} USD`
