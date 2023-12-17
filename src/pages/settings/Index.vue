@@ -5,7 +5,7 @@ import { ChevronRightIcon } from '@heroicons/vue/20/solid'
 import { useRouter } from 'vue-router'
 
 import passwordManager from '@/lib/password'
-import { VERSION } from '@/data/config'
+import { IS_DEV, VERSION } from '@/data/config'
 
 import SelectNetwork from './components/SelectNetwork.vue'
 import ResetModal from '@/components/ResetModal.vue'
@@ -86,7 +86,7 @@ const showResetModal = ref(false)
           </div>
         </div>
 
-        <div class="setting-item group cursor-pointer" @click="openWindowMode">
+        <div class="setting-item group cursor-pointer" @click="openWindowMode" v-if="!IS_DEV">
           <div class="text-gray-500 group-hover:underline">Open in Window Mode</div>
           <div class="">
             <ChevronRightIcon class="link-icon" />
