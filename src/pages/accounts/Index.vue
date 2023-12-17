@@ -11,8 +11,10 @@ getAccounts().then((res) => {
   accounts.value = Array.from(toRaw(res), ([key, value]) => value)
 })
 
-const currentAccount = ref<Account | null>()
+const currentAccount = ref<Account>()
 getCurrentAccount().then((acc) => {
+  if (!acc) return
+
   currentAccount.value = acc
 })
 </script>
@@ -23,7 +25,7 @@ getCurrentAccount().then((acc) => {
       v-for="account in accounts"
       :key="account.id"
       :account="account"
-      :curren-account="currentAccount"
+      :current-account="currentAccount"
       :show-connect-button="true"
     />
 

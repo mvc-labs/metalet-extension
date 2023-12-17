@@ -1,4 +1,3 @@
-import browser from 'webextension-polyfill'
 import actions from './data/query-actions'
 import exActions from './data/extension-actions'
 import { NOTIFICATION_HEIGHT, NOTIFICATION_WIDTH } from './data/config'
@@ -7,6 +6,7 @@ import { getCurrentAccount } from './lib/account'
 import { isLocked } from './lib/password'
 import { sleep } from './lib/helpers'
 
+const browser = window.browser as typeof chrome
 browser.runtime.onMessage.addListener(async (msg, sender) => {
   if (msg.channel === 'inter-extension') {
     await sleep(100)

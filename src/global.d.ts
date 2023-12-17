@@ -2,5 +2,5 @@
 
 interface Window {
   metaidwallet: any
-  ext: any
+  browser: any
 }

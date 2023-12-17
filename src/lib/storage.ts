@@ -30,11 +30,12 @@ export async function useStorage(location: 'local' | 'session' | 'sync' = 'local
 
   let ext
   try {
-    
+    ext = window && window.browser ? window.browser : await import('webextension-polyfill').then((m) => m.default)
+  } catch (e) {
+    // there is no window object, so we are in a web worker
+    ext = await import('webextension-polyfill').then((m) => m.default)
   }
-  const ext = window && window.ext ? window.ext : await import('webextension-polyfill').then((m) => m.default)
   const storage = ext.storage[location]
-  console.log({ storage })
 
   return {
     async get(key: string) {

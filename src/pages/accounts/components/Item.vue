@@ -139,7 +139,7 @@ const openEditNameModal = ref(false)
 
     <!-- connect button -->
     <template v-if="showConnectButton">
-      <span v-if="isCurrent" class="text-sm text-gray-500">active</span>
+      <span v-if="isCurrent" class="text-sm text-gray-500 cursor-pointer" @click="connect">active</span>
       <button
         class="rounded-md bg-blue-100 px-2 py-1 text-sm text-blue-700 transition hover:bg-blue-200"
         @click="connect"

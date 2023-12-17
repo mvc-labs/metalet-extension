@@ -28,6 +28,7 @@ export default defineConfig({
       input: {
         index: new URL('../popup.html', import.meta.url).pathname,
       },
+      // external: ['browser-polyfill.min.js'],
     },
   },
   // worker: {

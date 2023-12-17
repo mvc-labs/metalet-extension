@@ -6,14 +6,9 @@
   </head>
   <body class="overflow-hidden bg-white text-base text-black duration-300">
     <!-- import script -->
-    <!-- <script type="module">
-      import browser from 'webextension-polyfill'
-      window.ext = browser
-    </script> -->
+    <!-- <script type="application/javascript" src="browser-polyfill.min.js"></script> -->
+    <script type="application/javascript" src="browser-polyfill.min.js"></script>
 
-    <script type="module" src="/src/main.ts">
-      import browser from 'webextension-polyfill'
-      window.ext = browser
-    </script>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
