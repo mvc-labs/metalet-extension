@@ -1,7 +1,6 @@
+import tokens from '@/data/tokens'
 import { fetchTokens } from '@/queries/tokens'
 import { getCurrentAccount, setAccount, getAddress } from './account'
-import tokens from '@/data/tokens'
-import { ref, onMounted } from 'vue'
 
 export async function getAssetsDisplay() {
   const account = await getCurrentAccount()

@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { networks } from 'bitcoinjs-lib'
 
 import storage from './storage'
 import { notifyContent } from '@/lib/notify-content'
@@ -15,4 +16,8 @@ export async function setNetwork(_network: Network) {
 
 export async function getNetwork(): Promise<Network> {
   return network.value
+}
+
+export async function getBtcNetwork() {
+  return network.value === 'mainnet' ? networks.bitcoin : networks.testnet
 }

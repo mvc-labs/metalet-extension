@@ -1,47 +1,66 @@
 <script lang="ts" setup>
-import { Ref, computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ArrowUpRightIcon, QrCodeIcon, ArrowsRightLeftIcon, CircleStackIcon } from '@heroicons/vue/20/solid'
 
-import { type Asset, allAssets, getTags } from '@/data/assets'
+import { SymbolTicker } from '@/lib/asset-symbol'
 import { useBalanceQuery } from '@/queries/balance'
-import { getAddress } from '@/lib/account'
-
-import { prettifyBalance, prettifyTokenBalance } from '@/lib/formatters'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
+import { prettifyTokenBalance } from '@/lib/formatters'
+import { getTags, BTCAsset, MVCAsset } from '@/data/assets'
+import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
 
 import Activities from './components/Activities.vue'
 
-const { symbol } = defineProps({
-  symbol: {
-    type: String,
-    required: true,
-  },
-})
-
-const asset = allAssets.find((asset) => asset.symbol === symbol) as Asset
-
+const route = useRoute()
 const router = useRouter()
 
-const tags = getTags(asset)
+if (!route.params.address) {
+  router.go(-1)
+}
+const address = ref<string>(route.params.address as string)
 
-const address: Ref<string> = ref('')
-getAddress(asset.chain).then((add) => {
-  address.value = add!
+const symbol = ref<SymbolTicker>(route.params.symbol as SymbolTicker)
+const { data: btcAssets } = useBRC20AssetQuery(address, { enabled: computed(() => !!address.value) })
+
+const asset = computed(() => {
+  if (symbol.value === 'BTC') {
+    return BTCAsset
+  }
+  if (symbol.value === 'SPACE') {
+    return MVCAsset
+  }
+  if (btcAssets.value && btcAssets.value.length > 0) {
+    const asset = btcAssets.value.find((asset: any) => asset.symbol === symbol.value)
+    return asset
+  }
 })
 
-const enabled = computed(() => !!address.value && asset.queryable)
-const rateEnabled = computed(() => !!address.value && asset.isNative)
+const { isLoading, data: balance } = useBalanceQuery(
+  address,
+  symbol,
+  { enabled: computed(() => !!address.value && !!symbol.value) },
+  { contract: asset.value?.contract, genesis: asset.value?.genesis }
+)
 
-const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(asset.symbol, {
-  enabled: rateEnabled,
+const { isLoading: tickersLoading, data: tickersData } = useBRCTickerAseetQuery(address, symbol, {
+  enabled: computed(() => !!address.value),
 })
+
+const tags = computed(() => {
+  if (asset.value) {
+    return getTags(asset.value)
+  }
+})
+
+const rateEnabled = computed(() => !!symbol.value)
+
+const { data: exchangeRate } = useExchangeRatesQuery(symbol, asset.value?.contract, { enabled: rateEnabled })
 
 const exchange = computed(() => {
-  if (balance.value && exchangeRate.value) {
+  if (balance.value && exchangeRate.value && asset.value) {
     const usdRate: number = Number(exchangeRate.value.price)
-    const balanceInStandardUnit = balance.value.total / 10 ** asset.decimal
+    const balanceInStandardUnit = balance.value.total / 10 ** asset.value.decimal
     const exchanged = balanceInStandardUnit * usdRate
 
     // 保留两位
@@ -52,18 +71,30 @@ const exchange = computed(() => {
 })
 
 const toSend = () => {
-  router.push(`/wallet/send?symbol=${symbol}`)
-}
-const toReceive = () => {
-  router.push(`/wallet/receive?chain=${asset.chain}`)
+  const { contract } = asset.value!
+  if (contract === 'BRC-20') {
+    router.push(`/wallet/sendBRC?symbol=${symbol.value}`)
+    return
+  }
+  router.push(`/wallet/send?symbol=${symbol.value}&chain=${asset.value!.chain}`)
 }
 
-const isBtcRelated = computed(() => asset.chain === 'btc')
+const toReceive = () => {
+  router.push(`/wallet/receive?chain=${asset.value!.chain}`)
+}
+
+const toTransfer = () => {
+  const { contract } = asset.value!
+  if (contract === 'BRC-20') {
+    router.push({ name: 'transfer', params: { address: address.value, symbol: symbol.value } })
+  }
+}
 </script>
 
 <template>
-  <div class="mt-8 flex flex-col items-center">
-    <img :src="asset!.logo" alt="" class="h-20 w-20 rounded-xl" />
+  <div class="mt-8 flex flex-col items-center" v-if="asset">
+    <img v-if="asset!.logo" :src="asset.logo" alt="" class="h-20 w-20 rounded-xl" />
+    <CircleStackIcon class="h-20 w-20 text-gray-300 transition-all hover:text-blue-500" v-else />
 
     <div class="mt-1.5 flex items-center gap-x-1.5">
       <div
@@ -81,34 +112,76 @@ const isBtcRelated = computed(() => asset.chain === 'btc')
         <div v-if="isLoading">--</div>
         <template v-else-if="balance">
           <div class="mb-1 text-center text-3xl text-[#141416]">
-            {{ prettifyTokenBalance(balance.total, asset.decimal, false, symbol) }}
+            <span v-if="asset.isNative">
+              {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
+            </span>
+            <span v-else-if="asset.contract === 'BRC-20'">
+              {{ `${balance.total} ${asset.symbol}` }}
+            </span>
+            <span v-else>
+              {{ prettifyTokenBalance(balance.total, asset.decimal, true) }}
+            </span>
           </div>
           <div style="color: #909399">{{ exchange }}</div>
         </template>
 
         <!-- buttons -->
-        <div class="mt-8 grid grid-cols-2 gap-x-3 self-stretch">
+        <div class="mt-4 grid grid-cols-2 gap-x-3 self-stretch">
           <button
+            v-if="asset.isNative"
             class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3"
-            :class="isBtcRelated && 'hidden'"
             @click="toSend"
-            :disabled="isBtcRelated"
           >
             <ArrowUpRightIcon class="mr-1 h-4 w-4" />Send
           </button>
           <button
-            class="secondary-btn flex items-center justify-center gap-x-1 py-3"
-            :class="isBtcRelated ? 'col-span-2' : 'col-span-1'"
-            @click="toReceive"
+            v-if="asset.contract === 'BRC-20'"
+            class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3"
+            @click="toTransfer"
           >
+            <ArrowsRightLeftIcon class="mr-1 h-4 w-4" />Transfer
+          </button>
+          <button class="secondary-btn col-span-1 flex items-center justify-center gap-x-1 py-3" @click="toReceive">
             <QrCodeIcon class="mr-1 h-4 w-4" />Receive
           </button>
         </div>
 
-        <Activities class="mt-8 self-stretch" :asset="asset" :exchangeRate="Number(exchangeRate)" />
+        <div v-if="asset.contract === 'BRC-20'" class="mt-8 w-full">
+          <div class="flex items-end justify-between text-[#303133]">
+            <span class="text-base">Transferable</span
+            ><span class="text-lg"
+              >{{ (tickersData && tickersData.tokenBalance.transferableBalance) || 0 }} {{ asset.symbol }}</span
+            >
+          </div>
+          <div class="text-gray-500" v-if="tickersLoading">Loading BRC Tickers.</div>
+          <div v-else class="grid grid-cols-3 gap-2 w-full mt-3" v-if="tickersData && tickersData.transferableList">
+            <div
+              :key="ticker.inscriptionId"
+              v-for="ticker in tickersData.transferableList"
+              class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative"
+            >
+              <div class="mt-2.5 text-[#909399] text-sm">{{ ticker.ticker }}</div>
+              <div class="mt-3 text-[#141416] text-lg font-bold truncate">{{ ticker.amount }}</div>
+              <div
+                class="text-white text-xs bg-[#1E2BFF] rounded-b-md absolute bottom-0 w-full text-center pt-[5px] pb-[4px]"
+              >
+                #{{ ticker.inscriptionNumber }}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-end justify-between text-[#303133] mt-3">
+            <span class="text-base">Available</span
+            ><span class="text-lg"
+              >{{ (tickersData && tickersData.tokenBalance.availableBalance) || 0 }} {{ asset.symbol }}</span
+            >
+          </div>
+        </div>
+
+        <Activities class="mt-8 self-stretch" :asset="asset" :exchangeRate="Number(exchangeRate)" :address="address" />
       </template>
 
       <div class="text-gray-500" v-else>No Service for {{ asset?.symbol }} yet.</div>
     </div>
   </div>
+  <div v-else>No Asset</div>
 </template>

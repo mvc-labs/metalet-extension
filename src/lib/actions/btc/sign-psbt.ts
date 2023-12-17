@@ -1,8 +1,9 @@
 import ECPairFactory from 'ecpair'
-import { getPrivateKey, getAddressType, getPublicKey, getAddress } from '@/lib/account'
-import bitcoin, { address as PsbtAddress, networks } from 'bitcoinjs-lib'
+// import { getPrivateKey, getAddressType, getPublicKey, getAddress } from '@/lib/account'
+import { Psbt, payments, address as PsbtAddress, networks, Transaction } from 'bitcoinjs-lib'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { getNetwork } from '@/lib/network'
+import { createEmit } from '@/lib/emitters'
 
 const ECPair = ECPairFactory(ecc)
 
@@ -34,15 +35,14 @@ export interface SignPsbtOptions {
   toSignInputs?: UserToSignInput[]
 }
 
-export async function process(
-  psbt: bitcoin.Psbt,
-  toSignInputs: ToSignInput[],
-  autoFinalized: boolean
-): Promise<bitcoin.Psbt> {
+export async function process(psbt: Psbt, toSignInputs: ToSignInput[], autoFinalized: boolean): Promise<Psbt> {
   const networkType = await getNetwork()
-  const pubkey = await getPublicKey('btc')
-  const addressType = await getAddressType('btc')
-  const privateKey = await getPrivateKey('btc')
+  // const pubkey = await getPublicKey('btc')
+  const pubkey = await createEmit<string>('getPublicKey')('btc')
+  // const addressType = await getAddressType('btc')
+  const addressType = await createEmit<string>('getAddressType')('btc')
+  // const privateKey = await getPrivateKey('btc')
+  const privateKey = await createEmit<string>('getPrivateKey')('btc')
   const psbtNetwork = networkType === 'mainnet' ? networks.bitcoin : networks.testnet
 
   const keyPair = ECPair.fromWIF(privateKey)
@@ -60,7 +60,7 @@ export async function process(
     // Special measures taken for compatibility with certain applications.
     if (isNotSigned && isP2TR && lostInternalPubkey) {
       const tapInternalKey = toXOnly(Buffer.from(pubkey, 'hex'))
-      const { output } = bitcoin.payments.p2tr({
+      const { output } = payments.p2tr({
         internalPubkey: tapInternalKey,
         network: psbtNetwork,
       })
@@ -85,9 +85,11 @@ export async function process(
   return psbt
 }
 
-const formatOptionsToSignInputs = async (_psbt: string | bitcoin.Psbt, options?: SignPsbtOptions) => {
-  const pubkey = await getPublicKey('btc')
-  const btcAddress = await getAddress('btc')
+const formatOptionsToSignInputs = async (_psbt: string | Psbt, options?: SignPsbtOptions) => {
+  // const pubkey = await getPublicKey('btc')
+  const pubkey = await createEmit<string>('getPublicKey')('btc')
+  // const btcAddress = await getAddress('btc')
+  const btcAddress = await createEmit<string>('getAddress')('btc')
 
   let toSignInputs: ToSignInput[] = []
   if (options && options.toSignInputs) {
@@ -122,10 +124,7 @@ const formatOptionsToSignInputs = async (_psbt: string | bitcoin.Psbt, options?:
     const networkType = await getNetwork()
     const psbtNetwork = networkType === 'mainnet' ? networks.bitcoin : networks.testnet
 
-    const psbt =
-      typeof _psbt === 'string'
-        ? bitcoin.Psbt.fromHex(_psbt as string, { network: psbtNetwork })
-        : (_psbt as bitcoin.Psbt)
+    const psbt = typeof _psbt === 'string' ? Psbt.fromHex(_psbt as string, { network: psbtNetwork }) : (_psbt as Psbt)
     psbt.data.inputs.forEach((v, index) => {
       let script: any = null
       let value = 0
@@ -133,7 +132,7 @@ const formatOptionsToSignInputs = async (_psbt: string | bitcoin.Psbt, options?:
         script = v.witnessUtxo.script
         value = v.witnessUtxo.value
       } else if (v.nonWitnessUtxo) {
-        const tx = bitcoin.Transaction.fromBuffer(v.nonWitnessUtxo)
+        const tx = Transaction.fromBuffer(v.nonWitnessUtxo)
         const output = tx.outs[psbt.txInputs[index].index]
         script = output.script
         value = output.value

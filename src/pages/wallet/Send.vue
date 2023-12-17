@@ -1,21 +1,26 @@
 <script lang="ts" setup>
-import { ref, computed, Ref, inject, toRaw } from 'vue'
+import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
+import Decimal from 'decimal.js'
 import { useRoute } from 'vue-router'
 import { Wallet } from 'meta-contract'
 import { useQueryClient } from '@tanstack/vue-query'
+import { Psbt } from 'bitcoinjs-lib'
 
 import { useBalanceQuery } from '@/queries/balance'
 import { prettifyBalance } from '@/lib/formatters'
 import { getAddress } from '@/lib/account'
-import { MVCAssets } from '@/data/assets'
 import type { TransactionResult } from '@/global-types'
+import { allAssets } from '@/data/assets'
+import { BtcWallet } from '@/lib/wallets/btc'
+import { type SymbolTicker } from '@/lib/asset-symbol'
+import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
 
 import Modal from '@/components/Modal.vue'
 import TransactionResultModal from './components/TransactionResultModal.vue'
 
 const route = useRoute()
-const symbol: Ref<string> = ref(route.query.symbol as string)
-const asset = computed(() => MVCAssets.find((asset) => asset.symbol === symbol.value))
+const symbol = ref<SymbolTicker>(route.query.symbol as SymbolTicker)
+const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol.value)!)
 const queryClient = useQueryClient()
 
 const address = ref('')
@@ -23,42 +28,160 @@ getAddress().then((addr) => {
   address.value = addr!
 })
 
+const error = ref<Error | undefined>()
+
+// balance
+const enabled = computed(() => !!address.value)
+const { isLoading, data: balance } = useBalanceQuery(
+  address,
+  symbol,
+  { enabled },
+  { contract: asset.value?.contract, genesis: asset.value?.genesis }
+)
+
+// rate list query
+const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({
+  enabled: computed(() => !!address.value && asset.value.chain === 'btc'),
+})
+
+watch(
+  rateList,
+  (newRateList?: FeeRate[]) => {
+    if (newRateList && newRateList[1]) {
+      selectRateFee(newRateList[1].feeRate)
+    }
+  },
+  { immediate: true }
+)
+
+const isCustom = ref(false)
+const currentTitle = ref<string>('')
+const currentRateFee = ref<number | undefined>()
+
+const selectRateFee = (rateFee: number) => {
+  currentRateFee.value = rateFee
+  isCustom.value = false
+}
+
+const selectCustom = () => {
+  currentTitle.value = 'Custom'
+  currentRateFee.value = undefined
+  isCustom.value = true
+}
+
+// fee
+const txPsbt = ref<Psbt>()
+const totalFee = ref<number>()
+
 // form
 const amount = ref('')
 const amountInSats = computed(() => {
-  const _amount = Number(amount.value)
-  if (Number.isNaN(amount)) return 0
-  return _amount * 1e8
+  const _amount = new Decimal(amount.value || 0)
+  if (_amount.isNaN()) return new Decimal(0)
+  return _amount.times(new Decimal('1e8'))
 })
 const recipient = ref('')
-const transactionResult: Ref<undefined | TransactionResult> = ref()
+const transactionResult = ref<TransactionResult | undefined>()
 
 const isOpenConfirmModal = ref(false)
-const popConfirm = () => {
-  isOpenConfirmModal.value = true
+const popConfirm = async () => {
+  if (!recipient.value) {
+    transactionResult.value = {
+      status: 'warning',
+      message: "Please input recipient's address.",
+    }
+    isOpenResultModal.value = true
+    return
+  }
+  if (!amountInSats.value) {
+    transactionResult.value = {
+      status: 'warning',
+      message: 'Please input amount.',
+    }
+    isOpenResultModal.value = true
+    return
+  }
+  if (!currentRateFee.value && asset.value.chain === 'btc') {
+    transactionResult.value = {
+      status: 'warning',
+      message: 'Please select fee rate.',
+    }
+    isOpenResultModal.value = true
+    return
+  }
+  if (symbol.value === 'BTC') {
+    operationLock.value = true
+    const wallet = await BtcWallet.create()
+    const result = await wallet
+      .getFeeAndPsbt(recipient.value, amountInSats.value, currentRateFee.value)
+      .catch((err: Error) => {
+        isOpenConfirmModal.value = false
+        transactionResult.value = {
+          status: 'failed',
+          message: err.message,
+        }
+        isOpenResultModal.value = true
+      })
+    operationLock.value = false
+    if (result) {
+      const { fee, psbt } = result
+      txPsbt.value = psbt
+      totalFee.value = fee
+      isOpenConfirmModal.value = true
+    }
+  } else {
+    isOpenConfirmModal.value = true
+  }
 }
 
 const isOpenResultModal = ref(false)
 
-const enabled = computed(() => !!address.value)
-const { isLoading, data: balance, error } = useBalanceQuery(address, 'SPACE', { enabled })
 const wallet = inject<Ref<Wallet>>('wallet')!
 
 const operationLock = ref(false)
-async function send() {
-  if (operationLock.value) return
 
-  operationLock.value = true
+async function sendSpace() {
   const walletInstance = toRaw(wallet.value)
-  const sentRes = await walletInstance.send(recipient.value, amountInSats.value).catch((err) => {
+  const sentRes = await walletInstance.send(recipient.value, amountInSats.value.toNumber()).catch((err) => {
     isOpenConfirmModal.value = false
     transactionResult.value = {
       status: 'failed',
       message: err.message,
     }
-
     isOpenResultModal.value = true
   })
+
+  return sentRes
+}
+
+async function sendBTC() {
+  const wallet = await BtcWallet.create()
+  if (txPsbt.value) {
+    return await wallet.broadcast(txPsbt.value).catch((err: Error) => {
+      isOpenConfirmModal.value = false
+      transactionResult.value = {
+        status: 'failed',
+        message: err.message,
+      }
+      isOpenResultModal.value = true
+    })
+  } else {
+    isOpenConfirmModal.value = false
+    transactionResult.value = {
+      status: 'failed',
+      message: 'No Psbt',
+    }
+    isOpenResultModal.value = true
+  }
+}
+
+async function send() {
+  if (operationLock.value) return
+
+  operationLock.value = true
+
+  const sendProcessor = asset.value.symbol === 'SPACE' ? sendSpace : sendBTC
+  const sentRes = await sendProcessor()
 
   if (sentRes) {
     isOpenConfirmModal.value = false
@@ -66,10 +189,10 @@ async function send() {
       status: 'success',
       txId: sentRes.txId,
       recipient: recipient.value,
-      amount: amountInSats.value,
+      amount: amountInSats.value.toNumber(),
       token: {
-        symbol: 'SPACE',
-        decimal: 8,
+        symbol: asset.value.symbol,
+        decimal: asset.value.decimal,
       },
     }
 
@@ -77,7 +200,7 @@ async function send() {
 
     // 刷新query
     queryClient.invalidateQueries({
-      queryKey: ['balance', { address: address.value, symbol: 'SPACE' }],
+      queryKey: ['balance', { address: address.value, symbol: asset.value.symbol }],
     })
   }
 
@@ -86,9 +209,9 @@ async function send() {
 </script>
 
 <template>
-  <div class="mt-8 flex flex-col items-center gap-y-8">
+  <div class="mt-8 flex flex-col items-center gap-y-8" v-if="asset">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
-    <img :src="asset!.logo" alt="" class="h-16 w-16 rounded-xl" />
+    <img :src="asset.logo" alt="" class="h-16 w-16 rounded-xl" />
 
     <div class="space-y-3 self-stretch">
       <!-- address input -->
@@ -100,10 +223,14 @@ async function send() {
 
       <!-- amount input -->
       <div class="relative">
-        <input class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 text-sm" placeholder="Amount" v-model="amount" />
+        <input
+          class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 !text-xs"
+          placeholder="Amount"
+          v-model="amount"
+        />
         <!-- unit -->
         <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500">
-          <div class="border-l border-solid border-gray-500 px-4 py-1">SPACE</div>
+          <div class="border-l border-solid border-gray-500 px-4 py-1">{{ asset.symbol }}</div>
         </div>
       </div>
 
@@ -111,13 +238,71 @@ async function send() {
       <div class="flex items-center gap-x-2 text-xs text-gray-500">
         <div class="">Your Balance:</div>
         <div class="" v-if="isLoading">--</div>
-        <div class="" v-else-if="error">Error</div>
-        <div class="" v-else-if="balance">{{ prettifyBalance(balance.total) }}</div>
+        <div class="" v-else-if="balance">{{ prettifyBalance(balance.total, asset.symbol) }}</div>
       </div>
+
+      <!-- fee rate -->
+      <div v-if="asset.chain === 'btc' && !rateLoading && rateList">
+        <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
+
+        <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-[#141416]">
+          <div
+            v-for="rate in rateList"
+            @click="selectRateFee(rate.feeRate)"
+            :class="rate.feeRate === currentRateFee ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
+            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
+          >
+            <div class="tex-sm">{{ rate.title }}</div>
+            <div class="mt-1.5 text-base font-bold">{{ rate.feeRate }} sat/vB</div>
+            <div class="mt-1 text-sm text-[#999999]">About</div>
+            <div class="text-sm text-[#999999]">{{ rate.desc.replace('About', '') }}</div>
+          </div>
+          <div
+            @click="selectCustom()"
+            :class="isCustom ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
+            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
+          >
+            <div>Custom</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- custom rate input -->
+      <input
+        min="0"
+        type="number"
+        v-if="isCustom"
+        placeholder="sat/vB"
+        v-model="currentRateFee"
+        class="main-input w-full !rounded-xl !p-4 !text-xs mt-1"
+      />
     </div>
 
     <!-- send -->
-    <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="popConfirm">Send</button>
+    <template v-if="!operationLock">
+      <button
+        @click="popConfirm"
+        v-if="symbol === 'SPACE'"
+        :disabled="!recipient || !amountInSats"
+        :class="!recipient || !amountInSats ? 'opacity-50 cursor-not-allowed' : ''"
+        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
+      >
+        Next
+      </button>
+      <button
+        @click="popConfirm"
+        v-else-if="symbol === 'BTC'"
+        :disabled="!recipient || !amountInSats || !currentRateFee"
+        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
+        :class="!recipient || !amountInSats || !currentRateFee ? 'opacity-50 cursor-not-allowed' : ''"
+      >
+        Next
+      </button>
+    </template>
+    <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">Loading...</div>
+
+    <!-- error info -->
+    <p v-if="error">{{ error.message }}</p>
 
     <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
       <template #title>Confirm Transaction</template>
@@ -126,16 +311,16 @@ async function send() {
         <div class="mt-4 space-y-4">
           <div class="space-y-1">
             <div class="label">Amount</div>
-            <div class="value">{{ amount }} SPACE</div>
+            <div class="value">{{ amount }} {{ asset.symbol }}</div>
           </div>
           <div class="space-y-1">
             <div class="label">Recipient Address</div>
             <div class="value break-all text-sm">{{ recipient }}</div>
           </div>
-          <!-- <div class="space-y-1">
-            <div class="label">Network Fee</div>
-            <div class="value">100 SPACE</div>
-          </div> -->
+          <div class="space-y-1" v-if="totalFee">
+            <div class="label">BTC Total Fee</div>
+            <div class="value break-all text-sm">{{ totalFee / 10 ** 8 }} BTC</div>
+          </div>
         </div>
       </template>
 

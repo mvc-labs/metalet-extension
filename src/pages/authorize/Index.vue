@@ -1,11 +1,15 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
+import { LinkIcon } from '@heroicons/vue/20/solid'
 import { computed, ref } from 'vue'
 
 import { toTx } from '@/lib/helpers'
-import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
 import actions from '@/data/authorize-actions'
+import { getBrowserHost } from '@/lib/host'
+import logos from '@/data/logos'
+import { DEBUG } from '@/data/config'
+
 import TransferToken from './TransferToken.vue'
 import Transfer from './Transfer.vue'
 import Connect from './Connect.vue'
@@ -18,10 +22,6 @@ import SignTransactions from './SignTransactions.vue'
 import Pay from './Pay.vue'
 import SignMessage from './SignMessage.vue'
 import Merge from './Merge.vue'
-import { getBrowserHost } from '@/lib/host'
-import { LinkIcon } from '@heroicons/vue/20/solid'
-import logos from '@/data/logos'
-import { DEBUG } from '@/data/config'
 
 // 从query中获取数据
 const route = useRoute()

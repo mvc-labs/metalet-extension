@@ -7,8 +7,10 @@ import Balance from './components/Balance.vue'
 import AssetList from './components/AssetList.vue'
 import AccountItem from '../accounts/components/Item.vue'
 
-const currentAccount = ref<Account | null>()
+const currentAccount = ref<Account>()
 getCurrentAccount().then((acc) => {
+  if (!acc) return
+
   currentAccount.value = acc
 })
 </script>
@@ -17,10 +19,10 @@ getCurrentAccount().then((acc) => {
   <div class="-mt-4">
     <!-- Account Info -->
     <AccountItem
-      :account="currentAccount"
-      :currentAccount="currentAccount"
-      v-if="currentAccount"
       :show-network="true"
+      v-if="currentAccount"
+      :account="currentAccount"
+      :current-account="currentAccount"
     />
 
     <Balance />

@@ -1,14 +1,16 @@
-import { SymbolUC } from '@/lib/asset-symbol'
-import { useQuery } from '@tanstack/vue-query'
-import { ComputedRef, Ref } from 'vue'
-import tokens from '../data/tokens'
 import { mvcApi } from './request'
+import { Balance } from './balance'
+import { ComputedRef, Ref } from 'vue'
+import { getFTLogo } from '@/data/logos'
+import { type Asset } from '@/data/assets'
+import { useQuery } from '@tanstack/vue-query'
+import { SymbolTicker } from '@/lib/asset-symbol'
 
 export type Token = {
-  codehash: string
+  codeHash: string
   genesis: string
   name: string
-  symbol: SymbolUC
+  symbol: SymbolTicker
   decimal: number
   sensibleId: string
   utxoCount: number
@@ -16,6 +18,47 @@ export type Token = {
   confirmedString: string
   unconfirmed: number
   unconfirmedString: string
+}
+
+export const fetchMVCTokens = async (address: string): Promise<Token[]> => {
+  return await mvcApi<Token[]>(`/contract/ft/address/${address}/balance`).get()
+}
+
+export const useMVCAssetsQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
+  return useQuery({
+    queryKey: ['MVCTokens', { address: addressRef.value }],
+    queryFn: () => fetchMVCTokens(addressRef.value),
+    select: (tokens: Token[]) =>
+      tokens.map(
+        (token) =>
+          ({
+            symbol: token.symbol,
+            tokenName: token.name,
+            isNative: false,
+            chain: 'mvc',
+            queryable: true,
+            decimal: token.decimal,
+            contract: 'MetaContract',
+            codeHash: token.codeHash,
+            genesis: token.genesis,
+            logo: getFTLogo(token.name),
+          }) as Asset
+      ),
+    ...options,
+  })
+}
+
+export const useMVCTokenQuery = (
+  addressRef: Ref<string>,
+  genesis: string,
+  options: { enabled: ComputedRef<boolean> }
+) => {
+  return useQuery({
+    queryKey: ['MVCTokens', { address: addressRef.value }],
+    queryFn: () => fetchMVCTokens(addressRef.value),
+    select: (tokens: Token[]) => tokens.find((token) => token.genesis === genesis),
+    ...options,
+  })
 }
 
 export const fetchTokens = async (address: string): Promise<Token[]> => {
@@ -29,52 +72,16 @@ export const fetchTokens = async (address: string): Promise<Token[]> => {
   })
 }
 
-export const useTokensQuery = (address: Ref, options: { enabled: ComputedRef<boolean> }) => {
-  return useQuery({
-    queryKey: ['tokens', { address: address.value }],
-    queryFn: () => fetchTokens(address.value),
-    select: (data: Token[]) => {
-      return data.map((token) => {
-        // 查找token的图标
-        const tokenInfo = tokens.find((item) => item.genesis === token.genesis)
-        return {
-          ...token,
-          logo: tokenInfo?.logo || '',
-          tokenName: token.name,
-          isNative: false,
-          color: 'bg-blue-100',
-          chain: 'mvc' as const,
-          queryable: false,
-          total: token.confirmed + token.unconfirmed,
-        }
-      })
-    },
-    ...options,
-  })
+export const fetchTokenBalance = async (address: string, genesis: string): Promise<Balance> => {
+  const tokens = await mvcApi<Token[]>(`/contract/ft/address/${address}/balance`).get()
+
+  const token = tokens.find((token) => token.genesis === genesis)
+  const confirmed = token?.confirmed || 0
+  const unconfirmed = token?.unconfirmed || 0
+  return {
+    address,
+    confirmed,
+    unconfirmed,
+    total: confirmed + unconfirmed,
+  }
 }
-
-export const useTokenQuery = (address: Ref, genesis: string, options: { enabled: ComputedRef<boolean> }) => {
-  return useQuery({
-    queryKey: ['tokens', { address: address.value }],
-    queryFn: () => fetchTokens(address.value),
-    select: (data: Token[]) => {
-      const token = data.find((token) => token.genesis === genesis) as Token
-      // 查找token的图标
-      const tokenInfo = tokens.find((item) => item.genesis === token.genesis)
-
-      return {
-        ...token,
-        logo: tokenInfo?.logo || '',
-        tokenName: token!.name,
-        isNative: false,
-        color: 'bg-blue-100',
-        chain: 'mvc' as const,
-        queryable: false,
-        total: token!.confirmed + token!.unconfirmed,
-      }
-    },
-    ...options,
-  })
-}
-
-export default useTokensQuery

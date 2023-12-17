@@ -12,10 +12,6 @@ import accountManager, {
 const routes = [
   { path: '/', redirect: '/wallet' },
   {
-    path: '/dev',
-    component: () => import('./pages/Dev.vue'),
-  },
-  {
     path: '/welcome',
     component: () => import('./pages/welcome/Index.vue'),
     meta: {
@@ -113,7 +109,46 @@ const routes = [
       noFooter: true,
     },
   },
-
+  {
+    path: '/wallet/sendBRC20',
+    component: () => import('./pages/wallet/SendBRC.vue'),
+    name: 'sendBRC20',
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Send',
+      noFooter: true,
+    },
+  },
+  {
+    path: '/wallet/inscribe/:symbol/:address',
+    component: () => import('./pages/wallet/Inscribe.vue'),
+    name: 'inscribe',
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Inscribe Transfer',
+      noFooter: true,
+    },
+  },
+  {
+    path: '/wallet/transfer/:symbol/:address',
+    component: () => import('./pages/wallet/Transfer.vue'),
+    name: 'transfer',
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Transfer',
+      noFooter: true,
+    },
+  },
+  {
+    path: '/wallet/inscribe-success',
+    component: () => import('./pages/wallet/InscribeSuccess.vue'),
+    name: 'inscribe-success',
+    meta: {
+      secondaryHeader: true,
+      headerTitle: '',
+      noFooter: true,
+    },
+  },
   {
     path: '/wallet/send-token/:symbol/:genesis',
     component: () => import('./pages/wallet/SendToken.vue'),
@@ -154,7 +189,7 @@ const routes = [
     },
   },
   {
-    path: '/wallet/assets/:symbol',
+    path: '/wallet/assets/:address/:symbol',
     component: () => import('./pages/wallet/Asset.vue'),
     name: 'asset',
     props: true,
@@ -164,7 +199,7 @@ const routes = [
     },
   },
   {
-    path: '/wallet/tokens/:symbol/:genesis',
+    path: '/wallet/tokens/:address/:symbol/:genesis',
     component: () => import('./pages/wallet/Token.vue'),
     name: 'token',
     meta: {
@@ -183,6 +218,16 @@ const routes = [
     },
   },
   { path: '/collections', component: () => import('./pages/nfts/Index.vue'), name: 'collections' },
+  {
+    name: 'brc20Detail',
+    path: '/nft/brc20/detail',
+    component: () => import('./pages/nfts/BRCTokenDetail.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: '',
+      noFooter: true,
+    },
+  },
   {
     path: '/nfts/transfer-nft/:codehash/:genesis/:tokenIndex',
     component: () => import('./pages/nfts/Transfer.vue'),

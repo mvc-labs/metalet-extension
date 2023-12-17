@@ -4,10 +4,12 @@ import { ref } from 'vue'
 
 import SpaceLogoImg from '@/assets/images/space-logo.svg?url'
 import BtcLogoImg from '@/assets/images/btc-logo.svg?url'
+import { getCurrentAccount, type Account } from '@/lib/account'
+
+import BRCTokenList from './BRCTokenList.vue'
 import MvcCollectionPanel from './components/MvcCollectionPanel.vue'
 import BtcCollectionPanel from './components/BtcCollectionPanel.vue'
 import AccountItem from '../accounts/components/Item.vue'
-import { getCurrentAccount, type Account } from '@/lib/account'
 
 const account = ref<Account | null>(null)
 getCurrentAccount().then((acc) => {
@@ -19,16 +21,14 @@ getCurrentAccount().then((acc) => {
   <!-- 账号信息 -->
   <AccountItem :account="account" :current-account="account" v-if="account" :show-network="true" class="mb-4 -mt-4" />
 
-  <MvcCollectionPanel />
-
   <!-- 链切换标签 -->
-  <!-- <TabGroup>
+  <TabGroup>
     <TabList class="mx-auto flex w-5/6 rounded-md bg-gray-100">
       <Tab class="tab">
         <img :src="SpaceLogoImg" class="h-6 w-6" />
         <span>MVC</span>
       </Tab>
-      <Tab class="tab" disabled>
+      <Tab class="tab">
         <img :src="BtcLogoImg" />
         <span>BTC</span>
       </Tab>
@@ -38,10 +38,12 @@ getCurrentAccount().then((acc) => {
         <MvcCollectionPanel />
       </TabPanel>
       <TabPanel>
-        <BtcCollectionPanel />
+        <!-- <BtcCollectionPanel /> -->
+        <!-- BRC Token -->
+        <BRCTokenList />
       </TabPanel>
     </TabPanels>
-  </TabGroup> -->
+  </TabGroup>
 </template>
 
 <style scoped lang="css">

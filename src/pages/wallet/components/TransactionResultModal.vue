@@ -5,10 +5,29 @@ import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon } from '@heroicons/v
 import { toTx } from '@/lib/helpers'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import { getBrowserHost } from '@/lib/host'
-import { type TransactionResult } from '@/global-types'
+// import { type TransactionResult } from '@/global-types'
 
 import Modal from '@/components/Modal.vue'
 
+type SuccessResult = {
+  status: 'success'
+  txId: string
+  recipient: string
+  amount: number
+  token: {
+    symbol: string
+    decimal: number
+  }
+}
+type FailedResult = {
+  status: 'failed'
+  message: string
+}
+type WarningResult = {
+  status: 'warning'
+  message: string
+}
+export type TransactionResult = SuccessResult | FailedResult | WarningResult
 const props = defineProps({
   isOpenResult: {
     type: Boolean,
@@ -41,6 +60,12 @@ const toResultTx = async () => {
         <ExclamationTriangleIcon class="h-5 w-5 text-red-500"></ExclamationTriangleIcon>
       </div>
     </template>
+    <template #title v-if="result && result.status === 'warning'">
+      <div class="flex items-center gap-2">
+        <span class="text-gray-500">Transaction Warning</span>
+        <ExclamationTriangleIcon class="h-5 w-5 text-yellow-500"></ExclamationTriangleIcon>
+      </div>
+    </template>
     <template #title v-if="result && result.status === 'success'">
       <div class="flex items-center gap-2">
         <span class="gradient-text">Sent Successfully</span>
@@ -49,7 +74,7 @@ const toResultTx = async () => {
     </template>
 
     <template #body>
-      <div class="mt-4 space-y-4" v-if="result && result.status === 'failed'">
+      <div class="mt-4 space-y-4" v-if="result && (result.status === 'failed' || result.status === 'warning')">
         <div class="space-y-1">
           <div class="text-sm text-gray-500">{{ result.message }}</div>
         </div>

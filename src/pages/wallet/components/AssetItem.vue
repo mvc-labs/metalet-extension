@@ -2,51 +2,53 @@
 import { ref, computed } from 'vue'
 import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
-import { useBalanceQuery } from '@/queries/balance'
 import { isOfficialToken } from '@/lib/assets'
+import { updateAsset } from '@/lib/balance'
+import { useBalanceQuery } from '@/queries/balance'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import { type Asset, getTagInfo, Tag } from '@/data/assets'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
-import { getCurrentAccount } from '@/lib/account'
-import { getNetwork } from '@/lib/network'
-import { updateAsset } from '@/lib/balance'
 
-const { asset } = defineProps<{
+const { asset, address } = defineProps<{
   asset: Asset
+  address: string
 }>()
 
-const chain = computed(() => asset.chain)
-const address = ref('')
 const tag = ref<Tag>()
-
-getCurrentAccount().then(async (account) => {
-  if (!account) return
-
-  const network = await getNetwork()
-  if (network === 'mainnet') {
-    address.value = account[chain.value].mainnetAddress
-  } else {
-    address.value = account[chain.value].testnetAddress
-  }
-})
 
 if (asset?.contract) {
   tag.value = getTagInfo(asset.contract)
 }
 
-const enabled = computed(() => !!address.value && asset.queryable)
-const rateEnabled = computed(() => !!address.value)
+const enabled = computed(() => !!address && asset.queryable)
+const rateEnabled = computed(() => !!address)
 
-const { isLoading, data: balance } = useBalanceQuery(address, asset.symbol, { enabled })
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(asset.symbol, {
-  enabled: rateEnabled,
-})
+const { isLoading, data: balance } = useBalanceQuery(
+  ref(address),
+  ref(asset.symbol),
+  { enabled },
+  { contract: asset?.contract, genesis: asset?.genesis }
+)
+
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(
+  ref(asset.symbol),
+  asset?.contract,
+  {
+    enabled: rateEnabled,
+  }
+)
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
-    const usdRate: number = Number(exchangeRate.value.price)
+    let usdRate = Number(exchangeRate.value.price)
+
     const balanceInStandardUnit = balance.value.total / 10 ** asset.decimal
-    const exchanged = balanceInStandardUnit * usdRate
+
+    let exchanged = balanceInStandardUnit * usdRate
+    if (typeof exchanged !== 'number') {
+      exchanged = 0
+    }
+
     updateAsset({ name: asset.symbol, value: exchanged })
     return `$${exchanged.toFixed(2)} USD`
   }
@@ -63,11 +65,8 @@ const exchange = computed(() => {
         <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
         <div class="flex flex-col gap-y-1 items-start">
           <div
-            :class="[
-              'flex w-24 items-center gap-x-0.5 truncate whitespace-nowrap',
-              asset.isNative ? 'text-lg' : 'text-sm',
-            ]"
             :title="asset.tokenName"
+            :class="[asset.isNative ? 'text-lg' : 'text-sm', 'flex items-center gap-x-0.5']"
           >
             {{ asset.tokenName }}
             <CheckBadgeIcon
@@ -77,9 +76,9 @@ const exchange = computed(() => {
           </div>
 
           <div
-            :style="`background-color:${tag.bg};color:${tag.color};`"
-            :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs', 'inline-block']"
             v-if="tag"
+            :style="`background-color:${tag.bg};color:${tag.color};`"
+            :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs', 'inline-block', 'scale-75', 'origin-left']"
           >
             {{ tag.name }}
           </div>
@@ -94,7 +93,7 @@ const exchange = computed(() => {
               {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
             </span>
             <span v-else-if="asset.contract === 'BRC-20'">
-              {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
+              {{ `${balance.total} ${asset.symbol}` }}
             </span>
             <span v-else>
               {{ prettifyTokenBalance(balance.total, asset.decimal, true) }}

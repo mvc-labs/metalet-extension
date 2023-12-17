@@ -1,11 +1,10 @@
-import { SymbolUC } from '@/lib/asset-symbol'
+import { SymbolTicker } from '@/lib/asset-symbol'
 import BtcLogoImg from '../assets/images/btc-logo.svg?url'
-import OrdiLogoImg from '../assets/images/ordi-logo.svg?url'
 import SpaceLogoImg from '../assets/images/space-logo.svg?url'
 
 export type Asset = {
-  symbol: SymbolUC
-  logo: string
+  symbol: SymbolTicker
+  logo?: string
   tokenName: string
   isNative: boolean
   chain: 'btc' | 'mvc'
@@ -14,6 +13,7 @@ export type Asset = {
   total?: number
   genesis?: string
   contract?: string
+  codeHash?: string
 }
 
 export interface Tag {
@@ -40,7 +40,7 @@ const tags: Tag[] = [
   },
   {
     name: 'MetaContract',
-    bg: '#999FFF',
+    bg: 'rgba(153,159,255,0.2)',
     color: '#787FFF',
   },
 ]
@@ -64,50 +64,26 @@ function getTags(asset: Asset): Tag[] {
   return tagList
 }
 
-const BTCAssets: Asset[] = [
-  {
-    symbol: 'BTC',
-    logo: BtcLogoImg,
-    tokenName: 'BTC',
-    isNative: true,
-    chain: 'btc',
-    queryable: true,
-    decimal: 8,
-  },
-  {
-    symbol: 'ORDI',
-    logo: OrdiLogoImg,
-    tokenName: 'ORDI',
-    isNative: false,
-    chain: 'btc',
-    queryable: true,
-    decimal: 0,
-    contract: 'BRC-20',
-  },
-  {
-    symbol: 'ORXC',
-    logo: OrdiLogoImg,
-    tokenName: 'ORXC',
-    isNative: false,
-    chain: 'btc',
-    queryable: true,
-    decimal: 0,
-    contract: 'BRC-20',
-  },
-]
+const BTCAsset: Asset = {
+  symbol: 'BTC',
+  logo: BtcLogoImg,
+  tokenName: 'BTC',
+  isNative: true,
+  chain: 'btc',
+  queryable: true,
+  decimal: 8,
+}
 
-const MVCAssets: Asset[] = [
-  {
-    symbol: 'SPACE',
-    logo: SpaceLogoImg,
-    tokenName: 'SPACE',
-    isNative: true,
-    chain: 'mvc',
-    queryable: true,
-    decimal: 8,
-  },
-]
+const MVCAsset: Asset = {
+  symbol: 'SPACE',
+  logo: SpaceLogoImg,
+  tokenName: 'SPACE',
+  isNative: true,
+  chain: 'mvc',
+  queryable: true,
+  decimal: 8,
+}
 
-const allAssets = [...BTCAssets, ...MVCAssets]
+const allAssets = [BTCAsset, MVCAsset]
 
-export { BTCAssets, MVCAssets, allAssets, getTags, getTagInfo }
+export { BTCAsset, MVCAsset, allAssets, getTags, getTagInfo }

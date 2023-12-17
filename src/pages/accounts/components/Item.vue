@@ -11,6 +11,7 @@ import { shortestAddress } from '@/lib/formatters'
 import { FEEB } from '@/data/config'
 
 import EditName from './EditName.vue'
+import { assetList } from '@/lib/balance'
 
 const router = useRouter()
 
@@ -69,6 +70,8 @@ const connect = async () => {
   const network = await getNetwork()
   const wif = await getPrivateKey()
   wallet.value = new Wallet(wif, network as API_NET, FEEB, API_TARGET.MVC)
+
+  assetList.value = []
 
   router.push('/wallet')
 }

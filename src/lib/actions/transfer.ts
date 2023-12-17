@@ -1,4 +1,5 @@
-import { API_NET, API_TARGET, FtManager, TxDecoder, Wallet, mvc } from 'meta-contract'
+import { API_NET, API_TARGET, FtManager, Wallet, mvc } from 'meta-contract'
+
 import { getNetwork } from '../network'
 import { getAddress, getPrivateKey } from '../account'
 import { FEEB } from '@/data/config'

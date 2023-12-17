@@ -2,8 +2,10 @@
 import { ref, computed, Ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { MVCAssets } from '@/data/assets'
 import { getAssetsDisplay } from '@/lib/assets'
+import { allAssets } from '@/data/assets'
+import { Chain } from '@/lib/account'
+import { getAddress } from '@/lib/account'
 
 import AssetItem from './components/AssetItem.vue'
 
@@ -13,7 +15,28 @@ const props = defineProps<{
 
 const router = useRouter()
 
-const assets = ref(MVCAssets)
+const mvcAddress = ref<string>('')
+const btcAddress = ref<string>('')
+
+getAddress('mvc').then((addr) => {
+  mvcAddress.value = addr
+})
+getAddress('btc').then((addr) => {
+  btcAddress.value = addr
+})
+
+const selectAddress = (chain: Chain) => {
+  switch (chain) {
+    case 'btc':
+      return btcAddress.value
+    case 'mvc':
+      return mvcAddress.value
+    default:
+      return ''
+  }
+}
+
+const assets = ref(allAssets)
 const assetsDisplay: Ref<string[]> = ref([])
 getAssetsDisplay().then((display) => {
   assetsDisplay.value = display
@@ -36,6 +59,13 @@ function selectAsset(asset: any) {
 
 <template>
   <div class="space-y-2 divide-y divide-gray-100 text-black">
-    <AssetItem v-for="asset in displayingAssets" :key="asset.symbol" :asset="asset" @click="selectAsset(asset)" />
+    <AssetItem
+      v-for="asset in displayingAssets"
+      v-if="btcAddress && mvcAddress"
+      :key="asset.symbol"
+      :asset="asset"
+      :address="selectAddress(asset.chain)"
+      @click="selectAsset(asset)"
+    />
   </div>
 </template>

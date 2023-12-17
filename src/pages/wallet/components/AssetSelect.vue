@@ -2,13 +2,10 @@
 import { ref, watch } from 'vue'
 import { Switch } from '@headlessui/vue'
 import { addAssetsDisplay, getAssetsDisplay, removeAssetsDisplay } from '@/lib/assets'
+import { type Asset } from '@/data/assets'
 
 const props = defineProps<{
-  asset: {
-    symbol: string
-    logo: string
-    tokenName: string
-  }
+  asset: Asset
 }>()
 
 const enabled = ref(false)

@@ -1,11 +1,10 @@
-import { SymbolUC, BRC20_SYMBOLS } from '@/lib/asset-symbol'
-import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
-import { ComputedRef, Ref } from 'vue'
-
-import { metaletApi, mvcApi } from './request'
 import { type Token } from './tokens'
+import { ComputedRef, Ref } from 'vue'
 import { type Asset } from '@/data/assets'
+import { useQuery } from '@tanstack/vue-query'
+import { metaletApi, mvcApi } from './request'
+import { SymbolTicker } from '@/lib/asset-symbol'
 
 export type Activity = {
   address: string
@@ -73,7 +72,7 @@ export const fetchBtcActivities = async (address: string): Promise<Activities> =
     })
 }
 
-export const fetchBRC20Activities = async (address: string, symbol: SymbolUC): Promise<Activities> => {
+export const fetchBRC20Activities = async (address: string, symbol: SymbolTicker): Promise<Activities> => {
   return metaletApi(`/address/brc20/activities`)
     .get({
       address,
@@ -116,10 +115,8 @@ export const fetchOneActivity = async (txid: string): Promise<Activity> => {
   return detail
 }
 
-export const fetchTokenActivities = async (address: string, asset: Token): Promise<TokenActivities> => {
-  const activities: any = await mvcApi(`/contract/ft/address/${address}/${asset.codehash}/${asset.genesis}/tx`).get()
-
-  return activities
+export const fetchTokenActivities = async (address: string, asset: Asset): Promise<TokenActivities> => {
+  return await mvcApi<TokenActivities>(`/contract/ft/address/${address}/${asset.codeHash}/${asset.genesis}/tx`).get()
 }
 
 export const useOneActivityQuery = (
@@ -142,47 +139,22 @@ export const useOneActivityQuery = (
 }
 
 export const useActivitiesQuery = (
-  address: Ref,
-  params:
-    | {
-        type: 'native'
-        asset: Asset
-      }
-    | {
-        type: 'token'
-        token: Token
-      },
+  addressRef: Ref<string>,
+  asset: Asset,
   options?: { enabled: ComputedRef<boolean> }
 ) => {
-  let queryKeyParams: any
-  if (params.type === 'native') {
-    queryKeyParams = {
-      address: address.value,
-      symbol: params.asset.symbol,
-    }
-  } else {
-    queryKeyParams = {
-      address: address.value,
-      symbol: params.token.symbol,
-      genesis: params.token.genesis,
-    }
-  }
-
   return useQuery({
-    queryKey: ['activities', queryKeyParams],
+    queryKey: ['activities', { address: addressRef.value, symbol: asset.symbol, genesis: asset.genesis }],
     queryFn: async () => {
-      if (params.type === 'token') {
-        if (BRC20_SYMBOLS.includes(params.token.symbol)) {
-          return fetchBRC20Activities(address.value, params.token.symbol)
-        }
-        return fetchTokenActivities(address.value, params.token)
+      if (asset.symbol === 'BTC') {
+        return fetchBtcActivities(addressRef.value)
+      } else if (asset.symbol === 'SPACE') {
+        return fetchSpaceActivities(addressRef.value)
+      } else if (asset.contract === 'BRC-20') {
+        return fetchBRC20Activities(addressRef.value, asset.symbol)
+      } else if (asset.contract === 'MetaContract') {
+        return fetchTokenActivities(addressRef.value, asset)
       }
-
-      if (params.asset.symbol === 'BTC') {
-        return fetchBtcActivities(address.value)
-      }
-
-      return fetchSpaceActivities(address.value)
     },
     ...options,
   })
