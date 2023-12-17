@@ -55,7 +55,7 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
   // authorize actions
   if (msg.action?.startsWith('authorize')) {
     const icon = sender.tab?.favIconUrl || msg.icon || ''
-    const rawUrl = 'index.html#authorize'
+    const rawUrl = 'popup.html#authorize'
     // 拼接授权页的参数
     const params = new URLSearchParams()
     params.append('host', msg.host)
