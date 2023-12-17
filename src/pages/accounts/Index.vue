@@ -22,9 +22,8 @@ getCurrentAccount().then((acc) => {
     <AccountItem
       v-for="account in accounts"
       :key="account.id"
-      v-if="currentAccount"
       :account="account"
-      :currentAccount="currentAccount"
+      :curren-account="currentAccount"
       :show-connect-button="true"
     />
 

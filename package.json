@@ -26,6 +26,7 @@
     "@headlessui/vue": "^1.7.12",
     "@heroicons/vue": "^2.0.16",
     "@rollup/plugin-alias": "^4.0.3",
+    "@scure/bip39": "^1.2.2",
     "@sentry/vue": "^7.81.1",
     "@tanstack/vue-query": "^4.26.1",
     "@vueuse/core": "^10.3.0",

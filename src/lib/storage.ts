@@ -1,7 +1,4 @@
 import { IS_DEV } from '@/data/config'
-// import browser from 'webextension-polyfill'
-console.log({ IS_DEV })
-let browser = IS_DEV ? ({} as any) : import('webextension-polyfill').then((m) => m.default)
 
 export async function useStorage(location: 'local' | 'session' | 'sync' = 'local') {
   if (IS_DEV) {
@@ -31,14 +28,12 @@ export async function useStorage(location: 'local' | 'session' | 'sync' = 'local
     }
   }
 
-  // otherwise, dynamically import browser.storage module
-  // const ext = await import('webextension-poylyfill').then((m) => m.default)
-  // console.log(ext)
-  // const storage = ext.storage[location]
-  console.log('here')
-  console.log(browser)
-  console.log(2)
-  const storage = (await browser).storage[location]
+  let ext
+  try {
+    
+  }
+  const ext = window && window.ext ? window.ext : await import('webextension-polyfill').then((m) => m.default)
+  const storage = ext.storage[location]
   console.log({ storage })
 
   return {
@@ -46,7 +41,6 @@ export async function useStorage(location: 'local' | 'session' | 'sync' = 'local
       return ((await storage.get(key)) as any)[key]
     },
     async set(key: string, value: any) {
-      console.log('whwat')
       if (typeof value === 'object') {
         value = JSON.stringify(value)
       }
@@ -75,7 +69,6 @@ export async function getStorage(
   const storage = await useStorage(option?.useSession ? 'session' : 'local')
 
   const value = await storage.get(key)
-  console.log(value)
 
   if (typeof value === 'string') {
     try {

@@ -16,7 +16,7 @@ const router = useRouter()
 
 const props = defineProps<{
   account: Account
-  currentAccount: Account
+  currentAccount?: Account
   showNetwork?: boolean
   showConnectButton?: boolean
 }>()
@@ -74,6 +74,8 @@ const connect = async () => {
 }
 
 const isCurrent = computed(() => {
+  if (!props.currentAccount) return false
+
   return props.account.id === props.currentAccount.id
 })
 
