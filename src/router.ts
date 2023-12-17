@@ -1,13 +1,9 @@
 import * as VueRouter from 'vue-router'
+
 import Wallet from './pages/wallet/Index.vue'
 import { getStorage, useStorage } from './lib/storage'
-import accountManager, {
-  Account,
-  getAccounts,
-  getCurrentAccount,
-  getLegacyAccounts,
-  needsMigrationV2,
-} from './lib/account'
+import { getAccounts, getCurrentAccount, getLegacyAccounts, needsMigrationV2 } from './lib/account'
+import { IS_DEV } from '@/data/config'
 
 const routes = [
   { path: '/', redirect: '/wallet' },
@@ -291,8 +287,9 @@ const routes = [
   },
 ]
 
+const historyMode = IS_DEV ? VueRouter.createWebHistory() : VueRouter.createWebHashHistory()
 const router = VueRouter.createRouter({
-  history: VueRouter.createWebHashHistory(),
+  history: historyMode,
   routes,
 })
 
