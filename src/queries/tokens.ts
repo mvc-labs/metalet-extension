@@ -54,7 +54,7 @@ export const useMVCTokenQuery = (
   options: { enabled: ComputedRef<boolean> }
 ) => {
   return useQuery({
-    queryKey: ['MVCTokens', { address: addressRef.value }],
+    queryKey: ['MVCTokens', { address: addressRef.value, genesis }],
     queryFn: () => fetchMVCTokens(addressRef.value),
     select: (tokens: Token[]) => tokens.find((token) => token.genesis === genesis),
     ...options,

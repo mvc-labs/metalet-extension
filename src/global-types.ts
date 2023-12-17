@@ -12,4 +12,8 @@ type FailedResult = {
   status: 'failed'
   message: string
 }
-export type TransactionResult = SuccessResult | FailedResult
+type WarningResult = {
+  status: 'warning'
+  message: string
+}
+export type TransactionResult = SuccessResult | FailedResult | WarningResult
