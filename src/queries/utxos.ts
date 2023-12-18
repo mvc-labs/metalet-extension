@@ -97,7 +97,7 @@ function formatUnisatUTXO(utxo: UnisatUTXO & { confirmed: boolean }): UTXO {
 }
 
 export async function getBtcUtxos(address: string): Promise<UTXO[]> {
-  return metaletApiV3<UTXO[]>('/address/btc-utxo').get({ address })
+  return metaletApiV3<UTXO[]>('/address/btc-utxo').get({ address, unconfirmed: '1' })
 }
 
 // export async function getInscriptionUtxos(inscriptions: Inscription[]): Promise<UTXO[]> {
