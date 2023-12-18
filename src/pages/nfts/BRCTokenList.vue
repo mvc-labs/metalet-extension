@@ -39,9 +39,8 @@ const toBRC20Detail = (inscription: Inscription) => {
 
 <template>
   <div v-if="isLoading">BRC Token List loading...</div>
-  <div v-else class="mt-12 px-3 py-4 grid grid-cols-3 gap-x-2 gap-y-7">
+  <div v-else-if="inscriptionsData && inscriptionsData.total" class="mt-12 px-3 py-4 grid grid-cols-3 gap-x-2 gap-y-7">
     <div
-      v-if="inscriptionsData && inscriptionsData.total"
       v-for="inscription in inscriptionsData.list"
       @click="toBRC20Detail(inscription)"
       class="flex flex-col items-center justify-center rounded-md p-2 cursor-pointer text-[#999999]"
@@ -50,8 +49,8 @@ const toBRC20Detail = (inscription: Inscription) => {
       <span class="text-sm mt-3"># {{ inscription.inscriptionNumber }}</span>
       <span class="text-xs mt-1">{{ dayjs(inscription.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss') }}</span>
     </div>
-    <div v-else>No BRC Tokens yet</div>
   </div>
+  <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">No BRC Tokens yet</div>
 </template>
 
 <style lang="less" scoped></style>

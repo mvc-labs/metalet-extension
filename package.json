@@ -18,7 +18,7 @@
     "bwc": "yarn build:content --watch",
     "bwi": "yarn build:injectWatch",
     "bwb": "yarn build:bg --watch",
-    "bww": "NODE_OPTIONS=\"--max_old_space_size=4096\" yarn build:web --watch"
+    "bww": "set NODE_OPTIONS=\"--max_old_space_size=4096\" && yarn build:web --watch"
   },
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",

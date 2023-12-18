@@ -153,7 +153,7 @@ const toTransfer = () => {
               >{{ (tickersData && tickersData.tokenBalance.transferableBalance) || 0 }} {{ asset.symbol }}</span
             >
           </div>
-          <div class="text-gray-500" v-if="tickersLoading">Loading BRC Tickers.</div>
+          <div class="w-full py-3 text-center text-sm font-bold text-gray-500" v-if="tickersLoading">Loading BRC Tickers.</div>
           <div v-else class="grid grid-cols-3 gap-2 w-full mt-3" v-if="tickersData && tickersData.transferableList">
             <div
               :key="ticker.inscriptionId"
@@ -183,5 +183,5 @@ const toTransfer = () => {
       <div class="text-gray-500" v-else>No Service for {{ asset?.symbol }} yet.</div>
     </div>
   </div>
-  <div v-else>No Asset</div>
+  <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">Asset Loading...</div>
 </template>

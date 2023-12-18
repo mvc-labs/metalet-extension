@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { type Psbt } from 'bitcoinjs-lib'
 import { BtcWallet } from '@/lib/wallets/btc'
 import CopyIcon from '@/assets/icons/copy.svg'
 import { ref, computed, Ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
+import bitcoinjs, { type Psbt } from 'bitcoinjs-lib'
 import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
 import { prettifyBalance, shortestAddress } from '@/lib/formatters'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
@@ -71,6 +71,12 @@ const transactionResult: Ref<undefined | TransactionResult> = ref()
 const inscribeOrder = ref<PreInscribe | undefined>()
 const psbtHex = ref('')
 const copied = ref(false)
+interface SimpleUTXO {
+  address: string
+  value: number
+}
+const inputUTXOs = ref<SimpleUTXO[]>()
+const outputUTXOs = ref<SimpleUTXO[]>()
 const copyHex = () => {
   navigator.clipboard.writeText(psbtHex.value)
   copied.value = true
@@ -132,7 +138,13 @@ const popConfirm = async () => {
     operationLock.value = false
     return
   }
-  const { fee, psbt } = data
+  const { fee, psbt, selecedtUTXOs } = data
+  inputUTXOs.value = selecedtUTXOs.map((utxo) => ({ address: address.value, value: utxo.satoshi }))
+  const tx = psbt.extractTransaction()
+  outputUTXOs.value = tx.outs.map((out) => ({
+    address: bitcoinjs.address.fromOutputScript(out.script),
+    value: out.value,
+  }))
   psbtHex.value = psbt.extractTransaction().toHex()
   paymentNetworkFee.value = fee
   inscribePsbt.value = psbt
@@ -284,7 +296,7 @@ function toSuceess() {
         Next
       </button>
     </div>
-    <div v-if="nextStep === 2" class="text-[#141416] relative h-full">
+    <div v-if="nextStep === 2" class="text-[#141416] h-full">
       <div class="text-center text-base text-[#909399]">Spend Amount</div>
       <div class="text-center text-3xl font-bold mt-3">{{ inscribeAmount }} {{ asset.symbol }}</div>
       <div class="mt-3 text-center text-base text-[#909399]">
@@ -307,16 +319,16 @@ function toSuceess() {
       <div class="space-y-[18px]" v-show="tabIdx === 0">
         <div class="space-y-2 rounded-md">
           <div class="text-[#141416]">Inputs</div>
-          <div class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
-            <span>{{ shortestAddress(address || '') }}</span
-            ><span>{{ prettifyBalance(total || 0, 'BTC') }}</span>
+          <div v-for="utxo in inputUTXOs" class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
+            <span>{{ shortestAddress(utxo.address) }}</span
+            ><span>{{ prettifyBalance(utxo.value, 'BTC') }}</span>
           </div>
         </div>
         <div class="space-y-2 rounded-md">
           <div class="text-[#141416]">Outputs</div>
-          <div class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
-            <span>{{ shortestAddress(inscribeOrder?.payAddress || '') }}</span>
-            <span>{{ prettifyBalance(inscribeOrder?.needAmount || 0, 'BTC') }}</span>
+          <div v-for="utxo in outputUTXOs" class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
+            <span>{{ shortestAddress(utxo.address) }}</span>
+            <span>{{ prettifyBalance(utxo.value, 'BTC') }}</span>
           </div>
         </div>
         <div class="space-y-2 rounded-md">
@@ -336,7 +348,7 @@ function toSuceess() {
           <span class="text-sm" @click="copyHex">Copy psbt transaction data</span>
         </div>
       </div>
-      <div class="absolute bottom-4 w-full left-0 flex items-center justify-between">
+      <div class="w-full left-0 flex items-center justify-between mt-3">
         <button
           @click="cancel"
           class="border w-[133px] rounded-lg py-3 text-sm font-bold text-[#141416]"

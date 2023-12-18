@@ -96,7 +96,7 @@ export class BtcWallet {
       amount = new Decimal(amount)
     }
     if (!this.account) throw new Error('no account')
-    const psbt = await getPsbt(recipient, amount, feeRate)
+    const { psbt } = await getPsbtAndSelectUtxos(recipient, amount, feeRate)
     return await this.broadcast(psbt)
   }
 
@@ -104,9 +104,9 @@ export class BtcWallet {
     if (typeof amount === 'number') {
       amount = new Decimal(amount)
     }
-    const psbt = await getPsbt(recipient, amount, feeRate)
+    const { psbt, selecedtUTXOs } = await getPsbtAndSelectUtxos(recipient, amount, feeRate)
     const fee = calculateFee(psbt, feeRate)
-    return { fee, psbt }
+    return { fee, psbt, selecedtUTXOs }
   }
 
   async commitInscribe(orderId: string, psbt: Psbt) {
@@ -128,7 +128,7 @@ export class BtcWallet {
   }
 }
 
-async function getPsbt(recipient: string, amount: Decimal, feeRate: number) {
+async function getPsbtAndSelectUtxos(recipient: string, amount: Decimal, feeRate: number) {
   const btcNetwork = await getBtcNetwork()
   const address = await getAddress('btc')
   const addressType = await getAddressType('btc')
@@ -174,7 +174,8 @@ async function getPsbt(recipient: string, amount: Decimal, feeRate: number) {
   }
 
   let change = total.minus(amount).minus(fee)
-  return await buildPsbt(selecedtUTXOs, change)
+  psbt = await buildPsbt(selecedtUTXOs, change)
+  return { psbt, selecedtUTXOs }
 }
 
 const selectUTXOs = (utxos: UTXO[], targetAmount: Decimal): UTXO[] => {
