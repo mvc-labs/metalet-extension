@@ -3,9 +3,7 @@ import { ref, computed, Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQRCode } from '@vueuse/integrations/useQRCode'
 
-// import { type Chain, getAddress } from '@/lib/account'
-import { type Chain } from '@/lib/account'
-import { createEmit } from '@/lib/emitters'
+import { type Chain, getAddress } from '@/lib/account'
 import { allAssets } from '@/data/assets'
 
 // init
@@ -13,8 +11,8 @@ const route = useRoute()
 const chain: Ref<Chain> = ref(route.query.chain as Chain)
 const asset = computed(() => allAssets.find((asset) => asset.chain === chain.value))
 
-const address = ref('')
-createEmit<string>('getAddress')(chain.value).then((add) => {
+const address = ref<string>('')
+getAddress(chain.value).then((add) => {
   address.value = add!
 })
 

@@ -1,17 +1,20 @@
 <script lang="ts" setup>
 import { ref, toRaw } from 'vue'
-import { createEmit } from '@/lib/emitters'
-import AccountItem from './components/Item.vue'
 import { PlusIcon } from '@heroicons/vue/20/solid'
-import { type Account, getAccounts } from '@/lib/account'
+
+import { type Account, getAccounts, getCurrentAccount } from '@/lib/account'
+
+import AccountItem from './components/Item.vue'
 
 const accounts = ref<Account[] | undefined>()
 getAccounts().then((res) => {
   accounts.value = Array.from(toRaw(res), ([key, value]) => value)
 })
 
-const currentAccount = ref<Account | undefined>()
-createEmit<Account>('getCurrentAccount')().then((acc) => {
+const currentAccount = ref<Account>()
+getCurrentAccount().then((acc) => {
+  if (!acc) return
+
   currentAccount.value = acc
 })
 </script>

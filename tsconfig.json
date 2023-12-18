@@ -1,22 +1,30 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "target": "ESNext",
-    "useDefineForClassFields": true,
-    "moduleResolution": "Node",
-    "strict": true,
-    "jsx": "preserve",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    /* Base Options: */
     "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": false, // FIXME: enable
     "noImplicitThis": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "allowUnusedLabels": true,
-    "lib": ["ESNext", "DOM", "WebWorker"],
-    "skipLibCheck": true,
+
+    /* If NOT transpiling with TypeScript: */
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
     "noEmit": true,
-    "allowJs": true,
+
+    "useDefineForClassFields": true,
+    "jsx": "preserve",
+    "lib": ["ES2022", "DOM", "WebWorker", "DOM.Iterable"],
     "baseUrl": "./",
     "types": ["vite-svg-loader", "vite/client", "vitest/globals"],
     "paths": {

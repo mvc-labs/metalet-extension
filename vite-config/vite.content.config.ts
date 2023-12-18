@@ -19,6 +19,7 @@ export default defineConfig({
   build: {
     emptyOutDir: false,
     outDir: resolve(__dirname, '../public'),
+    copyPublicDir: false,
     lib: {
       entry: resolve(__dirname, '../src/content-script/main.ts'),
       name: 'Metalet',

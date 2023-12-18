@@ -1,17 +1,18 @@
 <script lang="ts" setup>
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 import { ref } from 'vue'
+
 import SpaceLogoImg from '@/assets/images/space-logo.svg?url'
 import BtcLogoImg from '@/assets/images/btc-logo.svg?url'
+import { getCurrentAccount, type Account } from '@/lib/account'
+
+import BRCTokenList from './BRCTokenList.vue'
 import MvcCollectionPanel from './components/MvcCollectionPanel.vue'
 import BtcCollectionPanel from './components/BtcCollectionPanel.vue'
 import AccountItem from '../accounts/components/Item.vue'
-import { type Account } from '@/lib/account'
-import { createEmit } from '@/lib/emitters'
-import BRCTokenList from './BRCTokenList.vue'
 
 const account = ref<Account | null>(null)
-createEmit<Account>('getCurrentAccount')().then((acc) => {
+getCurrentAccount().then((acc) => {
   account.value = acc
 })
 </script>
@@ -45,12 +46,12 @@ createEmit<Account>('getCurrentAccount')().then((acc) => {
   </TabGroup>
 </template>
 
-<style scoped lang="scss">
+<style scoped lang="css">
 .tab {
   @apply flex flex-1 items-center justify-center gap-2 rounded-inherit py-2 text-sm font-bold focus:outline-none focus:ring-0 ui-selected:bg-btn-blue ui-selected:text-blue-50;
+}
 
-  & img {
-    @apply h-6 w-6 rounded-full bg-white p-1;
-  }
+.tab > img {
+  @apply h-6 w-6 rounded-full bg-white p-1;
 }
 </style>

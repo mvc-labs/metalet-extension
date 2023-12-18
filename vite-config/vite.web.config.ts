@@ -21,12 +21,14 @@ export default defineConfig({
   plugins: [alias(), vue(), nodePolyfills(), wasm(), topLevelAwait(), svgLoader()],
   build: {
     minify: env.VITE_ENVIRONMENT !== 'development',
+    sourcemap: false,
     outDir: 'dist',
     emptyOutDir: false,
     rollupOptions: {
       input: {
-        index: new URL('../index.html', import.meta.url).pathname,
+        index: new URL('../popup.html', import.meta.url).pathname,
       },
+      // external: ['browser-polyfill.min.js'],
     },
   },
   // worker: {

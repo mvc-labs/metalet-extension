@@ -1,14 +1,16 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ArrowUpRightIcon, QrCodeIcon, ArrowsRightLeftIcon, CircleStackIcon } from '@heroicons/vue/20/solid'
+
 import { SymbolTicker } from '@/lib/asset-symbol'
 import { useBalanceQuery } from '@/queries/balance'
-import Activities from './components/Activities.vue'
+import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import { getTags, BTCAsset, MVCAsset } from '@/data/assets'
-import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
-import { ArrowUpRightIcon, QrCodeIcon, ArrowsRightLeftIcon, CircleStackIcon } from '@heroicons/vue/20/solid'
+
+import Activities from './components/Activities.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -29,7 +31,7 @@ const asset = computed(() => {
     return MVCAsset
   }
   if (btcAssets.value && btcAssets.value.length > 0) {
-    const asset = btcAssets.value.find((asset) => asset.symbol === symbol.value)
+    const asset = btcAssets.value.find((asset: any) => asset.symbol === symbol.value)
     return asset
   }
 })

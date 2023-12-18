@@ -24,7 +24,7 @@ export interface Tx {
   time: string
 }
 
-export const getBTActivities = async (address: string): Promise<Tx[]> => {
+export const getBTCActivities = async (address: string): Promise<Tx[]> => {
   const transactions = (await ordersApi('/activities').get({ address })) as any
 
   const txs: Tx[] = []

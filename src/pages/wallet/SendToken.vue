@@ -6,14 +6,14 @@ import { CircleStackIcon } from '@heroicons/vue/24/solid'
 import { useQueryClient } from '@tanstack/vue-query'
 
 import { prettifyTokenBalance } from '@/lib/formatters'
-// import { getAddress, getCurrentAccount, getPrivateKey } from '@/lib/account'
-import { createEmit } from '@/lib/emitters'
-import { useMVCTokenQuery } from '@/queries/tokens'
+import { getAddress, getCurrentAccount, getPrivateKey } from '@/lib/account'
 import { network } from '@/lib/network'
+import type { TransactionResult } from '@/global-types'
+import { useMVCTokenQuery } from '@/queries/tokens'
 import { type Asset } from '@/data/assets'
 
 import Modal from '@/components/Modal.vue'
-import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
+import TransactionResultModal from './components/TransactionResultModal.vue'
 
 const route = useRoute()
 const genesis = route.params.genesis as string
@@ -21,11 +21,8 @@ const genesis = route.params.genesis as string
 const queryClient = useQueryClient()
 
 const address = ref('')
-// getCurrentAccount()
-// getAddress().then((addr) => {
-//   address.value = addr!
-// })
-createEmit<string>('getAddress')().then((addr) => {
+getCurrentAccount()
+getAddress().then((addr) => {
   address.value = addr!
 })
 
@@ -69,8 +66,7 @@ async function send() {
 
   operationLock.value = true
 
-  // const privateKey = await getPrivateKey("mvc")
-  const privateKey = await createEmit<string>('getPrivateKey')('mvc')
+  const privateKey = await getPrivateKey('mvc')
 
   const ftManager = new FtManager({
     network: network.value as API_NET,

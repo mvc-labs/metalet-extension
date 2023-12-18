@@ -1,13 +1,9 @@
 import * as VueRouter from 'vue-router'
+
 import Wallet from './pages/wallet/Index.vue'
-import { getStorage } from './lib/storage'
-import accountManager, {
-  Account,
-  getAccounts,
-  getCurrentAccount,
-  getLegacyAccounts,
-  needsMigrationV2,
-} from './lib/account'
+import { getStorage, useStorage } from './lib/storage'
+import { getAccounts, getCurrentAccount, getLegacyAccounts, needsMigrationV2 } from './lib/account'
+import { IS_DEV } from '@/data/config'
 
 const routes = [
   { path: '/', redirect: '/wallet' },
@@ -33,6 +29,15 @@ const routes = [
     meta: {
       noFooter: true,
       noMenu: true,
+    },
+  },
+  {
+    path: '/connected-dapps',
+    component: () => import('./pages/connected-dapps/Index.vue'),
+    meta: {
+      noFooter: true,
+      secondaryHeader: true,
+      headerTitle: 'Connected Dapps',
     },
   },
   {
@@ -282,8 +287,9 @@ const routes = [
   },
 ]
 
+const historyMode = IS_DEV ? VueRouter.createWebHistory() : VueRouter.createWebHashHistory()
 const router = VueRouter.createRouter({
-  history: VueRouter.createWebHashHistory(),
+  history: historyMode,
   routes,
 })
 
@@ -300,7 +306,8 @@ router.beforeEach(async (to, from) => {
 // 检查账号状态；如果没有当前账号，跳转到账号页面
 router.beforeEach(async (to, from) => {
   // 如果是老用户（sync存储中有助记词），且该账号在localStorage中不存在，则说明需要迁移，跳转至新版本迁移页面
-  const v0Record = await chrome.storage.sync.get('currentAccount')
+  const syncStorage = await useStorage('sync')
+  const v0Record = await syncStorage.get('currentAccount')
   const v1Records = await getLegacyAccounts()
   if (v0Record && v0Record.currentAccount && v1Records.length === 0) {
     const mneStr = v0Record.currentAccount.mnemonicStr

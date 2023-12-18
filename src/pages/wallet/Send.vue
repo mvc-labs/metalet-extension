@@ -1,19 +1,22 @@
 <script lang="ts" setup>
+import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
 import Decimal from 'decimal.js'
 import { useRoute } from 'vue-router'
 import { Wallet } from 'meta-contract'
-import { allAssets } from '@/data/assets'
-import Modal from '@/components/Modal.vue'
-import { createEmit } from '@/lib/emitters'
-import { BtcWallet } from '@/lib/wallets/btc'
-import { prettifyBalance } from '@/lib/formatters'
-import { useBalanceQuery } from '@/queries/balance'
 import { useQueryClient } from '@tanstack/vue-query'
-import { type SymbolTicker } from '@/lib/asset-symbol'
-import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
-import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
-import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 import { Psbt } from 'bitcoinjs-lib'
+
+import { useBalanceQuery } from '@/queries/balance'
+import { prettifyBalance } from '@/lib/formatters'
+import { getAddress } from '@/lib/account'
+import type { TransactionResult } from '@/global-types'
+import { allAssets } from '@/data/assets'
+import { BtcWallet } from '@/lib/wallets/btc'
+import { type SymbolTicker } from '@/lib/asset-symbol'
+import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
+
+import Modal from '@/components/Modal.vue'
+import TransactionResultModal from './components/TransactionResultModal.vue'
 
 const route = useRoute()
 const symbol = ref<SymbolTicker>(route.query.symbol as SymbolTicker)
@@ -21,7 +24,7 @@ const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol.v
 const queryClient = useQueryClient()
 
 const address = ref('')
-createEmit<string>('getAddress')(route.query.chain).then((addr) => {
+getAddress().then((addr) => {
   address.value = addr!
 })
 
@@ -296,9 +299,7 @@ async function send() {
         Next
       </button>
     </template>
-    <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">
-      Loading...
-    </div>
+    <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">Loading...</div>
 
     <!-- error info -->
     <p v-if="error">{{ error.message }}</p>

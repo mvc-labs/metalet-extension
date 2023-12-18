@@ -1,13 +1,16 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { createEmit } from '@/lib/emitters'
-import { type Account } from '@/lib/account'
+
+import { getCurrentAccount, type Account } from '@/lib/account'
+
 import Balance from './components/Balance.vue'
 import AssetList from './components/AssetList.vue'
 import AccountItem from '../accounts/components/Item.vue'
 
-const currentAccount = ref<Account | undefined>()
-createEmit<Account>('getCurrentAccount')().then(async (acc) => {
+const currentAccount = ref<Account>()
+getCurrentAccount().then((acc) => {
+  if (!acc) return
+
   currentAccount.value = acc
 })
 </script>
@@ -19,7 +22,7 @@ createEmit<Account>('getCurrentAccount')().then(async (acc) => {
       :show-network="true"
       v-if="currentAccount"
       :account="currentAccount"
-      :currentAccount="currentAccount"
+      :current-account="currentAccount"
     />
 
     <Balance />

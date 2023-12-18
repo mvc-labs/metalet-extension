@@ -98,7 +98,7 @@ export default {
   Pay: {
     name: 'Pay',
     title: 'Pay for transactions',
-    description: ['Pay for transactions'],
+    description: ['Third party apps create functional transaction(s), and ask Metalet to pay for them.'],
     process: Pay.process,
     estimate: doNothing,
     closeAfterProcess: true,

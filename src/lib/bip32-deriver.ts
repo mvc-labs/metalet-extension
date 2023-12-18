@@ -1,9 +1,11 @@
-import bip39 from 'bip39'
-import ECPairFactory from 'ecpair'
+import * as bip39 from '@scure/bip39'
+import { wordlist } from '@scure/bip39/wordlists/english'
 import BIP32Factory, { BIP32Interface } from 'bip32'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { mvc } from 'meta-contract'
-import bitcoinjs, { type Payment, crypto } from 'bitcoinjs-lib'
+import * as bitcoinjs from 'bitcoinjs-lib'
+import type { Payment } from 'bitcoinjs-lib'
+import ECPairFactory from 'ecpair'
 
 import { raise } from './helpers'
 import { type Network, getBtcNetwork } from './network'
@@ -55,7 +57,7 @@ export function derivePrivateKey({
   network: Network
   path: string
 }): string {
-  bip39.validateMnemonic(mnemonic) ?? raise('Invalid mnemonic')
+  bip39.validateMnemonic(mnemonic, wordlist) ?? raise('Invalid mnemonic')
 
   if (chain === 'mvc') {
     return deriveMvcPrivateKey(mnemonic, path, network).toString()
@@ -64,7 +66,7 @@ export function derivePrivateKey({
   return deriveBtcPrivateKey(mnemonic, path, network).toWIF()
 }
 
-// FIXME support MVC and discord ECPairFactory
+// FIXME support MVC and discard ECPairFactory
 export async function deriveSigner(privateKey: string) {
   const ECPair = ECPairFactory(ecc)
   return ECPair.fromWIF(privateKey)
@@ -81,7 +83,8 @@ export function deriveBtcPrivateKey(mnemonic: string, path: string, network: Net
   const bip32 = BIP32Factory(ecc)
   const btcNetwork = network === 'mainnet' ? bitcoinjs.networks.bitcoin : bitcoinjs.networks.testnet
   const seed = bip39.mnemonicToSeedSync(mnemonic)
-  const master = bip32.fromSeed(seed, btcNetwork)
+  const seedBuf = Buffer.from(seed)
+  const master = bip32.fromSeed(seedBuf, btcNetwork)
 
   return master.derivePath(path)
 }
@@ -98,7 +101,7 @@ export function derivePublicKey({
   network: Network
   path: string
 }): string {
-  bip39.validateMnemonic(mnemonic) ?? raise('Invalid mnemonic')
+  bip39.validateMnemonic(mnemonic, wordlist) ?? raise('Invalid mnemonic')
 
   if (chain === 'mvc') {
     return deriveMvcPublicKey(mnemonic, path, network).toString()
@@ -129,7 +132,7 @@ export function deriveAllAddresses({
   btcPath: string
   mvcPath: string
 }) {
-  bip39.validateMnemonic(mnemonic) ?? raise('Invalid mnemonic')
+  bip39.validateMnemonic(mnemonic, wordlist) ?? raise('Invalid mnemonic')
 
   const mvcTestnetAddress = deriveMvcAddress(mnemonic, mvcPath, 'testnet')
   const mvcMainnetAddress = deriveMvcAddress(mnemonic, mvcPath, 'mainnet')
@@ -155,7 +158,7 @@ export function deriveAddress({
   network: Network
   path: string
 }): string {
-  bip39.validateMnemonic(mnemonic) ?? raise('Invalid mnemonic')
+  bip39.validateMnemonic(mnemonic, wordlist) ?? raise('Invalid mnemonic')
 
   if (chain === 'mvc') {
     return deriveMvcAddress(mnemonic, path, network)

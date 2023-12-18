@@ -5,6 +5,7 @@ import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon } from '@heroicons/v
 import { toTx } from '@/lib/helpers'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import { getBrowserHost } from '@/lib/host'
+// import { type TransactionResult } from '@/global-types'
 
 import Modal from '@/components/Modal.vue'
 
@@ -72,16 +73,14 @@ const toResultTx = async () => {
       </div>
     </template>
 
-    <template #body v-if="result && (result.status === 'failed' || result.status === 'warning')">
-      <div class="mt-4 space-y-4">
+    <template #body>
+      <div class="mt-4 space-y-4" v-if="result && (result.status === 'failed' || result.status === 'warning')">
         <div class="space-y-1">
           <div class="text-sm text-gray-500">{{ result.message }}</div>
         </div>
       </div>
-    </template>
 
-    <template #body v-if="result && result.status === 'success'">
-      <div class="mt-4 space-y-4">
+      <div class="mt-4 space-y-4" v-if="result && result.status === 'success'">
         <div class="space-y-1">
           <div class="label">Amount</div>
           <div class="text-sm">

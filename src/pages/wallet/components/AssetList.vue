@@ -1,29 +1,37 @@
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import AssetItem from './AssetItem.vue'
-import { createEmit } from '@/lib/emitters'
-import { useBRC20AssetQuery } from '@/queries/btc'
-import { useMVCAssetsQuery } from '@/queries/tokens'
 import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
-import { type Asset, MVCAsset, BTCAsset } from '@/data/assets'
+
+import { getAddress } from '@/lib/account'
+import { getAssetsDisplay } from '@/lib/assets'
+import { useMVCAssetsQuery } from '@/queries/tokens'
+import { useBRC20AssetQuery } from '@/queries/btc'
+import { type Asset, BTCAsset, MVCAsset } from '@/data/assets'
+
+import AssetItem from './AssetItem.vue'
 
 const router = useRouter()
 
 const mvcAddress = ref<string>('')
 const btcAddress = ref<string>('')
 
-createEmit<string>('getAddress')('mvc').then((addr) => {
-  mvcAddress.value = addr
+onMounted(async () => {
+  mvcAddress.value = await getAddress('mvc')
+  btcAddress.value = await getAddress('btc')
+
+  if (!btcAddress.value || !mvcAddress.value) {
+    router.push('/welcome')
+  }
 })
 
-createEmit<string>('getAddress')('btc').then((addr) => {
-  btcAddress.value = addr
+const { isLoading, data: userOwnedTokens } = useMVCAssetsQuery(mvcAddress, {
+  enabled: computed(() => !!mvcAddress.value),
 })
+type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
 
-// TODO asset display
 const assetsDisplay = ref<string[]>([])
-createEmit<string[]>('getAssetsDisplay')().then((display) => {
+getAssetsDisplay().then((display) => {
   assetsDisplay.value = display
 })
 

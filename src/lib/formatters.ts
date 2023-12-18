@@ -5,8 +5,8 @@ export const prettifyTimestamp = (timestamp: number, format = 'YYYY-MM-DD HH:mm:
   return dayjs(timestamp).format(format)
 }
 
-export const prettifyTxId = (txId: string) => {
-  return `${txId.slice(0, 6)}...${txId.slice(-6)}`
+export const prettifyTxId = (txId: string, useDigits = 6) => {
+  return `${txId.slice(0, useDigits)}...${txId.slice(-useDigits)}`
 }
 
 export const prettifyBalance = (balance: number, symbol: string = 'SPACE'): string => {

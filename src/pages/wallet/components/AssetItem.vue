@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import { updateAsset } from '@/lib/balance'
+import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
+
 import { isOfficialToken } from '@/lib/assets'
+import { updateAsset } from '@/lib/balance'
 import { useBalanceQuery } from '@/queries/balance'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import { type Asset, getTagInfo, Tag } from '@/data/assets'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
-import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
 const { asset, address } = defineProps<{
   asset: Asset

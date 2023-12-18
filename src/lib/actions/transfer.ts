@@ -1,9 +1,9 @@
 import { API_NET, API_TARGET, FtManager, Wallet, mvc } from 'meta-contract'
+
 import { getNetwork } from '../network'
-// import { getAddress, getPrivateKey } from '../account'
+import { getAddress, getPrivateKey } from '../account'
 import { FEEB } from '@/data/config'
 import { getApiHost } from '../host'
-import { createEmit } from '@/lib/emitters'
 
 export type Receiver = {
   address: string
@@ -15,13 +15,9 @@ export type TransferTask = {
   receivers: Receiver[]
 }
 export async function process({ tasks, broadcast = true }: { tasks: TransferTask[]; broadcast?: boolean }) {
-  console.log('here')
   const network: API_NET = (await getNetwork()) as API_NET
-  // const purse = await getPrivateKey("mvc")
-  const purse = await createEmit<string>('getPrivateKey')()
-
-  // const address = (await getAddress())!
-  const address = await createEmit<string>('getAddress')()
+  const purse = await getPrivateKey('mvc')
+  const address = (await getAddress())!
   const apiHost = await getApiHost()
 
   const wallet = new Wallet(purse, network, FEEB, API_TARGET.MVC, apiHost)

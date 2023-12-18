@@ -1,5 +1,6 @@
 import { mvc } from 'meta-contract'
-import { createEmit } from '@/data/event-actions'
+
+import { notifyContent } from '@/lib/notify-content'
 import { getNetwork } from './network'
 import { signMessage } from './crypto'
 import { fetchUtxos } from '../queries/utxos'
@@ -69,7 +70,7 @@ function serializeAccountMap(map: Map<string, Account>): string {
 
 // Account Map Deserialization
 function deserializeAccountMap(json: string): Map<string, Account> {
-  const obj = JSON.parse(json)
+  const obj = typeof json === 'string' ? JSON.parse(json) : json
   const map = new Map()
   for (const key in obj) {
     map.set(key, obj[key])
@@ -78,7 +79,9 @@ function deserializeAccountMap(json: string): Map<string, Account> {
 }
 
 export async function getAccounts(refresh = false): Promise<Map<string, Account>> {
-  return deserializeAccountMap(await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: '{}', isParse: false }))
+  const accounts = await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: '{}', isParse: false })
+
+  return deserializeAccountMap(accounts)
 }
 
 export async function getAccount(accountId: string): Promise<Account | null> {
@@ -134,7 +137,7 @@ export async function connectAccount(accountId: string) {
 
   const mvcAddress = await getAddress('mvc')
   const btcAddress = await getAddress('btc')
-  createEmit('accountsChanged')({ mvcAddress, btcAddress })
+  notifyContent('accountsChanged')({ mvcAddress, btcAddress })
 
   return true
 }

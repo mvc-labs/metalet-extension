@@ -5,7 +5,7 @@ import { ChevronRightIcon } from '@heroicons/vue/20/solid'
 import { useRouter } from 'vue-router'
 
 import passwordManager from '@/lib/password'
-import { VERSION } from '@/data/config'
+import { IS_DEV, VERSION } from '@/data/config'
 
 import SelectNetwork from './components/SelectNetwork.vue'
 import ResetModal from '@/components/ResetModal.vue'
@@ -54,6 +54,10 @@ const toBackup = () => {
   router.push('/wallet/backup')
 }
 
+const toConnectedDapps = () => {
+  router.push('/connected-dapps')
+}
+
 const showResetModal = ref(false)
 </script>
 
@@ -82,7 +86,7 @@ const showResetModal = ref(false)
           </div>
         </div>
 
-        <div class="setting-item group cursor-pointer" @click="openWindowMode">
+        <div class="setting-item group cursor-pointer" @click="openWindowMode" v-if="!IS_DEV">
           <div class="text-gray-500 group-hover:underline">Open in Window Mode</div>
           <div class="">
             <ChevronRightIcon class="link-icon" />
@@ -96,13 +100,6 @@ const showResetModal = ref(false)
       <div class="text-base font-bold">Security</div>
 
       <div class="divide-y divide-gray-100">
-        <!-- <div class="setting-item group cursor-pointer" @click="toCurrentAccount">
-          <div class="text-gray-500 group-hover:underline">Change Password</div>
-          <div class="">
-            <ChevronRightIcon class="link-icon" />
-          </div>
-        </div> -->
-
         <div class="setting-item group cursor-pointer" @click="toBackup" v-if="hasPassword">
           <div class="text-gray-500 group-hover:underline">Backup</div>
           <div class="">
@@ -123,6 +120,13 @@ const showResetModal = ref(false)
             <ChevronRightIcon class="link-icon" />
           </div>
         </div>
+
+        <!-- <div class="setting-item group cursor-pointer" @click="toConnectedDapps">
+          <div class="text-gray-500 group-hover:underline">Connected Dapps</div>
+          <div class="">
+            <ChevronRightIcon class="link-icon" />
+          </div>
+        </div> -->
       </div>
     </div>
 

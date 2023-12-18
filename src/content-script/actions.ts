@@ -183,7 +183,11 @@ export async function on(eventName: string, handler: Function) {
 
     handler(...event.data.args)
   }
+
   window.addEventListener('message', handleFn)
+
+  // add connecting dapps to list
+  // return await createAction('Listen', 'query')
 }
 
 // event removeListener
