@@ -21,3 +21,4 @@ export const API2_ORDERS_EXCHANGE = 'https://api2.orders.exchange/api'
 
 // export const UNISAT_HOST = 'https://api.unisat.io/wallet-v4'
 export const UNISAT_HOST = 'https://api.unisat.io/wallet-v4'
+export const UNISAT_TESTNET_HOST = 'https://api-testnet.unisat.io/wallet-v4'

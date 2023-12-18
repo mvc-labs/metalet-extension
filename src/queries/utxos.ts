@@ -60,7 +60,7 @@ export const fetchUtxos = async (chain: Chain = 'mvc', address: string): Promise
   if (chain === 'mvc') {
     return await fetchMVCUtxos(address)
   } else {
-    return await getBtcUtxos(address)
+    return (await getBtcUtxos(address)) || []
   }
 }
 

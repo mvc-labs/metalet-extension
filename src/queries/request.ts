@@ -9,6 +9,7 @@ import {
   MEMPOOL_HOST,
   BLOCKSTREAM_HOST,
   ORDINALS_HOST,
+  UNISAT_TESTNET_HOST,
 } from '@/data/hosts'
 
 type OptionParams = Record<string, string>
@@ -182,6 +183,8 @@ const unisatRequest = <T>(url: string, options: RequestOption): Promise<T> =>
   })
 
 export const unisatApi = <T>(path: string) => {
+  const unisatHost = network.value === 'mainnet' ? UNISAT_HOST : UNISAT_TESTNET_HOST
+
   const headers = new Headers()
   headers.append('X-Client', 'UniSat Wallet')
   headers.append('Content-Type', 'application/json;charset=utf-8')
@@ -191,8 +194,8 @@ export const unisatApi = <T>(path: string) => {
   )
 
   return {
-    get: (params?: any) => unisatRequest<T>(`${UNISAT_HOST}${path}`, { method: 'GET', headers, params, mode: 'cors' }),
-    post: (data?: any) => unisatRequest<T>(`${UNISAT_HOST}${path}`, { method: 'POST', headers, data, mode: 'cors' }),
+    get: (params?: any) => unisatRequest<T>(`${unisatHost}${path}`, { method: 'GET', headers, params, mode: 'cors' }),
+    post: (data?: any) => unisatRequest<T>(`${unisatHost}${path}`, { method: 'POST', headers, data, mode: 'cors' }),
   }
 }
 

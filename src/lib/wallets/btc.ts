@@ -29,7 +29,7 @@ export class BtcWallet {
     const address = await getAddress('btc')
     const addressType = await getAddressType('btc')
     const payment = await createPayment(addressType)
-    const utxos = await getBtcUtxos(address)
+    const utxos = (await getBtcUtxos(address)) || []
     if (!utxos.length) {
       throw new Error('your account currently has no available UTXO.')
     }
@@ -133,7 +133,7 @@ async function getPsbt(recipient: string, amount: Decimal, feeRate: number) {
   const address = await getAddress('btc')
   const addressType = await getAddressType('btc')
   const payment = await createPayment(addressType)
-  const utxos = await getBtcUtxos(address)
+  const utxos = (await getBtcUtxos(address)) || []
   utxos.sort((a, b) => b.satoshi - a.satoshi)
 
   const buildPsbt = async (selectedUtxos: UTXO[], change: Decimal) => {

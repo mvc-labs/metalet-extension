@@ -1,7 +1,8 @@
 import { ComputedRef, Ref } from 'vue'
+import { network } from '@/lib/network'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker } from '@/lib/asset-symbol'
-import { metaletApi, metaletApiV3, mvcApi } from './request'
+import { metaletApi, metaletApiV3, mvcApi, unisatApi } from './request'
 import { fetchTokenBalance, useMVCTokenQuery } from '@/queries/tokens'
 
 type TokenType = 'BRC20'
@@ -41,9 +42,30 @@ interface BTCBalance {
   }
 }
 
-export const fetchBtcBalance = async (address: string): Promise<Balance> => {
-  const data = await metaletApiV3<BTCBalance>(`/address/btc-balance`).get({ address })
+export interface BitcoinBalance {
+  confirm_amount: string
+  pending_amount: string
+  amount: string
+  confirm_btc_amount: string
+  pending_btc_amount: string
+  btc_amount: string
+  confirm_inscription_amount: string
+  pending_inscription_amount: string
+  inscription_amount: string
+  usd_value: string
+}
 
+export const fetchBtcBalance = async (address: string): Promise<Balance> => {
+  if (network.value === 'testnet') {
+    const data = await unisatApi<BitcoinBalance>(`/address/balance`).get({ address })
+    return {
+      address,
+      total: Number(data.btc_amount) * 10 ** 8,
+      confirmed: Number(data.confirm_amount) * 10 ** 8,
+      unconfirmed: Number(data.pending_amount) * 10 ** 8,
+    }
+  }
+  const data = await metaletApiV3<BTCBalance>(`/address/btc-balance`).get({ address })
   return {
     address,
     total: data.balance * 10 ** 8,
@@ -101,8 +123,6 @@ export const useBalanceQuery = (
         case 'BTC':
           return fetchBtcBalance(address.value)
         default: {
-          console.log({ params }, params?.contract === 'MetaContract')
-
           if (params?.contract === 'BRC-20') {
             return fetchBRC20Balance(address.value, symbol.value)
           } else if (params?.contract === 'MetaContract') {
