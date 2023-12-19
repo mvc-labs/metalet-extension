@@ -42,6 +42,11 @@ export const useMVCAssetsQuery = (addressRef: Ref<string>, options: { enabled: C
             codeHash: token.codeHash,
             genesis: token.genesis,
             logo: getFTLogo(token.name),
+            balance: {
+              total: token.confirmed + token.unconfirmed,
+              confirmed: token.confirmed,
+              unconfirmed: token.unconfirmed,
+            },
           }) as Asset
       ),
     ...options,

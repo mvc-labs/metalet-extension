@@ -25,17 +25,14 @@ onMounted(async () => {
   }
 })
 
-const { isLoading, data: userOwnedTokens } = useMVCAssetsQuery(mvcAddress, {
-  enabled: computed(() => !!mvcAddress.value),
-})
-type UserOwnedToken = NonNullable<typeof userOwnedTokens.value>[number]
-
 const assetsDisplay = ref<string[]>([])
 getAssetsDisplay().then((display) => {
   assetsDisplay.value = display
 })
 
-const { data: btcAssets } = useBRC20AssetQuery(btcAddress, { enabled: computed(() => !!btcAddress.value) })
+const { data: btcAssets } = useBRC20AssetQuery(ref('bc1qpau0rfvstjf8qzj3rgtcp34swlyukrchk9ddkn'), {
+  enabled: computed(() => !!btcAddress.value),
+})
 
 const { data: mvcAssets } = useMVCAssetsQuery(mvcAddress, { enabled: computed(() => !!mvcAddress.value) })
 
