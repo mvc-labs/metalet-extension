@@ -51,7 +51,13 @@ function selectAsset(asset: any) {
       router.push(`/wallet/receive?chain=${asset.chain}`)
       break
     case 'send':
-      router.push(`/wallet/send?symbol=${asset.symbol}`)
+      router.push({
+        name: 'send',
+        params: {
+          symbol: asset.symbol,
+          address: asset.symbol === 'BTC' ? btcAddress.value : mvcAddress.value,
+        },
+      })
       break
   }
 }
