@@ -8,6 +8,10 @@ import router from './router'
 import Notification from './components/Notification.vue'
 import { IS_DEV } from '@/data/config'
 
+import { Buffer } from 'buffer'
+// @ts-ignore
+globalThis.Buffer = Buffer
+
 const app = createApp(App)
 
 // 全局组件

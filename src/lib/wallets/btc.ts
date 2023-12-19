@@ -1,5 +1,7 @@
 import Decimal from 'decimal.js'
 import { raise } from '../helpers'
+import { Buffer } from 'buffer'
+
 import { getBtcNetwork } from '../network'
 import { createPayment } from '../bip32-deriver'
 import { getXOnlyPublicKey } from '../btc-util'
@@ -149,8 +151,12 @@ async function getPsbtAndSelectUtxos(recipient: string, amount: Decimal, feeRate
     }
 
     for (const utxo of selectedUtxos) {
-      const payInput = await createPayInput({ utxo, payment, addressType })
-      psbt.addInput(payInput)
+      try {
+        const payInput = await createPayInput({ utxo, payment, addressType })
+        psbt.addInput(payInput)
+      } catch (e: any) {
+        console.log(e)
+      }
     }
 
     const signer = await getSigner('btc', addressType)
@@ -228,6 +234,7 @@ async function createPayInput({
 }): Promise<any> {
   const rawTx = await fetchBtcTxHex(utxo.txId)
   const tx = Transaction.fromHex(rawTx)
+  console.log({ rawTx, tx, b: Buffer.from(rawTx) })
 
   const payInput: any = {
     hash: utxo.txId,

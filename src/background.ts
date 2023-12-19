@@ -5,8 +5,9 @@ import connector from './lib/connector'
 import { getCurrentAccount } from './lib/account'
 import { isLocked } from './lib/password'
 import { sleep } from './lib/helpers'
+import browser from 'webextension-polyfill'
 
-const browser = window.browser as typeof chrome
+// const browser = window.browser as typeof chrome
 browser.runtime.onMessage.addListener(async (msg, sender) => {
   if (msg.channel === 'inter-extension') {
     await sleep(100)

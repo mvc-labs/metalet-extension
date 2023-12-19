@@ -1,4 +1,5 @@
 import { mvc } from 'meta-contract'
+import { Buffer } from 'buffer'
 
 import { mvcApi } from '../queries/request'
 import { METAFILE_API_HOST } from '../data/hosts'

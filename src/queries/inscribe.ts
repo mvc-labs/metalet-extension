@@ -2,6 +2,7 @@ import { Ref, ComputedRef } from 'vue'
 import { getNetwork } from '@/lib/network'
 import { useQuery } from '@tanstack/vue-query'
 import { metaletApiV3, unisatApi } from './request'
+import { Buffer } from 'buffer'
 
 export interface PreInscribe {
   count: number

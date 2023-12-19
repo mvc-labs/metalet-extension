@@ -10,6 +10,7 @@ import ECPairFactory from 'ecpair'
 import { raise } from './helpers'
 import { type Network, getBtcNetwork } from './network'
 import { getPublicKey } from './account'
+import { Buffer } from 'buffer'
 
 export type AddressType = 'P2WPKH' | 'P2SH-P2WPKH' | 'P2TR' | 'P2PKH'
 
