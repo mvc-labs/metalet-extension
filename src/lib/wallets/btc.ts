@@ -22,7 +22,7 @@ export class BtcWallet {
     return wallet
   }
 
-  async sendBRC(recipient: string, utxo: UTXO, feeRate = 2) {
+  async sendBRC(recipient: string, utxo: UTXO, feeRate: number) {
     const amount = getTotalSatoshi([utxo])
     if (!this.account) throw new Error('no account')
     const btcNetwork = await getBtcNetwork()
@@ -87,8 +87,7 @@ export class BtcWallet {
 
     psbt = await buildPsbt(selecedtUTXOs, total.minus(amount).minus(fee))
 
-    const txId = await this.broadcast(psbt)
-    return { txId }
+    return await this.broadcast(psbt)
   }
 
   async send(recipient: string, amount: number | Decimal, feeRate = 2) {

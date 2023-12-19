@@ -1,16 +1,16 @@
 <script lang="ts" setup>
+import Decimal from 'decimal.js'
 import { computed, ref } from 'vue'
+import { updateAsset } from '@/lib/balance'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowUpRightIcon, QrCodeIcon, ArrowsRightLeftIcon, CircleStackIcon } from '@heroicons/vue/20/solid'
-
 import { SymbolTicker } from '@/lib/asset-symbol'
 import { useBalanceQuery } from '@/queries/balance'
-import { useExchangeRatesQuery } from '@/queries/exchange-rates'
+import Activities from './components/Activities.vue'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import { getTags, BTCAsset, MVCAsset } from '@/data/assets'
+import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
-
-import Activities from './components/Activities.vue'
+import { ArrowUpRightIcon, QrCodeIcon, ArrowsRightLeftIcon, CircleStackIcon } from '@heroicons/vue/20/solid'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,7 +19,6 @@ if (!route.params.address) {
   router.go(-1)
 }
 const address = ref<string>(route.params.address as string)
-
 const symbol = ref<SymbolTicker>(route.params.symbol as SymbolTicker)
 const { data: btcAssets } = useBRC20AssetQuery(address, { enabled: computed(() => !!address.value) })
 
@@ -31,20 +30,35 @@ const asset = computed(() => {
     return MVCAsset
   }
   if (btcAssets.value && btcAssets.value.length > 0) {
-    const asset = btcAssets.value.find((asset: any) => asset.symbol === symbol.value)
+    const asset = btcAssets.value.find((asset) => asset.symbol === symbol.value)
+    if (!asset) {
+      router.go(-1)
+      return
+    }
     return asset
   }
 })
 
-const { isLoading, data: balance } = useBalanceQuery(
-  address,
-  symbol,
-  { enabled: computed(() => !!address.value && !!symbol.value) },
-  { contract: asset.value?.contract, genesis: asset.value?.genesis }
-)
+const balaceEnabled = computed(() => {
+  if (asset.value) {
+    return !!address.value && !!symbol.value && !asset.value.balance
+  }
+  return false
+})
+
+const { isLoading, data: balance } = useBalanceQuery(address, symbol, {
+  enabled: balaceEnabled,
+})
+
+const tickerEnabled = computed(() => {
+  if (asset.value) {
+    return !!address.value && !!symbol.value && asset.value.contract === 'BRC-20'
+  }
+  return false
+})
 
 const { isLoading: tickersLoading, data: tickersData } = useBRCTickerAseetQuery(address, symbol, {
-  enabled: computed(() => !!address.value),
+  enabled: tickerEnabled,
 })
 
 const tags = computed(() => {
@@ -53,21 +67,39 @@ const tags = computed(() => {
   }
 })
 
-const rateEnabled = computed(() => !!symbol.value)
+const rateEnabled = computed(() => {
+  if (asset.value) {
+    return !!address.value && !!symbol.value
+  }
+  return false
+})
 
-const { data: exchangeRate } = useExchangeRatesQuery(symbol, asset.value?.contract, { enabled: rateEnabled })
+const {
+  isLoading: isExchangeRateLoading,
+  data: exchangeRate,
+  error: exchangeError,
+} = useExchangeRatesQuery(symbol, asset.value?.contract, {
+  enabled: rateEnabled,
+})
 
 const exchange = computed(() => {
-  if (balance.value && exchangeRate.value && asset.value) {
-    const usdRate: number = Number(exchangeRate.value.price)
-    const balanceInStandardUnit = balance.value.total / 10 ** asset.value.decimal
-    const exchanged = balanceInStandardUnit * usdRate
-
-    // 保留两位
-    return `$${exchanged.toFixed(2)} USD`
+  if (asset.value) {
+    if (asset.value?.balance) {
+      const usdRate = new Decimal(exchangeRate.value?.price || 0)
+      const balanceInStandardUnit = new Decimal(asset.value.balance?.total || 0)
+      const exchanged = usdRate.mul(balanceInStandardUnit)
+      updateAsset({ name: asset.value.symbol, value: exchanged.toNumber() })
+      return `$${exchanged.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
+    } else if (balance.value && exchangeRate.value) {
+      const usdRate = new Decimal(exchangeRate.value?.price || 0)
+      const balanceInStandardUnit = new Decimal(balance.value.total).dividedBy(1e8)
+      const exchanged = usdRate.mul(balanceInStandardUnit)
+      updateAsset({ name: asset.value.symbol, value: exchanged.toNumber() })
+      return `$${exchanged.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
+    }
   }
 
-  return '$0.00 USD'
+  return '$-- USD'
 })
 
 const toSend = () => {
@@ -115,20 +147,27 @@ const toTransfer = () => {
 
     <div class="mt-8 flex flex-col items-center self-stretch">
       <template v-if="asset?.queryable">
-        <div v-if="isLoading">--</div>
+        <template v-if="asset.balance">
+          <div class="mb-1 text-center text-3xl text-[#141416]" v-if="asset.contract === 'BRC-20'">
+            {{ prettifyTokenBalance(asset.balance.total, asset.decimal, false, asset.symbol) }}
+          </div>
+          <div class="mb-1 text-center text-3xl text-[#141416]" v-else>
+            {{ asset.balance.total }} {{ asset.symbol }}
+          </div>
+
+          <div class="text-[#909399] text-center">{{ exchange }}</div>
+        </template>
+        <div v-else-if="isLoading">--</div>
         <template v-else-if="balance">
           <div class="mb-1 text-center text-3xl text-[#141416]">
             <span v-if="asset.isNative">
               {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
             </span>
-            <span v-else-if="asset.contract === 'BRC-20'">
-              {{ `${balance.total} ${asset.symbol}` }}
-            </span>
             <span v-else>
               {{ prettifyTokenBalance(balance.total, asset.decimal, true) }}
             </span>
           </div>
-          <div style="color: #909399">{{ exchange }}</div>
+          <div class="text-[#909399] text-center">{{ exchange }}</div>
         </template>
 
         <!-- buttons -->
@@ -188,7 +227,7 @@ const toTransfer = () => {
         <Activities class="mt-8 self-stretch" :asset="asset" :exchangeRate="Number(exchangeRate)" :address="address" />
       </template>
 
-      <div class="text-gray-500" v-else>No Service for {{ asset?.symbol }} yet.</div>
+      <div class="text-gray-500" v-else>No Service for {{ symbol }} yet.</div>
     </div>
   </div>
   <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">Asset Loading...</div>

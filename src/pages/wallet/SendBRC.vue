@@ -3,15 +3,16 @@ import { ref, computed, watch } from 'vue'
 import { BtcWallet } from '@/lib/wallets/btc'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
+import { useQueryClient } from '@tanstack/vue-query'
 import { getInscriptionUtxo } from '@/queries/utxos'
 import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
 const router = useRouter()
+const queryClient = useQueryClient()
 
 if (!route.query.address || !route.query.symbol || !route.query.inscriptionId || !route.query.amount) {
-  console.log(route.query)
   router.go(-1)
 }
 
@@ -60,12 +61,21 @@ const transactionResult = ref<TransactionResult | undefined>()
 async function send() {
   if (operationLock.value) return
 
+  if (!currentRateFee.value) {
+    transactionResult.value = {
+      status: 'warning',
+      message: 'Please select fee rate.',
+    }
+    isOpenResultModal.value = true
+    return
+  }
+
   operationLock.value = true
 
   const utxo = await getInscriptionUtxo(inscriptionId.value)
 
   const wallet = await BtcWallet.create()
-  wallet.sendBRC(recipient.value, utxo, currentRateFee.value).catch((err: Error) => {
+  const sentRes = await wallet.sendBRC(recipient.value, utxo, currentRateFee.value).catch((err: Error) => {
     transactionResult.value = {
       status: 'failed',
       message: err.message,
@@ -73,12 +83,32 @@ async function send() {
     isOpenResultModal.value = true
   })
 
+  if (sentRes) {
+    transactionResult.value = {
+      status: 'success',
+      txId: sentRes.txId,
+      recipient: recipient.value,
+      amount: amount.value,
+      token: {
+        symbol: symbol.value,
+        decimal: 8,
+      },
+    }
+
+    isOpenResultModal.value = true
+
+    // 刷新query
+    queryClient.invalidateQueries({
+      queryKey: ['balance', { address: address.value, symbol: symbol.value }],
+    })
+  }
+
   operationLock.value = false
 }
 </script>
 
 <template>
-  <div class="pt-[30px] space-y-[30px] h-full relative overflow-y-auto">
+  <div class="pt-[30px] space-y-[30px] h-full overflow-y-auto">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
 
     <div class="space-y-2">
@@ -128,7 +158,7 @@ async function send() {
       class="main-input w-full !rounded-xl !py-4 !text-xs mt-1"
     />
 
-    <div v-if="operationLock" class="w-full py-3 text-center text-sm font-bold text-gray-500 absolute bottom-4 left-0">
+    <div v-if="operationLock" class="w-full py-3 text-center text-sm font-bold text-gray-500">
       Loading...
     </div>
     <button
