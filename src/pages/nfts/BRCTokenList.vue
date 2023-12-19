@@ -46,8 +46,12 @@ const toBRC20Detail = (inscription: Inscription) => {
       class="flex flex-col items-center justify-center rounded-md p-2 cursor-pointer text-[#999999]"
     >
       <BRCToken :ordinalsUrl="inscription.content" :value="inscription.outputValue" />
-      <span class="text-sm mt-3"># {{ inscription.inscriptionNumber }}</span>
-      <span class="text-xs mt-1">{{ dayjs(inscription.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss') }}</span>
+      <span class="text-sm mt-3 truncate" :title="'# ' + inscription.inscriptionNumber"
+        ># {{ inscription.inscriptionNumber }}</span
+      >
+      <span class="text-xs mt-1 h-[30px]">{{
+        inscription.timestamp === 0 ? '--' : dayjs(inscription.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
+      }}</span>
     </div>
   </div>
   <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">No BRC Tokens yet</div>

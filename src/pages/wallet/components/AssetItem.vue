@@ -8,6 +8,7 @@ import { useBalanceQuery } from '@/queries/balance'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import { type Asset, getTagInfo, Tag } from '@/data/assets'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
+import Decimal from 'decimal.js'
 
 const { asset, address } = defineProps<{
   asset: Asset
@@ -40,17 +41,43 @@ const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRate
 
 const exchange = computed(() => {
   if (balance.value && exchangeRate.value) {
-    let usdRate = Number(exchangeRate.value.price)
 
-    const balanceInStandardUnit = balance.value.total / 10 ** asset.decimal
+    let usdRate = Number(exchangeRate.value.price)
+    console.log('exchange', asset.symbol, { usdRate })
+
+    const usdRate1 = new Decimal(exchangeRate.value.price)
+    console.log('exchange1', asset.symbol, { usdRate1: usdRate1.toNumber() })
+
+
+    if (typeof usdRate !== 'number') {
+      usdRate = 0
+    }
+
+    let balanceInStandardUnit = balance.value.total / 10 ** asset.decimal
+    console.log('exchange', asset.symbol, { balanceInStandardUnit })
+
+    const balanceInStandardUnit1 = new Decimal(balance.value.total).dividedBy(1e8)
+    console.log('exchange1', asset.symbol, { balanceInStandardUnit1: balanceInStandardUnit1.toNumber() })
+
+
+    if (typeof balanceInStandardUnit !== 'number') {
+      balanceInStandardUnit = 0
+    }
 
     let exchanged = balanceInStandardUnit * usdRate
+    console.log('exchange', asset.symbol, { exchanged })
+
+    const exchanged1 = usdRate1.mul(balanceInStandardUnit1)
+    console.log('exchange1', asset.symbol, { exchanged1: exchanged1.toNumber() })
+
     if (typeof exchanged !== 'number') {
-      exchanged = 0
+      return '$0.00 USD'
     }
 
     updateAsset({ name: asset.symbol, value: exchanged })
+    return `$${exchanged1.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
     return `$${exchanged.toFixed(2)} USD`
+
   }
 
   return '$0.00 USD'

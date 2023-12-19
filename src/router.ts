@@ -97,8 +97,9 @@ const routes = [
     },
   },
   {
-    path: '/wallet/send',
+    path: '/wallet/send/:symbol/:address',
     component: () => import('./pages/wallet/Send.vue'),
+    name:'send',
     meta: {
       secondaryHeader: true,
       headerTitle: 'Send',

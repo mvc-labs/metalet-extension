@@ -12,7 +12,16 @@ export const prettifyTxId = (txId: string, useDigits = 6) => {
 export const prettifyBalance = (balance: number, symbol: string = 'SPACE'): string => {
   if (!balance) return `0 ${symbol}`
 
-  return `${new Decimal(balance).dividedBy(1e8)} ${symbol}`
+  return `${new Decimal(balance).dividedBy(1e8).toDecimalPlaces(8, Decimal.ROUND_HALF_UP)} ${symbol}`
+}
+
+export const prettifyBalanceFixed = (balance: number, symbol: string = 'SPACE', toFixedNum: number): string => {
+  if (!balance) return `0 ${symbol}`
+
+  return `${new Decimal(balance)
+    .dividedBy(1e8)
+    .toDecimalPlaces(8, Decimal.ROUND_HALF_UP)
+    .toFixed(toFixedNum)} ${symbol}`
 }
 
 export const prettifyTokenBalance = (balance: number, decimal: number, useRound = false, symbol?: string): string => {

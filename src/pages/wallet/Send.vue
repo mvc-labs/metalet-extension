@@ -1,14 +1,13 @@
 <script lang="ts" setup>
-import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
 import Decimal from 'decimal.js'
 import { useRoute } from 'vue-router'
 import { Wallet } from 'meta-contract'
-import { useQueryClient } from '@tanstack/vue-query'
 import { Psbt } from 'bitcoinjs-lib'
+import { useQueryClient } from '@tanstack/vue-query'
+import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
 
 import { useBalanceQuery } from '@/queries/balance'
 import { prettifyBalance } from '@/lib/formatters'
-import { getAddress } from '@/lib/account'
 import type { TransactionResult } from '@/global-types'
 import { allAssets } from '@/data/assets'
 import { BtcWallet } from '@/lib/wallets/btc'
@@ -19,16 +18,11 @@ import Modal from '@/components/Modal.vue'
 import TransactionResultModal from './components/TransactionResultModal.vue'
 
 const route = useRoute()
-const symbol = ref<SymbolTicker>(route.query.symbol as SymbolTicker)
-const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol.value)!)
 const queryClient = useQueryClient()
-
-const address = ref('')
-getAddress().then((addr) => {
-  address.value = addr!
-})
-
 const error = ref<Error | undefined>()
+const address = ref(route.params.address as string)
+const symbol = ref(route.params.symbol as SymbolTicker)
+const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol.value)!)
 
 // balance
 const enabled = computed(() => !!address.value)
@@ -74,7 +68,7 @@ const txPsbt = ref<Psbt>()
 const totalFee = ref<number>()
 
 // form
-const amount = ref('')
+const amount = ref<number>()
 const amountInSats = computed(() => {
   const _amount = new Decimal(amount.value || 0)
   if (_amount.isNaN()) return new Decimal(0)
@@ -133,6 +127,21 @@ const popConfirm = async () => {
     isOpenConfirmModal.value = true
   }
 }
+
+const total = computed(() => {
+  if (balance.value?.total) {
+    return new Decimal(balance.value.total).dividedBy(1e8)
+  }
+  return new Decimal(0)
+})
+
+watch(amountInSats, (newAmount) => {
+  if (balance.value && newAmount.gt(balance.value.total)) {
+    error.value = new Error('Insufficient balance')
+  } else {
+    error.value = undefined
+  }
+})
 
 const isOpenResultModal = ref(false)
 
@@ -241,6 +250,9 @@ async function send() {
         <div class="" v-else-if="balance">{{ prettifyBalance(balance.total, asset.symbol) }}</div>
       </div>
 
+      <!-- error info -->
+      <div v-if="error" class="w-full text-sm text-red-500">{{ error.message }}</div>
+
       <!-- fee rate -->
       <div v-if="asset.chain === 'btc' && !rateLoading && rateList">
         <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
@@ -283,8 +295,8 @@ async function send() {
       <button
         @click="popConfirm"
         v-if="symbol === 'SPACE'"
-        :disabled="!recipient || !amountInSats"
-        :class="!recipient || !amountInSats ? 'opacity-50 cursor-not-allowed' : ''"
+        :disabled="!recipient || !amount || !!error"
+        :class="!recipient || !amount || !!error ? 'opacity-50 cursor-not-allowed' : ''"
         class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
       >
         Next
@@ -292,17 +304,14 @@ async function send() {
       <button
         @click="popConfirm"
         v-else-if="symbol === 'BTC'"
-        :disabled="!recipient || !amountInSats || !currentRateFee"
+        :disabled="!recipient || !amount || !currentRateFee || !!error"
         class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
-        :class="!recipient || !amountInSats || !currentRateFee ? 'opacity-50 cursor-not-allowed' : ''"
+        :class="!recipient || !amount || !currentRateFee || !!error ? 'opacity-50 cursor-not-allowed' : ''"
       >
         Next
       </button>
     </template>
     <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">Loading...</div>
-
-    <!-- error info -->
-    <p v-if="error">{{ error.message }}</p>
 
     <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
       <template #title>Confirm Transaction</template>

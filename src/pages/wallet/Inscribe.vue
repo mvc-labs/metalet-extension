@@ -6,7 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
 import bitcoinjs, { type Psbt } from 'bitcoinjs-lib'
 import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
-import { prettifyBalance, shortestAddress } from '@/lib/formatters'
+import { prettifyBalanceFixed, shortestAddress } from '@/lib/formatters'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
 import { preInscribe, PreInscribe, getInscribeInfo } from '@/queries/inscribe'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
@@ -279,14 +279,14 @@ function toSuceess() {
       </div>
       <div class="mt-8 space-y-5">
         <div class="flex items-center justify-between">
-          <span>Payment Network Fee</span><span>{{ prettifyBalance(paymentNetworkFee || 0, 'BTC') }}</span>
+          <span>Payment Network Fee</span><span>{{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }}</span>
         </div>
         <div class="flex items-center justify-between">
-          <span>Need Amount</span><span>{{ prettifyBalance(inscribeOrder?.needAmount || 0, 'BTC') }}</span>
+          <span>Need Amount</span><span>{{ prettifyBalanceFixed(inscribeOrder?.needAmount || 0, 'BTC', 8) }}</span>
         </div>
         <hr />
         <div class="flex items-center justify-between">
-          <span>Total</span><span>{{ prettifyBalance(total || 0, 'BTC') }}</span>
+          <span>Total</span><span>{{ prettifyBalanceFixed(total || 0, 'BTC', 8) }}</span>
         </div>
       </div>
       <button
@@ -300,7 +300,7 @@ function toSuceess() {
       <div class="text-center text-base text-[#909399]">Spend Amount</div>
       <div class="text-center text-3xl font-bold mt-3">{{ inscribeAmount }} {{ asset.symbol }}</div>
       <div class="mt-3 text-center text-base text-[#909399]">
-        {{ prettifyBalance(paymentNetworkFee || 0, 'BTC') }} (network fee)
+        {{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }} (network fee)
       </div>
       <div class="border-b mt-3 space-x-3 text-base">
         <span
@@ -321,19 +321,19 @@ function toSuceess() {
           <div class="text-[#141416]">Inputs</div>
           <div v-for="utxo in inputUTXOs" class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
             <span>{{ shortestAddress(utxo.address) }}</span
-            ><span>{{ prettifyBalance(utxo.value, 'BTC') }}</span>
+            ><span>{{ prettifyBalanceFixed(utxo.value, 'BTC', 8) }}</span>
           </div>
         </div>
         <div class="space-y-2 rounded-md">
           <div class="text-[#141416]">Outputs</div>
           <div v-for="utxo in outputUTXOs" class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
             <span>{{ shortestAddress(utxo.address) }}</span>
-            <span>{{ prettifyBalance(utxo.value, 'BTC') }}</span>
+            <span>{{ prettifyBalanceFixed(utxo.value, 'BTC', 8) }}</span>
           </div>
         </div>
         <div class="space-y-2 rounded-md">
           <div class="text-[#141416]">Network Fee Rate</div>
-          <div class="w-full p-2 bg-[#F5F5F5]">{{ prettifyBalance(paymentNetworkFee || 0, 'BTC') }}</div>
+          <div class="w-full p-2 bg-[#F5F5F5]">{{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }}</div>
         </div>
       </div>
       <div class="space-y-[18px]" v-show="tabIdx === 1">

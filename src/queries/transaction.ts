@@ -1,7 +1,7 @@
 import { ComputedRef } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-import { metaletApi, metaletApiV3, unisatApi, metaletApiV2 } from './request'
 import { PageResult } from './types'
+import { useQuery } from '@tanstack/vue-query'
+import { metaletApi, metaletApiV3 } from './request'
 
 export const fetchBtcTxHex = async (txId: string): Promise<string> => {
   return metaletApi(`/tx/raw`)
@@ -17,18 +17,7 @@ export const broadcastBTCTx = async (rawTx: string) => {
     net: 'livenet',
     rawTx,
   })
-  // .then((result) => {
-  //   if (result.code === 0) {
-  //     return result.data
-  //   } else {
-  //     throw Error(result.msg)
-  //   }
-  // })
 }
-
-// export const broadcastBTCTx = async (rawtx: string): Promise<string> => {
-//   return unisatApi<string>(`/tx/broadcast`).post({ rawtx })
-// }
 
 export interface FeeRate {
   title: string

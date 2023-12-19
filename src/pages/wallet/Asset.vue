@@ -76,7 +76,13 @@ const toSend = () => {
     router.push(`/wallet/sendBRC?symbol=${symbol.value}`)
     return
   }
-  router.push(`/wallet/send?symbol=${symbol.value}&chain=${asset.value!.chain}`)
+  router.push({
+    name: 'send',
+    params: {
+      symbol: symbol.value,
+      address: address.value,
+    },
+  })
 }
 
 const toReceive = () => {
@@ -153,7 +159,9 @@ const toTransfer = () => {
               >{{ (tickersData && tickersData.tokenBalance.transferableBalance) || 0 }} {{ asset.symbol }}</span
             >
           </div>
-          <div class="w-full py-3 text-center text-sm font-bold text-gray-500" v-if="tickersLoading">Loading BRC Tickers.</div>
+          <div class="w-full py-3 text-center text-sm font-bold text-gray-500" v-if="tickersLoading">
+            Loading BRC Tickers.
+          </div>
           <div v-else class="grid grid-cols-3 gap-2 w-full mt-3" v-if="tickersData && tickersData.transferableList">
             <div
               :key="ticker.inscriptionId"

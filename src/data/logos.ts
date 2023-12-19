@@ -14,11 +14,12 @@ import IBTCLogo from '../assets/images/ibtc.jpg'
 import IGERLogo from '../assets/images/lger.jpg'
 import ORDILogo from '../assets/images/ordi-logo.svg?url'
 import RATSLogo from '../assets/images/rats.jpg'
-import RDEXLogo from '../assets/images/rdex.png'
+import RDEXLogo from '../assets/images/rdex.jpg'
 import SATSLogo from '../assets/images/sats.jpg'
 import SAYCLogo from '../assets/images/sayc.jpg'
 import TRACLogo from '../assets/images/trac.png'
 import VMPXLogo from '../assets/images/vmpx.jpg'
+import OXBTLogo from '../assets/images/oxbt.png'
 
 
 const logos = {
@@ -71,6 +72,8 @@ export const getBRC20Logo = (name: string) => {
       return TRACLogo
     case 'VMPX':
       return VMPXLogo
+    case 'OXBT':
+      return OXBTLogo
     default:
       return
   }
