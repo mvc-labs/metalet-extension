@@ -4,6 +4,7 @@ import MVCUSDTLogo from '../assets/images/usdt-logo.jpg?url'
 import ShowCoinLogo from '../assets/images/sc-logo.svg?url'
 import MetaCoinLogo from '../assets/images/mc-logo.svg?url'
 import XingnengLogo from '../assets/images/xingneng-logo.png'
+import FtDefaultLogo from '../assets/images/ft-default-icon.svg?url'
 
 // brc20 logo
 import BILILogo from '../assets/images/bili.jpg'
@@ -20,7 +21,6 @@ import SAYCLogo from '../assets/images/sayc.jpg'
 import TRACLogo from '../assets/images/trac.png'
 import VMPXLogo from '../assets/images/vmpx.jpg'
 import OXBTLogo from '../assets/images/oxbt.png'
-
 
 const logos = {
   'localhost:3000': MetaletLogo,
@@ -75,7 +75,7 @@ export const getBRC20Logo = (name: string) => {
     case 'OXBT':
       return OXBTLogo
     default:
-      return
+      return FtDefaultLogo
   }
 }
 

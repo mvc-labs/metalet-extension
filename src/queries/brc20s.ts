@@ -55,6 +55,8 @@ interface TokenBalance {
   overallBalance: string
   transferableBalance: string
   availableBalance: string
+  availableBalanceSafe: string
+  availableBalanceUnSafe: string
   decimal: number
 }
 
@@ -72,6 +74,11 @@ export const fetchBRC20Token = async (address: string): Promise<Asset[]> => {
         queryable: true,
         decimal: 0,
         contract: 'BRC-20',
+        balance: {
+          total: Number(token.overallBalance),
+          availableBalance: Number(token.availableBalance),
+          transferBalance: Number(token.transferableBalance),
+        },
       }) as Asset
   )
 }

@@ -3,7 +3,7 @@ import { metaletApi } from './request'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker, DEFAULT_SYMBOLS } from '@/lib/asset-symbol'
 
-type RawRates = Record<string, number>
+type RawRates = Record<string, number | undefined>
 
 export const fetchExchangeRates = async (): Promise<RawRates> => {
   return await metaletApi(`/coin/price`)

@@ -2,8 +2,8 @@ import { ComputedRef, Ref } from 'vue'
 import { network } from '@/lib/network'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker } from '@/lib/asset-symbol'
-import { metaletApi, metaletApiV3, mvcApi, unisatApi } from './request'
-import { fetchTokenBalance, useMVCTokenQuery } from '@/queries/tokens'
+import { fetchTokenBalance } from '@/queries/tokens'
+import { metaletApiV3, mvcApi, unisatApi } from './request'
 
 type TokenType = 'BRC20'
 
@@ -74,31 +74,6 @@ export const fetchBtcBalance = async (address: string): Promise<Balance> => {
   }
 }
 
-// TODO Test to avoid request /address/brc20/asset
-export const fetchBRC20Balance = async (address: string, symbol: SymbolTicker): Promise<Balance> => {
-  const { tickList } = await metaletApi(`/address/brc20/asset`)
-    .get({ address, chain: 'btc', tick: symbol.toLowerCase() })
-    .then((res) => res.data)
-
-  const tickAsset = tickList.find((tick: Tick) => tick.token === symbol)
-
-  if (tickAsset) {
-    return {
-      address,
-      total: Number(tickAsset.balance),
-      transferBalance: Number(tickAsset.transferBalance),
-      availableBalance: Number(tickAsset.availableBalance),
-    }
-  }
-
-  return {
-    address,
-    availableBalance: 0,
-    transferBalance: 0,
-    total: 0,
-  }
-}
-
 export const doNothing = async (address: string): Promise<Balance> => {
   return {
     address,
@@ -111,8 +86,7 @@ export const doNothing = async (address: string): Promise<Balance> => {
 export const useBalanceQuery = (
   address: Ref<string>,
   symbol: Ref<SymbolTicker>,
-  options: { enabled: ComputedRef<boolean> },
-  params?: { contract?: string; genesis?: string }
+  options: { enabled: ComputedRef<boolean> }
 ) => {
   return useQuery({
     queryKey: ['balance', { address: address.value, symbol: symbol.value }],
@@ -123,18 +97,6 @@ export const useBalanceQuery = (
         case 'BTC':
           return fetchBtcBalance(address.value)
         default: {
-          if (params?.contract === 'BRC-20') {
-            return fetchBRC20Balance(address.value, symbol.value)
-          } else if (params?.contract === 'MetaContract') {
-            // const { data: token } = useMVCTokenQuery(address, params?.genesis || '', options)
-            // return {
-            //   address: address.value,
-            //   confirmed: token.value?.confirmed || 0,
-            //   unconfirmed: token.value?.unconfirmed || 0,
-            //   total: (token.value?.unconfirmed || 0) + (token.value?.confirmed || 0),
-            // }
-            return fetchTokenBalance(address.value, params?.genesis || '')
-          }
           return doNothing(address.value)
         }
       }

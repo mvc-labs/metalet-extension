@@ -1,5 +1,6 @@
 import { SymbolTicker } from '@/lib/asset-symbol'
 import BtcLogoImg from '../assets/images/btc-logo.svg?url'
+import { Balance } from '@/queries/balance'
 import SpaceLogoImg from '../assets/images/space-logo.svg?url'
 
 export type Asset = {
@@ -10,7 +11,7 @@ export type Asset = {
   chain: 'btc' | 'mvc'
   queryable: boolean
   decimal: number
-  total?: number
+  balance?: Balance
   genesis?: string
   contract?: string
   codeHash?: string
