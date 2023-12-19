@@ -30,7 +30,7 @@ getAssetsDisplay().then((display) => {
   assetsDisplay.value = display
 })
 
-const { data: btcAssets } = useBRC20AssetQuery(ref('bc1qpau0rfvstjf8qzj3rgtcp34swlyukrchk9ddkn'), {
+const { data: btcAssets } = useBRC20AssetQuery(btcAddress, {
   enabled: computed(() => !!btcAddress.value),
 })
 
