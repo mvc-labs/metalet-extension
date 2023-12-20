@@ -7,7 +7,7 @@ import { useBalanceQuery } from '@/queries/balance'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 import { type Asset, getTagInfo, type Tag } from '@/data/assets'
-import { CircleStackIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
+import { CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
 const { asset, address } = defineProps<{
   asset: Asset
@@ -60,9 +60,12 @@ const exchange = computed(() => {
 <template>
   <div class="group relative transition hover:z-10">
     <div class="flex gap-2 cursor-pointer items-center justify-between rounded-md bg-gray-100 px-4 py-4">
+      <!-- left part -->
       <div class="flex flex-shrink-0 items-center gap-x-3">
         <img class="h-10 w-10 rounded-full" :src="asset.logo" v-if="asset.logo" />
-        <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
+        <div v-else class="h-10 w-10 text-center leading-10 rounded-full text-white text-base bg-[#1E2BFF]">
+          {{ asset.symbol[0].toLocaleUpperCase() }}
+        </div>
         <div class="flex flex-col gap-y-1 items-start">
           <div
             :title="asset.tokenName"
@@ -88,17 +91,17 @@ const exchange = computed(() => {
       <div class="flex grow overflow-hidden flex-col items-end text-xs gap-y-1">
         <template v-if="asset.queryable">
           <!-- balance info -->
-          <div v-if="asset.balance">
-            <span v-if="asset.contract === 'BRC-20'">
+          <div v-if="asset.balance" class="text-[#141416] font-bold w-full text-right">
+            <div v-if="asset.contract === 'BRC-20'" class="w-full border-b border-[#D8D8D8] border-dashed pb-3">
               {{ prettifyTokenBalance(asset.balance.total, asset.decimal, false, asset.symbol) }}
-            </span>
+            </div>
             <span v-else-if="asset.contract === 'MetaContract'">
               {{ prettifyTokenBalance(asset.balance.total, asset.decimal, true) }}
             </span>
             <span v-else> {{ asset.balance.total }} {{ asset.symbol }} </span>
           </div>
           <div v-else-if="isLoading">--</div>
-          <div v-else-if="balance">
+          <div v-else-if="balance" class="text-[#141416] font-bold">
             <span v-if="asset.isNative">
               {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
             </span>
@@ -109,7 +112,7 @@ const exchange = computed(() => {
           <div v-else-if="balanceError" class="text-xs text-red-500 truncate max-w-full">{{ balanceError }}</div>
 
           <!-- brc info -->
-          <div v-if="asset?.contract === 'BRC-20'" class="w-full">
+          <div v-if="asset?.contract === 'BRC-20'" class="w-full mt-2.5 space-y-2">
             <div class="text-xs flex items-center justify-between w-full">
               <span class="text-[#909399]">Transferable:</span>
               <span class="text-[#141416] font-bold truncate" :title="`${asset.balance?.transferBalance}`">{{

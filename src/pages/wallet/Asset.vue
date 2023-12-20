@@ -10,7 +10,7 @@ import { prettifyTokenBalance } from '@/lib/formatters'
 import { getTags, BTCAsset, MVCAsset } from '@/data/assets'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
-import { ArrowUpRightIcon, QrCodeIcon, ArrowsRightLeftIcon, CircleStackIcon } from '@heroicons/vue/20/solid'
+import { ArrowUpRightIcon, QrCodeIcon, ArrowsRightLeftIcon } from '@heroicons/vue/20/solid'
 
 const route = useRoute()
 const router = useRouter()
@@ -132,7 +132,9 @@ const toTransfer = () => {
 <template>
   <div class="mt-8 flex flex-col items-center" v-if="asset">
     <img v-if="asset!.logo" :src="asset.logo" alt="" class="h-20 w-20 rounded-xl" />
-    <CircleStackIcon class="h-20 w-20 text-gray-300 transition-all hover:text-blue-500" v-else />
+    <div v-else class="h-20 w-20 text-center rounded-full text-white text-3xl bg-[#1E2BFF]" style="line-height: 80px">
+      {{ symbol[0].toLocaleUpperCase() }}
+    </div>
 
     <div class="mt-1.5 flex items-center gap-x-1.5">
       <div

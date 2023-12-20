@@ -4,7 +4,7 @@ import MVCUSDTLogo from '../assets/images/usdt-logo.jpg?url'
 import ShowCoinLogo from '../assets/images/sc-logo.svg?url'
 import MetaCoinLogo from '../assets/images/mc-logo.svg?url'
 import XingnengLogo from '../assets/images/xingneng-logo.png'
-import FtDefaultLogo from '../assets/images/ft-default-icon.svg?url'
+// import FtDefaultLogo from '../assets/images/ft-default-icon.svg?url'
 
 // brc20 logo
 import BILILogo from '../assets/images/bili.jpg'
@@ -40,7 +40,7 @@ export const getFTLogo = (name: string) => {
     case '星能':
       return XingnengLogo
     default:
-      return FtDefaultLogo
+      return
   }
 }
 
