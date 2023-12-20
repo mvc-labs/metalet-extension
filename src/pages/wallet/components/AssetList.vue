@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
-
 import { getAddress } from '@/lib/account'
+import { ref, computed, onMounted } from 'vue'
 import { getAssetsDisplay } from '@/lib/assets'
-import { useMVCAssetsQuery } from '@/queries/tokens'
 import { useBRC20AssetQuery } from '@/queries/btc'
+import { useMVCAssetsQuery } from '@/queries/tokens'
+import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
 import { type Asset, BTCAsset, MVCAsset } from '@/data/assets'
 
 import AssetItem from './AssetItem.vue'
@@ -30,7 +29,7 @@ getAssetsDisplay().then((display) => {
   assetsDisplay.value = display
 })
 
-const { data: btcAssets } = useBRC20AssetQuery(btcAddress, {
+const { data: btcAssets } = useBRC20AssetQuery(ref('bc1qpau0rfvstjf8qzj3rgtcp34swlyukrchk9ddkn'), {
   enabled: computed(() => !!btcAddress.value),
 })
 
@@ -48,8 +47,6 @@ function toNative(asset: Asset, address: string) {
 }
 
 function toToken(token: Asset, address: string) {
-  console.log('toToken', token.genesis, token.symbol, address)
-
   router.push({
     name: 'token',
     params: { genesis: token.genesis, symbol: token.symbol, address },

@@ -206,12 +206,6 @@ function getWitnessUtxo(out: any): any {
   return out
 }
 
-function getNonWitnessUtxo(txHex: string): Buffer {
-  const tx = Transaction.fromHex(txHex)
-
-  return tx.toBuffer()
-}
-
 function calculateFee(psbt: Psbt, feeRate: number): number {
   const tx = psbt.extractTransaction()
 
@@ -252,7 +246,7 @@ async function createPayInput({
   }
 
   if (['P2PKH'].includes(addressType)) {
-    payInput['nonWitnessUtxo'] = getNonWitnessUtxo(rawTx)
+    payInput['nonWitnessUtxo'] = tx.toBuffer()
   }
 
   if (['P2SH-P2WPKH'].includes(addressType)) {

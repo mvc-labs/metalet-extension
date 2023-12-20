@@ -59,8 +59,8 @@ const exchange = computed(() => {
 
 <template>
   <div class="group relative transition hover:z-10">
-    <div class="flex cursor-pointer items-center justify-between rounded-md bg-gray-100 px-4 py-4">
-      <div class="flex items-center gap-x-3">
+    <div class="flex gap-2 cursor-pointer items-center justify-between rounded-md bg-gray-100 px-4 py-4">
+      <div class="flex flex-shrink-0 items-center gap-x-3">
         <img class="h-10 w-10 rounded-full" :src="asset.logo" v-if="asset.logo" />
         <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
         <div class="flex flex-col gap-y-1 items-start">
@@ -85,7 +85,7 @@ const exchange = computed(() => {
         </div>
       </div>
 
-      <div class="flex flex-1 flex-col items-end text-xs gap-y-1">
+      <div class="flex grow overflow-hidden flex-col items-end text-xs gap-y-1">
         <template v-if="asset.queryable">
           <!-- balance info -->
           <div v-if="asset.balance">
@@ -106,24 +106,18 @@ const exchange = computed(() => {
               {{ prettifyTokenBalance(balance.total, asset.decimal, true) }}
             </span>
           </div>
-          <div v-else-if="balanceError" class="text-xs text-red-500 truncate">{{ balanceError }}</div>
+          <div v-else-if="balanceError" class="text-xs text-red-500 truncate max-w-full">{{ balanceError }}</div>
 
           <!-- brc info -->
-          <div
-            class="text-xs flex items-center justify-between w-4/5 ml-auto truncate"
-            v-if="asset.balance?.transferBalance"
-          >
+          <div v-if="asset.balance?.transferBalance" class="text-xs flex items-center justify-between w-full">
             <span class="text-[#909399]">Transferable:</span>
-            <span class="text-[#141416] font-bold" :title="asset.balance?.transferBalance.toString()">{{
+            <span class="text-[#141416] font-bold truncate" :title="`${asset.balance?.transferBalance}`">{{
               asset.balance.transferBalance
             }}</span>
           </div>
-          <div
-            class="text-xs flex items-center justify-between w-4/5 ml-auto truncate"
-            v-if="asset.balance?.availableBalance"
-          >
+          <div v-if="asset.balance?.availableBalance" class="text-xs flex items-center justify-between w-full">
             <span class="text-[#909399]">Available:</span>
-            <span class="text-[#141416] font-bold" :title="asset.balance.availableBalance.toString()">{{
+            <span class="text-[#141416] font-bold truncate" :title="`${asset.balance?.availableBalance}`">{{
               asset.balance.availableBalance
             }}</span>
           </div>
@@ -132,7 +126,7 @@ const exchange = computed(() => {
           <div v-if="!(asset?.contract === 'BRC-20')">
             <div class="text-xs text-gray-500" v-if="isExchangeRateLoading">--</div>
             <div class="text-xs text-gray-500" v-else-if="exchange">{{ exchange }}</div>
-            <div v-else-if="exchangeError" class="text-xs text-red-500 truncate">{{ exchangeError }}</div>
+            <div v-else-if="exchangeError" class="text-xs text-red-500 truncate max-w-full">{{ exchangeError }}</div>
           </div>
         </template>
 
