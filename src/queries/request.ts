@@ -91,12 +91,19 @@ export const metaletApi = (path: string) => {
 }
 
 export const metaletApiV2 = <T>(path: string) => {
-  const metaletHost = METALET_HOST + '/wallet-api/v2'
+  if (network.value === 'mainnet') {
+    const metaletHost = `${METALET_HOST}/wallet-api/v2`
+    return {
+      get: (params?: OptionParams) =>
+        metaletV3Request<T>(`${metaletHost}${path}`, { method: 'GET', params, mode: 'cors' }),
+      post: (data?: OptionData) => metaletV3Request<T>(`${metaletHost}${path}`, { method: 'POST', data, mode: 'cors' }),
+    }
+  }
   return {
     get: (params?: OptionParams) =>
-      metaletV3Request<T>(`${metaletHost}${path}`, { method: 'GET', params, withCredential: true }),
+      unisatRequest<T>(`${UNISAT_TESTNET_HOST}${path}`, { method: 'GET', params, mode: 'cors' }),
     post: (data?: OptionData) =>
-      metaletV3Request<T>(`${metaletHost}${path}`, { method: 'POST', data, withCredential: true }),
+      unisatRequest<T>(`${UNISAT_TESTNET_HOST}${path}`, { method: 'POST', data, mode: 'cors' }),
   }
 }
 

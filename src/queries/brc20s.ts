@@ -3,7 +3,7 @@ import { ComputedRef, Ref } from 'vue'
 import { type Asset } from '@/data/assets'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker } from '@/lib/asset-symbol'
-import { metaletApi, metaletApiV3, unisatApi } from './request'
+import { metaletApi, metaletApiV3, metaletApiV2 } from './request'
 import { getBRC20Logo } from '@/data/logos'
 
 export type Brc20 = {
@@ -62,7 +62,7 @@ interface TokenBalance {
 
 export const fetchBRC20Token = async (address: string): Promise<Asset[]> => {
   return (
-    await unisatApi<PageResult<TokenBalance>>(`/brc20/tokens`).get({ address, cursor: 0, size: 100000 })
+    await metaletApiV2<PageResult<TokenBalance>>(`/brc20/tokens`).get({ address, cursor: 0, size: 100000 })
   ).list.map(
     (token) =>
       ({
@@ -94,17 +94,6 @@ export interface TokenTransfer {
   inscriptionId: string
   inscriptionNumber: number
   timestamp: number
-}
-
-interface AddressTokenSummary {
-  tokenInfo: TokenInfo
-  tokenBalance: TokenBalance
-  historyList: TokenTransfer[]
-  transferableList: TokenTransfer[]
-}
-
-const fetchBRC20TokenDetail = async (address: string, ticker: string): Promise<AddressTokenSummary> => {
-  return await unisatApi<AddressTokenSummary>(`/brc20/token-summary`).get({ address, ticker })
 }
 
 export const fetchBrc20s = async (address: string): Promise<RawBrc20[]> => {

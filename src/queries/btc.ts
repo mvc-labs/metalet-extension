@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import { Ref, ComputedRef } from 'vue'
 import { fetchBRC20Token } from './brc20s'
 import { useQuery } from '@tanstack/vue-query'
-import { ordersApi, metaletApi, unisatApi } from '@/queries/request'
+import { ordersApi, metaletApi, metaletApiV2 } from '@/queries/request'
 
 interface Tick {
   token: string
@@ -116,8 +116,8 @@ export interface AddressTokenSummary {
   transferableList: TokenTransfer[]
 }
 
-export async function getAddressTokenSummary(address: string, ticker: string): Promise<AddressTokenSummary> {
-  return await unisatApi<AddressTokenSummary>('/brc20/token-summary').get({
+export async function fetchBRC20TokenDetail(address: string, ticker: string): Promise<AddressTokenSummary> {
+  return await metaletApiV2<AddressTokenSummary>('/brc20/token-summary').get({
     address,
     ticker: encodeURIComponent(ticker),
   })
@@ -130,8 +130,7 @@ export const useBRCTickerAseetQuery = (
 ) => {
   return useQuery({
     queryKey: ['BRCTicker', { address: addressRef.value, ticker: tickerRef.value }],
-    queryFn: () => getAddressTokenSummary(addressRef.value, tickerRef.value),
-    // select: (result) => result.transferableList,
+    queryFn: () => fetchBRC20TokenDetail(addressRef.value, tickerRef.value),
     ...options,
   })
 }

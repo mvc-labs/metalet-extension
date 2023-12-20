@@ -1,5 +1,5 @@
 import { Chain } from '@/lib/account'
-import { mvcApi, unisatApi, mempoolApi, metaletApiV3 } from './request'
+import { mvcApi, metaletApiV2, mempoolApi, metaletApiV3 } from './request'
 
 export interface UTXO {
   txId: string
@@ -94,7 +94,7 @@ export async function getBtcUtxos(address: string): Promise<UTXO[]> {
 // }
 
 export async function getInscriptionUtxo(inscriptionId: string, confirmed = false): Promise<UTXO> {
-  const utxo = await unisatApi<UnisatUTXO>('/inscription/utxo').get({ inscriptionId })
+  const utxo = await metaletApiV2<UnisatUTXO>('/inscription/utxo').get({ inscriptionId })
   return formatUnisatUTXO({ ...utxo, confirmed })
 }
 
