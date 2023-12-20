@@ -62,7 +62,7 @@ interface TokenBalance {
 
 export const fetchBRC20Token = async (address: string): Promise<Asset[]> => {
   return (
-    await metaletApiV2<PageResult<TokenBalance>>(`/brc20/tokens`).get({ address, cursor: 0, size: 100000 })
+    await metaletApiV2<PageResult<TokenBalance>>(`/brc20/tokens`).get({ address, cursor: '0', size: '100000' })
   ).list.map(
     (token) =>
       ({
