@@ -79,10 +79,6 @@ export const useBRC20AssetQuery = (addressRef: Ref<string>, options: { enabled: 
   return useQuery({
     queryKey: ['BRC20Assets', { address: addressRef.value }],
     queryFn: () => fetchBRC20Token(addressRef.value),
-    select: (assets) => {
-      console.log({ assets })
-      return assets
-    },
     ...options,
   })
 }

@@ -214,7 +214,7 @@ const routes = [
       headerTitle: 'NFT Collection',
     },
   },
-  { path: '/collections', component: () => import('./pages/nfts/Index.vue'), name: 'collections' },
+  { path: '/collections/:tabIndex', component: () => import('./pages/nfts/Index.vue'), name: 'collections' },
   {
     name: 'brc20Detail',
     path: '/nft/brc20/detail',

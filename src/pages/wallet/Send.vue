@@ -124,13 +124,6 @@ const popConfirm = async () => {
   }
 }
 
-const total = computed(() => {
-  if (balance.value?.total) {
-    return new Decimal(balance.value.total).dividedBy(1e8)
-  }
-  return new Decimal(0)
-})
-
 watch(amountInSats, (newAmount) => {
   if (balance.value && newAmount.gt(balance.value.total)) {
     error.value = new Error('Insufficient balance')

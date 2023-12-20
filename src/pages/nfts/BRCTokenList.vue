@@ -18,6 +18,15 @@ const { isLoading, data: inscriptionsData } = useBRCInscriptionsQuery(addressRef
   enabled: computed(() => !!addressRef.value),
 })
 
+const inscriptionsCountDisplay = computed(() => {
+  if (!inscriptionsData.value) return '--'
+  return `${inscriptionsData.value.list.length} items`
+})
+
+const toReceive = () => {
+  router.push(`/wallet/receive?chain=btc`)
+}
+
 const toBRC20Detail = (inscription: Inscription) => {
   const query = {
     inscriptionId: inscription.inscriptionId,
@@ -38,23 +47,43 @@ const toBRC20Detail = (inscription: Inscription) => {
 </script>
 
 <template>
-  <div v-if="isLoading">BRC Token List loading...</div>
-  <div v-else-if="inscriptionsData && inscriptionsData.total" class="mt-12 px-3 py-4 grid grid-cols-3 gap-x-1 gap-y-7">
-    <div
-      v-for="inscription in inscriptionsData.list"
-      @click="toBRC20Detail(inscription)"
-      class="flex flex-col items-center justify-center rounded-md cursor-pointer text-[#999999]"
-    >
-      <BRCToken :ordinalsUrl="inscription.content" :value="inscription.outputValue" />
-      <span class="text-sm mt-3 truncate" :title="'# ' + inscription.inscriptionNumber"
-        ># {{ inscription.inscriptionNumber }}</span
-      >
-      <span class="text-xs mt-1 h-[30px]">{{
-        inscription.timestamp === 0 ? 'Uncomfirmed' : dayjs(inscription.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
-      }}</span>
+  <div class="space-y-4">
+    <div class="space-y-1">
+      <div class="text-sm text-gray-500">NUMBER OF COLLECTIBLES</div>
+      <div class="text-xl font-bold">{{ inscriptionsCountDisplay }}</div>
     </div>
+
+    <div class="">
+      <button class="secondary-btn flex w-full items-center justify-center gap-x-1 py-3" @click="toReceive">
+        <ArrowDownLeftIcon class="h-4 w-4" />
+        <span>Receive</span>
+      </button>
+    </div>
+    <div v-if="isLoading" class="w-full py-3 text-center text-sm font-bold text-gray-500">
+      BRC Token List loading...
+    </div>
+    <div
+      v-else-if="inscriptionsData && inscriptionsData.total"
+      class="mt-12 px-3 py-4 grid grid-cols-3 gap-x-1 gap-y-7"
+    >
+      <div
+        v-for="inscription in inscriptionsData.list"
+        @click="toBRC20Detail(inscription)"
+        class="flex flex-col items-center justify-center rounded-md cursor-pointer text-[#999999]"
+      >
+        <BRCToken :ordinalsUrl="inscription.content" :value="inscription.outputValue" />
+        <span class="text-sm text-center mt-3 truncate" :title="'# ' + inscription.inscriptionNumber"
+          ># {{ inscription.inscriptionNumber }}</span
+        >
+        <span class="text-xs text-center mt-1 h-[30px]">{{
+          inscription.timestamp === 0
+            ? 'Uncomfirmed'
+            : dayjs(inscription.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
+        }}</span>
+      </div>
+    </div>
+    <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">No BRC Tokens yet</div>
   </div>
-  <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">No BRC Tokens yet</div>
 </template>
 
 <style lang="less" scoped></style>

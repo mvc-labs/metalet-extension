@@ -91,7 +91,7 @@ async function send() {
       amount: amount.value,
       token: {
         symbol: symbol.value,
-        decimal: 8,
+        decimal: 0,
       },
     }
 
@@ -158,9 +158,7 @@ async function send() {
       class="main-input w-full !rounded-xl !py-4 !text-xs mt-1"
     />
 
-    <div v-if="operationLock" class="w-full py-3 text-center text-sm font-bold text-gray-500">
-      Loading...
-    </div>
+    <div v-if="operationLock" class="w-full py-3 text-center text-sm font-bold text-gray-500">Loading...</div>
     <button
       v-else
       @click="send"

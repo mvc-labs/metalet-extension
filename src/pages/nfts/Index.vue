@@ -1,20 +1,33 @@
 <script lang="ts" setup>
-import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 import { ref } from 'vue'
-
-import SpaceLogoImg from '@/assets/images/space-logo.svg?url'
-import BtcLogoImg from '@/assets/images/btc-logo.svg?url'
-import { getCurrentAccount, type Account } from '@/lib/account'
-
 import BRCTokenList from './BRCTokenList.vue'
-import MvcCollectionPanel from './components/MvcCollectionPanel.vue'
-import BtcCollectionPanel from './components/BtcCollectionPanel.vue'
+import { useRoute, useRouter } from 'vue-router'
+import BtcLogoImg from '@/assets/images/btc-logo.svg?url'
 import AccountItem from '../accounts/components/Item.vue'
+import SpaceLogoImg from '@/assets/images/space-logo.svg?url'
+import { getCurrentAccount, type Account } from '@/lib/account'
+import MvcCollectionPanel from './components/MvcCollectionPanel.vue'
+import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
+
+const route = useRoute()
+const router = useRouter()
 
 const account = ref<Account | null>(null)
 getCurrentAccount().then((acc) => {
   account.value = acc
 })
+
+const selectedTab = ref(Number(route.params.tabIndex))
+
+function changeTab(index: number) {
+  selectedTab.value = index
+  router.push({
+    name: 'collections',
+    params: {
+      tabIndex: index,
+    },
+  })
+}
 </script>
 
 <template>
@@ -22,25 +35,23 @@ getCurrentAccount().then((acc) => {
   <AccountItem :account="account" :current-account="account" v-if="account" :show-network="true" class="mb-4 -mt-4" />
 
   <!-- 链切换标签 -->
-  <TabGroup>
+  <TabGroup :selectedIndex="selectedTab" @change="changeTab">
     <TabList class="mx-auto flex w-5/6 rounded-md bg-gray-100">
-      <Tab class="tab">
-        <img :src="SpaceLogoImg" class="h-6 w-6" />
-        <span>MVC</span>
-      </Tab>
       <Tab class="tab">
         <img :src="BtcLogoImg" />
         <span>BTC</span>
       </Tab>
+      <Tab class="tab">
+        <img :src="SpaceLogoImg" />
+        <span>MVC</span>
+      </Tab>
     </TabList>
     <TabPanels class="mt-8">
       <TabPanel>
-        <MvcCollectionPanel />
+        <BRCTokenList />
       </TabPanel>
       <TabPanel>
-        <!-- <BtcCollectionPanel /> -->
-        <!-- BRC Token -->
-        <BRCTokenList />
+        <MvcCollectionPanel />
       </TabPanel>
     </TabPanels>
   </TabGroup>
@@ -53,5 +64,9 @@ getCurrentAccount().then((acc) => {
 
 .tab > img {
   @apply h-6 w-6 rounded-full bg-white p-1;
+}
+
+.tab > img:nth-child(1) {
+  @apply p-0;
 }
 </style>
