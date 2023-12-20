@@ -20,15 +20,16 @@ if (asset?.contract) {
   tag.value = getTagInfo(asset.contract)
 }
 
-const balaceEnabled = computed(() => !!address && !asset.balance)
-const rateEnabled = computed(() => !!address)
-
+const balaceEnabled = computed(() => !!address && !!asset.symbol && !asset.balance)
 const {
   isLoading,
   data: balance,
   error: balanceError,
 } = useBalanceQuery(ref(address), ref(asset.symbol), { enabled: balaceEnabled })
 
+const rateEnabled = computed(
+  () => !!address && !!asset.symbol && !(asset?.contract && ['BRC-20'].includes(asset.contract))
+)
 const {
   isLoading: isExchangeRateLoading,
   data: exchangeRate,
@@ -84,7 +85,7 @@ const exchange = computed(() => {
         </div>
       </div>
 
-      <div class="flex flex-1 flex-col items-end text-xs">
+      <div class="flex flex-1 flex-col items-end text-xs gap-y-1">
         <template v-if="asset.queryable">
           <!-- balance info -->
           <div v-if="asset.balance">
@@ -128,9 +129,11 @@ const exchange = computed(() => {
           </div>
 
           <!-- USD info -->
-          <div class="text-xs text-gray-500" v-if="isExchangeRateLoading">--</div>
-          <div class="text-xs text-gray-500" v-else-if="exchange">{{ exchange }}</div>
-          <div v-else-if="exchangeError" class="text-xs text-red-500 truncate">{{ exchangeError }}</div>
+          <div v-if="!(asset?.contract === 'BRC-20')">
+            <div class="text-xs text-gray-500" v-if="isExchangeRateLoading">--</div>
+            <div class="text-xs text-gray-500" v-else-if="exchange">{{ exchange }}</div>
+            <div v-else-if="exchangeError" class="text-xs text-red-500 truncate">{{ exchangeError }}</div>
+          </div>
         </template>
 
         <div v-else>--</div>

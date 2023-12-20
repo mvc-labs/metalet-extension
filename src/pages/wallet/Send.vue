@@ -25,13 +25,10 @@ const symbol = ref(route.params.symbol as SymbolTicker)
 const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol.value)!)
 
 // balance
-const enabled = computed(() => !!address.value)
-const { isLoading, data: balance } = useBalanceQuery(
-  address,
-  symbol,
-  { enabled },
-  { contract: asset.value?.contract, genesis: asset.value?.genesis }
-)
+const balaceEnabled = computed(() => {
+  return !!address.value && !!asset.value.symbol && !asset.value.balance
+})
+const { isLoading, data: balance } = useBalanceQuery(address, symbol, { enabled: balaceEnabled })
 
 // rate list query
 const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({
