@@ -119,10 +119,8 @@ export class BtcWallet {
 
   async broadcast(psbt: Psbt) {
     const tx = psbt.extractTransaction()
-    console.log({ tx })
 
     const rawTx = tx.toHex()
-    console.log({ rawTx })
 
     const txId = await broadcastBTCTx(rawTx)
     return { txId }
@@ -208,9 +206,14 @@ function getWitnessUtxo(out: any): any {
   return out
 }
 
+function getNonWitnessUtxo(txHex: string): Buffer {
+  const tx = Transaction.fromHex(txHex)
+
+  return tx.toBuffer()
+}
+
 function calculateFee(psbt: Psbt, feeRate: number): number {
   const tx = psbt.extractTransaction()
-  console.log({ tx })
 
   const size = tx.virtualSize()
   console.log({ size })
@@ -233,7 +236,6 @@ async function createPayInput({
 }): Promise<any> {
   const rawTx = await fetchBtcTxHex(utxo.txId)
   const tx = Transaction.fromHex(rawTx)
-  console.log({ rawTx, tx, b: Buffer.from(rawTx) })
 
   const payInput: any = {
     hash: utxo.txId,
@@ -250,7 +252,7 @@ async function createPayInput({
   }
 
   if (['P2PKH'].includes(addressType)) {
-    payInput['nonWitnessUtxo'] = Buffer.from(rawTx)
+    payInput['nonWitnessUtxo'] = getNonWitnessUtxo(rawTx)
   }
 
   if (['P2SH-P2WPKH'].includes(addressType)) {
