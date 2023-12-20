@@ -30,10 +30,13 @@ export async function useStorage(location: 'local' | 'session' | 'sync' = 'local
 
   let ext
   try {
-    ext = window && window.browser ? window.browser : await import('webextension-polyfill').then((m) => m.default)
+    if (typeof window !== 'undefined' && window.browser) {
+      ext = window.browser
+    } else {
+      throw new Error('no window.browser')
+    }
   } catch (e) {
-    // there is no window object, so we are in a web worker
-    ext = await import('webextension-polyfill').then((m) => m.default)
+    ext = chrome
   }
   const storage = ext.storage[location]
 
