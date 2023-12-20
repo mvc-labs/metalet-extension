@@ -123,10 +123,10 @@ const exchange = computed(() => {
           </div>
 
           <!-- USD info -->
-          <div v-if="!(asset?.contract === 'BRC-20')">
+          <div v-if="!asset?.contract">
             <div class="text-xs text-gray-500" v-if="isExchangeRateLoading">--</div>
             <div class="text-xs text-gray-500" v-else-if="exchange">{{ exchange }}</div>
-            <div v-else-if="exchangeError" class="text-xs text-red-500 truncate max-w-full">{{ exchangeError }}</div>
+            <!-- <div v-else-if="exchangeError" class="text-xs text-red-500 truncate max-w-full">{{ exchangeError }}</div> -->
           </div>
         </template>
 

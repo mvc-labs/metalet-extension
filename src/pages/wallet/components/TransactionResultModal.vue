@@ -35,7 +35,6 @@ const props = defineProps({
   },
   result: {
     type: Object as PropType<undefined | TransactionResult>,
-    required: true,
   },
 })
 const emit = defineEmits(['update:isOpenResult'])

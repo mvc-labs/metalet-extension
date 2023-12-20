@@ -35,20 +35,9 @@ const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({
   enabled: computed(() => !!address.value && asset.value.chain === 'btc'),
 })
 
-watch(
-  rateList,
-  (newRateList?: FeeRate[]) => {
-    if (newRateList && newRateList[1]) {
-      selectRateFee(newRateList[1].feeRate)
-    }
-  },
-  { immediate: true }
-)
-
+const currentRateFee = ref<number | undefined>()
 const isCustom = ref(false)
 const currentTitle = ref<string>('')
-const currentRateFee = ref<number | undefined>()
-
 const selectRateFee = (rateFee: number) => {
   currentRateFee.value = rateFee
   isCustom.value = false
@@ -59,6 +48,16 @@ const selectCustom = () => {
   currentRateFee.value = undefined
   isCustom.value = true
 }
+
+watch(
+  rateList,
+  (newRateList?: FeeRate[]) => {
+    if (newRateList && newRateList[1]) {
+      selectRateFee(newRateList[1].feeRate)
+    }
+  },
+  { immediate: true }
+)
 
 // fee
 const txPsbt = ref<Psbt>()
@@ -259,12 +258,12 @@ async function send() {
             v-for="rate in rateList"
             @click="selectRateFee(rate.feeRate)"
             :class="rate.feeRate === currentRateFee ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
+            class="flex flex-col items-center justify-center rounded-md border cursor-pointer h-[100px]"
           >
-            <div class="tex-sm">{{ rate.title }}</div>
-            <div class="mt-1.5 text-base font-bold">{{ rate.feeRate }} sat/vB</div>
-            <div class="mt-1 text-sm text-[#999999]">About</div>
-            <div class="text-sm text-[#999999]">{{ rate.desc.replace('About', '') }}</div>
+            <div class="text-xs">{{ rate.title }}</div>
+            <div class="mt-1.5 text-sm font-bold">{{ rate.feeRate }} sat/vB</div>
+            <div class="mt-1 text-xs text-[#999999]">About</div>
+            <div class="text-xs text-[#999999]">{{ rate.desc.replace('About', '') }}</div>
           </div>
           <div
             @click="selectCustom()"

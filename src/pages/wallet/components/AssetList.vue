@@ -84,11 +84,11 @@ function toToken(token: Asset, address: string) {
     <div v-else class="text-center text-gray-500 text-sm">MVC Asset Loading...</div>
 
     <!-- Manage Token List -->
-    <div class="flex items-center justify-center pb-4">
+    <!-- <div class="flex items-center justify-center pb-4">
       <button class="hover-gradient-text group flex items-center gap-x-2 text-sm text-gray-500" @click="toManageAssets">
         <SquaresPlusIcon class="h-4 w-4 group-hover:text-blue-600" />
         <span>Manage Token List</span>
       </button>
-    </div>
+    </div> -->
   </div>
 </template>

@@ -47,7 +47,7 @@ const onUpdateBtcPath = async (script: (typeof scripts)[number]) => {
           >
             <div
               @click="onUpdateBtcPath(script)"
-              :class="[checked ? ' ' : 'bg-[#f5f5f5] ']"
+              :class="[checked ? ' ' : 'bg-gray-50']"
               class="relative flex cursor-pointer rounded-lg px-5 py-4 shadow-md focus:outline-none"
               :style="checked ? 'background: linear-gradient(98deg, #72F5F6 4%, #171AFF 94%)' : ''"
             >
