@@ -51,13 +51,13 @@ type BRC20RawActivity = {
 }
 
 export const fetchBtcActivities = async (address: string): Promise<Activities> => {
-  return metaletApi(`/address/activities`)
+  return metaletApi<{ transactionList: BtcRawActivity[] }>(`/address/activities`)
     .get({
       address,
       chain: 'btc',
     })
-    .then((res) => res.data.transactionList)
-    .then((activities: BtcRawActivity[]) => {
+    .then((data) => data.transactionList)
+    .then((activities) => {
       return activities.map((activity) => {
         return {
           address: activity.from,
@@ -73,14 +73,14 @@ export const fetchBtcActivities = async (address: string): Promise<Activities> =
 }
 
 export const fetchBRC20Activities = async (address: string, symbol: SymbolTicker): Promise<Activities> => {
-  return metaletApi(`/address/brc20/activities`)
+  return metaletApi<{ inscriptionsList: BRC20RawActivity[] }>(`/address/brc20/activities`)
     .get({
       address,
       chain: 'btc',
       tick: symbol,
     })
-    .then((res) => res.data.inscriptionsList)
-    .then((activities: BRC20RawActivity[]) => {
+    .then((data) => data.inscriptionsList)
+    .then((activities) => {
       return activities.map((activity) => {
         return {
           address: activity.fromAddress,

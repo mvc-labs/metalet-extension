@@ -1,21 +1,21 @@
 import { ComputedRef, Ref } from 'vue'
-import { metaletApi } from './request'
+import { metaletApiV3 } from './request'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker, DEFAULT_SYMBOLS } from '@/lib/asset-symbol'
 
 type RawRates = Record<string, number | undefined>
 
 export const fetchExchangeRates = async (): Promise<RawRates> => {
-  return await metaletApi(`/coin/price`)
+  return await metaletApiV3<{ priceInfo: RawRates }>(`/coin/price`)
     .get()
-    .then((res) => res.data.priceInfo)
+    .then((res) => res.priceInfo)
 }
 
 // Fetch BRC-20 coin tick price
 export const fetchTickExchangeRates = async (): Promise<RawRates> => {
-  return await metaletApi(`/coin/tick/price`)
+  return await metaletApiV3<{ priceInfo: RawRates }>(`/coin/brc20/price`)
     .get()
-    .then((res) => res.data.priceInfo)
+    .then((res) => res.priceInfo)
 }
 
 export const doNothing = async (symbol: SymbolTicker): Promise<RawRates> => ({

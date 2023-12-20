@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
+import { useRouter } from 'vue-router'
 import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
 
 import { toTx } from '@/lib/helpers'
@@ -8,6 +9,8 @@ import { getBrowserHost } from '@/lib/host'
 // import { type TransactionResult } from '@/global-types'
 
 import Modal from '@/components/Modal.vue'
+
+const router = useRouter()
 
 type SuccessResult = {
   status: 'success'
@@ -41,6 +44,11 @@ const emit = defineEmits(['update:isOpenResult'])
 
 function closeModal() {
   emit('update:isOpenResult', false)
+}
+
+function ok() {
+  closeModal()
+  router.push('/')
 }
 
 const toResultTx = async () => {
@@ -108,7 +116,7 @@ const toResultTx = async () => {
       <div class="">
         <button
           class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100 outline-none"
-          @click="closeModal"
+          @click="ok"
         >
           OK
         </button>

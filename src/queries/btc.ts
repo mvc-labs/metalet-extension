@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import { Ref, ComputedRef } from 'vue'
 import { fetchBRC20Token } from './brc20s'
 import { useQuery } from '@tanstack/vue-query'
-import { ordersApi, metaletApi, metaletApiV2 } from '@/queries/request'
+import { ordersApi, metaletApiV2 } from '@/queries/request'
 
 interface Tick {
   token: string
@@ -63,17 +63,6 @@ export const getBTCPrice = () => {
 }
 
 type TokenType = 'BRC20'
-
-export const fetchBTCAsset = async (address: string): Promise<string[]> => {
-  if (!address) {
-    return []
-  }
-  return await metaletApi(`/address/brc20/asset`)
-    .get({ address, chain: 'btc' })
-    .then((res) => {
-      return res?.data?.tickList.map((tick: Tick) => tick.token) || []
-    })
-}
 
 export const useBRC20AssetQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
   return useQuery({

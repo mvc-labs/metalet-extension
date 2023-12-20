@@ -296,6 +296,7 @@ function toSuceess() {
         Next
       </button>
     </div>
+    
     <div v-if="nextStep === 2" class="text-[#141416] h-full">
       <div class="text-center text-base text-[#909399]">Spend Amount</div>
       <div class="text-center text-3xl font-bold mt-3">{{ inscribeAmount }} {{ asset.symbol }}</div>

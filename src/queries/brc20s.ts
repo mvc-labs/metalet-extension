@@ -1,10 +1,8 @@
 import { PageResult } from './types'
-import { ComputedRef, Ref } from 'vue'
 import { type Asset } from '@/data/assets'
-import { useQuery } from '@tanstack/vue-query'
-import { SymbolTicker } from '@/lib/asset-symbol'
-import { metaletApi, metaletApiV3, metaletApiV2 } from './request'
 import { getBRC20Logo } from '@/data/logos'
+import { SymbolTicker } from '@/lib/asset-symbol'
+import { metaletApiV3, metaletApiV2 } from './request'
 
 export type Brc20 = {
   symbol: SymbolTicker
@@ -94,28 +92,4 @@ export interface TokenTransfer {
   inscriptionId: string
   inscriptionNumber: number
   timestamp: number
-}
-
-export const fetchBrc20s = async (address: string): Promise<RawBrc20[]> => {
-  const tokens: any = await metaletApi(`/address/brc20/asset`)
-    .get({ address, chain: 'btc' })
-    .then((res) => res.data?.tickList || [])
-
-  return tokens
-}
-
-export const useBrc20sQuery = (address: Ref, options: { enabled: ComputedRef<boolean> }) => {
-  return useQuery({
-    queryKey: ['brc20s', { address: address.value }],
-    queryFn: () => fetchBrc20s(address.value),
-    select: (tokens) => {
-      return tokens.map((token) => {
-        return {
-          ...token,
-          symbol: token.token,
-        }
-      })
-    },
-    ...options,
-  })
 }

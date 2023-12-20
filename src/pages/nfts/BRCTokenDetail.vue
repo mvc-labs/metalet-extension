@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import dayjs from 'dayjs'
-import { useRoute } from 'vue-router'
+import { ref } from 'vue'
 import { getAddress } from '@/lib/account'
-import { shortestAddress } from '@/lib/formatters'
-import { Inscription } from '@/queries/inscribe'
 import { ordinalsApi } from '@/queries/request'
+import { useRoute, useRouter } from 'vue-router'
+import { Inscription } from '@/queries/inscribe'
+import { shortestAddress } from '@/lib/formatters'
 
-const { query } = useRoute()
 const address = ref('')
+const router = useRouter()
+const { query } = useRoute()
 const inscription = JSON.parse(JSON.stringify(query)) as Inscription
 
 getAddress('btc').then((addressStr) => {
@@ -22,6 +23,18 @@ ordinalsApi(inscription.content)
   .then((data: string) => {
     content.value = data
   })
+
+const toSendBRC20 = () => {
+  router.push({
+    name: 'sendBRC20',
+    query: {
+      address: address.value,
+      symbol: 'BTC',
+      inscriptionId: inscription.inscriptionId,
+      amount: inscription.outputValue / 1e8,
+    },
+  })
+}
 </script>
 
 <template>
@@ -89,6 +102,10 @@ ordinalsApi(inscription.content)
         <div class="w-44 truncate" :title="inscription.genesisTransaction">{{ inscription.genesisTransaction }}</div>
       </div>
     </div>
+
+    <button @click="toSendBRC20" class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100">
+      Transfers
+    </button>
   </div>
 </template>
 

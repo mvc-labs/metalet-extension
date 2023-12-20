@@ -23,6 +23,78 @@ export class BtcWallet {
     return wallet
   }
 
+  async getBRCFeeAndPsbt(recipient: string, utxo: UTXO, feeRate: number) {
+    const amount = getTotalSatoshi([utxo])
+    if (!this.account) throw new Error('no account')
+    const btcNetwork = await getBtcNetwork()
+    const address = await getAddress('btc')
+    const addressType = await getAddressType('btc')
+    const payment = await createPayment(addressType)
+    const utxos = ((await getBtcUtxos(address)) || [])
+      .filter((btcUtxo) => btcUtxo.txId !== utxo.txId)
+      .filter((btcUtxo) => btcUtxo.txId !== 'aec4e375b23cb532c42be593c5c83a391688c0a584e42d4a85c4193b40590096')
+
+    if (!utxos.length) {
+      throw new Error('your account currently has no available UTXO.')
+    }
+    utxos.sort((a, b) => b.satoshi - a.satoshi)
+
+    const buildPsbt = async (selectedUtxos: UTXO[], change: Decimal) => {
+      const psbt = new Psbt({ network: btcNetwork })
+
+      const payInput = await createPayInput({ utxo, payment, addressType })
+
+      psbt.addInput(payInput)
+      psbt.addOutput({
+        value: utxo.satoshi,
+        address: recipient,
+      })
+
+      if (change.gt(546)) {
+        psbt.addOutput({
+          value: change.toNumber(),
+          address,
+        })
+      }
+
+      // for (const utxo of brcUtxos) {
+      //   const payInput = await createPayInput({ utxo: utxo as any, payment, addressType })
+      //   psbt.addInput(payInput)
+      //   psbt.addOutput({
+      //     value: utxo.satoshi,
+      //     address: recipient,
+      //   })
+      // }
+
+      for (const utxo of selectedUtxos) {
+        const payInput = await createPayInput({ utxo, payment, addressType })
+        psbt.addInput(payInput)
+      }
+      const signer = await getSigner('btc', addressType)
+      psbt.signAllInputs(signer).finalizeAllInputs()
+      return psbt
+    }
+
+    let selecedtUTXOs = [utxos[0]]
+    let total = getTotalSatoshi(selecedtUTXOs)
+    let psbt = await buildPsbt(selecedtUTXOs, total.minus(amount))
+    let fee = calculateFee(psbt, feeRate)
+
+    while (getTotalSatoshi(selecedtUTXOs).lt(amount.add(fee))) {
+      if (selecedtUTXOs.length === utxos.length) {
+        throw new Error('Insufficient funds')
+      }
+      selecedtUTXOs = selectUTXOs(utxos, amount.add(fee))
+      total = getTotalSatoshi(selecedtUTXOs)
+      const psbt = await buildPsbt(selecedtUTXOs, total.minus(amount).minus(fee))
+      fee = calculateFee(psbt, feeRate)
+    }
+
+    psbt = await buildPsbt(selecedtUTXOs, total.minus(amount).minus(fee))
+    return { fee, psbt }
+    // return await this.broadcast(psbt)
+  }
+
   async sendBRC(recipient: string, utxo: UTXO, feeRate: number) {
     const amount = getTotalSatoshi([utxo])
     if (!this.account) throw new Error('no account')
@@ -209,7 +281,6 @@ function calculateFee(psbt: Psbt, feeRate: number): number {
   const tx = psbt.extractTransaction()
 
   const size = tx.virtualSize()
-  console.log({ size })
 
   return size * feeRate
 }
@@ -241,6 +312,7 @@ async function createPayInput({
 
   if (['P2TR'].includes(addressType)) {
     payInput['tapInternalKey'] = await getXOnlyPublicKey()
+
     payInput['witnessUtxo'] = { value: utxo.satoshi, script: payment.output }
   }
 

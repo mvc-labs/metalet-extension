@@ -98,6 +98,7 @@ export async function getTweakedPrivateKey() {
 
 export async function getXOnlyPublicKey() {
   const publicKeyStr = await getPublicKey('btc')
+  console.log({ publicKeyStr })
 
   return Buffer.from(publicKeyStr, 'hex').subarray(1)
 }

@@ -81,12 +81,13 @@ export const mvcApi = <T>(path: string) => {
   }
 }
 
-export const metaletApi = (path: string) => {
-  // metalet api requires credential to pass authentication check
+export const metaletApi = <T>(path: string) => {
   const metaletHost = METALET_HOST + '/wallet-api/v1'
   return {
-    get: (params?: OptionParams) => request(`${metaletHost}${path}`, { method: 'GET', params, withCredential: true }),
-    post: (data?: OptionData) => request(`${metaletHost}${path}`, { method: 'POST', data, withCredential: true }),
+    get: (params?: OptionParams) =>
+      metaletV3Request<T>(`${metaletHost}${path}`, { method: 'GET', params, withCredential: true }),
+    post: (data?: OptionData) =>
+      metaletV3Request<T>(`${metaletHost}${path}`, { method: 'POST', data, withCredential: true }),
   }
 }
 

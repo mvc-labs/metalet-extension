@@ -4,11 +4,9 @@ import { useQuery } from '@tanstack/vue-query'
 import { metaletApi, metaletApiV3 } from './request'
 
 export const fetchBtcTxHex = async (txId: string): Promise<string> => {
-  return metaletApi(`/tx/raw`)
+  return metaletApi<{ rawTx: string }>(`/tx/raw`)
     .get({ txId, chain: 'btc' })
-    .then(({ data: { rawTx } }) => {
-      return rawTx
-    })
+    .then((res) => res.rawTx)
 }
 
 export const broadcastBTCTx = async (rawTx: string) => {
