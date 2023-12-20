@@ -40,7 +40,7 @@ export const getFTLogo = (name: string) => {
     case '星能':
       return XingnengLogo
     default:
-      return
+      return FtDefaultLogo
   }
 }
 
@@ -75,7 +75,7 @@ export const getBRC20Logo = (name: string) => {
     case 'OXBT':
       return OXBTLogo
     default:
-      return FtDefaultLogo
+      return
   }
 }
 

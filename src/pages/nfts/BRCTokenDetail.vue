@@ -27,8 +27,8 @@ ordinalsApi(inscription.content)
 <template>
   <div class="w-full">
     <div class="w-full flex items-center justify-center">
-      <div class="w-64 h-64 bg-[#1E2BFF] flex items-center justify-center rounded-xl relative">
-        <div class="text-white truncate">{{ content }}</div>
+      <div class="w-64 h-64 bg-[#1E2BFF] flex items-center justify-center rounded-xl relative p-2">
+        <div class="text-white break-all">{{ content }}</div>
         <span class="absolute rounded right-3 bottom-3 py-3px px-1.5 bg-[rgb(235,236,255,0.2)] text-[#EBECFF] text-xs"
           >{{ inscription.outputValue }} sat</span
         >

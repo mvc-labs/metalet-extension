@@ -39,18 +39,18 @@ const toBRC20Detail = (inscription: Inscription) => {
 
 <template>
   <div v-if="isLoading">BRC Token List loading...</div>
-  <div v-else-if="inscriptionsData && inscriptionsData.total" class="mt-12 px-3 py-4 grid grid-cols-3 gap-x-2 gap-y-7">
+  <div v-else-if="inscriptionsData && inscriptionsData.total" class="mt-12 px-3 py-4 grid grid-cols-3 gap-x-1 gap-y-7">
     <div
       v-for="inscription in inscriptionsData.list"
       @click="toBRC20Detail(inscription)"
-      class="flex flex-col items-center justify-center rounded-md p-2 cursor-pointer text-[#999999]"
+      class="flex flex-col items-center justify-center rounded-md cursor-pointer text-[#999999]"
     >
       <BRCToken :ordinalsUrl="inscription.content" :value="inscription.outputValue" />
       <span class="text-sm mt-3 truncate" :title="'# ' + inscription.inscriptionNumber"
         ># {{ inscription.inscriptionNumber }}</span
       >
       <span class="text-xs mt-1 h-[30px]">{{
-        inscription.timestamp === 0 ? '--' : dayjs(inscription.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
+        inscription.timestamp === 0 ? 'Uncomfirmed' : dayjs(inscription.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
       }}</span>
     </div>
   </div>

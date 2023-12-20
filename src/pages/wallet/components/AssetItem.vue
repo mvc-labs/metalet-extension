@@ -109,17 +109,19 @@ const exchange = computed(() => {
           <div v-else-if="balanceError" class="text-xs text-red-500 truncate max-w-full">{{ balanceError }}</div>
 
           <!-- brc info -->
-          <div v-if="asset.balance?.transferBalance" class="text-xs flex items-center justify-between w-full">
-            <span class="text-[#909399]">Transferable:</span>
-            <span class="text-[#141416] font-bold truncate" :title="`${asset.balance?.transferBalance}`">{{
-              asset.balance.transferBalance
-            }}</span>
-          </div>
-          <div v-if="asset.balance?.availableBalance" class="text-xs flex items-center justify-between w-full">
-            <span class="text-[#909399]">Available:</span>
-            <span class="text-[#141416] font-bold truncate" :title="`${asset.balance?.availableBalance}`">{{
-              asset.balance.availableBalance
-            }}</span>
+          <div v-if="asset?.contract === 'BRC-20'" class="w-full">
+            <div class="text-xs flex items-center justify-between w-full">
+              <span class="text-[#909399]">Transferable:</span>
+              <span class="text-[#141416] font-bold truncate" :title="`${asset.balance?.transferBalance}`">{{
+                asset.balance?.transferBalance || 0
+              }}</span>
+            </div>
+            <div class="text-xs flex items-center justify-between w-full">
+              <span class="text-[#909399]">Available:</span>
+              <span class="text-[#141416] font-bold truncate" :title="`${asset.balance?.availableBalance}`">{{
+                asset.balance?.availableBalance || 0
+              }}</span>
+            </div>
           </div>
 
           <!-- USD info -->

@@ -17,10 +17,12 @@ ordinalsApi(ordinalsUrl)
 </script>
 
 <template>
-  <div class="flex items-center justify-center rounded-md p-2 bg-[#1E2BFF] relative h-24 w-24">
-    <div class="text-white truncate">{{ content }}</div>
-    <span class="absolute rounded right-1 bottom-1 py-3px px-1.5 bg-[rgb(235,236,255,0.2)] text-[#EBECFF] text-xs">{{ value }} sat</span>
+  <div class="flex items-center justify-center rounded-md p-1 bg-[#1E2BFF] relative">
+    <div class="text-white text-xs break-all scale-75">{{ content }}</div>
+    <span class="absolute rounded right-1 bottom-1 py-3px px-1.5 bg-[rgb(235,236,255,0.2)] text-[#EBECFF] text-xs"
+      >{{ value }} sat</span
+    >
   </div>
 </template>
 
-<style lang="less" scoped></style>
+<style lang="css" scoped></style>
