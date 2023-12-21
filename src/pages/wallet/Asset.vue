@@ -131,7 +131,7 @@ const toTransfer = () => {
 
 <template>
   <div class="mt-8 flex flex-col items-center" v-if="asset">
-    <img v-if="asset!.logo" :src="asset.logo" alt="" class="h-20 w-20 rounded-xl" />
+    <img v-if="asset!.logo" :src="asset.logo" alt="" class="h-20 w-20 rounded-full" />
     <div v-else class="h-20 w-20 text-center rounded-full text-white text-3xl bg-[#1E2BFF]" style="line-height: 80px">
       {{ symbol[0].toLocaleUpperCase() }}
     </div>

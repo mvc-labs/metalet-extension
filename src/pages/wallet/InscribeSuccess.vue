@@ -1,11 +1,19 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import SuccessIcon from '@/assets/icons/success.svg'
 
+const route = useRoute()
 const router = useRouter()
 
-function confirm() {
-  router.push('/')
+const symbol = ref(route.params.symbol as string)
+const orderId = ref(route.params.orderId as string)
+
+function toOrder() {
+  router.push({
+    name: 'inscribe-query',
+    params: { orderId: orderId.value, symbol: symbol.value },
+  })
 }
 </script>
 
@@ -15,7 +23,7 @@ function confirm() {
     <div class="test-lg text-[#141416]">Payment Sent</div>
     <div class="text-base text-[#909399] w-52 text-center">Your transaction has been succesfully sent.</div>
     <button
-      @click="confirm"
+      @click="toOrder"
       class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100 absolute bottom-4 left-0"
     >
       OK

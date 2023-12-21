@@ -48,7 +48,9 @@ function closeModal() {
 
 function ok() {
   closeModal()
-  router.push('/')
+  if (props.result?.status === 'success') {
+    router.push('/')
+  }
 }
 
 const toResultTx = async () => {
@@ -114,10 +116,7 @@ const toResultTx = async () => {
 
     <template #control>
       <div class="">
-        <button
-          class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100 outline-none"
-          @click="ok"
-        >
+        <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100 outline-none" @click="ok">
           OK
         </button>
       </div>

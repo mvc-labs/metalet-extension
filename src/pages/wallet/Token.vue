@@ -1,17 +1,13 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
+import { getFTLogo } from '@/data/logos'
 import { type Asset } from '@/data/assets'
 import { isOfficialToken } from '@/lib/assets'
 import { useRoute, useRouter } from 'vue-router'
 import { useMVCTokenQuery } from '@/queries/tokens'
 import Activities from './components/Activities.vue'
 import { prettifyTokenBalance, prettifyTokenGenesis } from '@/lib/formatters'
-import {
-  CheckBadgeIcon,
-  CircleStackIcon,
-  ClipboardDocumentCheckIcon,
-  ClipboardDocumentListIcon,
-} from '@heroicons/vue/24/solid'
+import { CheckBadgeIcon, ClipboardDocumentCheckIcon, ClipboardDocumentListIcon } from '@heroicons/vue/24/solid'
 
 const route = useRoute()
 const router = useRouter()
@@ -34,6 +30,12 @@ const asset = computed(() => {
       contract: 'MetaContract',
       codeHash: token.value.codeHash,
       genesis: token.value.genesis,
+      logo: getFTLogo(token.value.name),
+      balance: {
+        total: token.value.confirmed + token.value.unconfirmed,
+        confirmed: token.value.confirmed,
+        unconfirmed: token.value.unconfirmed,
+      },
     } as Asset
   }
 })
@@ -57,9 +59,11 @@ const copyGenesis = () => {
 
 <template>
   <div class="mt-8 flex flex-col items-center">
-    <!-- <img :src="token.logo" alt="" class="h-20 w-20 rounded-xl" v-if="token && token.logo" /> -->
+    <img :src="asset.logo" alt="" class="h-20 w-20 rounded-full" v-if="asset?.logo" />
 
-    <CircleStackIcon class="h-20 w-20 text-gray-300" />
+    <div v-else class="h-20 w-20 text-center rounded-full text-white text-3xl bg-[#1E2BFF]" style="line-height: 80px">
+      {{ symbol[0].toLocaleUpperCase() }}
+    </div>
 
     <div v-if="isLoading" class="mt-4">--</div>
     <div v-else-if="token" class="mt-4 flex flex-col items-center self-stretch">

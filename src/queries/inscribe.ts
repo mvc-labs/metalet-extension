@@ -59,8 +59,16 @@ export const commitInscribe = async (
 }
 
 export const getInscribeInfo = async (orderId: string): Promise<CommitInscribe> => {
-  return await metaletApiV3<CommitInscribe>(`/inscribe/info`).post({
+  return await metaletApiV3<CommitInscribe>(`/inscribe/info`).get({
     orderId,
+  })
+}
+
+export const useInscribeInfoQuery = (orderId: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
+  return useQuery({
+    queryKey: ['inscribeInfo', { orderId: orderId.value }],
+    queryFn: () => getInscribeInfo(orderId.value),
+    ...options,
   })
 }
 

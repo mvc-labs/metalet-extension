@@ -137,9 +137,19 @@ const routes = [
     },
   },
   {
-    path: '/wallet/inscribe-success',
+    path: '/wallet/inscribe-success/:symbol/:orderId',
     component: () => import('./pages/wallet/InscribeSuccess.vue'),
     name: 'inscribe-success',
+    meta: {
+      secondaryHeader: true,
+      headerTitle: '',
+      noFooter: true,
+    },
+  },
+  {
+    path: '/wallet/inscribe-query/:symbol/:orderId',
+    component: () => import('./pages/wallet/InscribeQuery.vue'),
+    name: 'inscribe-query',
     meta: {
       secondaryHeader: true,
       headerTitle: '',

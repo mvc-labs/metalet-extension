@@ -71,7 +71,10 @@ const toBRC20Detail = (inscription: Inscription) => {
         @click="toBRC20Detail(inscription)"
         class="flex flex-col items-center justify-center rounded-md cursor-pointer text-[#999999]"
       >
-        <BRCToken :ordinalsUrl="inscription.content" :value="inscription.outputValue" />
+        <BRCToken
+          :value="inscription.outputValue"
+          :ordinalsUrl="inscription.timestamp === 0 ? inscription.preview : inscription.content"
+        />
         <span class="text-sm text-center mt-3 truncate" :title="'# ' + inscription.inscriptionNumber"
           ># {{ inscription.inscriptionNumber }}</span
         >
