@@ -59,39 +59,45 @@ const copyGenesis = () => {
 
 <template>
   <div class="mt-8 flex flex-col items-center">
-    <img :src="asset.logo" alt="" class="h-20 w-20 rounded-full" v-if="asset?.logo" />
+    <div v-if="isLoading" class="text-center text-gray-500 font-bold">Token Asset Loading...</div>
 
-    <div v-else class="h-20 w-20 text-center rounded-full text-white text-3xl bg-[#1E2BFF]" style="line-height: 80px">
-      {{ symbol[0].toLocaleUpperCase() }}
-    </div>
-
-    <div v-if="isLoading" class="mt-4">--</div>
-    <div v-else-if="token" class="mt-4 flex flex-col items-center self-stretch">
-      <div class="mb-1 text-center text-xl">
-        {{ prettifyTokenBalance(token.confirmed + token.unconfirmed, token.decimal) + ' ' + token.symbol }}
+    <template v-else-if="!!asset && !!token">
+      <!-- logo -->
+      <img v-if="asset?.logo" :src="asset.logo" alt="" class="h-20 w-20 rounded-full" />
+      <div v-else style="line-height: 80px" class="h-20 w-20 text-center rounded-full text-white text-3xl bg-[#1E2BFF]">
+        {{ symbol[0].toLocaleUpperCase() }}
       </div>
 
-      <!-- Contract ID -->
-      <div class="mt-8 self-stretch">
-        <div class="text-xs text-gray-500">Token Contract ID</div>
-        <div class="flex items-center">
-          <CheckBadgeIcon class="mr-1 h-5 w-5 text-blue-500" v-if="token && isOfficialToken(token.genesis)" />
-          <div class="text-base text-gray-900">{{ prettifyTokenGenesis(token.genesis) }}</div>
-
-          <ClipboardDocumentCheckIcon class="ml-2 h-4 w-4 text-blue-500" v-if="isCopied" />
-          <button class="ml-2 text-gray-400 hover:text-gray-500" @click.stop="copyGenesis" type="button" v-else>
-            <ClipboardDocumentListIcon class="h-4 w-4" />
-          </button>
+      <!-- token info -->
+      <div class="mt-4 flex flex-col items-center self-stretch">
+        <div class="mb-1 text-center text-xl">
+          {{ prettifyTokenBalance(token.confirmed + token.unconfirmed, token.decimal) + ' ' + token.symbol }}
         </div>
-      </div>
 
-      <!-- buttons -->
-      <div class="mt-4 grid grid-cols-2 gap-x-3 self-stretch">
-        <button class="secondary-btn col-span-1 py-3" @click="toSend">SEND</button>
-        <button class="secondary-btn col-span-1 py-3" @click="toReceive">RECEIVE</button>
-      </div>
+        <!-- Contract ID -->
+        <div class="mt-8 self-stretch">
+          <div class="text-xs text-gray-500">Token Contract ID</div>
+          <div class="flex items-center">
+            <CheckBadgeIcon class="mr-1 h-5 w-5 text-blue-500" v-if="token && isOfficialToken(token.genesis)" />
+            <div class="text-base text-gray-900">{{ prettifyTokenGenesis(token.genesis) }}</div>
 
-      <Activities class="mt-8 self-stretch" v-if="asset" :asset="asset" :address="address" />
-    </div>
+            <ClipboardDocumentCheckIcon class="ml-2 h-4 w-4 text-blue-500" v-if="isCopied" />
+            <button class="ml-2 text-gray-400 hover:text-gray-500" @click.stop="copyGenesis" type="button" v-else>
+              <ClipboardDocumentListIcon class="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        <!-- buttons -->
+        <div class="mt-4 grid grid-cols-2 gap-x-3 self-stretch">
+          <button class="secondary-btn col-span-1 py-3" @click="toSend">SEND</button>
+          <button class="secondary-btn col-span-1 py-3" @click="toReceive">RECEIVE</button>
+        </div>
+
+        <Activities class="mt-8 self-stretch" v-if="asset" :asset="asset" :address="address" />
+      </div>
+    </template>
+
+    <div v-else class="text-center text-gray-500 font-bold">No Token Asset.</div>
   </div>
 </template>
