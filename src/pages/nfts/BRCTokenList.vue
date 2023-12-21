@@ -6,7 +6,7 @@ import { getAddress } from '@/lib/account'
 import { Inscription, useBRCInscriptionsQuery } from '@/queries/inscribe'
 import dayjs from 'dayjs'
 
-const addressRef = ref('')
+const addressRef = ref()
 const cursorRef = ref(0)
 const sizeRef = ref(10)
 const router = useRouter()
