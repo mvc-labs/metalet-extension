@@ -18,6 +18,12 @@ export const fetchTickExchangeRates = async (): Promise<RawRates> => {
     .then((res) => res.priceInfo)
 }
 
+export const fetchFTExchangeRates = async (): Promise<RawRates> => {
+  return await metaletApiV3<{ priceInfo: RawRates }>(`/coin/contract/ft/price`)
+    .get()
+    .then((res) => res.priceInfo)
+}
+
 export const doNothing = async (symbol: SymbolTicker): Promise<RawRates> => ({
   [symbol.toLowerCase()]: 0,
 })
@@ -32,6 +38,8 @@ export const useExchangeRatesQuery = (
     queryFn: () => {
       if (contract === 'BRC-20') {
         return fetchTickExchangeRates()
+      } else if (contract === 'MetaContract') {
+        return fetchFTExchangeRates()
       }
 
       if (DEFAULT_SYMBOLS.includes(symbolRef.value)) {
@@ -41,7 +49,7 @@ export const useExchangeRatesQuery = (
       return doNothing(symbolRef.value)
     },
     select: (rates: RawRates) => {
-      const rate = rates[symbolRef.value.toLowerCase()]
+      const rate = rates[contract === 'MetaContract' ? symbolRef.value : symbolRef.value.toLowerCase()]
       return { symbol: symbolRef.value, price: rate }
     },
     ...options,

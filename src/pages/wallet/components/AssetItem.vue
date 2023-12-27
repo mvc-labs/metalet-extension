@@ -41,13 +41,20 @@ const {
 const exchange = computed(() => {
   if (asset?.balance) {
     const usdRate = new Decimal(exchangeRate.value?.price || 0)
-    const balanceInStandardUnit = new Decimal(asset.balance?.total || 0)
+    const balanceInStandardUnit = new Decimal(asset.balance?.total || 0).dividedBy(10 ** asset.decimal)
     const exchanged = usdRate.mul(balanceInStandardUnit)
+    console.log({
+      symbol: asset.symbol,
+      usdRate: usdRate.toNumber(),
+      balanceInStandardUnit: balanceInStandardUnit.toNumber(),
+      exchanged: exchanged.toNumber(),
+    })
+
     updateAsset({ name: asset.symbol, value: exchanged.toNumber() })
     return `$${exchanged.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
   } else if (balance.value && exchangeRate.value) {
     const usdRate = new Decimal(exchangeRate.value?.price || 0)
-    const balanceInStandardUnit = new Decimal(balance.value.total).dividedBy(1e8)
+    const balanceInStandardUnit = new Decimal(balance.value.total).dividedBy(10 ** asset.decimal)
     const exchanged = usdRate.mul(balanceInStandardUnit)
     updateAsset({ name: asset.symbol, value: exchanged.toNumber() })
     return `$${exchanged.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
@@ -67,8 +74,8 @@ const exchange = computed(() => {
           {{ asset.symbol[0].toLocaleUpperCase() }}
         </div>
         <div class="flex flex-col gap-y-1 items-start">
-          <div :title="asset.tokenName" class="flex items-center gap-x-0.5 text-base font-bold">
-            {{ asset.tokenName }}
+          <div :title="asset.tokenName" class="flex items-center gap-x-0.5 text-base">
+            <span class="font-bold max-w-[100px] truncate overflow-hidden">{{ asset.tokenName }}</span>
             <CheckBadgeIcon
               class="h-4 w-4 shrink-0 text-blue-500"
               v-if="asset?.genesis && isOfficialToken(asset.genesis)"
