@@ -20,6 +20,8 @@ if (asset?.contract) {
   tag.value = getTagInfo(asset.contract)
 }
 
+console.log({ asset })
+
 const balaceEnabled = computed(() => !!address && !!asset.symbol && !asset.balance)
 const {
   isLoading,
@@ -38,17 +40,9 @@ const {
 
 const exchange = computed(() => {
   if (asset?.balance) {
-    console.log('asset?.balance', asset?.balance, exchangeRate.value)
-
     const usdRate = new Decimal(exchangeRate.value?.price || 0)
     const balanceInStandardUnit = new Decimal(asset.balance?.total || 0)
     const exchanged = usdRate.mul(balanceInStandardUnit)
-    console.log({
-      usdRate: usdRate.toNumber(),
-      balanceInStandardUnit: balanceInStandardUnit.toNumber(),
-      exchanged: exchanged.toNumber(),
-    })
-
     updateAsset({ name: asset.symbol, value: exchanged.toNumber() })
     return `$${exchanged.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
   } else if (balance.value && exchangeRate.value) {
@@ -73,7 +67,7 @@ const exchange = computed(() => {
           {{ asset.symbol[0].toLocaleUpperCase() }}
         </div>
         <div class="flex flex-col gap-y-1 items-start">
-          <div :title="asset.tokenName" class="flex items-center gap-x-0.5 text-lg font-bold">
+          <div :title="asset.tokenName" class="flex items-center gap-x-0.5 text-base font-bold">
             {{ asset.tokenName }}
             <CheckBadgeIcon
               class="h-4 w-4 shrink-0 text-blue-500"
@@ -95,11 +89,8 @@ const exchange = computed(() => {
         <template v-if="asset.queryable">
           <!-- balance info -->
           <div v-if="asset.balance" class="w-full text-right">
-            <div
-              v-if="asset.contract === 'BRC-20'"
-              class="w-full border-b border-[#D8D8D8] border-dashed pb-3 text-[#141416] font-bold text-lg"
-            >
-              <div>
+            <div v-if="asset.contract === 'BRC-20'" class="w-full border-b border-[#D8D8D8] border-dashed pb-3">
+              <div class="text-[#141416] font-bold text-base">
                 {{ prettifyTokenBalance(asset.balance.total, asset.decimal, false, asset.symbol) }}
               </div>
 
@@ -107,13 +98,14 @@ const exchange = computed(() => {
               <div class="text-sm font-normal text-gray-500" v-if="isExchangeRateLoading">--</div>
               <div class="text-sm font-normal text-gray-500" v-else-if="exchange">{{ exchange }}</div>
             </div>
-            <span v-else-if="asset.contract === 'MetaContract'">
-              {{ prettifyTokenBalance(asset.balance.total, asset.decimal, true) }}
+            <span v-else-if="asset.contract === 'MetaContract'" class="text-[#141416] font-bold text-base">
+              ≈ {{ (asset.balance.total / 10 ** asset.decimal).toFixed(2) }} {{ asset.symbol }}
+              <!-- {{ prettifyTokenBalance(asset.balance.total, asset.decimal, true) }} -->
             </span>
             <span v-else> {{ asset.balance.total }} {{ asset.symbol }} </span>
           </div>
           <div v-else-if="isLoading">--</div>
-          <div v-else-if="balance" class="text-[#141416] font-bold">
+          <div v-else-if="balance" class="text-[#141416] font-bold text-base">
             <span v-if="asset.isNative">
               {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
             </span>
@@ -121,7 +113,7 @@ const exchange = computed(() => {
               {{ prettifyTokenBalance(balance.total, asset.decimal, true) }}
             </span>
           </div>
-          <div v-else-if="balanceError" class="text-xs text-red-500 truncate max-w-full">{{ balanceError }}</div>
+          <!-- <div v-else-if="balanceError" class="text-xs text-red-500 truncate max-w-full">{{ balanceError }}</div> -->
 
           <!-- BRC-20 info -->
           <div v-if="asset?.contract === 'BRC-20'" class="w-full mt-2.5 space-y-2">
@@ -140,7 +132,7 @@ const exchange = computed(() => {
           </div>
 
           <!-- USD info -->
-          <div v-if="!asset?.contract">
+          <div v-if="!(asset?.contract === 'BRC-20')">
             <div class="text-sm text-gray-500" v-if="isExchangeRateLoading">--</div>
             <div class="text-sm text-gray-500" v-else-if="exchange">{{ exchange }}</div>
             <!-- <div v-else-if="exchangeError" class="text-xs text-red-500 truncate max-w-full">{{ exchangeError }}</div> -->
