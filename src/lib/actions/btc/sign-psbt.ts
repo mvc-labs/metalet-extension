@@ -35,7 +35,7 @@ export interface SignPsbtOptions {
   toSignInputs?: UserToSignInput[]
 }
 
-export async function process(psbt: Psbt, toSignInputs: ToSignInput[], autoFinalized: boolean): Promise<Psbt> {
+export async function process(psbtHex: string, options: { toSignInputs?: ToSignInput[], autoFinalized: boolean }): Promise<Psbt> {
   const networkType = await getNetwork()
   const pubkey = await getPublicKey('btc')
   const addressType = await getAddressType('btc')
@@ -44,11 +44,13 @@ export async function process(psbt: Psbt, toSignInputs: ToSignInput[], autoFinal
 
   const keyPair = ECPair.fromWIF(privateKey)
 
-  if (!toSignInputs) {
+  if (!options.toSignInputs) {
     // Compatibility with legacy code.
-    toSignInputs = await formatOptionsToSignInputs(psbt)
-    if (autoFinalized !== false) autoFinalized = true
+    options.toSignInputs = await formatOptionsToSignInputs(psbtHex)
+    if (options.autoFinalized !== false) options.autoFinalized = true
   }
+
+  let psbt = Psbt.fromHex(psbtHex, { network: psbtNetwork })
 
   psbt.data.inputs.forEach((v, index) => {
     const isNotSigned = !(v.finalScriptSig || v.finalScriptWitness)
@@ -67,13 +69,13 @@ export async function process(psbt: Psbt, toSignInputs: ToSignInput[], autoFinal
     }
   })
 
-  toSignInputs.forEach((v) => {
+  options?.toSignInputs.forEach((v) => {
     // psbt.signInput(v.index, keyPair)
     psbt = psbt.signInput(v.index, keyPair)
   })
 
-  if (autoFinalized) {
-    toSignInputs.forEach((v) => {
+  if (options.autoFinalized) {
+    options.toSignInputs.forEach((v) => {
       // psbt.validateSignaturesOfInput(v.index, validator);
       psbt.finalizeInput(v.index)
     })

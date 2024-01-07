@@ -12,6 +12,7 @@ import * as SignMessage from '../lib/actions/sign-message'
 import * as Merge from '../lib/actions/merge'
 
 // BTC
+import * as ConnectBTC from '../lib/actions/btc/connect'
 import * as SignBTCPsbt from '../lib/actions/btc/sign-psbt'
 import * as SignBTCMessage from '../lib/actions/btc/sign-message'
 
@@ -130,6 +131,14 @@ export default {
   },
 
   // BTC
+  ConnectBTC: {
+    name: 'Connect BTC',
+    title: 'Connect Account',
+    description: ['Connect Account'],
+    process: ConnectBTC.process,
+    estimate: doNothing,
+    closeAfterProcess: true,
+  },
   SignBTCMessage: {
     name: 'Sign BTC Message',
     title: 'Sign BTC Message',

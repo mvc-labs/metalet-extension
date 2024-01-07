@@ -8,7 +8,7 @@ type Echo = {
   res: any
 }
 
-export type ActionType = 'authorize' | 'query' | 'event'
+export type ActionType = 'authorize' | 'query' | 'event' | 'inscribe'
 
 export async function createAction(
   actionName: string,
@@ -210,9 +210,14 @@ export const btcKeys: Omit<Keys, 'event'> = {
     { name: 'getAddress', action: 'GetBTCAddress' },
     { name: 'getPublicKey', action: 'GetBTCPublicKey' },
     { name: 'getUtxos', action: 'GetBTCUtxos' },
+    { name: 'pushPsbt', action: 'PushPsbt' },
   ],
   authorize: [
+    { name: 'connect', action: 'ConnectBTC' },
     { name: 'signPsbt', action: 'SignBTCPsbt' },
     { name: 'signMessage', action: 'SignBTCMessage' },
   ],
+  inscribe: [
+    { name: 'inscribeTransfer', action: 'InscribeTransfer' }
+  ]
 }

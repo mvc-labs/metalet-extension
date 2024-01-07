@@ -15,6 +15,7 @@ import * as GetBTCBalance from '../lib/actions/btc/get-balance'
 import * as GetBTCAddress from '../lib/actions/btc/get-address'
 import * as GetBTCPublicKey from '../lib/actions/btc/get-public-key'
 import * as GetBTCUtxos from '../lib/actions/btc/get-utxos'
+import * as PushPsbt from '../lib/actions/btc/push-psbt'
 
 type QueryAction = {
   process: Function
@@ -38,4 +39,5 @@ export default {
   GetBTCAddress,
   GetBTCPublicKey,
   GetBTCUtxos,
+  PushPsbt,
 } as { [key: string]: QueryAction }
