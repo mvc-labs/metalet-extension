@@ -1,11 +1,13 @@
 import ECPairFactory from 'ecpair'
 import { Psbt, payments, address as PsbtAddress, networks, Transaction } from 'bitcoinjs-lib'
+import btcjs from 'bitcoinjs-lib'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 
 import { getPrivateKey, getAddressType, getPublicKey, getAddress } from '@/lib/account'
 import { getNetwork } from '@/lib/network'
 
 const ECPair = ECPairFactory(ecc)
+btcjs.initEccLib(ecc)
 
 const toXOnly = (pubKey: Buffer) => (pubKey.length === 32 ? pubKey : pubKey.slice(1, 33))
 
@@ -35,7 +37,10 @@ export interface SignPsbtOptions {
   toSignInputs?: UserToSignInput[]
 }
 
-export async function process(psbtHex: string, options: { toSignInputs?: ToSignInput[], autoFinalized: boolean }): Promise<Psbt> {
+export async function process(
+  psbtHex: string,
+  options: { toSignInputs?: ToSignInput[]; autoFinalized: boolean }
+): Promise<Psbt> {
   const networkType = await getNetwork()
   const pubkey = await getPublicKey('btc')
   const addressType = await getAddressType('btc')
@@ -122,6 +127,7 @@ const formatOptionsToSignInputs = async (_psbt: string | Psbt, options?: SignPsb
     const psbtNetwork = networkType === 'mainnet' ? networks.bitcoin : networks.testnet
 
     const psbt = typeof _psbt === 'string' ? Psbt.fromHex(_psbt as string, { network: psbtNetwork }) : (_psbt as Psbt)
+    psbt.setVersion(2)
     psbt.data.inputs.forEach((v, index) => {
       let script: any = null
       let value = 0
@@ -136,7 +142,7 @@ const formatOptionsToSignInputs = async (_psbt: string | Psbt, options?: SignPsb
       }
       const isSigned = v.finalScriptSig || v.finalScriptWitness
       if (script && !isSigned) {
-        const address = PsbtAddress.fromOutputScript(script, psbtNetwork)
+        const address = btcjs.address.fromOutputScript(script, psbtNetwork)
         if (btcAddress === address) {
           toSignInputs.push({
             index,
