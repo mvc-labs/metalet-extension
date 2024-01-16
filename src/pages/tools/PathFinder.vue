@@ -90,11 +90,11 @@ async function find() {
 
     <div class="mt-8">
       <div class="">
-        <label class="label font-bold">Original Address</label>
+        <label class="label font-bold">Target Address</label>
         <input
           type="text"
           class="pit-input block w-full mt-1"
-          placeholder="Enter your original address"
+          placeholder="Enter your target address"
           v-model="address"
         />
       </div>
