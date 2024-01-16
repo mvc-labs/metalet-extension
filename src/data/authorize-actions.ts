@@ -104,6 +104,14 @@ export default {
     estimate: doNothing,
     closeAfterProcess: true,
   },
+  SignBTCPsbt: {
+    name: 'SignBTCPsbt',
+    title: 'Sign for Psbt',
+    description: ['Third party apps requests signing of the PSBT(s), and ask Metalet to sign for them.'],
+    process: SignBTCPsbt.process,
+    estimate: doNothing,
+    closeAfterProcess: true,
+  },
 
   EciesEncrypt: {
     name: 'ECIES Encrypt',
@@ -144,14 +152,6 @@ export default {
     title: 'Sign BTC Message',
     description: ['Sign BTC Message'],
     process: SignBTCMessage.process,
-    estimate: doNothing,
-    closeAfterProcess: true,
-  },
-  SignBTCPsbt: {
-    name: 'Sign BTC Psbt',
-    title: 'Sign BTC Psbt',
-    description: ['Sign BTC Psbt'],
-    process: SignBTCPsbt.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },

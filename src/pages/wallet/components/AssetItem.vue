@@ -20,8 +20,6 @@ if (asset?.contract) {
   tag.value = getTagInfo(asset.contract)
 }
 
-console.log({ asset })
-
 const balaceEnabled = computed(() => !!address && !!asset.symbol && !asset.balance)
 const {
   isLoading,
@@ -43,13 +41,6 @@ const exchange = computed(() => {
     const usdRate = new Decimal(exchangeRate.value?.price || 0)
     const balanceInStandardUnit = new Decimal(asset.balance?.total || 0).dividedBy(10 ** asset.decimal)
     const exchanged = usdRate.mul(balanceInStandardUnit)
-    console.log({
-      symbol: asset.symbol,
-      usdRate: usdRate.toNumber(),
-      balanceInStandardUnit: balanceInStandardUnit.toNumber(),
-      exchanged: exchanged.toNumber(),
-    })
-
     updateAsset({ name: asset.symbol, value: exchanged.toNumber() })
     return `$${exchanged.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
   } else if (balance.value && exchangeRate.value) {
