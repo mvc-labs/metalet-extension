@@ -10,6 +10,7 @@ import { raise, sleep } from '@/lib/helpers'
 
 const address = ref<string>('')
 const foundPath = ref<string>('')
+const searchingPath = ref<string>('')
 const isFinding = ref<boolean>(false)
 const failed = ref<boolean>(false)
 
@@ -34,17 +35,22 @@ async function find() {
   const mnemonic = account.mnemonic
 
   await sleep(100)
-  const path = inferDerivationPath(mnemonic, address.value)
+  for (let res of inferDerivationPath(mnemonic, address.value)) {
+    if (!isFinding.value) break
+
+    searchingPath.value = res.path
+
+    if (res.status === 'success') {
+      foundPath.value = res.path
+      break
+    }
+    await sleep(10)
+  }
   isFinding.value = false
 
-  if (!path) {
+  if (!foundPath.value) {
     failed.value = true
-
-    return
   }
-
-  failed.value = false
-  foundPath.value = path
 }
 </script>
 
@@ -103,18 +109,32 @@ async function find() {
         <label class="label font-bold">Found Derivation Path</label>
         <div class="h-10">
           <span v-if="foundPath" class="text-green-500 font-bold">{{ foundPath }}</span>
-          <SparklesIcon class="inline-block w-8 h-8 m-1 text-gray-500 animate-pulse" v-else-if="isFinding" />
+          <div class="flex items-center gap-2" v-else-if="isFinding">
+            <SparklesIcon class="block w-8 h-8 m-1 text-gray-500 animate-pulse" />
+            <div class="">
+              <div class="text-gray-500">Searching path (0 - 20000)</div>
+              <div class="font-bold">{{ searchingPath }}</div>
+            </div>
+          </div>
           <span v-else>-</span>
         </div>
       </div>
 
-      <div class="mt-4">
+      <div class="mt-4 flex items-center gap-2">
         <button
           class="border border-gray-300 rounded-md px-8 py-1 enabled:shadow-md font-bold enabled:hover-gradient-text disabled:opacity-30"
           :disabled="!isValidAddress || isFinding"
           @click="find"
         >
           {{ isFinding ? 'Finding...' : 'Find' }}
+        </button>
+
+        <button
+          class="border border-gray-300 rounded-md px-8 py-1 shadow-md font-bold hover-gradient-text"
+          v-if="isFinding"
+          @click="isFinding = false"
+        >
+          Stop
         </button>
       </div>
 

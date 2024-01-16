@@ -245,35 +245,57 @@ export function inferAddressType(path: string): AddressType {
   return addressType
 }
 
-export function inferDerivationPath(mnemonic: string, targetAddress: string): string | false {
+export function* inferDerivationPath(
+  mnemonic: string,
+  targetAddress: string
+): Generator<{
+  status: 'progress' | 'failed' | 'success'
+  path: string
+}> {
   const commonSymbols = [0, 236, 10001]
   let chainSymbol: number = 0
-  let found = false
 
   // first try common paths
   for (let i = 0; i < commonSymbols.length; i++) {
-    const path = `m/44'/${commonSymbols[i]}'/0'/0/0`
+    const basePath = `m/44'/${commonSymbols[i]}'/0'`
+    const path = `${basePath}/0/0`
+
+    yield {
+      status: 'progress',
+      path: basePath,
+    }
+
     const address = deriveMvcAddress(mnemonic, path, 'mainnet')
     if (address === targetAddress) {
-      found = true
-
-      return `m/44'/${commonSymbols[i]}'/0'`
+      yield {
+        status: 'success',
+        path: basePath,
+      }
     }
   }
 
   // if not found, try all paths
   chainSymbol = 0
   while (chainSymbol < 20000) {
-    const path = `m/44'/${chainSymbol}'/0'/0/0`
+    const basePath = `m/44'/${chainSymbol}'/0'`
+    const path = `${basePath}/0/0`
+    yield {
+      status: 'progress',
+      path: basePath,
+    }
+
     const address = deriveMvcAddress(mnemonic, path, 'mainnet')
     if (address === targetAddress) {
-      found = true
-      break
+      yield {
+        status: 'success',
+        path: basePath,
+      }
     }
     chainSymbol += 1
   }
 
-  if (found) return `m/44'/${chainSymbol}'/0'`
-
-  return false
+  return {
+    status: 'failed',
+    path: '',
+  }
 }
