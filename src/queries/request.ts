@@ -73,6 +73,15 @@ async function request<T = any>(url: string, options: RequestOption): Promise<T>
   }
 }
 
+export const createApi = (host: string) => {
+  return (path: string) => {
+    return {
+      get: (params?: OptionParams) => request(`${host}${path}`, { method: 'GET', params }),
+      post: (data?: OptionData) => request(`${host}${path}`, { method: 'POST', data }),
+    }
+  }
+}
+
 export const mvcApi = <T>(path: string) => {
   const metasvHost = network.value === 'mainnet' ? METASV_HOST : METASV_TESTNET_HOST
   return {

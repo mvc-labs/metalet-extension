@@ -1,9 +1,9 @@
 import { ComputedRef, Ref } from 'vue'
-import { network } from '@/lib/network'
+import { getNetwork } from '@/lib/network'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker } from '@/lib/asset-symbol'
-import { fetchTokenBalance } from '@/queries/tokens'
-import { metaletApiV3, mvcApi, unisatApi } from './request'
+import { createApi, metaletApiV3, mvcApi, unisatApi } from './request'
+import { METASV_TESTNET_HOST } from '@/data/hosts'
 
 type TokenType = 'BRC20'
 
@@ -25,7 +25,11 @@ export type Balance = {
 }
 
 export const fetchSpaceBalance = async (address: string): Promise<Balance> => {
-  const balance: any = await mvcApi(`/address/${address}/balance`).get()
+  const network = await getNetwork()
+
+  const api = network === 'mainnet' ? mvcApi : createApi(METASV_TESTNET_HOST)
+  const balance = await api(`/address/${address}/balance`).get()
+
   balance.total = balance.confirmed + balance.unconfirmed
   return balance
 }
@@ -56,7 +60,8 @@ export interface BitcoinBalance {
 }
 
 export const fetchBtcBalance = async (address: string): Promise<Balance> => {
-  if (network.value === 'testnet') {
+  const network = await getNetwork()
+  if (network === 'testnet') {
     const data = await unisatApi<BitcoinBalance>(`/address/balance`).get({ address })
     return {
       address,

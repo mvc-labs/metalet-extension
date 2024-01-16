@@ -15,9 +15,10 @@ export async function setNetwork(_network: Network) {
 }
 
 export async function getNetwork(): Promise<Network> {
-  return network.value
+  return await storage.get('network', { defaultValue: 'mainnet' })
 }
 
 export async function getBtcNetwork() {
-  return network.value === 'mainnet' ? networks.bitcoin : networks.testnet
+  const network = await getNetwork()
+  return network === 'mainnet' ? networks.bitcoin : networks.testnet
 }
