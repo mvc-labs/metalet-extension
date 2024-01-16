@@ -99,7 +99,7 @@ const routes = [
   {
     path: '/wallet/send/:symbol/:address',
     component: () => import('./pages/wallet/Send.vue'),
-    name:'send',
+    name: 'send',
     meta: {
       secondaryHeader: true,
       headerTitle: 'Send',
@@ -293,6 +293,16 @@ const routes = [
     meta: {
       secondaryHeader: true,
       headerTitle: 'BTC Address Type',
+      noFooter: true,
+    },
+  },
+
+  {
+    path: '/tools/path-finder',
+    component: () => import('./pages/tools/PathFinder.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Path Finder',
       noFooter: true,
     },
   },

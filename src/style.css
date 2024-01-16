@@ -9,6 +9,21 @@
     url('./assets/fonts/Geist-Regular.otf') format('opentype'),
     url('./assets/fonts/Geist-Bold.otf') format('opentype');
 }
+.nicer-scrollbar::-webkit-scrollbar {
+  @apply h-2 w-2;
+}
+
+.nicer-scrollbar::-webkit-scrollbar-track {
+  @apply rounded-full bg-transparent;
+}
+
+.nicer-scrollbar::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-gray-200;
+}
+
+.nicer-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-300;
+}
 
 .gradient-text {
   @apply bg-gradient-to-r from-primary-teal to-primary-blue bg-clip-text text-transparent;

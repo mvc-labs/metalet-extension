@@ -16,7 +16,7 @@ getCurrentAccount().then((acc) => {
 </script>
 
 <template>
-  <div class="-mt-4">
+  <div class="-mt-4 nicer-scrollbar">
     <!-- Account Info -->
     <AccountItem
       :show-network="true"

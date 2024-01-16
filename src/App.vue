@@ -65,7 +65,7 @@ const secondaryHeaderTitle = computed(() => {
       >
         <img class="z-[-1] h-full w-full select-none opacity-100" :src="BgHueImg" alt="bg-hue" />
       </div>
-      <div class="isolate grow px-5 overflow-y-auto" :class="noFooter ? 'pb-8' : 'pb-16'">
+      <div class="isolate grow px-5 overflow-y-auto nicer-scrollbar" :class="noFooter ? 'pb-8' : 'pb-16'">
         <router-view></router-view>
       </div>
 
@@ -81,7 +81,6 @@ const secondaryHeaderTitle = computed(() => {
 }
 
 .ext-app::-webkit-scrollbar-track {
-  background: transparent;
   @apply rounded-full bg-transparent;
 }
 
