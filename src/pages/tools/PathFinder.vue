@@ -54,6 +54,9 @@ async function find() {
     <p class="text-sm text-gray-600">
       This tool is designed to help you find the correct derivation path for your wallet.
     </p>
+    <p class="text-sm text-gray-600">
+      It might take a long time to find the correct path. Please be patient and wait for the result.
+    </p>
 
     <Disclosure v-slot="{ open }">
       <DisclosureButton class="mt-4 text-gray-400 flex items-center gap-1">
