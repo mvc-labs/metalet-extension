@@ -7,10 +7,10 @@ export interface ToSignInput {
   sighashTypes?: number[]
 }
 
-export async function process(psbtHexs: string[], options: { toSignInputs?: ToSignInput[], autoFinalized: boolean }[]): Promise<Psbt[]> {
-  const psbts: Psbt[] = []
+export async function process(psbtHexs: string[], options: { toSignInputs?: ToSignInput[], autoFinalized: boolean }[]): Promise<string[]> {
+  const psbts:string[] = []
   psbtHexs.forEach(async (psbtHex, index) => {
-    const psbt = await SignPsbt.process(psbtHex, options[index])
+    const psbt = await SignPsbt.process({ psbtHex, options: options[index] })
     psbts.push(psbt)
   })
   return psbts

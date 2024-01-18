@@ -2,7 +2,7 @@ import ECPairFactory from 'ecpair'
 import { getNetwork } from '@/lib/network'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import btcjs, { Psbt, payments, networks, Transaction } from 'bitcoinjs-lib'
-import { getPrivateKey, getAddressType, getPublicKey, getAddress } from '@/lib/account'
+import { getPrivateKey, getAddressType, getPublicKey, getAddress, getSigner } from '@/lib/account'
 
 const ECPair = ECPairFactory(ecc)
 btcjs.initEccLib(ecc)
@@ -36,17 +36,16 @@ export interface SignPsbtOptions {
   toSignInputs?: UserToSignInput[]
 }
 
-export async function process(
+export async function process({ psbtHex, options }: {
   psbtHex: string,
   options?: { toSignInputs?: ToSignInput[]; autoFinalized: boolean }
-): Promise<Psbt> {
+}): Promise<string> {
   const networkType = await getNetwork()
   const pubkey = await getPublicKey('btc')
   const addressType = await getAddressType('btc')
-  const privateKey = await getPrivateKey('btc')
   const psbtNetwork = networkType === 'mainnet' ? networks.bitcoin : networks.testnet
 
-  const keyPair = ECPair.fromWIF(privateKey)
+  const keyPair = await getSigner('btc', addressType)
 
   if (!options) [
     options = { toSignInputs: undefined, autoFinalized: true }
@@ -78,7 +77,7 @@ export async function process(
 
   options?.toSignInputs.forEach((v) => {
     // psbt.signInput(v.index, keyPair)
-    psbt = psbt.signInput(v.index, keyPair)
+    psbt.signInput(v.index, keyPair, v.sighashTypes)
   })
 
   if (options.autoFinalized) {
@@ -88,7 +87,7 @@ export async function process(
     })
   }
 
-  return psbt
+  return psbt.toHex()
 }
 
 const formatOptionsToSignInputs = async (_psbt: string | Psbt, options?: SignPsbtOptions) => {
@@ -140,8 +139,6 @@ const formatOptionsToSignInputs = async (_psbt: string | Psbt, options?: SignPsb
         ? Psbt.fromHex(_psbt as string, { network: psbtNetwork })
         : (_psbt as Psbt);
     psbt.data.inputs.forEach((v, index) => {
-      console.log(`inputs v ${index}`, v);
-
       let script: any = null;
       let value = 0;
       if (v.witnessUtxo) {

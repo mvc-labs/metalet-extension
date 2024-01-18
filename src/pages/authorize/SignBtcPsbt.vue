@@ -1,21 +1,23 @@
 <script lang="ts" setup>
+import { ref } from 'vue'
 import { getNetwork } from '@/lib/network'
-import { getAddressType, getSigner } from '@/lib/account'
 import { Psbt, networks, address as btcAddress } from 'bitcoinjs-lib'
 import { CheckBadgeIcon, ChevronDoubleRightIcon, ChevronLeftIcon } from '@heroicons/vue/24/solid'
-import { computed, ref } from 'vue'
 
 import actions from '@/data/authorize-actions'
 import { prettifyTxId, prettifyBalance } from '@/lib/formatters'
 const action = actions.SignBTCPsbt
 
 const props = defineProps<{
-  params: string
+  params: {
+    psbtHex: string,
+    options: any
+  }
 }>()
 
 const isShowingDetails = ref(false)
 
-const psbtHex = props.params
+const psbtHex = props.params.psbtHex
 const inputs = ref<{ address: string, value: number }[]>([])
 const outputs = ref<{ address: string, value: number }[]>([])
 getNetwork().then(async networkType => {
@@ -28,15 +30,10 @@ getNetwork().then(async networkType => {
     }
     inputs.value.push({ address, value: inputData.witnessUtxo?.value || 0 })
   })
-  const addressType = await getAddressType('btc')
-  const signer = await getSigner('btc', addressType)
-  psbt.signAllInputs(signer).finalizeAllInputs()
-  const tx = psbt.extractTransaction()
-  console.log({ tx });
 
-  outputs.value = tx.outs.map((out) => ({
-    address: btcAddress.fromOutputScript(out.script),
+  outputs.value = psbt.txOutputs.map((out) => ({
     value: out.value,
+    address: out.address || '',
   }))
 })
 </script>
@@ -56,9 +53,6 @@ getNetwork().then(async networkType => {
 
     <!-- detail body -->
     <div class="py-4 grow">
-      <div class="label">Message</div>
-      <div class="value break-all">{{ `Sign PSBT` }}</div>
-
       <div class="label mt-4">PSBT Structure</div>
       <div class="grid grid-cols-11 items-center mt-1">
         <div class="col-span-5 bg-sky-50 border-2 border-sky-300 border-dashed py-2 px-1 rounded-lg">
