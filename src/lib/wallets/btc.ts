@@ -69,7 +69,7 @@ export class BtcWallet {
         const payInput = await createPayInput({ utxo, payment, addressType })
         psbt.addInput(payInput)
       }
-      const signer = await getSigner('btc', addressType)
+      const signer = await getSigner('btc')
       psbt.signAllInputs(signer).finalizeAllInputs()
       return psbt
     }
@@ -137,7 +137,7 @@ export class BtcWallet {
         const payInput = await createPayInput({ utxo, payment, addressType })
         psbt.addInput(payInput)
       }
-      const signer = await getSigner('btc', addressType)
+      const signer = await getSigner('btc')
       psbt.signAllInputs(signer).finalizeAllInputs()
       return psbt
     }
@@ -226,7 +226,7 @@ async function getPsbtAndSelectUtxos(recipient: string, amount: Decimal, feeRate
       }
     }
 
-    const signer = await getSigner('btc', addressType)
+    const signer = await getSigner('btc')
     psbt.signAllInputs(signer).finalizeAllInputs()
     return psbt
   }

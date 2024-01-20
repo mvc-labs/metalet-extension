@@ -112,6 +112,13 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
     })
 
     if (popupWindow.id) {
+      // To avoid repeating pop-ups of 'sign btc message'
+      chrome.tabs.query({ active: true }, async function (tabs) {
+        const tabIds = tabs.filter(
+          tab => tab.url?.includes('actionName=SignBTCMessage') && tab.url?.includes(`params=%22${msg.params}%22`))
+          .map(tab => tab.id as number)
+        chrome.tabs.remove(tabIds)
+      });
       // 给弹出窗口的关闭事件添加监听，如果用户关闭了弹窗，则返回取消
       browser.windows.onRemoved.addListener(async (windowId) => {
         if (windowId === popupWindow.id) {

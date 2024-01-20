@@ -16,7 +16,7 @@ import * as ConnectBTC from '../lib/actions/btc/connect'
 import * as SignBTCPsbt from '../lib/actions/btc/sign-psbt'
 import * as SignBTCMessage from '../lib/actions/btc/sign-message'
 
-function doNothing() {}
+function doNothing() { }
 
 type AuthorizeAction = {
   name: string
@@ -149,8 +149,8 @@ export default {
   },
   SignBTCMessage: {
     name: 'Sign BTC Message',
-    title: 'Sign BTC Message',
-    description: ['Sign BTC Message'],
+    title: 'Signature request',
+    description: 'Only sign this message if you fully understand the content and trust the requesting site.',
     process: SignBTCMessage.process,
     estimate: doNothing,
     closeAfterProcess: true,

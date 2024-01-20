@@ -223,7 +223,8 @@ export async function getPrivateKey(chain: Chain = 'mvc') {
   return derivePrivateKey({ mnemonic, chain, network, path })
 }
 
-export async function getSigner(chain: Chain = 'mvc', addressType: string) {
+export async function getSigner(chain: Chain = 'mvc') {
+  const addressType = await getAddressType(chain)
   if (addressType === 'P2TR') {
     const network = await getNetwork()
     const mnemonic = await getCurrentAccount().then((account) => account!.mnemonic)

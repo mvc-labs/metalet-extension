@@ -40,12 +40,12 @@ export async function process({ psbtHex, options }: {
   psbtHex: string,
   options?: { toSignInputs?: ToSignInput[]; autoFinalized: boolean }
 }): Promise<string> {
+  const keyPair = await getSigner('btc')
   const networkType = await getNetwork()
   const pubkey = await getPublicKey('btc')
   const addressType = await getAddressType('btc')
   const psbtNetwork = networkType === 'mainnet' ? networks.bitcoin : networks.testnet
 
-  const keyPair = await getSigner('btc', addressType)
 
   if (!options) [
     options = { toSignInputs: undefined, autoFinalized: true }
@@ -119,7 +119,6 @@ const formatOptionsToSignInputs = async (_psbt: string | Psbt, options?: SignPsb
       }
 
       const sighashTypes = input.sighashTypes?.map(Number);
-      console.log({ sighashTypes });
 
       if (sighashTypes?.some(isNaN)) throw new Error('invalid sighash type in toSignInput');
 

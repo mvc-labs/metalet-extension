@@ -22,13 +22,12 @@ import SignTransactions from './SignTransactions.vue'
 import Pay from './Pay.vue'
 import SignBTCPsbt from './SignBtcPsbt.vue'
 import SignMessage from './SignMessage.vue'
+import SignBTCMessage from './SignBTCMessage.vue'
 import Merge from './Merge.vue'
 
 // 从query中获取数据
 const route = useRoute()
 const { host, actionName, nonce, tabId, icon } = route.query
-console.log("route.query", route.query);
-console.log("route.params", route.params);
 
 const logo = computed(() => {
   type Host = keyof typeof logos
@@ -44,8 +43,6 @@ type ActionType = keyof typeof actions
 const action = actions[actionName as ActionType]
 
 const params: any = JSON.parse(route.query.params as string)
-console.log({ params });
-
 
 const exit = () => {
   if (!DEBUG) {
@@ -175,7 +172,7 @@ const cancelAction = async () => {
     <div class="my-4 grow self-stretch overflow-y-auto rounded-lg bg-gray-50 px-4 py-6 text-sm">
       <TransferToken v-if="actionName === 'TokenTransfer'" :params="params" />
       <Transfer v-if="actionName === 'Transfer'" :params="params" />
-      <Connect v-if="actionName === 'Connect'" />
+      <Connect v-if="actionName === 'Connect' || actionName === 'ConnectBTC'" />
       <Disconnect v-if="actionName === 'Disconnect'" />
       <Merge v-if="actionName === 'Merge'" />
       <SwitchNetwork v-if="actionName === 'SwitchNetwork'" />
@@ -186,6 +183,7 @@ const cancelAction = async () => {
       <Pay v-if="actionName === 'Pay'" :params="params" />
       <SignBTCPsbt v-if="actionName === 'SignBTCPsbt'" :params="params" />
       <SignMessage v-if="actionName === 'SignMessage'" :params="params" />
+      <SignBTCMessage v-if="actionName === 'SignBTCMessage'" :params="params" />
     </div>
 
     <!-- buttons -->
