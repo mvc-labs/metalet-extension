@@ -1,10 +1,8 @@
-import ECPairFactory from 'ecpair'
 import { getNetwork } from '@/lib/network'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import btcjs, { Psbt, payments, networks, Transaction } from 'bitcoinjs-lib'
-import { getPrivateKey, getAddressType, getPublicKey, getAddress, getSigner } from '@/lib/account'
+import { getAddressType, getPublicKey, getAddress, getSigner } from '@/lib/account'
 
-const ECPair = ECPairFactory(ecc)
 btcjs.initEccLib(ecc)
 
 const toXOnly = (pubKey: Buffer) => (pubKey.length === 32 ? pubKey : pubKey.slice(1, 33))

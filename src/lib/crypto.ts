@@ -5,6 +5,7 @@ import { getMvcRootPath, type Account } from './account'
 import { parseLocalTransaction } from './metadata'
 import { DERIVE_MAX_DEPTH, FEEB, P2PKH_UNLOCK_SIZE } from '@/data/config'
 import { MvcUtxo, fetchUtxos } from '@/queries/utxos'
+import CryptoJS from "crypto-js";
 
 export function eciesEncrypt(message: string, privateKey: mvc.PrivateKey): string {
   const publicKey = privateKey.toPublicKey()
@@ -499,4 +500,53 @@ function pickUtxo(utxos: SA_utxo[], amount: number) {
     }
   }
   return candidateUtxos
+}
+
+// 十六位十六进制数作为密钥
+const SECRET_KEY = CryptoJS.enc.Utf8.parse("metalet.wallet");
+// 十六位十六进制数作为密钥偏移量
+const SECRET_IV = CryptoJS.enc.Utf8.parse("metalet.wallet");
+
+/**
+ * encrypt
+ * @param data
+ * @returns {string}
+ */
+export function encrypt(data: any) {
+  if (typeof data === "object") {
+    try {
+      // eslint-disable-next-line no-param-reassign
+      data = JSON.stringify(data);
+    } catch (error) {
+      console.log("encrypt error:", error);
+    }
+  }
+  const dataHex = CryptoJS.enc.Utf8.parse(data);
+  const encrypted = CryptoJS.AES.encrypt(dataHex, SECRET_KEY, {
+    iv: SECRET_IV,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  });
+  return encrypted.ciphertext.toString();
+}
+
+/**
+ * 解密方法
+ * @param data
+ * @returns {string}
+ */
+export function decrypt(data: any) {
+  const encryptedHexStr = CryptoJS.enc.Hex.parse(data);
+
+  const str = CryptoJS.enc.Base64.stringify(encryptedHexStr);
+
+  const decrypt = CryptoJS.AES.decrypt(str, SECRET_KEY, {
+    iv: SECRET_IV,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  });
+
+  const decryptedStr = decrypt.toString(CryptoJS.enc.Utf8);
+
+  return decryptedStr.toString();
 }
