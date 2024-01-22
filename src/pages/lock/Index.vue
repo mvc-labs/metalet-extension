@@ -4,6 +4,7 @@ import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/solid'
 import passwordManager from '@/lib/password'
 import { useRouter } from 'vue-router'
+import { setLastLockTime } from '@/lib/lock'
 
 const router = useRouter()
 
@@ -18,6 +19,7 @@ const tryUnlock = async () => {
   if (isCorrect) {
     // 如果正确，解锁
     await passwordManager.unlock(password.value)
+    await setLastLockTime()
     // 跳转到钱包页面
     router.push('/wallet')
   } else {

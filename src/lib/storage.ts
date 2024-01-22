@@ -76,10 +76,10 @@ export async function getStorage(
 
   if (typeof value === 'string') {
     try {
-      if (option?.isParse === false) {
-        return value
+      if (option?.isParse === true) {
+        return JSON.parse(value)
       }
-      return JSON.parse(value)
+      return value
     } catch (e) {
       return value
     }
