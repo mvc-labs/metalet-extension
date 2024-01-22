@@ -4,6 +4,7 @@ import Wallet from './pages/wallet/Index.vue'
 import { getStorage, useStorage } from './lib/storage'
 import { getAccounts, getCurrentAccount, getLegacyAccounts, needsMigrationV2 } from './lib/account'
 import { IS_DEV } from '@/data/config'
+import { encrypt } from './lib/crypto'
 
 const routes = [
   { path: '/', redirect: '/wallet' },
@@ -99,7 +100,7 @@ const routes = [
   {
     path: '/wallet/send/:symbol/:address',
     component: () => import('./pages/wallet/Send.vue'),
-    name:'send',
+    name: 'send',
     meta: {
       secondaryHeader: true,
       headerTitle: 'Send',
@@ -326,7 +327,7 @@ router.beforeEach(async (to, from) => {
     // 比照查看有无该助记词的账号
     const accounts = await getAccounts()
     const accountsArr = Array.from(accounts.values())
-    const hasAccount = accountsArr.some((account) => account.mnemonic === mneStr)
+    const hasAccount = accountsArr.some((account) => account.mnemonic === encrypt(mneStr))
 
     if (!hasAccount && to.path !== '/migrate') {
       return '/migrate'

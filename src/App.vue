@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute ,useRouter} from 'vue-router'
 import { computed, Ref, inject } from 'vue'
+import passwordManager from '@/lib/password'
 import { API_NET, API_TARGET, Wallet } from 'meta-contract'
 // setup vue-query
 import { useQueryClient } from '@tanstack/vue-query'
@@ -15,6 +16,13 @@ import TheHeader from './components/headers/TheHeader.vue'
 import SecondaryHeader from './components/headers/SecondaryHeader.vue'
 
 const route = useRoute()
+const router = useRouter()
+
+// 查询有否设置密码
+passwordManager.has().then(hasPassword=>{
+  const following = hasPassword ? '/wallet' : '/wallet/set-password'
+  router.push(following)
+})
 
 const queryClient = useQueryClient()
 queryClient.setDefaultOptions({

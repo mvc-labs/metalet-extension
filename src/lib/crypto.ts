@@ -89,7 +89,7 @@ export const signTransaction = async (
   { txHex, scriptHex, inputIndex, satoshis, sigtype, path }: ToSignTransaction,
   returnsTransaction: boolean = false
 ) => {
-  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+  const mneObj = mvc.Mnemonic.fromString(encrypt(account.mnemonic))
   const hdpk = mneObj.toHDPrivateKey('', network)
   const rootPath = await getMvcRootPath()
   // find out priv / pub according to path
@@ -136,7 +136,7 @@ export const signTransactions = async (
   network: 'testnet' | 'mainnet',
   toSignTransactions: ToSignTransaction[]
 ) => {
-  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+  const mneObj = mvc.Mnemonic.fromString(encrypt(account.mnemonic))
   const hdpk = mneObj.toHDPrivateKey('', network)
   const rootPath = await getMvcRootPath()
 
@@ -502,10 +502,12 @@ function pickUtxo(utxos: SA_utxo[], amount: number) {
   return candidateUtxos
 }
 
+const str = "metalet".split('').map(char => char.charCodeAt(0)).join('')
+
 // 十六位十六进制数作为密钥
-const SECRET_KEY = CryptoJS.enc.Utf8.parse("metalet.wallet");
+const SECRET_KEY = CryptoJS.enc.Utf8.parse(str);
 // 十六位十六进制数作为密钥偏移量
-const SECRET_IV = CryptoJS.enc.Utf8.parse("metalet.wallet");
+const SECRET_IV = CryptoJS.enc.Utf8.parse(str);
 
 /**
  * encrypt

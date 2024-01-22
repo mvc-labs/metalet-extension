@@ -18,12 +18,7 @@ getCurrentAccount().then((acc) => {
 <template>
   <div class="-mt-4">
     <!-- Account Info -->
-    <AccountItem
-      :show-network="true"
-      v-if="currentAccount"
-      :account="currentAccount"
-      :current-account="currentAccount"
-    />
+    <AccountItem :show-network="true" v-if="currentAccount" :account="currentAccount" :current-account="currentAccount" />
 
     <Balance />
 
