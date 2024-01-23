@@ -306,14 +306,14 @@ const router = VueRouter.createRouter({
 })
 
 // 检查锁定状态；如果锁定，跳转到锁定页面
-router.beforeEach(async (to, from) => {
-  if (to.path !== '/lock') {
-    const locked = await getStorage('locked')
-    if (locked) {
-      return '/lock'
-    }
-  }
-})
+// router.beforeEach(async (to, from) => {
+//   if (to.path !== '/lock') {
+//     const locked = await getStorage('locked')
+//     if (locked) {
+//       return '/lock'
+//     }
+//   }
+// })
 
 // 检查账号状态；如果没有当前账号，跳转到账号页面
 router.beforeEach(async (to, from) => {
@@ -334,7 +334,7 @@ router.beforeEach(async (to, from) => {
     }
   }
 
-  if (await needsMigrationV2()) {
+  if (await needsMigrationV2() && await getStorage('needsMigration')) {
     if (to.path !== '/welcome') {
       return '/welcome'
     }

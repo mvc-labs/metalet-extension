@@ -142,6 +142,10 @@ export async function connectAccount(accountId: string) {
   return true
 }
 
+export async function setV2Accounts(accountsMap: Map<string, Account>): Promise<void> {
+  await setStorage(ACCOUNT_STORAGE_HISTORY_KEYS[1], serializeAccountMap(accountsMap))
+}
+
 export async function setAccounts(accountsMap: Map<string, Account>): Promise<void> {
   await setStorage(ACCOUNT_STORAGE_CURRENT_KEY, serializeAccountMap(accountsMap))
 }
@@ -382,7 +386,7 @@ export async function needsMigrationV2(): Promise<boolean> {
 }
 
 export async function getLegacyAccounts(): Promise<V1Account[]> {
-  const legacyAccounts = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
+  const legacyAccounts = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0], { isParse: true })
   if (!legacyAccounts) {
     return []
   }
@@ -456,7 +460,7 @@ export async function migrateV2(): Promise<void> {
   }
 
   // set new accounts map
-  await setAccounts(v2Accounts)
+  await setV2Accounts(v2Accounts)
 }
 
 export async function migrateV3(): Promise<void> {

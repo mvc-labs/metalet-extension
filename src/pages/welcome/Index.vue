@@ -2,10 +2,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { getAccounts, getCurrentAccount, migrateV2, needsMigrationV2 ,migrateV3} from '@/lib/account'
+import { getAccounts, getCurrentAccount, migrateV2, needsMigrationV2, migrateV3 } from '@/lib/account'
 import { sleep } from '@/lib/helpers'
 
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
+import { getStorage, setStorage } from '@/lib/storage'
 
 const router = useRouter()
 
@@ -20,6 +21,9 @@ getAccounts().then((accounts) => {
 
 const showingMigrationCover = ref(true)
 needsMigrationV2().then(async (needsMigration: boolean) => {
+  if(await getStorage('needsMigration')){
+    return
+  }
   if (!needsMigration) {
     showingMigrationCover.value = false
     return
@@ -27,9 +31,9 @@ needsMigrationV2().then(async (needsMigration: boolean) => {
 
   if (needsMigration) {
     showingMigrationCover.value = true
-
     await migrateV2()
     await migrateV3()
+    await setStorage("needsMigration", false)
     await sleep(1000)
 
     showingMigrationCover.value = false
@@ -68,11 +72,8 @@ needsMigrationV2().then(async (needsMigration: boolean) => {
     </div>
 
     <div class="flex flex-col items-stretch gap-y-4">
-      <button
-        class="gradient-bg rounded-md py-4 text-base leading-none text-white"
-        @click="() => $router.push('/accounts')"
-        v-if="accountsCount"
-      >
+      <button class="gradient-bg rounded-md py-4 text-base leading-none text-white"
+        @click="() => $router.push('/accounts')" v-if="accountsCount">
         Connect
       </button>
 
@@ -80,10 +81,8 @@ needsMigrationV2().then(async (needsMigration: boolean) => {
         Create Wallet
       </button>
 
-      <button
-        class="rounded-md border border-primary-blue py-4 text-base leading-none"
-        @click="router.push('/wallet/import')"
-      >
+      <button class="rounded-md border border-primary-blue py-4 text-base leading-none"
+        @click="router.push('/wallet/import')">
         Restore Wallet
       </button>
     </div>

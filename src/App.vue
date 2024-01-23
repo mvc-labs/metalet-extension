@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { computed, Ref, inject } from 'vue'
-import passwordManager from '@/lib/password'
 import { API_NET, API_TARGET, Wallet } from 'meta-contract'
 // setup vue-query
 import { useQueryClient } from '@tanstack/vue-query'
@@ -14,24 +13,8 @@ import BgHueImg from './assets/images/bg-hue.png?url'
 import TheFooter from './components/the-footer/Index.vue'
 import TheHeader from './components/headers/TheHeader.vue'
 import SecondaryHeader from './components/headers/SecondaryHeader.vue'
-import { getLastLockTime } from './lib/lock'
 
 const route = useRoute()
-const router = useRouter()
-
-// check password
-passwordManager.has().then(hasPassword => {
-  const following = hasPassword ? '/wallet' : '/wallet/set-password'
-  router.push(following)
-})
-
-// check lock time
-getLastLockTime().then(time => {
-  console.log({ time });
-  if (time === -1 || Date.now() - time > 1000 * 60 * 60) {
-    router.push('/lock')
-  }
-})
 
 const queryClient = useQueryClient()
 queryClient.setDefaultOptions({
