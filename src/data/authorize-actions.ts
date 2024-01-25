@@ -12,10 +12,11 @@ import * as SignMessage from '../lib/actions/sign-message'
 import * as Merge from '../lib/actions/merge'
 
 // BTC
+import * as ConnectBTC from '../lib/actions/btc/connect'
 import * as SignBTCPsbt from '../lib/actions/btc/sign-psbt'
 import * as SignBTCMessage from '../lib/actions/btc/sign-message'
 
-function doNothing() {}
+function doNothing() { }
 
 type AuthorizeAction = {
   name: string
@@ -103,6 +104,14 @@ export default {
     estimate: doNothing,
     closeAfterProcess: true,
   },
+  SignBTCPsbt: {
+    name: 'SignBTCPsbt',
+    title: 'Sign for Psbt',
+    description: ['Third party apps requests signing of the PSBT(s), and ask Metalet to sign for them.'],
+    process: SignBTCPsbt.process,
+    estimate: doNothing,
+    closeAfterProcess: true,
+  },
 
   EciesEncrypt: {
     name: 'ECIES Encrypt',
@@ -130,19 +139,19 @@ export default {
   },
 
   // BTC
-  SignBTCMessage: {
-    name: 'Sign BTC Message',
-    title: 'Sign BTC Message',
-    description: ['Sign BTC Message'],
-    process: SignBTCMessage.process,
+  ConnectBTC: {
+    name: 'Connect BTC',
+    title: 'Connect Account',
+    description: ['Connect Account'],
+    process: ConnectBTC.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },
-  SignBTCPsbt: {
-    name: 'Sign BTC Psbt',
-    title: 'Sign BTC Psbt',
-    description: ['Sign BTC Psbt'],
-    process: SignBTCPsbt.process,
+  SignBTCMessage: {
+    name: 'Sign BTC Message',
+    title: 'Signature request',
+    description: 'Only sign this message if you fully understand the content and trust the requesting site.',
+    process: SignBTCMessage.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },

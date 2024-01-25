@@ -2,18 +2,8 @@ import { ComputedRef, Ref } from 'vue'
 import { getNetwork } from '@/lib/network'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker } from '@/lib/asset-symbol'
-import { createApi, metaletApiV3, mvcApi, unisatApi } from './request'
-import { METASV_TESTNET_HOST } from '@/data/hosts'
-
-type TokenType = 'BRC20'
-
-interface Tick {
-  token: SymbolTicker
-  tokenType: TokenType
-  balance: string
-  availableBalance: string
-  transferBalance: string
-}
+import { metaletApiV3, mvcApi, unisatApi } from './request'
+import Decimal from 'decimal.js'
 
 export type Balance = {
   address: string
@@ -25,12 +15,8 @@ export type Balance = {
 }
 
 export const fetchSpaceBalance = async (address: string): Promise<Balance> => {
-  const network = await getNetwork()
-
-  const api = network === 'mainnet' ? mvcApi : createApi(METASV_TESTNET_HOST)
-  const balance = await api(`/address/${address}/balance`).get()
-
-  balance.total = balance.confirmed + balance.unconfirmed
+  const balance: any = await mvcApi(`/address/${address}/balance`).get()
+  balance.total = new Decimal(balance.confirmed).add(balance.unconfirmed).toNumber()
   return balance
 }
 
@@ -73,9 +59,9 @@ export const fetchBtcBalance = async (address: string): Promise<Balance> => {
   const data = await metaletApiV3<BTCBalance>(`/address/btc-balance`).get({ address })
   return {
     address,
-    total: data.balance * 10 ** 8,
-    confirmed: data.block.incomeFee * 10 ** 8,
-    unconfirmed: data.mempool.incomeFee * 10 ** 8,
+    total: new Decimal(data.balance).mul(1e8).toNumber(),
+    confirmed: new Decimal(data.block.incomeFee).mul(1e8).toNumber(),
+    unconfirmed: new Decimal(data.mempool.incomeFee).mul(1e8).toNumber(),
   }
 }
 

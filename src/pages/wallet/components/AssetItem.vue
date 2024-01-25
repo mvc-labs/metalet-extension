@@ -27,9 +27,7 @@ const {
   error: balanceError,
 } = useBalanceQuery(ref(address), ref(asset.symbol), { enabled: balaceEnabled })
 
-const rateEnabled = computed(
-  () => !!address && !!asset.symbol && !(asset?.contract && ['BRC-20'].includes(asset.contract))
-)
+const rateEnabled = computed(() => !!address && !!asset.symbol)
 const {
   isLoading: isExchangeRateLoading,
   data: exchangeRate,
@@ -41,13 +39,13 @@ const {
 const exchange = computed(() => {
   if (asset?.balance) {
     const usdRate = new Decimal(exchangeRate.value?.price || 0)
-    const balanceInStandardUnit = new Decimal(asset.balance?.total || 0)
+    const balanceInStandardUnit = new Decimal(asset.balance?.total || 0).dividedBy(10 ** asset.decimal)
     const exchanged = usdRate.mul(balanceInStandardUnit)
     updateAsset({ name: asset.symbol, value: exchanged.toNumber() })
     return `$${exchanged.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
   } else if (balance.value && exchangeRate.value) {
     const usdRate = new Decimal(exchangeRate.value?.price || 0)
-    const balanceInStandardUnit = new Decimal(balance.value.total).dividedBy(1e8)
+    const balanceInStandardUnit = new Decimal(balance.value.total).dividedBy(10 ** asset.decimal)
     const exchanged = usdRate.mul(balanceInStandardUnit)
     updateAsset({ name: asset.symbol, value: exchanged.toNumber() })
     return `$${exchanged.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
@@ -67,11 +65,8 @@ const exchange = computed(() => {
           {{ asset.symbol[0].toLocaleUpperCase() }}
         </div>
         <div class="flex flex-col gap-y-1 items-start">
-          <div
-            :title="asset.tokenName"
-            :class="[asset.isNative ? 'text-lg' : 'text-sm', 'flex items-center gap-x-0.5']"
-          >
-            {{ asset.tokenName }}
+          <div :title="asset.tokenName" class="flex items-center gap-x-0.5 text-base">
+            <span class="font-bold max-w-[100px] truncate overflow-hidden">{{ asset.tokenName }}</span>
             <CheckBadgeIcon
               class="h-4 w-4 shrink-0 text-blue-500"
               v-if="asset?.genesis && isOfficialToken(asset.genesis)"
@@ -91,17 +86,24 @@ const exchange = computed(() => {
       <div class="flex grow overflow-hidden flex-col items-end text-xs gap-y-1">
         <template v-if="asset.queryable">
           <!-- balance info -->
-          <div v-if="asset.balance" class="text-[#141416] font-bold w-full text-right">
+          <div v-if="asset.balance" class="w-full text-right">
             <div v-if="asset.contract === 'BRC-20'" class="w-full border-b border-[#D8D8D8] border-dashed pb-3">
-              {{ prettifyTokenBalance(asset.balance.total, asset.decimal, false, asset.symbol) }}
+              <div class="text-[#141416] font-bold text-base">
+                {{ prettifyTokenBalance(asset.balance.total, asset.decimal, false, asset.symbol) }}
+              </div>
+
+              <!-- BRC-20 USD -->
+              <div class="text-sm font-normal text-gray-500" v-if="isExchangeRateLoading">--</div>
+              <div class="text-sm font-normal text-gray-500" v-else-if="exchange">{{ exchange }}</div>
             </div>
-            <span v-else-if="asset.contract === 'MetaContract'">
-              {{ prettifyTokenBalance(asset.balance.total, asset.decimal, true) }}
+            <span v-else-if="asset.contract === 'MetaContract'" class="text-[#141416] font-bold text-base">
+              ≈ {{ (asset.balance.total / 10 ** asset.decimal).toFixed(2) }} {{ asset.symbol }}
+              <!-- {{ prettifyTokenBalance(asset.balance.total, asset.decimal, true) }} -->
             </span>
             <span v-else> {{ asset.balance.total }} {{ asset.symbol }} </span>
           </div>
           <div v-else-if="isLoading">--</div>
-          <div v-else-if="balance" class="text-[#141416] font-bold">
+          <div v-else-if="balance" class="text-[#141416] font-bold text-base">
             <span v-if="asset.isNative">
               {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
             </span>
@@ -109,9 +111,9 @@ const exchange = computed(() => {
               {{ prettifyTokenBalance(balance.total, asset.decimal, true) }}
             </span>
           </div>
-          <div v-else-if="balanceError" class="text-xs text-red-500 truncate max-w-full">{{ balanceError }}</div>
+          <!-- <div v-else-if="balanceError" class="text-xs text-red-500 truncate max-w-full">{{ balanceError }}</div> -->
 
-          <!-- brc info -->
+          <!-- BRC-20 info -->
           <div v-if="asset?.contract === 'BRC-20'" class="w-full mt-2.5 space-y-2">
             <div class="text-xs flex items-center justify-between w-full">
               <span class="text-[#909399]">Transferable:</span>
@@ -128,9 +130,9 @@ const exchange = computed(() => {
           </div>
 
           <!-- USD info -->
-          <div v-if="!asset?.contract">
-            <div class="text-xs text-gray-500" v-if="isExchangeRateLoading">--</div>
-            <div class="text-xs text-gray-500" v-else-if="exchange">{{ exchange }}</div>
+          <div v-if="!(asset?.contract === 'BRC-20')">
+            <div class="text-sm text-gray-500" v-if="isExchangeRateLoading">--</div>
+            <div class="text-sm text-gray-500" v-else-if="exchange">{{ exchange }}</div>
             <!-- <div v-else-if="exchangeError" class="text-xs text-red-500 truncate max-w-full">{{ exchangeError }}</div> -->
           </div>
         </template>

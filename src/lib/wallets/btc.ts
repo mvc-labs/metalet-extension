@@ -32,7 +32,6 @@ export class BtcWallet {
     const payment = await createPayment(addressType)
     const utxos = ((await getBtcUtxos(address)) || [])
       .filter((btcUtxo) => btcUtxo.txId !== utxo.txId)
-      .filter((btcUtxo) => btcUtxo.txId !== 'aec4e375b23cb532c42be593c5c83a391688c0a584e42d4a85c4193b40590096')
 
     if (!utxos.length) {
       throw new Error('your account currently has no available UTXO.')
@@ -70,7 +69,7 @@ export class BtcWallet {
         const payInput = await createPayInput({ utxo, payment, addressType })
         psbt.addInput(payInput)
       }
-      const signer = await getSigner('btc', addressType)
+      const signer = await getSigner('btc')
       psbt.signAllInputs(signer).finalizeAllInputs()
       return psbt
     }
@@ -138,7 +137,7 @@ export class BtcWallet {
         const payInput = await createPayInput({ utxo, payment, addressType })
         psbt.addInput(payInput)
       }
-      const signer = await getSigner('btc', addressType)
+      const signer = await getSigner('btc')
       psbt.signAllInputs(signer).finalizeAllInputs()
       return psbt
     }
@@ -227,7 +226,7 @@ async function getPsbtAndSelectUtxos(recipient: string, amount: Decimal, feeRate
       }
     }
 
-    const signer = await getSigner('btc', addressType)
+    const signer = await getSigner('btc')
     psbt.signAllInputs(signer).finalizeAllInputs()
     return psbt
   }

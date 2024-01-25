@@ -2,7 +2,7 @@ import actions from './data/query-actions'
 import exActions from './data/extension-actions'
 import { NOTIFICATION_HEIGHT, NOTIFICATION_WIDTH } from './data/config'
 import connector from './lib/connector'
-import { getCurrentAccount } from './lib/account'
+import { getAddress, getCurrentAccount } from './lib/account'
 import { isLocked } from './lib/password'
 import { sleep } from './lib/helpers'
 import browser from 'webextension-polyfill'
@@ -14,7 +14,7 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
     return await exActions[msg.fn](...msg.args)
   }
 
-  const actionName = msg.action.replace('authorize-', '').replace('query-', '').replace('event-', '')
+  const actionName = msg.action.replace('authorize-', '').replace('query-', '').replace('event-', '').replace('inscribe-', '')
   if (msg.action?.startsWith('query') && actionName === 'Ping') {
     const response = {
       nonce: msg.nonce,
@@ -35,7 +35,7 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
     failedStatus = 'locked'
   } else if (!account || !account.id) {
     failedStatus = 'not-logged-in'
-  } else if (!(await connector.isConnected(account.id, msg.host)) && !['Connect', 'IsConnected'].includes(actionName)) {
+  } else if (!(await connector.isConnected(account.id, msg.host)) && !['Connect', 'IsConnected', 'ConnectBTC'].includes(actionName)) {
     failedStatus = 'not-connected'
   }
 
@@ -51,6 +51,29 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
     }
 
     return response
+  }
+
+  if (msg.action?.startsWith('inscribe')) {
+    if (actionName === 'InscribeTransfer') {
+      const rawUrl = 'popup.html#/wallet/inscribe'
+      let popupUrl = browser.runtime.getURL(rawUrl)
+      const address = await getAddress('btc')
+      popupUrl += `/${msg.params}/${address}`
+      let top = 0
+      let left = 0
+      const lastFocused = await browser.windows.getLastFocused()
+      top = lastFocused.top!
+      left = lastFocused.left! + lastFocused.width! - NOTIFICATION_WIDTH
+      const popupWindow = await browser.windows.create({
+        url: popupUrl,
+        type: 'popup',
+        width: NOTIFICATION_WIDTH,
+        height: NOTIFICATION_HEIGHT,
+        top,
+        left,
+      })
+    }
+    return
   }
 
   // authorize actions
@@ -72,6 +95,17 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
 
     let popupUrl = browser.runtime.getURL(rawUrl)
     popupUrl += `?${params.toString()}`
+
+
+    // To avoid repeating pop-ups of 'sign btc message'
+    let isClose = false
+    const tabs = await browser.tabs.query({ active: true })
+    tabs.forEach(tab => {
+      isClose = (tab.url?.includes('actionName=SignBTCMessage') || false) && (tab.url?.includes(`params=%22${msg.params}%22`) || false)
+    });
+    if (isClose) {
+      return
+    }
 
     let top = 0
     let left = 0
@@ -120,7 +154,6 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
 
   // query actions
   if (msg.action?.startsWith('query')) {
-    console.log(msg.action)
     // call corresponding process function
     const action = actions[actionName]
     if (action) {
