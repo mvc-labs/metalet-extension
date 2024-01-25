@@ -2,7 +2,7 @@ import { mvc } from 'meta-contract'
 
 import { notifyContent } from '@/lib/notify-content'
 import { getNetwork } from './network'
-import { decrypt, encrypt, signMessage } from './crypto'
+import { signMessage } from './crypto'
 import { fetchUtxos } from '../queries/utxos'
 import { getStorage, setStorage } from './storage'
 import { generateRandomString, raise } from './helpers'
@@ -18,11 +18,11 @@ import {
   deriveBtcPrivateKey,
 } from './bip32-deriver'
 import { crypto } from 'bitcoinjs-lib'
+import { DEBUG } from '@/data/config'
 
 const CURRENT_ACCOUNT_ID = 'currentAccountId'
-// const ACCOUNT_STORAGE_CURRENT_KEY = 'accounts_v2'
-const ACCOUNT_STORAGE_CURRENT_KEY = 'accounts_v3'
-const ACCOUNT_STORAGE_HISTORY_KEYS = ['accounts', 'accounts_v2']
+const ACCOUNT_STORAGE_CURRENT_KEY = 'accounts_v2'
+const ACCOUNT_STORAGE_HISTORY_KEYS = ['accounts']
 
 // TODO put in types.ts
 export type Chain = 'btc' | 'mvc'
@@ -156,15 +156,13 @@ export async function addAccount(newAccount: Omit<Account, 'id' | 'name'>) {
   const accounts = await getAccounts()
 
   const { mnemonic } = newAccount
-  const encryptedMnemonic = encrypt(mnemonic)
   let id: string
-  let account = [...accounts.values()].find((account) => account.mnemonic === encryptedMnemonic)
+  let account = [...accounts.values()].find((account) => account.mnemonic === mnemonic)
 
   if (!account) {
     id = generateRandomString(32)
     await setAccount({
       ...newAccount,
-      mnemonic: encryptedMnemonic,
       id,
       name: `Account ${accounts.size + 1}`,
     })
@@ -197,7 +195,7 @@ export async function getAddress(chain: Chain = 'mvc', path?: string): Promise<s
     const rootPath = await getMvcRootPath()
     const concatPath = `${rootPath}/${path}`
 
-    const mneObj = mvc.Mnemonic.fromString(decrypt(account!.mnemonic))
+    const mneObj = mvc.Mnemonic.fromString(account!.mnemonic)
     const hdpk = mneObj.toHDPrivateKey('', network)
     const privateKey = hdpk.deriveChild(concatPath).privateKey
 
@@ -219,7 +217,7 @@ export async function getMvcRootPath(): Promise<string> {
 
 export async function getPrivateKey(chain: Chain = 'mvc') {
   const network = await getNetwork()
-  const mnemonic = await getCurrentAccount().then((account) => decrypt(account!.mnemonic))
+  const mnemonic = await getCurrentAccount().then((account) => account!.mnemonic)
   const path = await getAccountProperty(chain, 'path')
 
   return derivePrivateKey({ mnemonic, chain, network, path })
@@ -229,7 +227,7 @@ export async function getSigner(chain: Chain = 'mvc') {
   const addressType = await getAddressType(chain)
   if (addressType === 'P2TR') {
     const network = await getNetwork()
-    const mnemonic = await getCurrentAccount().then((account) => decrypt(account!.mnemonic))
+    const mnemonic = await getCurrentAccount().then((account) => account!.mnemonic)
     const path = await getAccountProperty(chain, 'path')
     const node = deriveBtcPrivateKey(mnemonic, path, network)
     const nodeXOnlyPubkey = node.publicKey.subarray(1)
@@ -268,7 +266,7 @@ export async function getCredential(
 
 export async function getPublicKey(chain: Chain = 'mvc', path?: string): Promise<string> {
   const network = await getNetwork()
-  const mnemonic = await getCurrentAccount().then((account) => decrypt(account!.mnemonic))
+  const mnemonic = await getCurrentAccount().then((account) => account!.mnemonic)
 
   if (!path) {
     const fullPath = await getAccountProperty(chain, 'path')
@@ -298,7 +296,7 @@ export async function getXPublicKey() {
   }
 
   const network = await getNetwork()
-  const mneObj = mvc.Mnemonic.fromString(decrypt(account!.mnemonic))
+  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
   const rootPath = await getMvcRootPath()
   const xPublicKey = mneObj.toHDPrivateKey('', network).deriveChild(rootPath).xpubkey.toString()
 
@@ -353,7 +351,7 @@ export async function updateBtcPath(path: string) {
   }
 
   // derive new address
-  const mnemonic = decrypt(account!.mnemonic)
+  const mnemonic = account.mnemonic
   const mainnetAddress = deriveAddress({ mnemonic, chain: 'btc', network: 'mainnet', path })
   const testnetAddress = deriveAddress({ mnemonic, chain: 'btc', network: 'testnet', path })
   account.btc = {
@@ -368,17 +366,13 @@ export async function updateBtcPath(path: string) {
 
 export async function needsMigrationV2(): Promise<boolean> {
   const v1Records = await getLegacyAccounts()
-  const v2Records = await getV2Accounts()
-  const v3Records = await getAccounts()
+  const v2Records = await getAccounts()
 
   // find out if there are any old records that exists in v1 but not in v2, judged by mnemonic
   const v1Mnemonics = v1Records.map((record) => record.mnemonic)
   const v2Mnemonics = Array.from(v2Records.values()).map((record) => record.mnemonic)
-  const v3Mnemonics = Array.from(v3Records.values()).map((record) => record.mnemonic)
 
-  return v1Mnemonics.some((mne) => !v2Mnemonics.includes(mne)) ||
-    v1Mnemonics.some((mne) => !v3Mnemonics.includes(encrypt(mne))) ||
-    v2Mnemonics.some((mne) => !v3Mnemonics.includes(encrypt(mne)))
+  return v1Mnemonics.some((mne) => !v2Mnemonics.includes(mne))
 }
 
 export async function getLegacyAccounts(): Promise<V1Account[]> {
@@ -388,15 +382,6 @@ export async function getLegacyAccounts(): Promise<V1Account[]> {
   }
 
   return Object.values(legacyAccounts)
-}
-
-export async function getV2Accounts(): Promise<Map<string, Account>> {
-  const v2Accounts = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[1], { defaultValue: '{}', isParse: false })
-  if (!v2Accounts) {
-    return new Map()
-  }
-
-  return deserializeAccountMap(v2Accounts)
 }
 
 export async function migrateV2(): Promise<void> {
@@ -459,19 +444,6 @@ export async function migrateV2(): Promise<void> {
   await setAccounts(v2Accounts)
 }
 
-export async function migrateV3(): Promise<void> {
-  const accounts = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[1], { defaultValue: '{}', isParse: false })
-
-  const accountsMap = deserializeAccountMap(accounts)
-  for (let [v3AccountId, v3Account] of accountsMap.entries()) {
-    // encryte mnemonic
-    v3Account.mnemonic = encrypt(v3Account.mnemonic)
-    accountsMap.set(v3AccountId, v3Account)
-  }
-  // set new accounts map
-  await setAccounts(accountsMap)
-}
-
 type AccountManager = {
   all: () => Promise<Map<string, Account>>
   getCurrent: () => Promise<Account | null>
@@ -502,3 +474,61 @@ accountManager.removeCurrent = removeCurrentAccount
 accountManager.updateName = updateName
 
 export default accountManager
+
+// Class
+class AccountCls {
+  mnemonic: string
+  constructor(mnemonic: string) {
+    this.mnemonic = mnemonic
+  }
+
+  async getAddress({ path }: { path?: string }) {
+    const network = await getNetwork()
+    const mneObj = mvc.Mnemonic.fromString(this.mnemonic)
+    const hdpk = mneObj.toHDPrivateKey('', network)
+    if (!(path && path.length)) {
+      const privateKey = hdpk.deriveChild(`m/44'/0'/0'/0/0`).privateKey
+      return privateKey.toAddress(network).toString()
+    }
+
+    // 根据路径导出
+    try {
+      const privateKey = hdpk.deriveChild(`m/44'/0'/0'/${path}`).privateKey
+      return privateKey.toAddress(network).toString()
+    } catch (e: any) {
+      return {
+        message: e.message,
+        status: 'failed',
+      }
+    }
+  }
+
+  async getPublicKey({ path }: { path?: string }) {
+    const network = await getNetwork()
+    const mneObj = mvc.Mnemonic.fromString(this.mnemonic)
+    const hdpk = mneObj.toHDPrivateKey('', network)
+    if (!(path && path.length)) {
+      const privateKey = hdpk.deriveChild(`m/44'/0'/0'/0/0`).privateKey
+      return privateKey.toPublicKey().toString()
+    }
+
+    // 根据路径导出
+    try {
+      const privateKey = hdpk.deriveChild(`m/44'/0'/0'/${path}`).privateKey
+      return privateKey.toPublicKey().toString()
+    } catch (e: any) {
+      return {
+        message: e.message,
+        status: 'failed',
+      }
+    }
+  }
+
+  async getXPublicKey() {
+    const network = await getNetwork()
+    const mneObj = mvc.Mnemonic.fromString(this.mnemonic)
+    const xPublicKey = mneObj.toHDPrivateKey('', network).xpubkey.toString()
+
+    return xPublicKey
+  }
+}
