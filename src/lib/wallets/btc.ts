@@ -13,7 +13,7 @@ import { Account, getCurrentAccount, getAddressType, getAddress, getSigner } fro
 export class BtcWallet {
   private account?: Account = undefined
 
-  constructor() {}
+  constructor() { }
 
   static async create() {
     const wallet = new BtcWallet()
@@ -222,7 +222,7 @@ async function getPsbtAndSelectUtxos(recipient: string, amount: Decimal, feeRate
         const payInput = await createPayInput({ utxo, payment, addressType })
         psbt.addInput(payInput)
       } catch (e: any) {
-        console.log(e)
+        throw new Error(e.message)
       }
     }
 

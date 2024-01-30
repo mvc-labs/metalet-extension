@@ -1,7 +1,7 @@
 import { Ref, ComputedRef } from 'vue'
 import { getNetwork } from '@/lib/network'
 import { useQuery } from '@tanstack/vue-query'
-import { metaletApiV2, metaletApiV3 } from './request'
+import { metaletApiV3 } from './request'
 import { Buffer } from 'buffer'
 
 export interface PreInscribe {
@@ -96,7 +96,10 @@ export async function getBRCInscriptions(
   cursor = 0,
   size = 10
 ): Promise<{ list: Inscription[]; total: number }> {
-  return await metaletApiV2<{ list: Inscription[]; total: number }>('/address/inscriptions').get({
+  const network = await getNetwork()
+  const net = network === 'mainnet' ? 'livenet' : network
+  return await metaletApiV3<{ list: Inscription[]; total: number }>('/address/inscriptions').get({
+    net,
     address,
     cursor: `${cursor}`,
     size: `${size}`,

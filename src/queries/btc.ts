@@ -2,7 +2,8 @@ import dayjs from 'dayjs'
 import { Ref, ComputedRef } from 'vue'
 import { fetchBRC20Token } from './brc20s'
 import { useQuery } from '@tanstack/vue-query'
-import { ordersApi, metaletApiV2 } from '@/queries/request'
+import { ordersApi, metaletApiV3 } from '@/queries/request'
+import { getNetwork } from '@/lib/network'
 
 interface Tick {
   token: string
@@ -102,7 +103,10 @@ export interface AddressTokenSummary {
 }
 
 export async function fetchBRC20TokenDetail(address: string, ticker: string): Promise<AddressTokenSummary> {
-  return await metaletApiV2<AddressTokenSummary>('/brc20/token-summary').get({
+  const network = await getNetwork()
+  const net = network === 'mainnet' ? 'livenet' : network
+  return await metaletApiV3<AddressTokenSummary>('/brc20/token-summary').get({
+    net,
     address,
     ticker: encodeURIComponent(ticker),
   })

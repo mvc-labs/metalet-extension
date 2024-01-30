@@ -1,5 +1,6 @@
 import { Chain } from '@/lib/account'
-import { mvcApi, metaletApiV2, mempoolApi, metaletApiV3 } from './request'
+import { mvcApi, mempoolApi, metaletApiV3 } from './request'
+import { getNetwork } from '@/lib/network'
 
 export interface UTXO {
   txId: string
@@ -7,11 +8,11 @@ export interface UTXO {
   satoshi: number
   confirmed: boolean
   inscriptions:
-    | {
-        id: string
-        num: number
-      }[]
-    | null
+  | {
+    id: string
+    num: number
+  }[]
+  | null
 }
 
 export type MvcUtxo = {
@@ -78,7 +79,9 @@ function formatUnisatUTXO(utxo: UnisatUTXO & { confirmed: boolean }): UTXO {
 }
 
 export async function getBtcUtxos(address: string): Promise<UTXO[]> {
-  return metaletApiV3<UTXO[]>('/address/btc-utxo').get({ address, unconfirmed: '1' })
+  const network = await getNetwork()
+  const net = network === 'mainnet' ? 'livenet' : network
+  return metaletApiV3<UTXO[]>('/address/btc-utxo').get({ net, address, unconfirmed: '1' })
 }
 
 // export async function getInscriptionUtxos(inscriptions: Inscription[]): Promise<UTXO[]> {
@@ -93,9 +96,10 @@ export async function getBtcUtxos(address: string): Promise<UTXO[]> {
 //   return utxos.map((utxo) => formatUnisatUTXO(utxo))
 // }
 
-export async function getInscriptionUtxo(inscriptionId: string, confirmed = false): Promise<UTXO> {
-  const utxo = await metaletApiV2<UnisatUTXO>('/inscription/utxo').get({ inscriptionId })
-  return formatUnisatUTXO({ ...utxo, confirmed })
+export async function getInscriptionUtxo(inscriptionId: string): Promise<UTXO> {
+  const network = await getNetwork()
+  const net = network === 'mainnet' ? 'livenet' : network
+  return await metaletApiV3<UTXO>('/inscription/utxo').get({ net, inscriptionId })
 }
 
 export interface MempoolUtxo {

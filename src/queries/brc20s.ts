@@ -2,19 +2,12 @@ import { PageResult } from './types'
 import { type Asset } from '@/data/assets'
 import { getBRC20Logo } from '@/data/logos'
 import { SymbolTicker } from '@/lib/asset-symbol'
-import { metaletApiV3, metaletApiV2 } from './request'
+import { metaletApiV3 } from './request'
+import { getNetwork } from '@/lib/network'
 
 export type Brc20 = {
   symbol: SymbolTicker
   balance: string
-  availableBalance: string
-  transferBalance: string
-}
-
-type RawBrc20 = {
-  token: SymbolTicker
-  balance: string
-  tokenType: 'BRC20'
   availableBalance: string
   transferBalance: string
 }
@@ -45,7 +38,9 @@ interface TickerInfo {
 }
 
 export const getTickerInfo = async (tick: string): Promise<TickerInfo> => {
-  return await metaletApiV3<TickerInfo>(`/brc20/tick/info`).get({ tick })
+  const network = await getNetwork()
+  const net = network === 'mainnet' ? 'livenet' : network
+  return await metaletApiV3<TickerInfo>(`/brc20/tick/info`).get({ net, tick })
 }
 
 interface TokenBalance {
@@ -59,8 +54,10 @@ interface TokenBalance {
 }
 
 export const fetchBRC20Token = async (address: string): Promise<Asset[]> => {
+  const network = await getNetwork()
+  const net = network === 'mainnet' ? 'livenet' : network
   return (
-    await metaletApiV2<PageResult<TokenBalance>>(`/brc20/tokens`).get({ address, cursor: '0', size: '100000' })
+    await metaletApiV3<PageResult<TokenBalance>>(`/brc20/tokens`).get({ net, address, cursor: '0', size: '100000' })
   ).list.map(
     (token) =>
       ({
