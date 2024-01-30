@@ -236,6 +236,16 @@ const routes = [
     },
   },
   {
+    name: 'metaPinDetail',
+    path: '/nft/metaPin/detail',
+    component: () => import('./pages/nfts/MetaPinDetail.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: '',
+      noFooter: true,
+    },
+  },
+  {
     path: '/nfts/transfer-nft/:codehash/:genesis/:tokenIndex',
     component: () => import('./pages/nfts/Transfer.vue'),
     name: 'transfer-nft',
