@@ -11,7 +11,7 @@ const connector = {} as Connector
 
 connector.connect = async function (accountId, host) {
   const connections = await storage.get('connections', {
-    defaultValue: {},
+    defaultValue: {}, isParse: true
   })
   const accountConnections = connections[accountId] || {}
   accountConnections[host] = {
@@ -26,14 +26,14 @@ connector.connect = async function (accountId, host) {
 }
 
 connector.isConnected = async function (accountId, host) {
-  const connections = await storage.get('connections', { defaultValue: {} })
+  const connections = await storage.get('connections', { defaultValue: {}, isParse: true })
   const accountConnections = connections[accountId] || {}
 
   return accountConnections[host] !== undefined
 }
 
 connector.disconnect = async function (accountId, host) {
-  const connections = await storage.get('connections', { defaultValue: {} })
+  const connections = await storage.get('connections', { defaultValue: {}, isParse: true })
   const accountConnections = connections[accountId] || {}
 
   delete accountConnections[host]
@@ -45,7 +45,7 @@ connector.disconnect = async function (accountId, host) {
 }
 
 connector.registerListen = async function (accountId, host) {
-  const listens = await storage.get('listens', { defaultValue: {}, useSession: true })
+  const listens = await storage.get('listens', { defaultValue: {}, isParse: true, useSession: true })
   const accountListens = listens[accountId] || {}
   accountListens[host] = true
 
