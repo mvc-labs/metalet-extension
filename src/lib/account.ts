@@ -223,14 +223,17 @@ export async function getPrivateKey(chain: Chain = 'mvc') {
   return derivePrivateKey({ mnemonic, chain, network, path })
 }
 
-export async function getSigner(chain: Chain = 'mvc') {
+export async function getSigner(chain: Chain = 'mvc', treehash?: string) {
   const addressType = await getAddressType(chain)
   if (addressType === 'P2TR') {
     const network = await getNetwork()
     const mnemonic = await getCurrentAccount().then((account) => account!.mnemonic)
     const path = await getAccountProperty(chain, 'path')
     const node = deriveBtcPrivateKey(mnemonic, path, network)
-    const nodeXOnlyPubkey = node.publicKey.subarray(1)
+    let nodeXOnlyPubkey = node.publicKey.subarray(1)
+    if (treehash) {
+      nodeXOnlyPubkey = Buffer.concat([nodeXOnlyPubkey, Buffer.from(treehash)])
+    }
     return node.tweak(crypto.taggedHash('TapTweak', nodeXOnlyPubkey))
   }
   const privateKey = await getPrivateKey(chain)

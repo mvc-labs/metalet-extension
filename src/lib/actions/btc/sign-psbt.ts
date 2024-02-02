@@ -1,8 +1,8 @@
 import ECPairFactory from 'ecpair'
-import { getNetwork } from '@/lib/network'
+import { getBtcNetwork, getNetwork } from '@/lib/network'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import btcjs, { Psbt, payments, networks, Transaction } from 'bitcoinjs-lib'
-import { getPrivateKey, getAddressType, getPublicKey, getAddress, getSigner } from '@/lib/account'
+import { getAddressType, getPublicKey, getAddress, getSigner } from '@/lib/account'
 
 const ECPair = ECPairFactory(ecc)
 btcjs.initEccLib(ecc)
@@ -13,6 +13,7 @@ export interface ToSignInput {
   index: number
   publicKey: string
   sighashTypes?: number[]
+  treehash?: string
 }
 
 interface BaseUserToSignInput {
@@ -40,12 +41,8 @@ export async function process({ psbtHex, options }: {
   psbtHex: string,
   options?: { toSignInputs?: ToSignInput[]; autoFinalized: boolean }
 }): Promise<string> {
-  const keyPair = await getSigner('btc')
-  const networkType = await getNetwork()
-  const pubkey = await getPublicKey('btc')
+  const psbtNetwork = await getBtcNetwork()
   const addressType = await getAddressType('btc')
-  const psbtNetwork = networkType === 'mainnet' ? networks.bitcoin : networks.testnet
-
 
   if (!options) [
     options = { toSignInputs: undefined, autoFinalized: true }
@@ -56,7 +53,7 @@ export async function process({ psbtHex, options }: {
     if (options.autoFinalized !== false) options.autoFinalized = true
   }
 
-  let psbt = Psbt.fromHex(psbtHex, { network: psbtNetwork })
+  const psbt = Psbt.fromHex(psbtHex, { network: psbtNetwork })
 
   psbt.data.inputs.forEach((v, index) => {
     const isNotSigned = !(v.finalScriptSig || v.finalScriptWitness);
@@ -64,7 +61,7 @@ export async function process({ psbtHex, options }: {
     const lostInternalPubkey = !v.tapInternalKey;
     // Special measures taken for compatibility with certain applications.
     if (isNotSigned && isP2TR && lostInternalPubkey) {
-      const tapInternalKey = toXOnly(Buffer.from(pubkey, 'hex'));
+      const tapInternalKey = toXOnly(Buffer.from(options!.toSignInputs![index].publicKey, 'hex'));
       const { output } = payments.p2tr({
         internalPubkey: tapInternalKey,
         network: psbtNetwork
@@ -75,14 +72,13 @@ export async function process({ psbtHex, options }: {
     }
   })
 
-  options?.toSignInputs.forEach((v) => {
-    // psbt.signInput(v.index, keyPair)
+  options.toSignInputs.forEach(async (v, index) => {
+    const keyPair = await getSigner('btc', options!.toSignInputs![index].treehash)
     psbt.signInput(v.index, keyPair, v.sighashTypes)
   })
 
   if (options.autoFinalized) {
     options.toSignInputs.forEach((v) => {
-      // psbt.validateSignaturesOfInput(v.index, validator);
       psbt.finalizeInput(v.index)
     })
   }
