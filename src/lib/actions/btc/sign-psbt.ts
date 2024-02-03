@@ -76,10 +76,15 @@ export async function process({
     }
   })
 
-  options.toSignInputs.forEach(async (v, index) => {
-    const keyPair = await getSigner('btc', options!.toSignInputs![index].treehash)
+  // options.toSignInputs.forEach(async (v, index) => {
+  //   const keyPair = await getSigner('btc', options!.toSignInputs![index].treehash)
+  //   psbt.signInput(v.index, keyPair, v.sighashTypes)
+  // })
+  for (let i = 0; i < options.toSignInputs.length; i++) {
+    const keyPair = await getSigner('btc', options!.toSignInputs![i].treehash)
+    const v = options.toSignInputs[i]
     psbt.signInput(v.index, keyPair, v.sighashTypes)
-  })
+  }
 
   if (options.autoFinalized) {
     options.toSignInputs.forEach((v) => {
