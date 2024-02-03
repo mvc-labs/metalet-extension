@@ -48,7 +48,9 @@ export async function process({
   const addressType = await getAddressType('btc')
   const pubkey = await getPublicKey('btc')
 
-  if (!options) [(options = { toSignInputs: undefined, autoFinalized: true })]
+  if (!options) {
+    options = { toSignInputs: undefined, autoFinalized: true }
+  }
   if (!options?.toSignInputs) {
     // Compatibility with legacy code.
     options.toSignInputs = await formatOptionsToSignInputs(psbtHex)
