@@ -230,10 +230,12 @@ export async function getSigner(chain: Chain = 'mvc', treehash?: string) {
     const mnemonic = await getCurrentAccount().then((account) => account!.mnemonic)
     const path = await getAccountProperty(chain, 'path')
     const node = deriveBtcPrivateKey(mnemonic, path, network)
-    let nodeXOnlyPubkey = node.publicKey.subarray(1)
+    const nodeXOnlyPubkey = node.publicKey.subarray(1)
     if (treehash) {
-      nodeXOnlyPubkey = Buffer.concat([nodeXOnlyPubkey, Buffer.from(treehash)])
+      const withTreehash = Buffer.concat([nodeXOnlyPubkey, Buffer.from(treehash, 'hex')])
+      return node.tweak(crypto.taggedHash('TapTweak', withTreehash))
     }
+
     return node.tweak(crypto.taggedHash('TapTweak', nodeXOnlyPubkey))
   }
   const privateKey = await getPrivateKey(chain)
