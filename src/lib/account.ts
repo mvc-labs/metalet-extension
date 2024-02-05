@@ -182,7 +182,7 @@ async function getAccountProperty(chain: Chain, key: keyof ChainDetail[Chain]): 
   return account[chain][key]
 }
 
-export async function getAddress(chain: Chain = 'mvc', path?: string): Promise<string> {
+export async function getAddress(chain: Chain, path?: string): Promise<string> {
   const network = await getNetwork()
   const account = await getCurrentAccount()
 
