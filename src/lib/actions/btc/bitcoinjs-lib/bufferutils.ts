@@ -2,6 +2,8 @@
  * The following methods are based on `bitcoinjs`, thanks for their work
  * https://github.com/bitcoinjs/bitcoinjs-lib
  */
+
+// @ts-nocheck
 import * as types from './types';
 const { typeforce } = types;
 import * as varuint from './varuint';

@@ -2,6 +2,8 @@
  * The following methods are based on `bitcoinjs`, thanks for their work
  * https://github.com/bitcoinjs/bitcoinjs-lib
  */
+
+// @ts-nocheck
 import { base } from "@okxweb3/crypto-lib"
 import { toOutputScript } from './address';
 import { Network } from './networks';

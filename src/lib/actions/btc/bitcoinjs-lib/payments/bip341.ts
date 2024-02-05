@@ -2,6 +2,8 @@
  * The following methods are based on `bitcoinjs`, thanks for their work
  * https://github.com/bitcoinjs/bitcoinjs-lib
  */
+
+// @ts-nocheck
 import { Buffer as NBuffer } from 'buffer';
 import * as bcrypto from '../crypto';
 

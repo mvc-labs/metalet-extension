@@ -1,5 +1,6 @@
-import BIP32Factory from 'bip32';
+import BIP32Factory, { BIP32Interface } from 'bip32';
 import * as taproot from "./taproot";
+import { randomBytes } from 'crypto';
 import * as bitcoin from "./bitcoinjs-lib";
 import { getBtcNetwork } from "@/lib/network";
 import * as bcrypto from "./bitcoinjs-lib/crypto";
@@ -8,15 +9,14 @@ import { broadcastBTCTx } from "@/queries/transaction";
 import { vectorSize } from "./bitcoinjs-lib/transaction";
 import { getAddressType, private2public, privateKeyFromWIF, sign } from "./txBuild";
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-import { randomBytes } from 'crypto'; 
 
 const schnorr = signUtil.schnorr.secp256k1.schnorr
 
-export type InscriptionData = {
-  contentType: string
-  body: string | Buffer
-  revealAddr: string
-}
+// export type InscriptionData = {
+//   contentType: string
+//   body: string | Buffer
+//   revealAddr: string
+// }
 
 export type Operation = 'init' | 'create' | 'modify' | 'revoke'
 
@@ -36,8 +36,6 @@ export type PrevOutput = {
   vOut: number
   amount: number
   address: string
-  privateKey: string
-  publicKey?: string
 }
 
 export type InscriptionRequest = {
@@ -70,7 +68,7 @@ export type TxOut = {
 }
 
 type InscriptionTxCtxData = {
-  privateKey: Buffer
+  // privateKey: Buffer
   inscriptionScript: Buffer
   commitTxAddress: string
   commitTxAddressPkScript: Buffer
@@ -99,7 +97,7 @@ export class InscriptionTool {
   mustRevealTxFees: number[] = [];
   commitAddrs: string[] = [];
 
-  static newInscriptionTool(network: bitcoin.Network, request: InscriptionRequest) {
+  static newInscriptionTool(network: bitcoin.Network, request: InscriptionRequest, keyPairs: BIP32Interface) {
     const tool = new InscriptionTool();
     tool.network = network;
 
@@ -107,16 +105,16 @@ export class InscriptionTool {
     const minChangeValue = request.minChangeValue || defaultMinChangeValue;
 
     request.metaidDataList.forEach(metaidData => {
-      tool.inscriptionTxCtxDataList.push(createMetaIdTxCtxData(network, metaidData));
+      tool.inscriptionTxCtxDataList.push(createMetaIdTxCtxData(network, metaidData, keyPairs));
     });
 
     const totalRevealPrevOutputValue = tool.buildEmptyRevealTx(network, revealOutValue, request.revealFeeRate);
-    const insufficient = tool.buildCommitTx(network, request.commitTxPrevOutputList, request.changeAddress, totalRevealPrevOutputValue, request.commitFeeRate, minChangeValue);
+    const insufficient = tool.buildCommitTx(network, request.commitTxPrevOutputList, request.changeAddress, totalRevealPrevOutputValue, request.commitFeeRate, minChangeValue, keyPairs);
     if (insufficient) {
       return tool;
     }
-    tool.signCommitTx(request.commitTxPrevOutputList);
-    tool.completeRevealTx();
+    tool.signCommitTx(request.commitTxPrevOutputList, keyPairs.privateKey!);
+    tool.completeRevealTx(keyPairs.privateKey!);
 
     return tool;
   }
@@ -160,7 +158,7 @@ export class InscriptionTool {
     return totalPrevOutputValue;
   }
 
-  buildCommitTx(network: bitcoin.Network, commitTxPrevOutputList: PrevOutput[], changeAddress: string, totalRevealPrevOutputValue: number, commitFeeRate: number, minChangeValue: number): boolean {
+  buildCommitTx(network: bitcoin.Network, commitTxPrevOutputList: PrevOutput[], changeAddress: string, totalRevealPrevOutputValue: number, commitFeeRate: number, minChangeValue: number, keyPairs: BIP32Interface): boolean {
     let totalSenderAmount = 0;
 
     const tx = new bitcoin.Transaction();
@@ -181,7 +179,7 @@ export class InscriptionTool {
     tx.addOutput(changePkScript, 0);
 
     const txForEstimate = tx.clone();
-    signTx(txForEstimate, commitTxPrevOutputList, this.network);
+    signTx(txForEstimate, commitTxPrevOutputList, this.network, keyPairs.privateKey!);
 
     const fee = Math.floor(txForEstimate.virtualSize() * commitFeeRate);
     const changeAmount = totalSenderAmount - totalRevealPrevOutputValue - fee;
@@ -201,11 +199,11 @@ export class InscriptionTool {
     return false;
   }
 
-  signCommitTx(commitTxPrevOutputList: PrevOutput[]) {
-    signTx(this.commitTx, commitTxPrevOutputList, this.network);
+  signCommitTx(commitTxPrevOutputList: PrevOutput[], privateKey: Buffer) {
+    signTx(this.commitTx, commitTxPrevOutputList, this.network, privateKey);
   }
 
-  completeRevealTx() {
+  completeRevealTx(privateKey: Buffer) {
     this.revealTxs.forEach((revealTx, i) => {
       revealTx.ins[0].hash = this.commitTx.getHash();
 
@@ -215,7 +213,7 @@ export class InscriptionTool {
       this.revealTxPrevOutputFetcher.push(this.inscriptionTxCtxDataList[i].revealTxPrevOutput.value);
 
       const hash = revealTx.hashForWitnessV1(0, prevOutScripts, values, bitcoin.Transaction.SIGHASH_DEFAULT, this.inscriptionTxCtxDataList[i].hash);
-      const signature = Buffer.from(schnorr.sign(hash, this.inscriptionTxCtxDataList[i].privateKey, base.randomBytes(32)));
+      const signature = Buffer.from(schnorr.sign(hash, privateKey, base.randomBytes(32)));
       revealTx.ins[0].witness = [Buffer.from(signature), ...this.inscriptionTxCtxDataList[i].witness];
 
       // check tx max tx wight
@@ -249,10 +247,9 @@ export class InscriptionTool {
   }
 }
 
-function signTx(tx: bitcoin.Transaction, commitTxPrevOutputList: PrevOutput[], network: bitcoin.Network) {
+function signTx(tx: bitcoin.Transaction, commitTxPrevOutputList: PrevOutput[], network: bitcoin.Network, privateKey: Buffer) {
   tx.ins.forEach((input, i) => {
     const addressType = getAddressType(commitTxPrevOutputList[i].address, network);
-    const privateKey = base.fromHex(privateKeyFromWIF(commitTxPrevOutputList[i].privateKey, network));
     const privateKeyHex = base.toHex(privateKey);
     const publicKey = private2public(privateKeyHex);
 
@@ -296,10 +293,8 @@ function signTx(tx: bitcoin.Transaction, commitTxPrevOutputList: PrevOutput[], n
   });
 }
 
-function createMetaIdTxCtxData(network: bitcoin.Network, metaidData: MetaidData): InscriptionTxCtxData {
-  const bip32 = BIP32Factory(ecc);
-  const keyPairs = bip32.fromSeed(randomBytes(64), network);
-  const internalPubKey = keyPairs.publicKey.slice(1)
+function createMetaIdTxCtxData(network: bitcoin.Network, metaidData: MetaidData, keyPairs: BIP32Interface): InscriptionTxCtxData {
+  const internalPubKey = keyPairs.publicKey.subarray(1)
   const ops = bitcoin.script.OPS
 
   const inscriptionBuilder: bitcoin.payments.StackElement[] = []
@@ -347,7 +342,7 @@ function createMetaIdTxCtxData(network: bitcoin.Network, metaidData: MetaidData)
   })
 
   return {
-    privateKey: keyPairs.privateKey!,
+    // privateKey: keyPairs.privateKey!,
     inscriptionScript,
     commitTxAddress: address!,
     commitTxAddressPkScript: output!,
@@ -361,8 +356,8 @@ function createMetaIdTxCtxData(network: bitcoin.Network, metaidData: MetaidData)
   }
 }
 
-export function inscribe(network: bitcoin.Network, request: InscriptionRequest) {
-  const tool = InscriptionTool.newInscriptionTool(network, request);
+export function inscribe(network: bitcoin.Network, request: InscriptionRequest, keyPairs: BIP32Interface) {
+  const tool = InscriptionTool.newInscriptionTool(network, request, keyPairs);
   if (tool.mustCommitTxFee > 0) {
     return {
       commitTx: "",
@@ -397,7 +392,9 @@ interface InscribeTxIdResult {
 
 export async function process({ data, options = initOptions() }: { data: InscriptionRequest, options: { noBroadcast: boolean } }): Promise<InscribeHexResult | InscribeTxIdResult> {
   const network = await getBtcNetwork()
-  const { commitTx, revealTxs } = inscribe(network, data)
+  const bip32 = BIP32Factory(ecc);
+  const keyPairs = bip32.fromSeed(randomBytes(64), network);
+  const { commitTx, revealTxs } = inscribe(network, data, keyPairs)
   if (!options.noBroadcast) {
     const [commitTxId, ...revealTxIds] = await Promise.all([
       broadcastBTCTx(commitTx),
