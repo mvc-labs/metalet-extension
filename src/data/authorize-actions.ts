@@ -15,6 +15,7 @@ import * as Merge from '../lib/actions/merge'
 import * as ConnectBTC from '../lib/actions/btc/connect'
 import * as SignBTCPsbt from '../lib/actions/btc/sign-psbt'
 import * as SignBTCMessage from '../lib/actions/btc/sign-message'
+import * as Inscribe from '../lib/actions/btc/inscribe'
 
 function doNothing() { }
 
@@ -152,6 +153,14 @@ export default {
     title: 'Signature request',
     description: 'Only sign this message if you fully understand the content and trust the requesting site.',
     process: SignBTCMessage.process,
+    estimate: doNothing,
+    closeAfterProcess: true,
+  },
+  Inscribe: {
+    name: 'Inscribe',
+    title: 'Inscribe',
+    description: 'Inscribe',
+    process: Inscribe.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },

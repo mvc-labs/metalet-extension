@@ -217,8 +217,8 @@ export async function getMvcRootPath(): Promise<string> {
 
 export async function getPrivateKey(chain: Chain = 'mvc') {
   const network = await getNetwork()
-  const mnemonic = await getCurrentAccount().then((account) => account!.mnemonic)
   const path = await getAccountProperty(chain, 'path')
+  const mnemonic = await getCurrentAccount().then((account) => account!.mnemonic)
 
   return derivePrivateKey({ mnemonic, chain, network, path })
 }

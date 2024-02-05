@@ -216,6 +216,7 @@ export const btcKeys: Omit<Keys, 'event'> = {
     { name: 'connect', action: 'ConnectBTC' },
     { name: 'signPsbt', action: 'SignBTCPsbt' },
     { name: 'signMessage', action: 'SignBTCMessage' },
+    { name: 'inscribe', action: 'Inscribe' },
   ],
   inscribe: [
     { name: 'inscribeTransfer', action: 'InscribeTransfer' }
