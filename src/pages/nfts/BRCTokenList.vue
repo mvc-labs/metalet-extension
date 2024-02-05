@@ -48,17 +48,18 @@ const toBRC20Detail = (inscription: Inscription) => {
 
 <template>
   <div class="space-y-4">
-    <div class="space-y-1">
+    <div class="space-y-1" v-if="false">
       <div class="text-sm text-gray-500">NUMBER OF COLLECTIBLES</div>
       <div class="text-xl font-bold">{{ inscriptionsCountDisplay }}</div>
     </div>
 
-    <div class="">
+    <div v-if="false">
       <button class="secondary-btn flex w-full items-center justify-center gap-x-1 py-3" @click="toReceive">
         <ArrowDownLeftIcon class="h-4 w-4" />
         <span>Receive</span>
       </button>
     </div>
+    
     <div v-if="isLoading" class="w-full py-3 text-center text-sm font-bold text-gray-500">
       BRC Token List loading...
     </div>

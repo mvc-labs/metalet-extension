@@ -1,18 +1,18 @@
 import { ComputedRef } from 'vue'
 import { PageResult } from './types'
+import { getNet } from '@/lib/network'
+import { metaletApiV3 } from './request'
 import { useQuery } from '@tanstack/vue-query'
-import { metaletApi, metaletApiV3 } from './request'
-import { getNetwork } from '@/lib/network'
 
 export const fetchBtcTxHex = async (txId: string): Promise<string> => {
-  return metaletApi<{ rawTx: string }>(`/tx/raw`)
-    .get({ txId, chain: 'btc' })
+  const net = getNet()
+  return metaletApiV3<{ rawTx: string }>(`/tx/raw`)
+    .get({ net, txId, chain: 'btc' })
     .then((res) => res.rawTx)
 }
 
 export const broadcastBTCTx = async (rawTx: string) => {
-  const network = await getNetwork()
-  const net = network === 'mainnet' ? 'livenet' : network
+  const net = getNet()
   return await metaletApiV3<string>(`/tx/broadcast`).post({ chain: 'btc', net, rawTx })
 }
 

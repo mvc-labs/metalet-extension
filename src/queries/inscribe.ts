@@ -1,8 +1,8 @@
-import { Ref, ComputedRef } from 'vue'
-import { getNetwork } from '@/lib/network'
-import { useQuery } from '@tanstack/vue-query'
-import { metaletApiV2, metaletApiV3 } from './request'
 import { Buffer } from 'buffer'
+import { getNet } from '@/lib/network'
+import { Ref, ComputedRef } from 'vue'
+import { metaletApiV3 } from './request'
+import { useQuery } from '@tanstack/vue-query'
 
 export interface PreInscribe {
   count: number
@@ -19,8 +19,7 @@ export interface PreInscribe {
 }
 
 export const preInscribe = async (receiveAddress: string, feeRate: number, filename: string): Promise<PreInscribe> => {
-  const network = await getNetwork()
-  const net = network === 'mainnet' ? 'livenet' : network
+  const net = await getNet()
   return await metaletApiV3<PreInscribe>(`/inscribe/pre`).post({
     feeRate,
     files: [
@@ -47,8 +46,7 @@ export const commitInscribe = async (
   orderId: string,
   rawTx: string
 ): Promise<CommitInscribe | void> => {
-  const network = await getNetwork()
-  const net = network === 'mainnet' ? 'livenet' : network
+  const net = await getNet()
   return await metaletApiV3<CommitInscribe>(`/inscribe/commit`).post({
     feeAddress: address,
     net,
@@ -96,7 +94,9 @@ export async function getBRCInscriptions(
   cursor = 0,
   size = 10
 ): Promise<{ list: Inscription[]; total: number }> {
-  return await metaletApiV2<{ list: Inscription[]; total: number }>('/address/inscriptions').get({
+  const net = await getNet()
+  return await metaletApiV3<{ list: Inscription[]; total: number }>('/address/inscriptions').get({
+    net,
     address,
     cursor: `${cursor}`,
     size: `${size}`,

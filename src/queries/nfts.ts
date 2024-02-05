@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/vue-query'
-import { mvcApi } from './request'
+import { getNet } from '@/lib/network'
 import { ComputedRef, Ref } from 'vue'
+import { useQuery } from '@tanstack/vue-query'
+import { metaletApiV3, mvcApi } from './request'
 import { bannedCollections } from '../data/nfts'
 
 export type NftCollection = {
@@ -142,6 +143,59 @@ export const useOneNftQuery = (params: { codehash: string; genesis: string; toke
   return useQuery({
     queryKey: ['nft', { ...params }],
     queryFn: () => fetchOneNft(params),
+  })
+}
+
+export interface MetaIDPin {
+  "id": string,
+  "number": number,
+  "rootTxId": string,
+  "address": string,
+  "output": string,
+  "outputValue": number,
+  "timestamp": number,
+  "genesisFee": number,
+  "genesisHeight": number,
+  "genesisTransaction": string,
+  "txInIndex": number,
+  "txInOffset": number,
+  "operation": string,
+  "path": string,
+  "parentPath": string,
+  "encryption": string,
+  "version": string,
+  "contentType": string,
+  "contentBody": string,
+  "contentLength": number,
+  "contentSummary": string
+}
+
+export async function getMetaPins(
+  address: string,
+  cursor = 0,
+  size = 10
+): Promise<MetaIDPin[]> {
+  const net = await getNet()
+  return await metaletApiV3<MetaIDPin[]>('/address/pins').get({
+    // net: 'testnet',
+    // address: "tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme",
+    net,
+    address,
+    cursor: `${cursor}`,
+    size: `${size}`,
+  })
+}
+
+export const useMetaPinsQuery = (
+  address: Ref<string>,
+  cursor: Ref<number>,
+  size: Ref<number>,
+  options: { enabled: ComputedRef<boolean> }
+) => {
+  return useQuery({
+    queryKey: ['MetaPins', { address: address.value, cursor: cursor.value, size: size.value }],
+    queryFn: () => getMetaPins(address.value, cursor.value, size.value),
+    ...options,
   })
 }
 

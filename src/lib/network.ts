@@ -18,7 +18,10 @@ export async function getNetwork(): Promise<Network> {
   return await storage.get('network', { defaultValue: 'mainnet' })
 }
 
-export async function getBtcNetwork() {
-  const network = await getNetwork()
-  return network === 'mainnet' ? networks.bitcoin : networks.testnet
+export function getBtcNetwork() {
+  return network.value ? networks.bitcoin : networks.testnet
+}
+
+export function getNet(): string {
+  return network.value === 'mainnet' ? 'livenet' : network.value
 }
