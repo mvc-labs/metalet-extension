@@ -24,6 +24,7 @@ import SignBTCPsbt from './SignBtcPsbt.vue'
 import SignMessage from './SignMessage.vue'
 import SignBTCMessage from './SignBTCMessage.vue'
 import Merge from './Merge.vue'
+import Inscribe from './Inscribe.vue'
 
 // 从query中获取数据
 const route = useRoute()
@@ -188,6 +189,7 @@ const cancelAction = async () => {
       <SignBTCPsbt v-if="actionName === 'SignBTCPsbt'" :params="params" />
       <SignMessage v-if="actionName === 'SignMessage'" :params="params" />
       <SignBTCMessage v-if="actionName === 'SignBTCMessage'" :params="params" />
+      <Inscribe v-if="actionName === 'Inscribe'" :params="params" />
     </div>
 
     <!-- buttons -->

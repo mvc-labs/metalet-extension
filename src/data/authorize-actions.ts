@@ -159,7 +159,7 @@ export default {
   Inscribe: {
     name: 'Inscribe',
     title: 'Inscribe',
-    description: 'Inscribe',
+    description: 'Inscrible Your Data On The Chain.',
     process: Inscribe.process,
     estimate: doNothing,
     closeAfterProcess: true,
