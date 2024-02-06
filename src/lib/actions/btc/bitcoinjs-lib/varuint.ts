@@ -2,6 +2,7 @@
  * The following methods are based on `bitcoinjs`, thanks for their work
  * https://github.com/bitcoinjs/bitcoinjs-lib
  */
+// @ts-nocheck
 import { Buffer } from 'safe-buffer';
 
 // Number.MAX_SAFE_INTEGER 
@@ -23,26 +24,26 @@ function encode(number: number, buffer?: Buffer, offset?: number): Buffer {
     // 8 bit
     if (number < 0xfd) {
         buffer.writeUInt8(number, offset);
-        this.bytes = 1;
+        encode.bytes = 1;
 
         // 16 bit
     } else if (number <= 0xffff) {
         buffer.writeUInt8(0xfd, offset);
         buffer.writeUInt16LE(number, offset + 1);
-        this.bytes = 3;
+        encode.bytes = 3;
 
         // 32 bit  
     } else if (number <= 0xffffffff) {
         buffer.writeUInt8(0xfe, offset);
         buffer.writeUInt32LE(number, offset + 1);
-        this.bytes = 5;
+        encode.bytes = 5;
 
         // 64 bit
     } else {
         buffer.writeUInt8(0xff, offset);
         buffer.writeUInt32LE(number >>> 0, offset + 1);
         buffer.writeUInt32LE((number / 0x100000000) | 0, offset + 5);
-        this.bytes = 9;
+        encode.bytes = 9;
     }
 
     return buffer;
@@ -56,22 +57,22 @@ function decode(buffer: Buffer, offset?: number): number {
 
     // 8 bit
     if (first < 0xfd) {
-        this.bytes = 1;
+        decode.bytes = 1;
         return first;
 
         // 16 bit
     } else if (first === 0xfd) {
-        this.bytes = 3;
+        decode.bytes = 3;
         return buffer.readUInt16LE(offset + 1);
 
         // 32 bit
     } else if (first === 0xfe) {
-        this.bytes = 5;
+        decode.bytes = 5;
         return buffer.readUInt32LE(offset + 1);
 
         // 64 bit
     } else {
-        this.bytes = 9;
+        decode.bytes = 9;
         const lo = buffer.readUInt32LE(offset + 1);
         const hi = buffer.readUInt32LE(offset + 5);
         const number = hi * 0x0100000000 + lo;

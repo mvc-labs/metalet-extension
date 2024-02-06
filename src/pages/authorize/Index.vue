@@ -131,12 +131,16 @@ const cancelAction = async () => {
 <template>
   <div class="flex h-full flex-col items-center overflow-y-auto">
     <!-- backdrop -->
-    <div class="absolute inset-0 z-10 flex h-full w-full items-center justify-center rounded-lg bg-white/40 backdrop-blur"
-      v-show="running">
+    <div
+      class="absolute inset-0 z-10 flex h-full w-full items-center justify-center rounded-lg bg-white/40 backdrop-blur"
+      v-show="running"
+    >
       <div class="">Processing...</div>
     </div>
-    <div class="absolute inset-0 z-10 flex h-full w-full flex-col items-center justify-center rounded-lg bg-white p-6"
-      v-show="isFinished">
+    <div
+      class="absolute inset-0 z-10 flex h-full w-full flex-col items-center justify-center rounded-lg bg-white p-6"
+      v-show="isFinished"
+    >
       <div class="gradient-text text-base font-bold">Task Finished</div>
 
       <div class="mt-8 space-y-4 text-sm">
@@ -188,8 +192,10 @@ const cancelAction = async () => {
 
     <!-- buttons -->
     <div class="mt-4 grid grid-cols-2 gap-x-4 self-stretch">
-      <button class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-500"
-        @click="cancelAction">
+      <button
+        class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-500"
+        @click="cancelAction"
+      >
         Cancel
       </button>
       <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="runAction">

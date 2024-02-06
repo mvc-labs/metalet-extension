@@ -19,7 +19,7 @@ export async function getNetwork(): Promise<Network> {
 }
 
 export function getBtcNetwork() {
-  return network.value ? networks.bitcoin : networks.testnet
+  return network.value === 'mainnet' ? networks.bitcoin : networks.testnet
 }
 
 export function getNet(): string {
