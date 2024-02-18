@@ -1,9 +1,10 @@
-import * as VueRouter from 'vue-router'
-
-import Wallet from './pages/wallet/Index.vue'
-import { getStorage, useStorage } from './lib/storage'
-import { getAccounts, getCurrentAccount, getLegacyAccounts, needsMigrationV2 } from './lib/account'
+import useStorage from './lib/storage'
 import { IS_DEV } from '@/data/config'
+import * as VueRouter from 'vue-router'
+import Wallet from './pages/wallet/Index.vue'
+import { getCurrentAccount } from './lib/account'
+
+const storage = useStorage()
 
 const routes = [
   { path: '/', redirect: '/wallet' },
@@ -24,8 +25,11 @@ const routes = [
     },
   },
   {
-    path: '/migrate',
-    component: () => import('./pages/migrate/Index.vue'),
+    // path: '/migrate',
+    // component: () => import('./pages/migrate/Index.vue'),
+    path: '/migrateV2',
+    component: () => import('./pages/migrateV2/Index.vue'),
+    name: 'migrateV2',
     meta: {
       noFooter: true,
       noMenu: true,
@@ -313,7 +317,6 @@ const routes = [
       noFooter: true,
     },
   },
-
   {
     path: '/settings/address-type',
     component: () => import('./pages/settings/AddressType.vue'),
@@ -323,7 +326,15 @@ const routes = [
       noFooter: true,
     },
   },
-
+  {
+    path: '/settings/security-lab',
+    component: () => import('./pages/settings/SecurityLab.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Security Lab',
+      noFooter: true,
+    },
+  },
   {
     path: '/tools/path-finder',
     component: () => import('./pages/tools/PathFinder.vue'),
@@ -341,10 +352,10 @@ const router = VueRouter.createRouter({
   routes,
 })
 
-// 检查锁定状态；如果锁定，跳转到锁定页面
+// check storage lock status, if locked, redirect to lock page
 router.beforeEach(async (to, from) => {
   if (to.path !== '/lock') {
-    const locked = await getStorage('locked')
+    const locked = await storage.get('locked')
     if (locked) {
       return '/lock'
     }
@@ -352,31 +363,14 @@ router.beforeEach(async (to, from) => {
 })
 
 // 检查账号状态；如果没有当前账号，跳转到账号页面
-router.beforeEach(async (to, from) => {
-  // 如果是老用户（sync存储中有助记词），且该账号在localStorage中不存在，则说明需要迁移，跳转至新版本迁移页面
-  const syncStorage = await useStorage('sync')
-  const v0Record = await syncStorage.get('currentAccount')
-  const v1Records = await getLegacyAccounts()
-  if (v0Record && v0Record.currentAccount && v1Records.length === 0) {
-    const mneStr = v0Record.currentAccount.mnemonicStr
+router.beforeEach(async (to) => {
+  // console.log('locked', await storage.get('locked'))
 
-    // 比照查看有无该助记词的账号
-    const accounts = await getAccounts()
-    const accountsArr = Array.from(accounts.values())
-    const hasAccount = accountsArr.some((account) => account.mnemonic === mneStr)
-
-    if (!hasAccount && to.path !== '/migrate') {
-      return '/migrate'
-    }
+  if (await storage.get('locked')) {
+    return '/lock'
   }
+  const authPages = ['/welcome', '/lock', '/accounts', '/wallet/create', '/wallet/import', '/migrateV2']
 
-  if (await needsMigrationV2()) {
-    if (to.path !== '/welcome') {
-      return '/welcome'
-    }
-  }
-
-  const authPages = ['/welcome', '/lock', '/accounts', '/wallet/create', '/wallet/import', '/migrate']
   if (!authPages.includes(to.path)) {
     const redirect = getCurrentAccount().then(async (account) => {
       if (!account) {

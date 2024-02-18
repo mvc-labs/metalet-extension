@@ -14,7 +14,11 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
     return await exActions[msg.fn](...msg.args)
   }
 
-  const actionName = msg.action.replace('authorize-', '').replace('query-', '').replace('event-', '').replace('inscribe-', '')
+  const actionName = msg.action
+    .replace('authorize-', '')
+    .replace('query-', '')
+    .replace('event-', '')
+    .replace('inscribe-', '')
   if (msg.action?.startsWith('query') && actionName === 'Ping') {
     const response = {
       nonce: msg.nonce,
@@ -28,6 +32,7 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
 
   const account = await getCurrentAccount()
   const walletLocked = await isLocked()
+  console.log('walletLocked', walletLocked)
 
   // 如果连接状态为未连接，且请求的 action 不是connect或者IsConnected，则返回错误
   let failedStatus: string = ''
@@ -35,7 +40,10 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
     failedStatus = 'locked'
   } else if (!account || !account.id) {
     failedStatus = 'not-logged-in'
-  } else if (!(await connector.isConnected(account.id, msg.host)) && !['Connect', 'IsConnected', 'ConnectBTC'].includes(actionName)) {
+  } else if (
+    !(await connector.isConnected(account.id, msg.host)) &&
+    !['Connect', 'IsConnected', 'ConnectBTC'].includes(actionName)
+  ) {
     failedStatus = 'not-connected'
   }
 
@@ -96,13 +104,14 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
     let popupUrl = browser.runtime.getURL(rawUrl)
     popupUrl += `?${params.toString()}`
 
-
     // To avoid repeating pop-ups of 'sign btc message'
     let isClose = false
     const tabs = await browser.tabs.query({ active: true })
-    tabs.forEach(tab => {
-      isClose = (tab.url?.includes('actionName=SignBTCMessage') || false) && (tab.url?.includes(`params=%22${msg.params}%22`) || false)
-    });
+    tabs.forEach((tab) => {
+      isClose =
+        (tab.url?.includes('actionName=SignBTCMessage') || false) &&
+        (tab.url?.includes(`params=%22${msg.params}%22`) || false)
+    })
     if (isClose) {
       return
     }

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { setStorage } from '@/lib/storage'
+import useStorage from '@/lib/storage'
 import BtcLogoImg from '@/assets/images/btc-logo.svg?url'
 import CheckIcon from '@/assets/icons/check.svg?component'
 import SpaceLogoImg from '@/assets/images/space-logo.svg?url'
@@ -13,8 +13,10 @@ const service = ref<Service>('all')
 
 const router = useRouter()
 
+const storage = useStorage()
+
 const goOn = async () => {
-  await setStorage(Service_Network_Key, service.value)
+  await storage.set(Service_Network_Key, service.value)
   router.push('/wallet/create-success')
 }
 </script>

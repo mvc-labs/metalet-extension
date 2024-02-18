@@ -9,7 +9,7 @@ const router = useRouter()
 const mnemonic = ref('')
 const isValid = ref(true)
 
-const account = ref<Account | null>(null)
+const account = ref<Account | undefined>()
 getCurrentAccount().then((acc) => {
   account.value = acc
 })

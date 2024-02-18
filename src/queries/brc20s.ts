@@ -55,24 +55,26 @@ interface TokenBalance {
 export const fetchBRC20Token = async (address: string): Promise<Asset[]> => {
   const net = await getNet()
   return (
-    await metaletApiV3<PageResult<TokenBalance>>(`/brc20/tokens`).get({ net, address, cursor: '0', size: '100000' })
-  ).list.map(
-    (token) =>
-      ({
-        symbol: token.ticker,
-        logo: getBRC20Logo(token.ticker),
-        tokenName: token.ticker,
-        isNative: false,
-        chain: 'btc',
-        queryable: true,
-        decimal: 0,
-        contract: 'BRC-20',
-        balance: {
-          total: Number(token.overallBalance),
-          availableBalance: Number(token.availableBalance),
-          transferBalance: Number(token.transferableBalance),
-        },
-      }) as Asset
+    (
+      await metaletApiV3<PageResult<TokenBalance>>(`/brc20/tokens`).get({ net, address, cursor: '0', size: '100000' })
+    ).list?.map(
+      (token) =>
+        ({
+          symbol: token.ticker,
+          logo: getBRC20Logo(token.ticker),
+          tokenName: token.ticker,
+          isNative: false,
+          chain: 'btc',
+          queryable: true,
+          decimal: 0,
+          contract: 'BRC-20',
+          balance: {
+            total: Number(token.overallBalance),
+            availableBalance: Number(token.availableBalance),
+            transferBalance: Number(token.transferableBalance),
+          },
+        }) as Asset
+    ) || []
   )
 }
 

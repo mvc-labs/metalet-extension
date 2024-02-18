@@ -1,19 +1,21 @@
-import storageManager from './storage'
 import hash from 'object-hash'
+import useStorage from './storage'
+
+const Locked_Key = 'locked'
+const Password_Key = 'password'
+
+const storage = useStorage()
 
 export async function getPassword() {
-  const password = await storageManager.get('password')
-  return password
+  return await storage.get(Password_Key)
 }
 
 export async function hasPassword() {
-  const password = await getPassword()
-  return !!password
+  return !!(await getPassword())
 }
 
 export async function checkPassword(credential: string) {
   const password = await getPassword()
-
   return hash(credential) === password
 }
 
@@ -23,15 +25,15 @@ export async function checkPassword(credential: string) {
 
 export async function setPassword(password: string) {
   const hashed = hash(password)
-  await storageManager.set('password', hashed)
+  await storage.set(Password_Key, hashed)
 }
 
 export async function lock() {
-  await storageManager.set('locked', true)
+  await storage.set(Locked_Key, true)
 }
 
 export async function isLocked() {
-  return await storageManager.get('locked', { defaultValue: false })
+  return await !!storage.get(Locked_Key)
 }
 
 export async function unlock(password: string) {
@@ -39,14 +41,13 @@ export async function unlock(password: string) {
   if (!isCorrect) {
     throw new Error('Password incorrect')
   }
-  await storageManager.set('locked', false)
-
+  await storage.set(Locked_Key, false)
   return true
 }
 
 type PasswordManager = {
   has: () => Promise<boolean>
-  get: () => Promise<string>
+  get: () => Promise<string | undefined>
   set: (password: string) => Promise<void>
   lock: () => Promise<void>
   unlock: (password: string) => Promise<boolean>

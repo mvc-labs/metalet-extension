@@ -9,7 +9,7 @@ import ResetModal from '../ResetModal.vue'
 
 const router = useRouter()
 
-const account = ref<Account | null>(null)
+const account = ref<Account | undefined>()
 getCurrentAccount().then((acc) => {
   account.value = acc
 })

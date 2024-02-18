@@ -10,7 +10,7 @@ import PasswordImg from '@/assets/images/password.svg?url'
 
 const router = useRouter()
 
-const account = ref<Account | null>(null)
+const account = ref<Account | undefined>()
 getCurrentAccount().then((acc) => {
   account.value = acc
 })

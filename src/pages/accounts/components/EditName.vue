@@ -8,7 +8,7 @@ import Modal from '@/components/Modal.vue'
 defineProps(['open'])
 const emit = defineEmits(['update:open'])
 
-const currentAccount = ref<Account | null>(null)
+const currentAccount = ref<Account | undefined>()
 getCurrentAccount().then((acc) => {
   currentAccount.value = acc
 })
