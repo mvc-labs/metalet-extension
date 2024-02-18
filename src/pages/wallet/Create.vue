@@ -57,7 +57,7 @@ const saveAccount = async (backup: boolean) => {
     await addAccount(account)
 
     if (!backup) {
-      router.push('/wallet/create-success')
+      router.push('/wallet/init-service')
     } else {
       router.push('/wallet/check-backup')
     }

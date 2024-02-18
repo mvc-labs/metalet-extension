@@ -28,7 +28,7 @@ const verify = async () => {
   }
 
   // 跳转至后续
-  router.push('/wallet/create-success')
+  router.push('/wallet/init-service')
 }
 </script>
 

@@ -16,6 +16,14 @@ const routes = [
     },
   },
   {
+    path: '/wallet/init-service',
+    component: () => import('./pages/wallet/InitService.vue'),
+    meta: {
+      noFooter: true,
+      noMenu: true,
+    },
+  },
+  {
     path: '/migrate',
     component: () => import('./pages/migrate/Index.vue'),
     meta: {
@@ -174,6 +182,15 @@ const routes = [
     meta: {
       secondaryHeader: true,
       headerTitle: 'Select Asset',
+    },
+  },
+  {
+    path: '/wallet/select-network',
+    component: () => import('./pages/wallet/SelectNetwork.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Select Network',
+      noFooter: true,
     },
   },
   {
