@@ -79,3 +79,7 @@
     border-radius: inherit;
   }
 }
+
+button[aria-selected='true'] {
+  outline: none;
+}
