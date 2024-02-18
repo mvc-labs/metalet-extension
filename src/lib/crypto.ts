@@ -88,7 +88,7 @@ export const signTransaction = async (
   { txHex, scriptHex, inputIndex, satoshis, sigtype, path }: ToSignTransaction,
   returnsTransaction: boolean = false
 ) => {
-  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+  const mneObj = mvc.Mnemonic.fromString(encrypt(account.mnemonic))
   const hdpk = mneObj.toHDPrivateKey('', network)
   const rootPath = await getMvcRootPath()
   // find out priv / pub according to path
@@ -135,7 +135,7 @@ export const signTransactions = async (
   network: 'testnet' | 'mainnet',
   toSignTransactions: ToSignTransaction[]
 ) => {
-  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
+  const mneObj = mvc.Mnemonic.fromString(encrypt(account.mnemonic))
   const hdpk = mneObj.toHDPrivateKey('', network)
   const rootPath = await getMvcRootPath()
 

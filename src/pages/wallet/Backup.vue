@@ -7,6 +7,7 @@ import passwordManager from '@/lib/password'
 import { type Account, getCurrentAccount } from '@/lib/account'
 
 import PasswordImg from '@/assets/images/password.svg?url'
+import { decrypt } from '@/lib/crypto'
 
 const router = useRouter()
 
@@ -22,7 +23,7 @@ const password = ref('')
 const failed = ref(false)
 
 const isCoveredMne = ref(true)
-const mne = computed(() => account.value?.mnemonic)
+const mne = computed(() => decrypt(account.value?.mnemonic))
 
 // 按钮
 const back = () => {
@@ -62,12 +63,8 @@ const next = async () => {
         <div class="mt-12">
           <h4 class="mb-2 text-sm">Password</h4>
           <div class="relative">
-            <input
-              :type="passwordInputType"
-              class="w-full rounded-md border bg-gray-100 p-4 pr-12 text-sm text-gray-700"
-              :class="failed ? 'border-red-500' : 'border-transparent'"
-              v-model="password"
-            />
+            <input :type="passwordInputType" class="w-full rounded-md border bg-gray-100 p-4 pr-12 text-sm text-gray-700"
+              :class="failed ? 'border-red-500' : 'border-transparent'" v-model="password" />
             <div class="absolute right-0 top-0 flex h-full items-center pr-4">
               <button class="" @click="isCovered = !isCovered">
                 <EyeIcon v-if="isCovered" class="h-5 w-5 text-gray-400 transition hover:text-blue-500" />
@@ -98,14 +95,10 @@ const next = async () => {
               {{ mne }}
             </div>
 
-            <div
-              class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-100/30 backdrop-blur"
-              v-if="isCoveredMne"
-            >
-              <button
-                class="w- flex w-32 items-center justify-center gap-x-2 rounded-full border border-black py-2"
-                @click="isCoveredMne = false"
-              >
+            <div class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-100/30 backdrop-blur"
+              v-if="isCoveredMne">
+              <button class="w- flex w-32 items-center justify-center gap-x-2 rounded-full border border-black py-2"
+                @click="isCoveredMne = false">
                 <EyeIcon class="h-5 w-5" />
                 <span>Show</span>
               </button>
@@ -126,12 +119,8 @@ const next = async () => {
     <!-- buttons -->
     <div class="grid grid-cols-2 gap-x-2">
       <button class="rounded-md border border-primary-blue py-4 text-base leading-none" @click="back">Back</button>
-      <button
-        class="gradient-bg rounded-md py-4 text-base leading-none text-white"
-        :class="!password && 'opacity-50 saturate-50'"
-        :disabled="!password"
-        @click="next"
-      >
+      <button class="gradient-bg rounded-md py-4 text-base leading-none text-white"
+        :class="!password && 'opacity-50 saturate-50'" :disabled="!password" @click="next">
         Next
       </button>
     </div>

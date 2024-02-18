@@ -446,6 +446,115 @@ export async function updateBtcPath(path: string) {
   await setAccount(account)
 }
 
+<<<<<<< HEAD
+=======
+export async function needsMigrationV2(): Promise<boolean> {
+  const v1Records = await getLegacyAccounts()
+  const v2Records = await getV2Accounts()
+  const v3Records = await getAccounts()
+
+  // find out if there are any old records that exists in v1 but not in v2, judged by mnemonic
+  const v1Mnemonics = v1Records.map((record) => record.mnemonic)
+  const v2Mnemonics = Array.from(v2Records.values()).map((record) => record.mnemonic)
+  const v3Mnemonics = Array.from(v3Records.values()).map((record) => record.mnemonic)
+
+  return v1Mnemonics.some((mne) => !v2Mnemonics.includes(mne)) ||
+    v1Mnemonics.some((mne) => !v3Mnemonics.includes(encrypt(mne))) ||
+    v2Mnemonics.some((mne) => !v3Mnemonics.includes(encrypt(mne)))
+}
+
+export async function getLegacyAccounts(): Promise<V1Account[]> {
+  const legacyAccounts = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0], { isParse: true })
+  if (!legacyAccounts) {
+    return []
+  }
+
+  return Object.values(legacyAccounts)
+}
+
+export async function getV2Accounts(): Promise<Map<string, Account>> {
+  const v2Accounts = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[1], { defaultValue: '{}', isParse: false })
+  if (!v2Accounts) {
+    return new Map()
+  }
+
+  return deserializeAccountMap(v2Accounts)
+}
+
+export async function migrateV2(): Promise<void> {
+  const v1Accounts = await getLegacyAccounts()
+  const v2Accounts = await getAccounts()
+  const v2AccountsArr = Array.from(v2Accounts.values())
+  if (!v1Accounts) {
+    return
+  }
+  const v1AccountsIds = v1Accounts.map((account) => account.id)
+
+  // loop through v1 accounts, see if there are any accounts that are not in v2
+  for (let i = 0; i < v1AccountsIds.length; i++) {
+    const v1AccountId = v1AccountsIds[i]
+    const v1Account = v1Accounts.find((account) => account.id === v1AccountId)
+
+    if (!v1Account) {
+      continue
+    }
+
+    // check if account already exists in v2
+    const accountHasMigrated = v2AccountsArr.some((account) => account.mnemonic === v1Account.mnemonic)
+
+    if (accountHasMigrated) {
+      continue
+    }
+
+    const deriveChainPath = v1Account.path
+    const path = `m/44'/${deriveChainPath}'/0'/0/0`
+    const rndNameId = generateRandomString(4)
+
+    const allAddresses = deriveAllAddresses({
+      mnemonic: v1Account.mnemonic,
+      btcPath: path,
+      mvcPath: path,
+    })
+
+    const newAccount = {
+      id: v1AccountId,
+      name: v1Account.name || `Account ${rndNameId}`,
+      mnemonic: v1Account.mnemonic,
+      assetsDisplay: ['SPACE', 'BTC'],
+      mvc: {
+        path,
+        addressType: 'P2PKH',
+        mainnetAddress: allAddresses.mvcMainnetAddress,
+        testnetAddress: allAddresses.mvcTestnetAddress,
+      } as DerivedAccountDetail,
+      btc: {
+        path,
+        addressType: 'P2PKH',
+        mainnetAddress: allAddresses.btcMainnetAddress,
+        testnetAddress: allAddresses.btcTestnetAddress,
+      } as DerivedAccountDetail,
+    }
+    v2Accounts.set(v1AccountId, newAccount)
+  }
+
+  // set new accounts map
+  await setV2Accounts(v2Accounts)
+}
+
+export async function migrateV3(): Promise<void> {
+  const accounts = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[1], { defaultValue: '{}', isParse: false })
+
+  const accountsMap = deserializeAccountMap(accounts)
+  for (let [v3AccountId, v3Account] of accountsMap.entries()) {
+    // encryte mnemonic
+    v3Account.mnemonic = encrypt(v3Account.mnemonic)
+    accountsMap.set(v3AccountId, v3Account)
+  }
+  // set new accounts map
+  await setAccounts(accountsMap)
+}
+
+>>>>>>> 060ee0db2d0628873973e7ccfbb8f843e47a6c81
 type AccountManager = {
   all: () => Promise<Map<string, Account>>
   getCurrent: () => Promise<Account | undefined>

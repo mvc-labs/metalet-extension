@@ -352,6 +352,7 @@ const router = VueRouter.createRouter({
   routes,
 })
 
+<<<<<<< HEAD
 // check storage lock status, if locked, redirect to lock page
 router.beforeEach(async (to, from) => {
   if (to.path !== '/lock') {
@@ -361,16 +362,48 @@ router.beforeEach(async (to, from) => {
     }
   }
 })
+=======
+// 检查锁定状态；如果锁定，跳转到锁定页面
+// router.beforeEach(async (to, from) => {
+//   if (to.path !== '/lock') {
+//     const locked = await getStorage('locked')
+//     if (locked) {
+//       return '/lock'
+//     }
+//   }
+// })
+>>>>>>> 060ee0db2d0628873973e7ccfbb8f843e47a6c81
 
 // 检查账号状态；如果没有当前账号，跳转到账号页面
 router.beforeEach(async (to) => {
   // console.log('locked', await storage.get('locked'))
 
+<<<<<<< HEAD
   if (await storage.get('locked')) {
     return '/lock'
+=======
+    // 比照查看有无该助记词的账号
+    const accounts = await getAccounts()
+    const accountsArr = Array.from(accounts.values())
+    const hasAccount = accountsArr.some((account) => account.mnemonic === encrypt(mneStr))
+
+    if (!hasAccount && to.path !== '/migrate') {
+      return '/migrate'
+    }
+>>>>>>> 060ee0db2d0628873973e7ccfbb8f843e47a6c81
   }
   const authPages = ['/welcome', '/lock', '/accounts', '/wallet/create', '/wallet/import', '/migrateV2']
 
+<<<<<<< HEAD
+=======
+  if (await needsMigrationV2() && await getStorage('needsMigration')) {
+    if (to.path !== '/welcome') {
+      return '/welcome'
+    }
+  }
+
+  const authPages = ['/welcome', '/lock', '/accounts', '/wallet/create', '/wallet/import', '/migrate']
+>>>>>>> 060ee0db2d0628873973e7ccfbb8f843e47a6c81
   if (!authPages.includes(to.path)) {
     const redirect = getCurrentAccount().then(async (account) => {
       if (!account) {
