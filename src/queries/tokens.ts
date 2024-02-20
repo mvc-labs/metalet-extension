@@ -24,10 +24,10 @@ export const fetchMVCTokens = async (address: string): Promise<Token[]> => {
   return await mvcApi<Token[]>(`/contract/ft/address/${address}/balance`).get()
 }
 
-export const useMVCAssetsQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
+export const useMVCAssetsQuery = (address: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
-    queryKey: ['MVCTokens', { address: addressRef.value }],
-    queryFn: () => fetchMVCTokens(addressRef.value),
+    queryKey: ['MVCTokens', { address }],
+    queryFn: () => fetchMVCTokens(address.value),
     select: (tokens: Token[]) =>
       tokens.map(
         (token) =>

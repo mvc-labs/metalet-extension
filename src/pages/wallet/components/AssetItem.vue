@@ -57,11 +57,15 @@ const assetUSD = computed(() => {
   }
 })
 
-watch(assetUSD, (_assetUSD) => {
-  if (_assetUSD) {
-    updateAsset({ name: asset.symbol, value: _assetUSD.toNumber() })
-  }
-})
+watch(
+  assetUSD,
+  (_assetUSD) => {
+    if (_assetUSD) {
+      updateAsset({ name: asset.symbol, value: _assetUSD.toNumber() })
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>

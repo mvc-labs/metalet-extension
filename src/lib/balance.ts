@@ -9,6 +9,10 @@ export const assetList = ref<Asset[]>([])
 
 export const totalBalance = computed(() => assetList.value.reduce((sum, asset) => sum + (asset.value || 0), 0))
 
+export const resetAssetList = () => {
+  assetList.value = []
+}
+
 export async function updateAsset(asset: Asset) {
   const preAsset = assetList.value.find((assetItem) => assetItem.name === asset.name)
   if (!preAsset) {

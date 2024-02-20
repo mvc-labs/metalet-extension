@@ -29,11 +29,13 @@ getAssetsDisplay().then((display) => {
   assetsDisplay.value = display
 })
 
-const { data: btcAssets } = useBRC20AssetQuery(btcAddress, {
+const { isLoading: btcAssetsLoading, data: btcAssets } = useBRC20AssetQuery(btcAddress, {
   enabled: computed(() => !!btcAddress.value),
 })
 
-const { data: mvcAssets } = useMVCAssetsQuery(mvcAddress, { enabled: computed(() => !!mvcAddress.value) })
+const { isFetching: mvcAssetsLoading, data: mvcAssets } = useMVCAssetsQuery(mvcAddress, {
+  enabled: computed(() => !!mvcAddress.value),
+})
 
 function toManageAssets() {
   router.push('/wallet/manage-assets')
@@ -64,6 +66,7 @@ function toToken(token: Asset, address: string) {
         :asset="asset"
         :key="asset.symbol"
         :address="btcAddress"
+        v-show="!btcAssetsLoading"
         v-for="asset in btcAssets"
         @click="toNative(asset, btcAddress)"
       />
@@ -77,6 +80,7 @@ function toToken(token: Asset, address: string) {
         :asset="asset"
         :key="asset.genesis"
         :address="mvcAddress"
+        v-show="!mvcAssetsLoading"
         v-for="asset in mvcAssets"
         @click="toToken(asset, mvcAddress)"
       />

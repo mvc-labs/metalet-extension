@@ -65,10 +65,10 @@ export const getBTCPrice = () => {
 
 type TokenType = 'BRC20'
 
-export const useBRC20AssetQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
+export const useBRC20AssetQuery = (address: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
-    queryKey: ['BRC20Assets', { address: addressRef.value }],
-    queryFn: () => fetchBRC20Token(addressRef.value),
+    queryKey: ['BRC20Assets', { address }],
+    queryFn: () => fetchBRC20Token(address.value),
     ...options,
   })
 }

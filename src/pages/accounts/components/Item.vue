@@ -66,15 +66,17 @@ const connect = async () => {
   // invalidate all queries
   await queryClient.invalidateQueries()
 
+  // reset Asset List
+  // resetAssetList()
+
   // update injected wallet
   const network = await getNetwork()
   const wif = await getPrivateKey()
   wallet.value = new Wallet(wif, network as API_NET, FEEB, API_TARGET.MVC)
 
   assetList.value = []
-  // window.location.reload()
 
-  router.replace('/wallet')
+  router.push('/wallet')
 }
 
 const isCurrent = computed(() => {
