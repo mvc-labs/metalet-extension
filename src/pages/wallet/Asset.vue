@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import Decimal from 'decimal.js'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { updateAsset } from '@/lib/balance'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
@@ -77,29 +77,30 @@ const rateEnabled = computed(() => {
 const {
   isLoading: isExchangeRateLoading,
   data: exchangeRate,
-  error: exchangeError,
 } = useExchangeRatesQuery(symbol, asset.value?.contract, {
   enabled: rateEnabled,
 })
 
-const exchange = computed(() => {
+const assetUSD = computed(() => {
+  if (isExchangeRateLoading.value) {
+    return
+  }
+  const usdRate = new Decimal(exchangeRate.value?.price || 0)
   if (asset.value) {
     if (asset.value?.balance) {
-      const usdRate = new Decimal(exchangeRate.value?.price || 0)
-      const balanceInStandardUnit = new Decimal(asset.value.balance?.total || 0)
-      const exchanged = usdRate.mul(balanceInStandardUnit)
-      updateAsset({ name: asset.value.symbol, value: exchanged.toNumber() })
-      return `$${exchanged.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
+      const balanceInStandardUnit = new Decimal(asset.value.balance?.total || 0).dividedBy(10 ** asset.value.decimal)
+      return usdRate.mul(balanceInStandardUnit)
     } else if (balance.value && exchangeRate.value) {
-      const usdRate = new Decimal(exchangeRate.value?.price || 0)
-      const balanceInStandardUnit = new Decimal(balance.value.total).dividedBy(1e8)
-      const exchanged = usdRate.mul(balanceInStandardUnit)
-      updateAsset({ name: asset.value.symbol, value: exchanged.toNumber() })
-      return `$${exchanged.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
+      const balanceInStandardUnit = new Decimal(balance.value.total).dividedBy(10 ** asset.value.decimal)
+      return usdRate.mul(balanceInStandardUnit)
     }
   }
+})
 
-  return '$-- USD'
+watch(assetUSD, (_assetUSD) => {
+  if (_assetUSD) {
+    updateAsset({ name: asset.value!.symbol, value: _assetUSD.toNumber() })
+  }
 })
 
 const toSend = () => {
@@ -157,7 +158,10 @@ const toTransfer = () => {
             {{ asset.balance.total }} {{ asset.symbol }}
           </div>
 
-          <div class="text-[#909399] text-center">{{ exchange }}</div>
+          <div class="text-[#909399] text-center">
+            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD` }}</span>
+            <span v-else>$-- USD</span>
+          </div>
         </template>
         <div v-else-if="isLoading">--</div>
         <template v-else-if="balance">
@@ -169,7 +173,10 @@ const toTransfer = () => {
               {{ prettifyTokenBalance(balance.total, asset.decimal, true) }}
             </span>
           </div>
-          <div class="text-[#909399] text-center">{{ exchange }}</div>
+          <div class="text-[#909399] text-center">
+            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD` }}</span>
+            <span v-else>$-- USD</span>
+          </div>
         </template>
 
         <!-- buttons -->
@@ -201,7 +208,7 @@ const toTransfer = () => {
             >
           </div>
           <div class="w-full py-3 text-center text-sm font-bold text-gray-500" v-if="tickersLoading">
-            Loading BRC Tickers.
+            Loading BRC Tickers...
           </div>
           <div v-else class="grid grid-cols-3 gap-2 w-full mt-3" v-if="tickersData && tickersData.transferableList">
             <div

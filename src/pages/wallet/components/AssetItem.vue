@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import Decimal from 'decimal.js'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { updateAsset } from '@/lib/balance'
 import { isOfficialToken } from '@/lib/assets'
 import { useBalanceQuery } from '@/queries/balance'
@@ -14,6 +14,8 @@ const { asset, address } = defineProps<{
   address: string
 }>()
 
+// console.log('asset', asset.symbol, asset)
+
 const tag = ref<Tag>()
 
 if (asset?.contract) {
@@ -21,37 +23,44 @@ if (asset?.contract) {
 }
 
 const balaceEnabled = computed(() => !!address && !!asset.symbol && !asset.balance)
-const {
-  isLoading,
-  data: balance,
-  error: balanceError,
-} = useBalanceQuery(ref(address), ref(asset.symbol), { enabled: balaceEnabled })
+const { data: balance } = useBalanceQuery(ref(address), ref(asset.symbol), { enabled: balaceEnabled })
 
 const rateEnabled = computed(() => !!address && !!asset.symbol)
-const {
-  isLoading: isExchangeRateLoading,
-  data: exchangeRate,
-  error: exchangeError,
-} = useExchangeRatesQuery(ref(asset.symbol), asset?.contract, {
-  enabled: rateEnabled,
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(
+  ref(asset.symbol),
+  asset?.contract,
+  {
+    enabled: rateEnabled,
+  }
+)
+
+const assetPrice = computed(() => {
+  if (asset?.balance) {
+    return `${new Decimal(asset.balance.total).dividedBy(10 ** asset.decimal).toNumber()} ${asset.symbol}`
+  } else if (balance.value) {
+    return `${new Decimal(balance.value.total).dividedBy(10 ** asset.decimal).toNumber()} ${asset.symbol}`
+  }
+  return `-- ${asset.symbol}`
 })
 
-const exchange = computed(() => {
-  if (asset?.balance) {
-    const usdRate = new Decimal(exchangeRate.value?.price || 0)
-    const balanceInStandardUnit = new Decimal(asset.balance?.total || 0).dividedBy(10 ** asset.decimal)
-    const exchanged = usdRate.mul(balanceInStandardUnit)
-    updateAsset({ name: asset.symbol, value: exchanged.toNumber() })
-    return `$${exchanged.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
-  } else if (balance.value && exchangeRate.value) {
-    const usdRate = new Decimal(exchangeRate.value?.price || 0)
-    const balanceInStandardUnit = new Decimal(balance.value.total).dividedBy(10 ** asset.decimal)
-    const exchanged = usdRate.mul(balanceInStandardUnit)
-    updateAsset({ name: asset.symbol, value: exchanged.toNumber() })
-    return `$${exchanged.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD`
+const assetUSD = computed(() => {
+  if (isExchangeRateLoading.value) {
+    return
   }
+  const usdRate = new Decimal(exchangeRate.value?.price || 0)
+  if (asset?.balance) {
+    const balanceInStandardUnit = new Decimal(asset.balance?.total || 0).dividedBy(10 ** asset.decimal)
+    return usdRate.mul(balanceInStandardUnit)
+  } else if (balance.value && exchangeRate.value) {
+    const balanceInStandardUnit = new Decimal(balance.value.total).dividedBy(10 ** asset.decimal)
+    return usdRate.mul(balanceInStandardUnit)
+  }
+})
 
-  return '$-- USD'
+watch(assetUSD, (_assetUSD) => {
+  if (_assetUSD) {
+    updateAsset({ name: asset.symbol, value: _assetUSD.toNumber() })
+  }
 })
 </script>
 
@@ -84,60 +93,29 @@ const exchange = computed(() => {
       </div>
 
       <div class="flex grow overflow-hidden flex-col items-end text-xs gap-y-1">
-        <template v-if="asset.queryable">
-          <!-- balance info -->
-          <div v-if="asset.balance" class="w-full text-right">
-            <div v-if="asset.contract === 'BRC-20'" class="w-full border-b border-[#D8D8D8] border-dashed pb-3">
-              <div class="text-[#141416] font-bold text-base">
-                {{ prettifyTokenBalance(asset.balance.total, asset.decimal, false, asset.symbol) }}
-              </div>
-
-              <!-- BRC-20 USD -->
-              <div class="text-sm font-normal text-gray-500" v-if="isExchangeRateLoading">--</div>
-              <div class="text-sm font-normal text-gray-500" v-else-if="exchange">{{ exchange }}</div>
-            </div>
-            <span v-else-if="asset.contract === 'MetaContract'" class="text-[#141416] font-bold text-base">
-              ≈ {{ (asset.balance.total / 10 ** asset.decimal).toFixed(2) }} {{ asset.symbol }}
-              <!-- {{ prettifyTokenBalance(asset.balance.total, asset.decimal, true) }} -->
-            </span>
-            <span v-else> {{ asset.balance.total }} {{ asset.symbol }} </span>
+        <div
+          :class="[
+            'w-full text-right',
+            asset?.contract === 'BRC-20' ? 'border-b border-[#D8D8D8] border-dashed pb-3' : '',
+          ]"
+        >
+          <div class="text-[#141416] font-bold text-base">{{ assetPrice }}</div>
+          <div :class="['text-sm font-normal text-gray-500']">
+            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD` }}</span>
+            <span v-else>$-- USD</span>
           </div>
-          <div v-else-if="isLoading">--</div>
-          <div v-else-if="balance" class="text-[#141416] font-bold text-base">
-            <span v-if="asset.isNative">
-              {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
-            </span>
-            <span v-else>
-              {{ prettifyTokenBalance(balance.total, asset.decimal, true) }}
-            </span>
-          </div>
-          <!-- <div v-else-if="balanceError" class="text-xs text-red-500 truncate max-w-full">{{ balanceError }}</div> -->
+        </div>
 
-          <!-- BRC-20 info -->
-          <div v-if="asset?.contract === 'BRC-20'" class="w-full mt-2.5 space-y-2">
-            <div class="text-xs flex items-center justify-between w-full">
-              <span class="text-[#909399]">Transferable:</span>
-              <span class="text-[#141416] font-bold truncate" :title="`${asset.balance?.transferBalance}`">{{
-                asset.balance?.transferBalance || 0
-              }}</span>
-            </div>
-            <div class="text-xs flex items-center justify-between w-full">
-              <span class="text-[#909399]">Available:</span>
-              <span class="text-[#141416] font-bold truncate" :title="`${asset.balance?.availableBalance}`">{{
-                asset.balance?.availableBalance || 0
-              }}</span>
-            </div>
+        <div v-if="asset?.contract === 'BRC-20'" class="w-full mt-2.5 space-y-2">
+          <div class="text-xs flex items-center justify-between w-full">
+            <span class="text-[#909399]">Transferable:</span>
+            <span class="text-[#141416] font-bold truncate">{{ asset.balance?.transferBalance || 0 }}</span>
           </div>
-
-          <!-- USD info -->
-          <div v-if="!(asset?.contract === 'BRC-20')">
-            <div class="text-sm text-gray-500" v-if="isExchangeRateLoading">--</div>
-            <div class="text-sm text-gray-500" v-else-if="exchange">{{ exchange }}</div>
-            <!-- <div v-else-if="exchangeError" class="text-xs text-red-500 truncate max-w-full">{{ exchangeError }}</div> -->
+          <div class="text-xs flex items-center justify-between w-full">
+            <span class="text-[#909399]">Available:</span>
+            <span class="text-[#141416] font-bold truncate">{{ asset.balance?.availableBalance || 0 }}</span>
           </div>
-        </template>
-
-        <div v-else>--</div>
+        </div>
       </div>
     </div>
   </div>

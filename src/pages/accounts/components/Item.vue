@@ -72,8 +72,9 @@ const connect = async () => {
   wallet.value = new Wallet(wif, network as API_NET, FEEB, API_TARGET.MVC)
 
   assetList.value = []
+  // window.location.reload()
 
-  router.push('/wallet')
+  router.replace('/wallet')
 }
 
 const isCurrent = computed(() => {

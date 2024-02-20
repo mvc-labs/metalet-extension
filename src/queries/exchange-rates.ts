@@ -11,7 +11,6 @@ export const fetchExchangeRates = async (): Promise<RawRates> => {
     .then((res) => res.priceInfo)
 }
 
-// Fetch BRC-20 coin tick price
 export const fetchTickExchangeRates = async (): Promise<RawRates> => {
   return await metaletApiV3<{ priceInfo: RawRates }>(`/coin/brc20/price`)
     .get()
@@ -28,24 +27,33 @@ export const doNothing = async (symbol: SymbolTicker): Promise<RawRates> => ({
   [symbol.toLowerCase()]: 0,
 })
 
+const getExchangeCoinType = (symbol: SymbolTicker, contract?: string) => {
+  if (DEFAULT_SYMBOLS.includes(symbol)) {
+    return 'Default'
+  } else if (contract === 'BRC-20') {
+    return 'BRC-20'
+  } else if (contract === 'MetaContract') {
+    return 'MetaContract'
+  } else {
+    throw Error('Unknown coin type')
+  }
+}
+
 export const useExchangeRatesQuery = (
   symbolRef: Ref<SymbolTicker>,
   contract?: string,
   options?: { enabled: ComputedRef<boolean> }
 ) => {
   return useQuery({
-    queryKey: ['exchangeRates', { symbol: symbolRef.value, contract }],
+    queryKey: ['exchangeRates', { type: getExchangeCoinType(symbolRef.value, contract) }],
     queryFn: () => {
       if (contract === 'BRC-20') {
         return fetchTickExchangeRates()
       } else if (contract === 'MetaContract') {
         return fetchFTExchangeRates()
-      }
-
-      if (DEFAULT_SYMBOLS.includes(symbolRef.value)) {
+      } else if (DEFAULT_SYMBOLS.includes(symbolRef.value)) {
         return fetchExchangeRates()
       }
-
       return doNothing(symbolRef.value)
     },
     select: (rates: RawRates) => {

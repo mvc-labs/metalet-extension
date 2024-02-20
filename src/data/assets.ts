@@ -1,7 +1,7 @@
 import { SymbolTicker } from '@/lib/asset-symbol'
 import BtcLogoImg from '../assets/images/btc-logo.svg?url'
 import { Balance } from '@/queries/balance'
-import SpaceLogoImg from '../assets/images/space-logo.svg?url'
+import SpaceLogoImg from '../assets/images/space-circle.svg?url'
 
 export type Asset = {
   symbol: SymbolTicker

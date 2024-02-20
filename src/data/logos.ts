@@ -2,7 +2,7 @@ import MetaletLogo from '../assets/images/metalet-logo.png?url'
 import MvcSwapLogo from '../assets/images/mvcswap-logo.png?url'
 import MVCUSDTLogo from '../assets/images/usdt-logo.jpg?url'
 import ShowCoinLogo from '../assets/images/sc-logo.svg?url'
-import MetaCoinLogo from '../assets/images/mc-logo.svg?url'
+import MetaCoinLogo from '../assets/images/mc-circle.svg?url'
 import XingnengLogo from '../assets/images/xingneng-logo.png'
 // import FtDefaultLogo from '../assets/images/ft-default-icon.svg?url'
 
