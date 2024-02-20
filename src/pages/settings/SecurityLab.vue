@@ -78,7 +78,7 @@ const exportAccouts = async (jsonStr: string, version: string) => {
       </div>
     </div>
   </div>
-  <div class="space-y-2 mt-4">
+  <div class="space-y-2 mt-4" v-if="false">
     <div class="text-base font-bold">Export</div>
 
     <div class="divide-y divide-gray-100">

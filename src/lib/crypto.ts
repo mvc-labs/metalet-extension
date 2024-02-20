@@ -1,10 +1,10 @@
-import { BN, TxComposer, mvc } from 'meta-contract'
 import { Buffer } from 'buffer'
-import { getMvcRootPath, type Account } from './account'
+import CryptoJS from 'crypto-js'
 import { parseLocalTransaction } from './metadata'
+import { BN, TxComposer, mvc } from 'meta-contract'
+import { getMvcRootPath, type Account } from './account'
+import { type MvcUtxo, fetchUtxos } from '@/queries/utxos'
 import { DERIVE_MAX_DEPTH, FEEB, P2PKH_UNLOCK_SIZE } from '@/data/config'
-import { MvcUtxo, fetchUtxos } from '@/queries/utxos'
-import CryptoJS from "crypto-js";
 
 export function eciesEncrypt(message: string, privateKey: mvc.PrivateKey): string {
   const publicKey = privateKey.toPublicKey()
@@ -88,7 +88,7 @@ export const signTransaction = async (
   { txHex, scriptHex, inputIndex, satoshis, sigtype, path }: ToSignTransaction,
   returnsTransaction: boolean = false
 ) => {
-  const mneObj = mvc.Mnemonic.fromString(encrypt(account.mnemonic))
+  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
   const hdpk = mneObj.toHDPrivateKey('', network)
   const rootPath = await getMvcRootPath()
   // find out priv / pub according to path
@@ -135,7 +135,7 @@ export const signTransactions = async (
   network: 'testnet' | 'mainnet',
   toSignTransactions: ToSignTransaction[]
 ) => {
-  const mneObj = mvc.Mnemonic.fromString(encrypt(account.mnemonic))
+  const mneObj = mvc.Mnemonic.fromString(account.mnemonic)
   const hdpk = mneObj.toHDPrivateKey('', network)
   const rootPath = await getMvcRootPath()
 
@@ -509,42 +509,30 @@ function pickUtxo(utxos: SA_utxo[], amount: number) {
 export function getSecretData(password: string) {
   return {
     SECRET_KEY: CryptoJS.enc.Utf8.parse(password),
-    SECRET_IV: CryptoJS.enc.Utf8.parse(password)
+    SECRET_IV: CryptoJS.enc.Utf8.parse('0000000000000000'),
   }
 }
 
-/**
- * Encrypts a mnemonic using a password.
- * @param mnemonic - The mnemonic phrase to encrypt.
- * @param password - The password used for encryption.
- * @returns The encrypted ciphertext of the mnemonic.
- */
-export function encryptMnemonic(mnemonic: string, password: string) {
+export function encrypt(mnemonic: string, password: string) {
   const { SECRET_KEY, SECRET_IV } = getSecretData(password)
-  const mnemonicHex = CryptoJS.enc.Utf8.parse(mnemonic);
-  const encrypted = CryptoJS.AES.encrypt(mnemonicHex, SECRET_KEY, {
+  const mnemonicUtf8 = CryptoJS.enc.Utf8.parse(mnemonic)
+  const encrypted = CryptoJS.AES.encrypt(mnemonicUtf8, SECRET_KEY, {
     iv: SECRET_IV,
     mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7
-  });
-  return encrypted.ciphertext.toString();
+    padding: CryptoJS.pad.Pkcs7,
+  })
+  return encrypted.ciphertext.toString()
 }
 
-/**
- * Decrypt mnemonic phrase
- * @param encryptedText Encrypted mnemonic phrase
- * @param password Password
- * @returns Decrypted mnemonic phrase
- */
-export function decryptMnemonic(encryptedText: string, password: string) {
+export function decrypt(encryptedText: string, password: string) {
   const { SECRET_KEY, SECRET_IV } = getSecretData(password)
-  const encryptedHexStr = CryptoJS.enc.Hex.parse(encryptedText);
-  const str = CryptoJS.enc.Base64.stringify(encryptedHexStr);
+  const encryptedHexStr = CryptoJS.enc.Hex.parse(encryptedText)
+  const str = CryptoJS.enc.Base64.stringify(encryptedHexStr)
   const decrypt = CryptoJS.AES.decrypt(str, SECRET_KEY, {
     iv: SECRET_IV,
     mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7
-  });
-  const decryptedStr = decrypt.toString(CryptoJS.enc.Utf8);
-  return decryptedStr.toString();
+    padding: CryptoJS.pad.Pkcs7,
+  })
+  const decryptedStr = decrypt.toString(CryptoJS.enc.Utf8)
+  return decryptedStr.toString()
 }

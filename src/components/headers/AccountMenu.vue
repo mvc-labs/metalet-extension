@@ -27,8 +27,6 @@ password.has().then((has) => {
 })
 const lock = async () => {
   await password.lock()
-
-  // 返回锁定页
   router.push('/lock')
 }
 

@@ -22,9 +22,9 @@ import { ChevronDownIcon, CheckIcon } from '@heroicons/vue/24/solid'
 
 const nfts = [
   { id: 1, name: 'Ordinals', disabled: false },
-  { id: 2, name: 'Atomicals', disabled: true },
+  // { id: 2, name: 'Atomicals', disabled: true },
   { id: 3, name: 'MetaContract', disabled: false },
-  { id: 4, name: 'MetaID Pin', disabled: false },
+  // { id: 4, name: 'MetaID Pin', disabled: false },
 ]
 const selectedNFT = ref(nfts[0])
 

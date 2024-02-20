@@ -1,24 +1,21 @@
 import useStorage from './storage'
 import { mvc } from 'meta-contract'
-import { encryptMnemonic } from './crypto'
+import { encrypt, decrypt } from './crypto'
 import { generateRandomString } from './helpers'
 import { AddressType, deriveAllAddresses } from './bip32-deriver'
 import {
-  Account,
-  // getAccounts,
   getV0Account,
   getLegacyAccounts,
   getV2Accounts,
+  getV2AccountsObj,
   setV2Accounts,
-  getV3Accounts,
-  setV3Accounts,
+  type Account,
   type DerivedAccountDetail,
-  // setAccount,
 } from './account'
 
 export const ACCOUNT_Sync_Migrated_KEY = 'accounts_sync_migrated'
 export const ACCOUNT_V2_Migrated_KEY = 'accounts_v2_migrated'
-export const ACCOUNT_V3_Migrated_KEY = 'accounts_v3_migrated'
+export const ACCOUNT_V2_Encrypted_KEY = 'accounts_v2_encrypted'
 export const Error_Accounts_Migrate_Log_Key = 'error_accounts_migrate_log'
 
 const storage = useStorage()
@@ -218,29 +215,14 @@ export async function migrateV2(): Promise<void> {
   await setV2Accounts(v2Accounts)
 }
 
-export async function migrateV3(password: string): Promise<void> {
-  const v2Accounts = await getV2Accounts()
-  const v3Accounts = await getV3Accounts()
-  const v3AccountsArr = Array.from(v3Accounts.values())
-  if (!v2Accounts.size) {
-    return
-  }
+export async function encryptV2Accounts(password: string): Promise<void> {
+  const v2Accounts = await getV2AccountsObj()
+  console.log('v2Accounts', v2Accounts)
 
-  for (let v2Account of v2Accounts.values()) {
-    const notMigrated = v3AccountsArr.some(
-      (account) => account.mnemonic === encryptMnemonic(v2Account.mnemonic, password)
-    )
-    if (notMigrated) {
-      continue
-    }
-    const v3Account = {
-      ...v2Account,
-      mnemonic: encryptMnemonic(v2Account.mnemonic, password),
-    }
-    v3Accounts.set(v2Account.id, v3Account)
-  }
+  const encryptedText = encrypt(JSON.stringify(v2Accounts), password)
+  console.log('encryptedText', encryptedText)
 
-  // set new accounts map
-  await setV3Accounts(v3Accounts)
-  await storage.set(ACCOUNT_V3_Migrated_KEY, true)
+  const decryptedText = decrypt(encryptedText, password)
+  console.log('decryptedText', decryptedText)
+  console.log('JSON decryptedText', JSON.parse(decryptedText))
 }

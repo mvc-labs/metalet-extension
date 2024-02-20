@@ -9,7 +9,6 @@ import { isTaprootInput } from 'bitcoinjs-lib/src/psbt/bip371'
 
 import { raise } from './helpers'
 import { Output } from 'bitcoinjs-lib/src/transaction'
-import { encrypt } from './crypto'
 
 export const DUST_UTXO_VALUE = 546
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4
@@ -56,12 +55,12 @@ function outputBytes(output: PsbtTxOutput) {
     (output.script
       ? output.script.length
       : output.address?.startsWith('bc1') || output.address?.startsWith('tb1')
-        ? output.address?.length === 42
-          ? TX_OUTPUT_SEGWIT
-          : TX_OUTPUT_SEGWIT_SCRIPTHASH
-        : output.address?.startsWith('3') || output.address?.startsWith('2')
-          ? TX_OUTPUT_SCRIPTHASH
-          : TX_OUTPUT_PUBKEYHASH)
+      ? output.address?.length === 42
+        ? TX_OUTPUT_SEGWIT
+        : TX_OUTPUT_SEGWIT_SCRIPTHASH
+      : output.address?.startsWith('3') || output.address?.startsWith('2')
+      ? TX_OUTPUT_SCRIPTHASH
+      : TX_OUTPUT_PUBKEYHASH)
   )
 }
 
@@ -90,7 +89,7 @@ export async function getTweakedPrivateKey() {
   const network = await getNetwork()
   const account = (await getCurrentAccount()) ?? raise('No current account')
 
-  const privateKey = deriveBtcPrivateKey(encrypt(account.mnemonic), account.btc.path, network)
+  const privateKey = deriveBtcPrivateKey(account.mnemonic, account.btc.path, network)
   const xOnlyPublicKey = await getXOnlyPublicKey()
   const tabTweaked = tapTweakHash(xOnlyPublicKey)
 

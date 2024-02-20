@@ -1,5 +1,6 @@
 import hash from 'object-hash'
 import useStorage from './storage'
+import { notifyBg } from './notify-bg'
 
 const Locked_Key = 'locked'
 const Password_Key = 'password'
@@ -19,10 +20,6 @@ export async function checkPassword(credential: string) {
   return hash(credential) === password
 }
 
-// export async function encrypt(anything: any) {
-//   const password = await getPassword()
-// }
-
 export async function setPassword(password: string) {
   const hashed = hash(password)
   await storage.set(Password_Key, hashed)
@@ -30,6 +27,7 @@ export async function setPassword(password: string) {
 
 export async function lock() {
   await storage.set(Locked_Key, true)
+  await notifyBg('lock')()
 }
 
 export async function isLocked() {
@@ -42,7 +40,7 @@ export async function unlock(password: string) {
     throw new Error('Password incorrect')
   }
   await storage.set(Locked_Key, false)
-  return true
+  await notifyBg('unlock')()
 }
 
 type PasswordManager = {
@@ -50,7 +48,7 @@ type PasswordManager = {
   get: () => Promise<string | undefined>
   set: (password: string) => Promise<void>
   lock: () => Promise<void>
-  unlock: (password: string) => Promise<boolean>
+  unlock: (password: string) => Promise<void>
   isLocked: () => Promise<boolean>
   check: (credential: string) => Promise<boolean>
 }

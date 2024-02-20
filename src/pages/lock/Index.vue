@@ -6,11 +6,10 @@ import passwordManager from '@/lib/password'
 import { useRouter } from 'vue-router'
 import { setLastLockTime } from '@/lib/lock'
 
+const password = ref('')
 const router = useRouter()
-
 const isCovered = ref(true)
 const passwordInputType = computed(() => (isCovered.value ? 'password' : 'text'))
-const password = ref('')
 
 const failed = ref(false)
 const tryUnlock = async () => {

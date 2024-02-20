@@ -1,17 +1,19 @@
-import { getStorage, setStorage } from './storage'
+import useStorage from './storage'
 
-const LAST_LOCK_TIME = 'LAST_LOCK_TIME'
+const storage = useStorage()
+
+const LAST_LOCK_TIME_KEY = 'LAST_LOCK_TIME'
 
 export async function getLastLockTime() {
-    const time = await getStorage(LAST_LOCK_TIME, { defaultValue: -1 })
-    try {
-        return Number(time)
-    } catch (error) {
-        console.error("getLastLockTimeError", error);
-        return -1
-    }
+  const time = await storage.get(LAST_LOCK_TIME_KEY, { defaultValue: -1 })
+  try {
+    return Number(time)
+  } catch (error) {
+    console.error('getLastLockTimeError', error)
+    return -1
+  }
 }
 
 export async function setLastLockTime() {
-    return await setStorage(LAST_LOCK_TIME, Date.now())
+  return await storage.set(LAST_LOCK_TIME_KEY, Date.now())
 }

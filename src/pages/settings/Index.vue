@@ -123,14 +123,14 @@ const showResetModal = ref(false)
           </div>
         </div>
 
-        <div class="setting-item group cursor-pointer" @click="toSecurityLab" v-if="hasPassword">
+        <div class="setting-item group cursor-pointer" @click="toSecurityLab" v-if="false">
           <div class="text-gray-500 group-hover:underline">Security Lab (Upgrade to account V3 version)</div>
           <div class="">
             <ChevronRightIcon class="link-icon" />
           </div>
         </div>
 
-        <div class="setting-item group cursor-pointer" @click="toSecurityLab">
+        <div class="setting-item group cursor-pointer" @click="toSecurityLab" v-if="false">
           <div class="text-gray-500 group-hover:underline">Migrate Error Logs</div>
           <div class="">
             <ChevronRightIcon class="link-icon" />

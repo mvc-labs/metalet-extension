@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { migrateV3 } from '@/lib/migrate'
 import passwordManager from '../lib/password'
+import { encryptV2Accounts } from '@/lib/migrate'
 import { XMarkIcon } from '@heroicons/vue/20/solid'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/solid'
 
 const router = useRouter()
 
-const props = defineProps<{
+const { show } = defineProps<{
   show: boolean
 }>()
 const emit = defineEmits(['update:show'])
@@ -27,7 +27,7 @@ const migrate = async () => {
   }
 
   // await accountManager.removeCurrent()
-  await migrateV3(password.value)
+  await encryptV2Accounts(password.value)
 
   emit('update:show', false)
 

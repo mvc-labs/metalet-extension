@@ -29,13 +29,7 @@ async function getConnections() {
 }
 
 connector.connect = async function (accountId, host) {
-<<<<<<< HEAD
   const connections = await getConnections()
-=======
-  const connections = await storage.get('connections', {
-    defaultValue: {}, isParse: true
-  })
->>>>>>> 060ee0db2d0628873973e7ccfbb8f843e47a6c81
   const accountConnections = connections[accountId] || {}
   accountConnections[host] = {
     connectedAt: Date.now(),
