@@ -15,7 +15,7 @@ export type Balance = {
 }
 
 export const fetchSpaceBalance = async (address: string): Promise<Balance> => {
-  const balance: any = await mvcApi(`/address/${address}/balance`).get()
+  const balance: any = (await await mvcApi(`/address/${address}/balance`)).get()
   balance.total = new Decimal(balance.confirmed).add(balance.unconfirmed).toNumber()
   return balance
 }
@@ -46,7 +46,7 @@ export interface BitcoinBalance {
 }
 
 export const fetchBtcBalance = async (address: string): Promise<Balance> => {
-  const net = await getNet()
+  const net = await await getNet()
   const data = await metaletApiV3<BTCBalance>(`/address/btc-balance`).get({ net, address })
   return {
     address,
@@ -71,7 +71,7 @@ export const useBalanceQuery = (
   options: { enabled: ComputedRef<boolean> }
 ) => {
   return useQuery({
-    queryKey: ['balance', { address: address.value, symbol: symbol.value }],
+    queryKey: ['balance', { address, symbol }],
     queryFn: () => {
       switch (symbol.value) {
         case 'SPACE':

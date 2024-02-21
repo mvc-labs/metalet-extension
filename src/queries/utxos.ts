@@ -8,11 +8,11 @@ export interface UTXO {
   satoshi: number
   confirmed: boolean
   inscriptions:
-  | {
-    id: string
-    num: number
-  }[]
-  | null
+    | {
+        id: string
+        num: number
+      }[]
+    | null
 }
 
 export type MvcUtxo = {
@@ -25,7 +25,7 @@ export type MvcUtxo = {
 }
 
 const fetchMVCUtxos = async (address: string): Promise<MvcUtxo[]> => {
-  return await mvcApi<MvcUtxo[]>(`/address/${address}/utxo`).get()
+  return await (await mvcApi<MvcUtxo[]>(`/address/${address}/utxo`)).get()
 }
 
 export type Utxo = {
@@ -79,7 +79,7 @@ function formatUnisatUTXO(utxo: UnisatUTXO & { confirmed: boolean }): UTXO {
 }
 
 export async function getBtcUtxos(address: string): Promise<UTXO[]> {
-  const net = await getNet()
+  const net = await await getNet()
   return metaletApiV3<UTXO[]>('/address/btc-utxo').get({ net, address, unconfirmed: '1' })
 }
 
@@ -96,7 +96,7 @@ export async function getBtcUtxos(address: string): Promise<UTXO[]> {
 // }
 
 export async function getInscriptionUtxo(inscriptionId: string): Promise<UTXO> {
-  const net = await getNet()
+  const net = await await getNet()
   return await metaletApiV3<UTXO>('/inscription/utxo').get({ net, inscriptionId })
 }
 

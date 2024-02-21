@@ -21,7 +21,7 @@ export type Token = {
 }
 
 export const fetchMVCTokens = async (address: string): Promise<Token[]> => {
-  return await mvcApi<Token[]>(`/contract/ft/address/${address}/balance`).get()
+  return await (await mvcApi<Token[]>(`/contract/ft/address/${address}/balance`)).get()
 }
 
 export const useMVCAssetsQuery = (address: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
@@ -67,7 +67,7 @@ export const useMVCTokenQuery = (
 }
 
 export const fetchTokens = async (address: string): Promise<Token[]> => {
-  const tokens: any = await mvcApi(`/contract/ft/address/${address}/balance`).get()
+  const tokens: any = await (await mvcApi(`/contract/ft/address/${address}/balance`)).get()
 
   return tokens.map((token: any) => {
     // 将codeHash改为小写
@@ -78,7 +78,7 @@ export const fetchTokens = async (address: string): Promise<Token[]> => {
 }
 
 export const fetchTokenBalance = async (address: string, genesis: string): Promise<Balance> => {
-  const tokens = await mvcApi<Token[]>(`/contract/ft/address/${address}/balance`).get()
+  const tokens = await (await mvcApi<Token[]>(`/contract/ft/address/${address}/balance`)).get()
 
   const token = tokens.find((token) => token.genesis === genesis)
   const confirmed = token?.confirmed || 0

@@ -6,7 +6,7 @@ import { API_NET, API_TARGET, Wallet } from 'meta-contract'
 import { useQueryClient } from '@tanstack/vue-query'
 
 import { type Account, connectAccount, getPrivateKey } from '@/lib/account'
-import { getNetwork, network } from '@/lib/network'
+import { getNetwork } from '@/lib/network'
 import { shortestAddress } from '@/lib/formatters'
 import { FEEB } from '@/data/config'
 
@@ -22,12 +22,15 @@ const props = defineProps<{
   showConnectButton?: boolean
 }>()
 
-const mvcAddress = ref(
-  network.value === 'mainnet' ? props.account.mvc.mainnetAddress : props.account.mvc.testnetAddress
-)
-const btcAddress = ref(
-  network.value === 'mainnet' ? props.account.btc.mainnetAddress : props.account.btc.testnetAddress
-)
+const network = ref()
+const mvcAddress = ref()
+const btcAddress = ref()
+
+getNetwork().then((_network) => {
+  network.value = _network
+  mvcAddress.value = _network === 'mainnet' ? props.account.mvc.mainnetAddress : props.account.mvc.testnetAddress
+  btcAddress.value = _network === 'mainnet' ? props.account.btc.mainnetAddress : props.account.btc.testnetAddress
+})
 
 const isBTCCopied = ref(false)
 const isMVCCopied = ref(false)

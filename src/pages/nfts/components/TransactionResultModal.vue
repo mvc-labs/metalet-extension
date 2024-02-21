@@ -3,7 +3,6 @@ import { PropType } from 'vue'
 import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
 
 import { toTx } from '@/lib/helpers'
-import { getBrowserHost } from '@/lib/host'
 
 import Modal from '@/components/Modal.vue'
 import { useRouter } from 'vue-router'
@@ -44,9 +43,7 @@ function closeModal() {
 
 const toResultTx = async () => {
   if (!props.result || props.result.status !== 'success') return
-
-  const host = await getBrowserHost()
-  toTx(props.result.txId, host as string)
+  toTx(props.result.txId)
 }
 </script>
 
@@ -88,7 +85,7 @@ const toResultTx = async () => {
 
         <div class="space-y-1">
           <div class="label">Recipient Address</div>
-          <div class="text-xs">{{ result.recipient }}</div>
+          <div class="text-xs break-all">{{ result.recipient }}</div>
         </div>
 
         <div class="space-y-1">

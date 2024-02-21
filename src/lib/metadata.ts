@@ -89,7 +89,7 @@ export async function parseMetaData(txid: string, outputIndex: number): Promise<
 }
 
 export async function parse(txid: string, outputIndex: number): Promise<string[]> {
-  const { hex: metaTxHex } = (await mvcApi('/tx/' + txid + '/raw').get()) as {
+  const { hex: metaTxHex } = (await (await mvcApi('/tx/' + txid + '/raw')).get()) as {
     hex: string
   }
   const tx = new mvc.Transaction(metaTxHex)

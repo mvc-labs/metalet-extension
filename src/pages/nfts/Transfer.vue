@@ -7,7 +7,7 @@ import { getAddress, getCurrentAccount, getPrivateKey } from '@/lib/account'
 import { parseMetaFile, getResizeQuery } from '@/lib/metadata'
 import { useOneNftQuery } from '@/queries/nfts'
 import { useNftInfoQuery } from '@/queries/metadata'
-import { network } from '@/lib/network'
+import { getNetwork } from '@/lib/network'
 
 import Modal from '@/components/Modal.vue'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
@@ -60,8 +60,10 @@ async function transfer() {
 
   const privateKey = await getPrivateKey('mvc')
 
+  const network = await getNetwork()
+
   const nftManager = new NftManager({
-    network: network.value as API_NET,
+    network: network as API_NET,
     apiTarget: API_TARGET.MVC,
     purse: privateKey,
   })
@@ -162,7 +164,9 @@ async function transfer() {
     </div>
 
     <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
-      <template #title>Confirm Transaction</template>
+      <template #title>
+        <div class="text-black-primary font-bold text-center">Confirm Send</div>
+      </template>
 
       <template #body>
         <div class="mt-4 space-y-4">

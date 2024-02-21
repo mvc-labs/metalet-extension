@@ -5,9 +5,9 @@ import { API_NET, FtManager } from 'meta-contract'
 import { CircleStackIcon } from '@heroicons/vue/24/solid'
 import { useQueryClient } from '@tanstack/vue-query'
 
+import { getNetwork } from '@/lib/network'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import { getAddress, getCurrentAccount, getPrivateKey } from '@/lib/account'
-import { network } from '@/lib/network'
 import type { TransactionResult } from '@/global-types'
 import { useMVCTokenQuery } from '@/queries/tokens'
 import { type Asset } from '@/data/assets'
@@ -68,8 +68,10 @@ async function send() {
 
   const privateKey = await getPrivateKey('mvc')
 
+  const network = await getNetwork()
+
   const ftManager = new FtManager({
-    network: network.value as API_NET,
+    network: network as API_NET,
     purse: privateKey,
   })
 
@@ -117,7 +119,8 @@ async function send() {
     transactionResult.value = {
       status: 'success',
       txId: transferRes.txid,
-      recipient: recipient.value,
+      fromAddress: address.value,
+      toAdddress: recipient.value,
       amount: amountInSats.value,
       token: {
         symbol: token.value!.symbol,
@@ -173,7 +176,9 @@ async function send() {
     <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="popConfirm">Send</button>
 
     <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
-      <template #title>Confirm Transaction</template>
+      <template #title>
+        <div class="text-black-primary font-bold text-center">Confirm Send</div>
+      </template>
 
       <template #body>
         <div class="mt-4 space-y-4">

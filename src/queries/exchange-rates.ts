@@ -1,9 +1,18 @@
 import { ComputedRef, Ref } from 'vue'
+import { getNet } from '@/lib/network'
 import { metaletApiV3 } from './request'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker, DEFAULT_SYMBOLS } from '@/lib/asset-symbol'
 
 type RawRates = Record<string, number | undefined>
+
+const getTestnetRates = (symbol: SymbolTicker): RawRates => {
+  const symbolLower = symbol.toLowerCase()
+  return {
+    symbol: 0,
+    [symbolLower]: 0,
+  }
+}
 
 export const fetchExchangeRates = async (): Promise<RawRates> => {
   return await metaletApiV3<{ priceInfo: RawRates }>(`/coin/price`)
@@ -46,7 +55,11 @@ export const useExchangeRatesQuery = (
 ) => {
   return useQuery({
     queryKey: ['exchangeRates', { type: getExchangeCoinType(symbolRef.value, contract) }],
-    queryFn: () => {
+    queryFn: async () => {
+      const net = await await getNet()
+      if (net === 'testnet') {
+        return getTestnetRates(symbolRef.value)
+      }
       if (contract === 'BRC-20') {
         return fetchTickExchangeRates()
       } else if (contract === 'MetaContract') {

@@ -19,7 +19,7 @@ export interface PreInscribe {
 }
 
 export const preInscribe = async (receiveAddress: string, feeRate: number, filename: string): Promise<PreInscribe> => {
-  const net = await getNet()
+  const net = await await getNet()
   return await metaletApiV3<PreInscribe>(`/inscribe/pre`).post({
     feeRate,
     files: [
@@ -46,7 +46,7 @@ export const commitInscribe = async (
   orderId: string,
   rawTx: string
 ): Promise<CommitInscribe | void> => {
-  const net = await getNet()
+  const net = await await getNet()
   return await metaletApiV3<CommitInscribe>(`/inscribe/commit`).post({
     feeAddress: address,
     net,
@@ -94,7 +94,7 @@ export async function getBRCInscriptions(
   cursor = 0,
   size = 10
 ): Promise<{ list: Inscription[]; total: number }> {
-  const net = await getNet()
+  const net = await await getNet()
   return await metaletApiV3<{ list: Inscription[]; total: number }>('/address/inscriptions').get({
     net,
     address,

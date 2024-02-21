@@ -15,7 +15,6 @@ import { parseMetaFile } from '@/lib/metadata'
 import { prettifyTimestamp, prettifyTxId, prettifyTokenGenesis } from '@/lib/formatters'
 import { toTx } from '@/lib/helpers'
 import { isOfficialNft } from '@/lib/nft'
-import { getBrowserHost } from '@/lib/host'
 
 import NftDetailAboutCollection from './components/NftDetailAboutCollection.vue'
 
@@ -59,8 +58,7 @@ const copyGenesis = () => {
   isCopied.value = true
 }
 const toActivityTx = async () => {
-  const host = await getBrowserHost()
-  toTx(nft.value!.txid, host)
+  toTx(nft.value!.txid)
 }
 
 const activityId = computed(() => nft.value?.txid) as ComputedRef<string>

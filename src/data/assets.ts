@@ -37,7 +37,7 @@ const tags: Tag[] = [
   {
     name: 'MVC',
     bg: '#767EFF',
-    color: '#fff',
+    color: '#ffffff',
   },
   {
     name: 'MetaContract',

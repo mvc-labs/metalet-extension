@@ -13,7 +13,7 @@ import { Account, getCurrentAccount, getAddressType, getAddress, getSigner } fro
 export class BtcWallet {
   private account?: Account = undefined
 
-  constructor() { }
+  constructor() {}
 
   static async create() {
     const wallet = new BtcWallet()
@@ -30,8 +30,7 @@ export class BtcWallet {
     const address = await getAddress('btc')
     const addressType = await getAddressType('btc')
     const payment = await createPayment(addressType)
-    const utxos = ((await getBtcUtxos(address)) || [])
-      .filter((btcUtxo) => btcUtxo.txId !== utxo.txId)
+    const utxos = ((await getBtcUtxos(address)) || []).filter((btcUtxo) => btcUtxo.txId !== utxo.txId)
 
     if (!utxos.length) {
       throw new Error('your account currently has no available UTXO.')
@@ -198,8 +197,12 @@ export class BtcWallet {
 }
 
 async function getPsbtAndSelectUtxos(recipient: string, amount: Decimal, feeRate: number) {
+  console.log({ recipient, amount: amount.toNumber() })
+
   const btcNetwork = await getBtcNetwork()
   const address = await getAddress('btc')
+  console.log({ address })
+
   const addressType = await getAddressType('btc')
   const payment = await createPayment(addressType)
   const utxos = (await getBtcUtxos(address)) || []

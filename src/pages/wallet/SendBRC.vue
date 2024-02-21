@@ -126,7 +126,8 @@ async function send() {
     transactionResult.value = {
       status: 'success',
       txId: sentRes.txId,
-      recipient: recipient.value,
+      fromAddress: address.value,
+      toAdddress: recipient.value,
       amount: amount.value,
       token: {
         symbol: symbol.value,

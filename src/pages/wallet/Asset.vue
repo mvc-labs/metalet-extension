@@ -74,10 +74,7 @@ const rateEnabled = computed(() => {
   return false
 })
 
-const {
-  isLoading: isExchangeRateLoading,
-  data: exchangeRate,
-} = useExchangeRatesQuery(symbol, asset.value?.contract, {
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(symbol, asset.value?.contract, {
   enabled: rateEnabled,
 })
 
@@ -151,7 +148,7 @@ const toTransfer = () => {
     <div class="mt-8 flex flex-col items-center self-stretch">
       <template v-if="asset?.queryable">
         <template v-if="asset.balance">
-          <div class="mb-1 text-center text-3xl text-[#141416]" v-if="asset.contract === 'BRC-20'">
+          <div class="mb-1 text-center text-3xl text-[#141416] font-bold" v-if="asset.contract === 'BRC-20'">
             {{ prettifyTokenBalance(asset.balance.total, asset.decimal, false, asset.symbol) }}
           </div>
           <div class="mb-1 text-center text-3xl text-[#141416]" v-else>
@@ -210,7 +207,10 @@ const toTransfer = () => {
           <div class="w-full py-3 text-center text-sm font-bold text-gray-500" v-if="tickersLoading">
             Loading BRC Tickers...
           </div>
-          <div v-else class="grid grid-cols-3 gap-2 w-full mt-3" v-if="tickersData && tickersData.transferableList">
+          <div
+            class="grid grid-cols-3 gap-2 w-full mt-3"
+            v-else-if="tickersData && tickersData.transferableList.length"
+          >
             <div
               :key="ticker.inscriptionId"
               v-for="ticker in tickersData.transferableList"
@@ -225,6 +225,7 @@ const toTransfer = () => {
               </div>
             </div>
           </div>
+          <div v-else class="w-full h-[142px] flex items-center justify-center text-[#999999]">Empty</div>
           <div class="flex items-end justify-between text-[#303133] mt-3">
             <span class="text-base">Available</span
             ><span class="text-lg"

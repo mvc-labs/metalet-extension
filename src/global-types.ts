@@ -1,7 +1,8 @@
 type SuccessResult = {
   status: 'success'
   txId: string
-  recipient: string
+  fromAddress: string
+  toAdddress: string
   amount: number
   token: {
     symbol: string

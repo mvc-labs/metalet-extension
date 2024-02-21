@@ -1,21 +1,26 @@
 <script lang="ts" setup>
 import Decimal from 'decimal.js'
+import { Psbt } from 'bitcoinjs-lib'
 import { useRoute } from 'vue-router'
 import { Wallet } from 'meta-contract'
-import { Psbt } from 'bitcoinjs-lib'
+import { getTags } from '@/data/assets'
+import Modal from '@/components/Modal.vue'
+import { allAssets } from '@/data/assets'
 import { useQueryClient } from '@tanstack/vue-query'
-import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
-
 import { useBalanceQuery } from '@/queries/balance'
 import { prettifyBalance } from '@/lib/formatters'
 import type { TransactionResult } from '@/global-types'
-import { allAssets } from '@/data/assets'
 import { BtcWallet } from '@/lib/wallets/btc'
 import { type SymbolTicker } from '@/lib/asset-symbol'
+import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
 import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
-
-import Modal from '@/components/Modal.vue'
 import TransactionResultModal from './components/TransactionResultModal.vue'
+
+const tags = computed(() => {
+  if (asset.value) {
+    return getTags(asset.value)
+  }
+})
 
 const route = useRoute()
 const queryClient = useQueryClient()
@@ -186,7 +191,8 @@ async function send() {
     transactionResult.value = {
       status: 'success',
       txId: sentRes.txId,
-      recipient: recipient.value,
+      fromAddress: address.value,
+      toAdddress: recipient.value,
       amount: amountInSats.value.toNumber(),
       token: {
         symbol: asset.value.symbol,
@@ -209,38 +215,47 @@ async function send() {
 <template>
   <div class="mt-8 flex flex-col items-center gap-y-8" v-if="asset">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
-    <img :src="asset.logo" alt="" class="h-16 w-16 rounded-xl" />
+    <div class="flex flex-col gap-y-1.5 items-center">
+      <img :src="asset.logo" alt="" class="h-[42px] w-[42px] rounded-xl" />
+      <div class="mt-1.5 flex items-center gap-x-1.5" v-if="tags">
+        <span
+          :key="tag.name"
+          v-for="tag in tags"
+          class="px-1.5 py-0.5 rounded text-xs"
+          :style="`color: ${tag.color};background: ${tag.bg};`"
+        >
+          {{ tag.name }}
+        </span>
+      </div>
+    </div>
 
-    <div class="space-y-3 self-stretch">
-      <!-- address input -->
-      <input
-        class="main-input w-full !rounded-xl !p-4 !text-xs"
-        placeholder="Recipient's address"
-        v-model="recipient"
-      />
-
-      <!-- amount input -->
-      <div class="relative">
-        <input
-          class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 !text-xs"
-          placeholder="Amount"
-          v-model="amount"
-        />
-        <!-- unit -->
-        <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500">
-          <div class="border-l border-solid border-gray-500 px-4 py-1">{{ asset.symbol }}</div>
+    <div class="space-y-[30px] self-stretch">
+      <div class="space-y-2">
+        <div class="text-black-primary flex justify-between text-sm">
+          <span>Amount</span>
+          <span>
+            <span>Balance: </span>
+            <span v-if="balance">{{ balance.total / 10 ** asset.decimal }} {{ symbol }}</span>
+            <span v-else>--</span>
+          </span>
+        </div>
+        <div class="relative">
+          <input
+            v-model="amount"
+            placeholder="Amount"
+            class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 !text-xs"
+          />
+          <!-- unit -->
+          <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500">
+            <div class="border-l border-solid border-gray-500 px-4 py-1">{{ asset.symbol }}</div>
+          </div>
         </div>
       </div>
 
-      <!-- balance -->
-      <div class="flex items-center gap-x-2 text-xs text-gray-500">
-        <div class="">Your Balance:</div>
-        <div class="" v-if="isLoading">--</div>
-        <div class="" v-else-if="balance">{{ prettifyBalance(balance.total, asset.symbol) }}</div>
+      <div class="space-y-2">
+        <div class="text-black-primary flex justify-between text-sm">Recipient</div>
+        <input v-model="recipient" placeholder="Address" class="main-input w-full !rounded-xl !p-4 !text-xs" />
       </div>
-
-      <!-- error info -->
-      <div v-if="error" class="w-full text-sm text-red-500">{{ error.message }}</div>
 
       <!-- fee rate -->
       <div v-if="asset.chain === 'btc' && !rateLoading && rateList">
@@ -303,7 +318,9 @@ async function send() {
     <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">Loading...</div>
 
     <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
-      <template #title>Confirm Transaction</template>
+      <template #title>
+        <div class="text-black-primary font-bold text-center">Confirm Send</div>
+      </template>
 
       <template #body>
         <div class="mt-4 space-y-4">
