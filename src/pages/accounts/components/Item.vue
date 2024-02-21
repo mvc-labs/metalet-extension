@@ -1,17 +1,15 @@
 <script lang="ts" setup>
-import { Ref, computed, inject, ref } from 'vue'
-import { ClipboardDocumentCheckIcon, ClipboardDocumentListIcon, PencilSquareIcon } from '@heroicons/vue/24/solid'
-import { useRouter } from 'vue-router'
-import { API_NET, API_TARGET, Wallet } from 'meta-contract'
-import { useQueryClient } from '@tanstack/vue-query'
-
-import { type Account, connectAccount, getPrivateKey } from '@/lib/account'
-import { getNetwork } from '@/lib/network'
-import { shortestAddress } from '@/lib/formatters'
 import { FEEB } from '@/data/config'
-
 import EditName from './EditName.vue'
+import { useRouter } from 'vue-router'
 import { assetList } from '@/lib/balance'
+import { getNetwork } from '@/lib/network'
+import { Ref, computed, inject, ref } from 'vue'
+import { shortestAddress } from '@/lib/formatters'
+import { useQueryClient } from '@tanstack/vue-query'
+import { API_NET, API_TARGET, Wallet } from 'meta-contract'
+import { type Account, connectAccount, getPrivateKey } from '@/lib/account'
+import { ClipboardDocumentCheckIcon, ClipboardDocumentListIcon, PencilSquareIcon } from '@heroicons/vue/24/solid'
 
 const router = useRouter()
 
@@ -23,8 +21,8 @@ const props = defineProps<{
 }>()
 
 const network = ref()
-const mvcAddress = ref()
-const btcAddress = ref()
+const mvcAddress = ref('')
+const btcAddress = ref('')
 
 getNetwork().then((_network) => {
   network.value = _network

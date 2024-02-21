@@ -4,7 +4,7 @@ import BIP32Factory, { BIP32Interface } from 'bip32'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { mvc } from 'meta-contract'
 import * as bitcoinjs from 'bitcoinjs-lib'
-import type { Payment } from 'bitcoinjs-lib'
+import type { Payment, Network as btcNetwork } from 'bitcoinjs-lib'
 import ECPairFactory from 'ecpair'
 
 import { raise } from './helpers'
@@ -68,9 +68,9 @@ export function derivePrivateKey({
 }
 
 // FIXME support MVC and discard ECPairFactory
-export async function deriveSigner(privateKey: string) {
+export async function deriveSigner(privateKey: string, network: btcNetwork) {
   const ECPair = ECPairFactory(ecc)
-  return ECPair.fromWIF(privateKey)
+  return ECPair.fromWIF(privateKey, network)
 }
 
 function deriveMvcPrivateKey(mnemonic: string, path: string, network: Network): mvc.PrivateKey {

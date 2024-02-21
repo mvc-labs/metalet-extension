@@ -15,7 +15,7 @@ export type Balance = {
 }
 
 export const fetchSpaceBalance = async (address: string): Promise<Balance> => {
-  const balance: any = (await await mvcApi(`/address/${address}/balance`)).get()
+  const balance: any = await (await mvcApi(`/address/${address}/balance`)).get()
   balance.total = new Decimal(balance.confirmed).add(balance.unconfirmed).toNumber()
   return balance
 }

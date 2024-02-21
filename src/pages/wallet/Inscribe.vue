@@ -5,6 +5,7 @@ import CopyIcon from '@/assets/icons/copy.svg'
 import { ref, computed, Ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
+import BTCRateList from './components/BTCRateList.vue'
 import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
 import { prettifyBalanceFixed, shortestAddress } from '@/lib/formatters'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
@@ -28,34 +29,11 @@ const asset = computed(() => {
   }
 })
 
-const isCustom = ref(false)
 const currentRateFee = ref<number | undefined>()
-
-const selectRateFee = (rateFee: number) => {
-  currentRateFee.value = rateFee
-  isCustom.value = false
-}
-
-const selectCustom = () => {
-  currentRateFee.value = undefined
-  isCustom.value = true
-}
 
 const { data: tokenData } = useBRCTickerAseetQuery(address, symbol, {
   enabled: computed(() => !!address.value),
 })
-
-const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({ enabled: computed(() => !!address.value) })
-
-watch(
-  rateList,
-  (newRateList?: FeeRate[]) => {
-    if (newRateList && newRateList[1]) {
-      selectRateFee(newRateList[1].feeRate)
-    }
-  },
-  { immediate: true }
-)
 
 const nextStep = ref(0)
 
@@ -218,38 +196,9 @@ function toSuceess() {
           class="main-input w-full !rounded-xl !p-4 !text-xs"
         />
 
-        <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
+        <BTCRateList v-if="asset.chain === 'btc'" v-model:currentRateFee="currentRateFee" />
 
-        <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-[#141416]" v-if="!rateLoading && rateList">
-          <div
-            v-for="rate in rateList"
-            @click="selectRateFee(rate.feeRate)"
-            :class="rate.feeRate === currentRateFee ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
-          >
-            <div class="tex-sm">{{ rate.title }}</div>
-            <div class="mt-1.5 text-base font-bold">{{ rate.feeRate }} sat/vB</div>
-            <div class="mt-1 text-sm text-[#999999]">About</div>
-            <div class="text-sm text-[#999999]">{{ rate.desc.replace('About', '') }}</div>
-          </div>
-          <div
-            @click="selectCustom()"
-            :class="isCustom ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
-          >
-            <div>Custom</div>
-          </div>
-        </div>
       </div>
-
-      <input
-        min="0"
-        type="number"
-        v-if="isCustom"
-        placeholder="sat/vB"
-        v-model="currentRateFee"
-        class="main-input w-full !rounded-xl !p-4 !text-xs mt-4"
-      />
 
       <div
         v-if="operationLock"

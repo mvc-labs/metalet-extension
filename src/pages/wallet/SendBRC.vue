@@ -1,12 +1,12 @@
 <script lang="ts" setup>
+import { ref } from 'vue'
 import { Psbt } from 'bitcoinjs-lib'
-import { ref, computed, watch } from 'vue'
 import { BtcWallet } from '@/lib/wallets/btc'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
 import { useQueryClient } from '@tanstack/vue-query'
 import { getInscriptionUtxo } from '@/queries/utxos'
-import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
+import BTCRateList from './components/BTCRateList.vue'
 import { prettifyBalanceFixed, shortestAddress } from '@/lib/formatters'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
@@ -26,38 +26,9 @@ const inscriptionId = ref<string>(route.query.inscriptionId as string)
 const recipient = ref('')
 
 const operationLock = ref(false)
-
-const isCustom = ref(false)
-const currentTitle = ref<string>('')
 const currentRateFee = ref<number>()
 const calcFee = ref<number>()
 const txPsbt = ref<Psbt>()
-
-const selectRateFee = (rateFee: number) => {
-  currentRateFee.value = rateFee
-  isCustom.value = false
-}
-
-const selectCustom = () => {
-  currentTitle.value = 'Custom'
-  currentRateFee.value = undefined
-  isCustom.value = true
-}
-
-// rate list query
-const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({
-  enabled: computed(() => !!address.value),
-})
-
-watch(
-  rateList,
-  (newRateList?: FeeRate[]) => {
-    if (newRateList && newRateList[1]) {
-      selectRateFee(newRateList[1].feeRate)
-    }
-  },
-  { immediate: true }
-)
 
 const isOpenResultModal = ref(false)
 const isShowComfirm = ref(false)
@@ -148,11 +119,11 @@ async function send() {
 </script>
 
 <template>
-  <div class="pt-[30px] space-y-[30px] h-full overflow-y-auto">
+  <div class="pt-[30px] space-y-[30px] h-full">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
 
     <!-- send page -->
-    <div v-show="!isShowComfirm">
+    <div v-show="!isShowComfirm" class="space-y-4 w-full pb-4">
       <div class="space-y-2">
         <div class="text-[#141416] text-sm">Amount</div>
         <div class="bg-[#F5F5F5] w-full px-3 py-[15px]">{{ amount }} {{ symbol }}</div>
@@ -166,39 +137,7 @@ async function send() {
         />
       </div>
 
-      <div v-if="!rateLoading && rateList">
-        <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
-
-        <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-[#141416]">
-          <div
-            v-for="rate in rateList"
-            @click="selectRateFee(rate.feeRate)"
-            :class="rate.feeRate === currentRateFee ? 'border-[#9da1eb]' : 'border-[#D8D8D8]'"
-            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
-          >
-            <div class="tex-sm">{{ rate.title }}</div>
-            <div class="mt-1.5 text-base font-bold">{{ rate.feeRate }} sat/vB</div>
-            <div class="mt-1 text-sm text-[#999999]">About</div>
-            <div class="text-sm text-[#999999]">{{ rate.desc.replace('About', '') }}</div>
-          </div>
-          <div
-            @click="selectCustom()"
-            :class="isCustom ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
-          >
-            <div>Custom</div>
-          </div>
-        </div>
-      </div>
-
-      <input
-        min="0"
-        type="number"
-        v-if="isCustom"
-        placeholder="sat/vB"
-        v-model="currentRateFee"
-        class="main-input w-full !rounded-xl !py-4 !text-xs mt-1"
-      />
+      <BTCRateList v-model:currentRateFee="currentRateFee" />
 
       <div v-if="operationLock" class="w-full py-3 text-center text-sm font-bold text-gray-500">Loading...</div>
       <button
