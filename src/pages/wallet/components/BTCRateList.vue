@@ -36,7 +36,7 @@ watch(
   <div v-if="!rateLoading && rateList">
     <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
 
-    <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-[#141416]">
+    <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-black-primary">
       <div
         v-for="(rate, index) in rateList"
         @click="selectRateFee(rate.feeRate, index)"

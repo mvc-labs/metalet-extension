@@ -117,6 +117,7 @@ async function send() {
   if (transferRes && transferRes.txid) {
     isOpenConfirmModal.value = false
     transactionResult.value = {
+      chain: 'mvc',
       status: 'success',
       txId: transferRes.txid,
       fromAddress: address.value,

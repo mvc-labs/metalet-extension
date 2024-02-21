@@ -20,7 +20,7 @@ function toOrder() {
 <template>
   <div class="flex flex-col items-center justify-center relative w-full h-full gap-y-4">
     <SuccessIcon />
-    <div class="test-lg text-[#141416]">Payment Sent</div>
+    <div class="text-lg text-black-primary font-bold">Payment Sent</div>
     <div class="text-base text-[#909399] w-52 text-center">Your transaction has been succesfully sent.</div>
     <button
       @click="toOrder"

@@ -44,7 +44,7 @@ function closeModal() {
             <DialogPanel
               class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl shadow-gray-500/50 transition-all"
             >
-              <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
+              <DialogTitle as="h3" class="text-lg leading-6 text-gray-900">
                 <slot name="title"></slot>
               </DialogTitle>
 

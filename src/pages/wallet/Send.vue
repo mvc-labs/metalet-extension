@@ -161,6 +161,7 @@ async function send() {
   if (sentRes) {
     isOpenConfirmModal.value = false
     transactionResult.value = {
+      chain: asset.value.symbol === 'SPACE' ? 'mvc' : 'btc',
       status: 'success',
       txId: sentRes.txId,
       fromAddress: address.value,

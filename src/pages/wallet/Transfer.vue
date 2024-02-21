@@ -34,7 +34,7 @@ const toInscribe = () => {
   <div class="mt-8 flex flex-col pt-[30px] h-full" v-if="tickersData">
     <div class="flex flex-col gap-3">
       <div class="text-[#909399] text-base">Transfer amount</div>
-      <div class="text-[#141416]">{{ tickersData.tokenBalance.transferableBalance }} {{ symbol }}</div>
+      <div class="text-black-primary font-bold text-lg">{{ tickersData.tokenBalance.transferableBalance }} {{ symbol }}</div>
     </div>
     <div class="flex flex-col gap-3 mt-[30px]">
       <div class="text-[#909399] text-base">TRANSFER Inscriptions ({{ tickersData.transferableList.length }})</div>
@@ -46,7 +46,7 @@ const toInscribe = () => {
           class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative cursor-pointer"
         >
           <div class="mt-2.5 text-[#909399] text-sm">{{ ticker.ticker }}</div>
-          <div class="mt-3 text-[#141416] text-lg font-bold truncate">{{ ticker.amount }}</div>
+          <div class="mt-3 text-black-primary text-lg font-bold truncate">{{ ticker.amount }}</div>
           <div
             class="text-white text-xs bg-[#1E2BFF] rounded-b-md absolute bottom-0 w-full text-center pt-[5px] pb-[4px]"
           >
@@ -59,7 +59,7 @@ const toInscribe = () => {
       @click="toInscribe"
       class="border border-[#D8D8D8] rounded-lg flex flex-col items-center justify-center gap-3 mt-[30px] py-[18px] cursor-pointer"
     >
-      <div class="text-[#141416] text-center text-lg font-bold">Inscribe TRANSFER</div>
+      <div class="text-black-primary text-center text-lg font-bold">Inscribe TRANSFER</div>
       <div class="text-[#909399] text-center text-lg">
         Available {{ tickersData.tokenBalance.availableBalance }} {{ symbol }}
       </div>

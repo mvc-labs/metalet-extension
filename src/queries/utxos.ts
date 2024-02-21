@@ -5,7 +5,9 @@ import { mvcApi, mempoolApi, metaletApiV3 } from './request'
 export interface UTXO {
   txId: string
   vout: number
+  outputIndex?: number
   satoshi: number
+  satoshis?: number
   confirmed: boolean
   inscriptions:
     | {
@@ -80,7 +82,16 @@ function formatUnisatUTXO(utxo: UnisatUTXO & { confirmed: boolean }): UTXO {
 
 export async function getBtcUtxos(address: string): Promise<UTXO[]> {
   const net = await await getNet()
-  return metaletApiV3<UTXO[]>('/address/btc-utxo').get({ net, address, unconfirmed: '1' })
+  return metaletApiV3<UTXO[]>('/address/btc-utxo')
+    .get({ net, address, unconfirmed: '1' })
+    .then((utxos) => {
+      utxos.forEach((utxo) => {
+        if (utxo?.satoshis !== undefined && utxo.satoshi === undefined) {
+          utxo.satoshi = utxo.satoshis
+        }
+      })
+      return utxos
+    })
 }
 
 // export async function getInscriptionUtxos(inscriptions: Inscription[]): Promise<UTXO[]> {
@@ -97,7 +108,17 @@ export async function getBtcUtxos(address: string): Promise<UTXO[]> {
 
 export async function getInscriptionUtxo(inscriptionId: string): Promise<UTXO> {
   const net = await await getNet()
-  return await metaletApiV3<UTXO>('/inscription/utxo').get({ net, inscriptionId })
+  return await metaletApiV3<UTXO>('/inscription/utxo')
+    .get({ net, inscriptionId })
+    .then((utxo) => {
+      if (utxo?.satoshis !== undefined && utxo.satoshi === undefined) {
+        utxo.satoshi = utxo.satoshis
+      }
+      if (utxo?.outputIndex !== undefined && utxo.vout === undefined) {
+        utxo.vout = utxo.outputIndex
+      }
+      return utxo
+    })
 }
 
 export interface MempoolUtxo {

@@ -7,10 +7,12 @@ import { toTx, toMempool } from '@/lib/helpers'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import SuccessIcon from '@/assets/icons/success.svg?url'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
+import { type Chain } from '@/lib/account'
 
 const router = useRouter()
 
 type SuccessResult = {
+  chain: Chain
   status: 'success'
   txId: string
   fromAddress: string
@@ -54,7 +56,9 @@ function ok() {
 
 const toResultTx = async () => {
   if (!props.result || props.result.status !== 'success') return
-  if (props.result.token.symbol === 'BTC') {
+  console.log(props.result)
+
+  if (props.result.chain === 'btc') {
     toMempool(props.result.txId)
   } else {
     toTx(props.result.txId)
@@ -79,7 +83,7 @@ const toResultTx = async () => {
     <template #title v-if="result && result.status === 'success'">
       <div class="flex flex-col justify-center items-center gap-[18px]">
         <img class="w-[54px] h-[54px]" :src="SuccessIcon" alt="" />
-        <span class="text-black-primary">Send Successfully</span>
+        <span class="text-black-primary">Sent Successfully</span>
       </div>
     </template>
 

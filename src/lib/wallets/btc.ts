@@ -197,12 +197,8 @@ export class BtcWallet {
 }
 
 async function getPsbtAndSelectUtxos(recipient: string, amount: Decimal, feeRate: number) {
-  console.log({ recipient, amount: amount.toNumber() })
-
   const btcNetwork = await getBtcNetwork()
   const address = await getAddress('btc')
-  console.log({ address })
-
   const addressType = await getAddressType('btc')
   const payment = await createPayment(addressType)
   const utxos = (await getBtcUtxos(address)) || []

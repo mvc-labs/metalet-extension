@@ -54,7 +54,7 @@ const onUpdateBtcPath = async (script: (typeof scripts)[number]) => {
               <div class="flex w-full items-center justify-between">
                 <div class="flex items-center">
                   <div class="text-sm">
-                    <RadioGroupLabel as="p" :class="checked ? 'text-white' : 'text-gray-900'" class="font-medium">
+                    <RadioGroupLabel as="p" :class="checked ? 'text-white' : 'text-gray-900'">
                       {{ script.name }}
                     </RadioGroupLabel>
                     <RadioGroupDescription as="span" :class="checked ? 'text-sky-100' : 'text-gray-500'" class="inline">

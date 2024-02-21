@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { Psbt } from 'bitcoinjs-lib'
+import type { Psbt } from 'bitcoinjs-lib'
+import CopyIcon from '@/assets/icons/copy.svg'
 import { BtcWallet } from '@/lib/wallets/btc'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
@@ -95,6 +96,7 @@ async function send() {
 
   if (sentRes) {
     transactionResult.value = {
+      chain: 'btc',
       status: 'success',
       txId: sentRes.txId,
       fromAddress: address.value,
@@ -125,11 +127,11 @@ async function send() {
     <!-- send page -->
     <div v-show="!isShowComfirm" class="space-y-4 w-full pb-4">
       <div class="space-y-2">
-        <div class="text-[#141416] text-sm">Amount</div>
+        <div class="text-black-primary text-sm">Amount</div>
         <div class="bg-[#F5F5F5] w-full px-3 py-[15px]">{{ amount }} {{ symbol }}</div>
       </div>
       <div class="space-y-2">
-        <div class="text-[#141416] text-sm">Receiver</div>
+        <div class="text-black-primary text-sm">Receiver</div>
         <input
           v-model="recipient"
           placeholder="Recipient's address"
@@ -152,30 +154,38 @@ async function send() {
     </div>
 
     <!-- comfirm page -->
-    <div v-show="isShowComfirm">
+    <div v-show="isShowComfirm" class="h-full flex flex-col">
       <div class="text-center text-3xl font-bold">{{ amount }} {{ symbol }}</div>
-      <div class="mt-8 space-y-5">
+      <div class="mt-8 space-y-5 relative flex-1">
         <div class="flex items-center justify-between">
-          <span>From</span><span>{{ shortestAddress(address) }}</span>
+          <span>From</span>
+          <span class="flex items-center gap-x-2">
+            <span :title="address">{{ shortestAddress(address) }}</span>
+            <CopyIcon class="h-4 w-4 cursor-pointer hover:text-blue-500" />
+          </span>
         </div>
         <div class="flex items-center justify-between">
-          <span>To</span><span>{{ shortestAddress(recipient) }}</span>
+          <span>To</span>
+          <span class="flex items-center gap-x-2">
+            <span :title="recipient">{{ shortestAddress(recipient) }}</span>
+            <CopyIcon class="h-4 w-4 cursor-pointer hover:text-blue-500" />
+          </span>
         </div>
         <div class="flex items-center justify-between">
-          <span>Payment Network Fee</span><span>{{ prettifyBalanceFixed(calcFee || 0, 'BTC', 8) }}</span>
+          <span>Network Fee</span><span>{{ prettifyBalanceFixed(calcFee || 0, 'BTC', 8) }}</span>
         </div>
-      </div>
-      <div class="w-full left-0 flex items-center justify-between mt-3">
-        <button
-          @click="cancel"
-          class="border w-[133px] rounded-lg py-3 text-sm font-bold text-[#141416]"
-          style="border-image: 'linear-gradient(105deg, #72F5F6 4%, #171AFF 94%) 1'"
-        >
-          Cancel
-        </button>
-        <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm font-bold text-sky-100">
-          Confirm
-        </button>
+        <div class="w-full left-0 flex items-center justify-center gap-x-4 absolute bottom-5">
+          <button
+            @click="cancel"
+            class="border w-[133px] rounded-lg py-3 text-sm font-bold text-black-primary"
+            style="border-image: 'linear-gradient(105deg, #72F5F6 4%, #171AFF 94%) 1'"
+          >
+            Cancel
+          </button>
+          <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm font-bold text-sky-100">
+            Confirm
+          </button>
+        </div>
       </div>
     </div>
   </div>
