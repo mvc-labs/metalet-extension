@@ -1,7 +1,11 @@
+import { type Chain } from './lib/account'
+
 type SuccessResult = {
+  chain: Chain
   status: 'success'
   txId: string
-  recipient: string
+  fromAddress: string
+  toAdddress: string
   amount: number
   token: {
     symbol: string

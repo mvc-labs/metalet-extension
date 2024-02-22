@@ -1,6 +1,7 @@
 import useStorage from './lib/storage'
 import { IS_DEV } from '@/data/config'
 import * as VueRouter from 'vue-router'
+import { assetList } from '@/lib/balance'
 import Wallet from './pages/wallet/Index.vue'
 import { getCurrentAccount } from './lib/account'
 
@@ -366,6 +367,10 @@ router.beforeEach(async (to, _, next) => {
 
     if (to.name === 'send-token') {
       to.meta.headerTitle = `Send ${to.params.symbol}`
+    }
+
+    if (to.path === '/wallet') {
+      assetList.value = []
     }
 
     next()

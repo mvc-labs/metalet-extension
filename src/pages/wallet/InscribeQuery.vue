@@ -19,9 +19,9 @@ function confirm() {
     <div v-if="isLoading" class="text-gray-500 text-center font-bold">Order Info Loading...</div>
     <template v-else-if="data">
       <div class="flex flex-col items-center gap-[18px] w-full">
-        <div class="test-lg text-[#141416]">Inscribe Succes</div>
+        <div class="text-lg text-black-primary font-bold">Inscribe Success</div>
         <div class="w-[160px] h-[168px] rounded-md relative border border-[#1E2BFF] overflow-hidden">
-          <div class="break-all p-2 flex h-[128px] items-center justify-center text-[#141416]">
+          <div class="break-all p-2 flex h-[128px] items-center justify-center text-black-primary">
             {{ `{"p":"brc-20","op":"transfer","tick":"${symbol}","amt":"546"}` }}
           </div>
           <div

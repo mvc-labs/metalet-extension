@@ -65,10 +65,10 @@ export const getBTCPrice = () => {
 
 type TokenType = 'BRC20'
 
-export const useBRC20AssetQuery = (addressRef: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
+export const useBRC20AssetQuery = (address: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
-    queryKey: ['BRC20Assets', { address: addressRef.value }],
-    queryFn: () => fetchBRC20Token(addressRef.value),
+    queryKey: ['BRC20Assets', { address }],
+    queryFn: () => fetchBRC20Token(address.value),
     ...options,
   })
 }
@@ -103,7 +103,7 @@ export interface AddressTokenSummary {
 }
 
 export async function fetchBRC20TokenDetail(address: string, ticker: string): Promise<AddressTokenSummary> {
-  const net = await getNet()
+  const net = await await getNet()
   return await metaletApiV3<AddressTokenSummary>('/brc20/token-summary').get({
     net,
     address,

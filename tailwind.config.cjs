@@ -11,6 +11,8 @@ module.exports = {
 
     extend: {
       colors: {
+        'black-primary': '#141416',
+        'base-black': '#141416',
         'primary-teal': '#72F5F6',
         'primary-blue': '#171AFF',
         'btn-blue': '#1E2BFF',
@@ -23,7 +25,7 @@ module.exports = {
         150: '37.5rem',
       },
       fontFamily: {
-        sans: ['"Geist"', ...defaultTheme.fontFamily.sans],
+        inter: ['Inter'],
       },
     },
   },

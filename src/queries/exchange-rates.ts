@@ -1,9 +1,18 @@
 import { ComputedRef, Ref } from 'vue'
+import { getNet } from '@/lib/network'
 import { metaletApiV3 } from './request'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker, DEFAULT_SYMBOLS } from '@/lib/asset-symbol'
 
 type RawRates = Record<string, number | undefined>
+
+const getTestnetRates = (symbol: SymbolTicker): RawRates => {
+  const symbolLower = symbol.toLowerCase()
+  return {
+    symbol: 0,
+    [symbolLower]: 0,
+  }
+}
 
 export const fetchExchangeRates = async (): Promise<RawRates> => {
   return await metaletApiV3<{ priceInfo: RawRates }>(`/coin/price`)
@@ -11,7 +20,6 @@ export const fetchExchangeRates = async (): Promise<RawRates> => {
     .then((res) => res.priceInfo)
 }
 
-// Fetch BRC-20 coin tick price
 export const fetchTickExchangeRates = async (): Promise<RawRates> => {
   return await metaletApiV3<{ priceInfo: RawRates }>(`/coin/brc20/price`)
     .get()
@@ -28,24 +36,37 @@ export const doNothing = async (symbol: SymbolTicker): Promise<RawRates> => ({
   [symbol.toLowerCase()]: 0,
 })
 
+const getExchangeCoinType = (symbol: SymbolTicker, contract?: string) => {
+  if (DEFAULT_SYMBOLS.includes(symbol)) {
+    return 'Default'
+  } else if (contract === 'BRC-20') {
+    return 'BRC-20'
+  } else if (contract === 'MetaContract') {
+    return 'MetaContract'
+  } else {
+    throw Error('Unknown coin type')
+  }
+}
+
 export const useExchangeRatesQuery = (
   symbolRef: Ref<SymbolTicker>,
   contract?: string,
   options?: { enabled: ComputedRef<boolean> }
 ) => {
   return useQuery({
-    queryKey: ['exchangeRates', { symbol: symbolRef.value, contract }],
-    queryFn: () => {
+    queryKey: ['exchangeRates', { type: getExchangeCoinType(symbolRef.value, contract) }],
+    queryFn: async () => {
+      const net = await await getNet()
+      if (net === 'testnet') {
+        return getTestnetRates(symbolRef.value)
+      }
       if (contract === 'BRC-20') {
         return fetchTickExchangeRates()
       } else if (contract === 'MetaContract') {
         return fetchFTExchangeRates()
-      }
-
-      if (DEFAULT_SYMBOLS.includes(symbolRef.value)) {
+      } else if (DEFAULT_SYMBOLS.includes(symbolRef.value)) {
         return fetchExchangeRates()
       }
-
       return doNothing(symbolRef.value)
     },
     select: (rates: RawRates) => {

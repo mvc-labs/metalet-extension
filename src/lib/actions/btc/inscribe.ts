@@ -431,8 +431,8 @@ export async function process({
   const utxos = await getBtcUtxos(address)
   const commitTxPrevOutputList = utxos.map((utxo) => ({
     txId: utxo.txId,
-    vOut: utxo.vout,
-    amount: utxo.satoshi,
+    vOut: utxo.outputIndex,
+    amount: utxo.satoshis,
     address,
   }))
   const signer = (await getSigner('btc')) as BIP32Interface

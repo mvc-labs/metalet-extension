@@ -2,7 +2,7 @@ import Decimal from 'decimal.js'
 import { ComputedRef, Ref } from 'vue'
 import { type Asset } from '@/data/assets'
 import { useQuery } from '@tanstack/vue-query'
-import { metaletApi, mvcApi } from './request'
+import { metaletApi, mvcApi, metaletApiV3 } from './request'
 import { SymbolTicker } from '@/lib/asset-symbol'
 
 export type Activity = {
@@ -50,7 +50,7 @@ type BRC20RawActivity = {
 }
 
 export const fetchBtcActivities = async (address: string): Promise<Activities> => {
-  return metaletApi<{ transactionList: BtcRawActivity[] }>(`/address/activities`)
+  return metaletApiV3<{ transactionList: BtcRawActivity[] }>(`/address/activities`)
     .get({
       address,
       chain: 'btc',
@@ -95,8 +95,8 @@ export const fetchBRC20Activities = async (address: string, symbol: SymbolTicker
 }
 
 export const fetchSpaceActivities = async (address: string): Promise<Activities> => {
-  const unconfirmed: any = mvcApi(`/address/${address}/tx?confirmed=false`).get()
-  const confirmed: any = mvcApi(`/address/${address}/tx?confirmed=true`).get()
+  const unconfirmed: any = (await mvcApi(`/address/${address}/tx?confirmed=false`)).get()
+  const confirmed: any = (await mvcApi(`/address/${address}/tx?confirmed=true`)).get()
 
   const [unconfirmedActivities, confirmedActivities] = await Promise.all([unconfirmed, confirmed])
 
@@ -104,7 +104,7 @@ export const fetchSpaceActivities = async (address: string): Promise<Activities>
 }
 
 export const fetchOneActivity = async (txid: string): Promise<Activity> => {
-  const activity: any = await mvcApi(`/tx/${txid}`).get()
+  const activity: any = await (await mvcApi(`/tx/${txid}`)).get()
 
   // rename timestamp to time
   const detail = activity.txDetail
@@ -115,7 +115,9 @@ export const fetchOneActivity = async (txid: string): Promise<Activity> => {
 }
 
 export const fetchTokenActivities = async (address: string, asset: Asset): Promise<TokenActivities> => {
-  return await mvcApi<TokenActivities>(`/contract/ft/address/${address}/${asset.codeHash}/${asset.genesis}/tx`).get()
+  return await (
+    await mvcApi<TokenActivities>(`/contract/ft/address/${address}/${asset.codeHash}/${asset.genesis}/tx`)
+  ).get()
 }
 
 export const useOneActivityQuery = (

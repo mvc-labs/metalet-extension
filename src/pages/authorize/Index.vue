@@ -6,7 +6,6 @@ import { computed, ref } from 'vue'
 
 import { toTx } from '@/lib/helpers'
 import actions from '@/data/authorize-actions'
-import { getBrowserHost } from '@/lib/host'
 import logos from '@/data/logos'
 import { DEBUG } from '@/data/config'
 
@@ -52,8 +51,7 @@ const exit = () => {
 }
 
 const getHostAndToTx = async (txid: string) => {
-  const host = await getBrowserHost()
-  toTx(txid, host as string)
+  toTx(txid)
 }
 
 const running = ref(false)

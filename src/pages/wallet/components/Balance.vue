@@ -36,6 +36,7 @@ function toSelectAsset(purpose: 'receive' | 'send') {
     </div>
   </div>
 </template>
+
 <style lang="css" scoped>
 .button {
   @apply flex items-center justify-center rounded-md bg-btn-blue py-3 text-sm text-white;

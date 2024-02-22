@@ -18,6 +18,8 @@ getCurrentAccount().then((acc) => {
     <!-- Account Info -->
     <AccountItem :show-network="true" v-if="currentAccount" :account="currentAccount" :current-account="currentAccount" />
 
+    <button>test</button>
+
     <Balance />
 
     <!-- Asset List -->

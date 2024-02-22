@@ -7,7 +7,13 @@ import { useRoute, useRouter } from 'vue-router'
 import { useMVCTokenQuery } from '@/queries/tokens'
 import Activities from './components/Activities.vue'
 import { prettifyTokenBalance, prettifyTokenGenesis } from '@/lib/formatters'
-import { CheckBadgeIcon, ClipboardDocumentCheckIcon, ClipboardDocumentListIcon } from '@heroicons/vue/24/solid'
+import {
+  CheckBadgeIcon,
+  ClipboardDocumentCheckIcon,
+  ClipboardDocumentListIcon,
+  ArrowUpRightIcon,
+  QrCodeIcon,
+} from '@heroicons/vue/24/solid'
 
 const route = useRoute()
 const router = useRouter()
@@ -90,8 +96,14 @@ const copyGenesis = () => {
 
         <!-- buttons -->
         <div class="mt-4 grid grid-cols-2 gap-x-3 self-stretch">
-          <button class="secondary-btn col-span-1 py-3" @click="toSend">SEND</button>
-          <button class="secondary-btn col-span-1 py-3" @click="toReceive">RECEIVE</button>
+          <button class="button" @click="toSend">
+            <ArrowUpRightIcon class="mr-1 h-4 w-4" />
+            <span>Send</span>
+          </button>
+          <button class="button" @click="toReceive">
+            <QrCodeIcon class="mr-1 h-4 w-4" />
+            <span>Receive</span>
+          </button>
         </div>
 
         <Activities class="mt-8 self-stretch" v-if="asset" :asset="asset" :address="address" />
@@ -101,3 +113,9 @@ const copyGenesis = () => {
     <div v-else class="text-center text-gray-500 font-bold">No Token Asset.</div>
   </div>
 </template>
+
+<style lang="css" scoped>
+.button {
+  @apply flex items-center justify-center rounded-md bg-btn-blue py-3 text-sm text-white;
+}
+</style>

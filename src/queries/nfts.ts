@@ -27,7 +27,7 @@ export type Nft = {
 }
 
 export const fetchNftCollections = async (address: string): Promise<NftCollection[]> => {
-  const nftCollections: any = await mvcApi(`/contract/nft/address/${address}/summary`).get()
+  const nftCollections: any = await (await mvcApi(`/contract/nft/address/${address}/summary`)).get()
 
   return nftCollections
     .filter((nftCollection: any) => {
@@ -49,7 +49,7 @@ export const fetchNftCollections = async (address: string): Promise<NftCollectio
 }
 
 export const fetchOneNftCollection = async (codehash: string, genesis: string): Promise<NftCollection> => {
-  const nftCollection: any = await mvcApi(`/contract/nft/genesis/${codehash}/${genesis}/summary`).get()
+  const nftCollection: any = await (await mvcApi(`/contract/nft/genesis/${codehash}/${genesis}/summary`)).get()
 
   // codeHash to lowercase
   nftCollection.codehash = nftCollection.codeHash
@@ -73,7 +73,7 @@ export const fetchNfts = async (
   if (params?.limit) {
     path += `&limit=${params.limit}`
   }
-  const nfts: any = await mvcApi(path).get()
+  const nfts: any = await (await mvcApi(path)).get()
 
   return nfts.map((nft: any) => {
     // codeHash to codehash
@@ -86,9 +86,7 @@ export const fetchNfts = async (
 export const fetchOneNft = async (params: { codehash: string; genesis: string; tokenIndex: number }): Promise<Nft> => {
   let path = `/contract/nft/genesis/${params.codehash}/${params.genesis}/utxo?tokenIndex=${params.tokenIndex}`
 
-  const nft: any = await mvcApi(path)
-    .get()
-    .then((nfts: any) => nfts[0])
+  const nft: any = await (await mvcApi(path)).get().then((nfts: any) => nfts[0])
   // codeHash to codehash
   nft.codehash = nft.codeHash
   delete nft.codeHash
@@ -147,35 +145,31 @@ export const useOneNftQuery = (params: { codehash: string; genesis: string; toke
 }
 
 export interface MetaIDPin {
-  "id": string,
-  "number": number,
-  "rootTxId": string,
-  "address": string,
-  "output": string,
-  "outputValue": number,
-  "timestamp": number,
-  "genesisFee": number,
-  "genesisHeight": number,
-  "genesisTransaction": string,
-  "txInIndex": number,
-  "txInOffset": number,
-  "operation": string,
-  "path": string,
-  "parentPath": string,
-  "encryption": string,
-  "version": string,
-  "contentType": string,
-  "contentBody": string,
-  "contentLength": number,
-  "contentSummary": string
+  id: string
+  number: number
+  rootTxId: string
+  address: string
+  output: string
+  outputValue: number
+  timestamp: number
+  genesisFee: number
+  genesisHeight: number
+  genesisTransaction: string
+  txInIndex: number
+  txInOffset: number
+  operation: string
+  path: string
+  parentPath: string
+  encryption: string
+  version: string
+  contentType: string
+  contentBody: string
+  contentLength: number
+  contentSummary: string
 }
 
-export async function getMetaPins(
-  address: string,
-  cursor = 0,
-  size = 10
-): Promise<MetaIDPin[]> {
-  const net = await getNet()
+export async function getMetaPins(address: string, cursor = 0, size = 10): Promise<MetaIDPin[]> {
+  const net = await await getNet()
   return await metaletApiV3<MetaIDPin[]>('/address/pins').get({
     // net: 'testnet',
     // address: "tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme",

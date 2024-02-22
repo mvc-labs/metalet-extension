@@ -1,4 +1,4 @@
-import { network } from '@/lib/network'
+import { getNetwork } from '@/lib/network'
 import { getCredential } from '@/lib/account'
 import {
   METASV_TESTNET_HOST,
@@ -83,11 +83,13 @@ export const createApi = (host: string) => {
 }
 
 export const mvcApi = <T>(path: string) => {
-  const metasvHost = network.value === 'mainnet' ? METASV_HOST : METASV_TESTNET_HOST
-  return {
-    get: (params?: OptionParams) => request<T>(`${metasvHost}${path}`, { method: 'GET', params }),
-    post: (data?: OptionData) => request<T>(`${metasvHost}${path}`, { method: 'POST', data }),
-  }
+  return getNetwork().then((network) => {
+    const metasvHost = network === 'mainnet' ? METASV_HOST : METASV_TESTNET_HOST
+    return {
+      get: (params?: OptionParams) => request<T>(`${metasvHost}${path}`, { method: 'GET', params }),
+      post: (data?: OptionData) => request<T>(`${metasvHost}${path}`, { method: 'POST', data }),
+    }
+  })
 }
 
 export const metaletApi = <T>(path: string) => {
@@ -97,23 +99,6 @@ export const metaletApi = <T>(path: string) => {
       metaletV3Request<T>(`${metaletHost}${path}`, { method: 'GET', params, withCredential: true }),
     post: (data?: OptionData) =>
       metaletV3Request<T>(`${metaletHost}${path}`, { method: 'POST', data, withCredential: true }),
-  }
-}
-
-export const metaletApiV2 = <T>(path: string) => {
-  if (network.value === 'mainnet') {
-    const metaletHost = `${METALET_HOST}/wallet-api/v2`
-    return {
-      get: (params?: OptionParams) =>
-        metaletV3Request<T>(`${metaletHost}${path}`, { method: 'GET', params, mode: 'cors' }),
-      post: (data?: OptionData) => metaletV3Request<T>(`${metaletHost}${path}`, { method: 'POST', data, mode: 'cors' }),
-    }
-  }
-  return {
-    get: (params?: OptionParams) =>
-      unisatRequest<T>(`${UNISAT_TESTNET_HOST}${path}`, { method: 'GET', params, mode: 'cors' }),
-    post: (data?: OptionData) =>
-      unisatRequest<T>(`${UNISAT_TESTNET_HOST}${path}`, { method: 'POST', data, mode: 'cors' }),
   }
 }
 
@@ -199,8 +184,9 @@ const unisatRequest = <T>(url: string, options: RequestOption): Promise<T> =>
     return data.result
   })
 
-export const unisatApi = <T>(path: string) => {
-  const unisatHost = network.value === 'mainnet' ? UNISAT_HOST : UNISAT_TESTNET_HOST
+export const unisatApi = async <T>(path: string) => {
+  const network = await getNetwork()
+  const unisatHost = network === 'mainnet' ? UNISAT_HOST : UNISAT_TESTNET_HOST
 
   const headers = new Headers()
   headers.append('X-Client', 'UniSat Wallet')

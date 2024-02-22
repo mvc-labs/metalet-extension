@@ -1,10 +1,11 @@
 <script lang="ts" setup>
+import { type Psbt } from 'bitcoinjs-lib'
 import { BtcWallet } from '@/lib/wallets/btc'
 import CopyIcon from '@/assets/icons/copy.svg'
 import { ref, computed, Ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
-import bitcoinjs, { type Psbt } from 'bitcoinjs-lib'
+import BTCRateList from './components/BTCRateList.vue'
 import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
 import { prettifyBalanceFixed, shortestAddress } from '@/lib/formatters'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
@@ -17,6 +18,7 @@ const router = useRouter()
 if (!route.params.address || !route.params.symbol) {
   router.go(-1)
 }
+
 const address = ref<string>(route.params.address as string)
 const symbol = ref<SymbolTicker>(route.params.symbol as SymbolTicker)
 
@@ -27,34 +29,11 @@ const asset = computed(() => {
   }
 })
 
-const isCustom = ref(false)
 const currentRateFee = ref<number | undefined>()
-
-const selectRateFee = (rateFee: number) => {
-  currentRateFee.value = rateFee
-  isCustom.value = false
-}
-
-const selectCustom = () => {
-  currentRateFee.value = undefined
-  isCustom.value = true
-}
 
 const { data: tokenData } = useBRCTickerAseetQuery(address, symbol, {
   enabled: computed(() => !!address.value),
 })
-
-const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({ enabled: computed(() => !!address.value) })
-
-watch(
-  rateList,
-  (newRateList?: FeeRate[]) => {
-    if (newRateList && newRateList[1]) {
-      selectRateFee(newRateList[1].feeRate)
-    }
-  },
-  { immediate: true }
-)
 
 const nextStep = ref(0)
 
@@ -66,7 +45,6 @@ const inscribeAmount = ref<number | undefined>()
 const inscribePsbt = ref<Psbt | undefined>()
 const total = ref<number | undefined>()
 const paymentNetworkFee = ref<number | undefined>()
-const inscriptionNetworkFee = ref<number | undefined>()
 const transactionResult: Ref<undefined | TransactionResult> = ref()
 const inscribeOrder = ref<PreInscribe | undefined>()
 const psbtHex = ref('')
@@ -120,7 +98,7 @@ const popConfirm = async () => {
     isOpenResultModal.value = true
     return
   })
-  console.log({ order })
+  // console.log({ order })
   if (!order) {
     operationLock.value = false
     return
@@ -139,21 +117,18 @@ const popConfirm = async () => {
     return
   }
   const { fee, psbt, selecedtUTXOs } = data
-  inputUTXOs.value = selecedtUTXOs.map((utxo) => ({ address: address.value, value: utxo.satoshi }))
+  inputUTXOs.value = selecedtUTXOs.map((utxo) => ({ address: address.value, value: utxo.satoshis }))
   const tx = psbt.extractTransaction()
-  outputUTXOs.value = tx.outs.map((out) => ({
-    address: bitcoinjs.address.fromOutputScript(out.script),
+  outputUTXOs.value = psbt.txOutputs.map((out) => ({
+    address: out.address || '',
     value: out.value,
   }))
   psbtHex.value = psbt.extractTransaction().toHex()
   paymentNetworkFee.value = fee
   inscribePsbt.value = psbt
-  console.log('paymentNetworkFee', paymentNetworkFee.value, order.minerFee)
+  // console.log('paymentNetworkFee', paymentNetworkFee.value, order.minerFee)
   inscribeOrder.value = order
   total.value = paymentNetworkFee.value + order.needAmount
-  console.log('total', total.value)
-  inscriptionNetworkFee.value = total.value - order.serviceFee - 546
-  console.log('inscriptionNetworkFee', inscriptionNetworkFee.value)
   operationLock.value = false
   nextStep.value = 1
 }
@@ -203,8 +178,8 @@ function toSuceess() {
 <template>
   <div class="pt-8 h-full" v-if="asset">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
-    <div v-if="nextStep === 0" class="relative h-full">
-      <div class="flex items-end justify-between w-full text-[#141416]">
+    <div v-if="nextStep === 0" class="h-full relative">
+      <div class="flex items-end justify-between w-full text-black-primary">
         <span class="text-xs">Available</span>
         <span class="text-sm">
           {{ (tokenData && tokenData.tokenBalance.availableBalance) || 0 }} {{ asset.symbol }}</span
@@ -221,38 +196,9 @@ function toSuceess() {
           class="main-input w-full !rounded-xl !p-4 !text-xs"
         />
 
-        <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
+        <BTCRateList v-if="asset.chain === 'btc'" v-model:currentRateFee="currentRateFee" />
 
-        <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-[#141416]" v-if="!rateLoading && rateList">
-          <div
-            v-for="rate in rateList"
-            @click="selectRateFee(rate.feeRate)"
-            :class="rate.feeRate === currentRateFee ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
-          >
-            <div class="tex-sm">{{ rate.title }}</div>
-            <div class="mt-1.5 text-base font-bold">{{ rate.feeRate }} sat/vB</div>
-            <div class="mt-1 text-sm text-[#999999]">About</div>
-            <div class="text-sm text-[#999999]">{{ rate.desc.replace('About', '') }}</div>
-          </div>
-          <div
-            @click="selectCustom()"
-            :class="isCustom ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
-          >
-            <div>Custom</div>
-          </div>
-        </div>
       </div>
-
-      <input
-        min="0"
-        type="number"
-        v-if="isCustom"
-        placeholder="sat/vB"
-        v-model="currentRateFee"
-        class="main-input w-full !rounded-xl !p-4 !text-xs mt-4"
-      />
 
       <div
         v-if="operationLock"
@@ -271,10 +217,10 @@ function toSuceess() {
       </button>
     </div>
 
-    <div v-else-if="nextStep === 1" class="text-[#141416] relative h-full">
+    <div v-else-if="nextStep === 1" class="text-black-primary relative h-full">
       <div class="text-center text-3xl font-bold">{{ inscribeAmount }} {{ asset.symbol }}</div>
       <div class="mt-[30px] text-sm w-full">Preview</div>
-      <div class="w-full h-[76px] rounded-sm bg-[#F5F5F5] mt-2 p-3 text-sm truncate">
+      <div class="w-full h-[76px] rounded-sm bg-[#F5F5F5] mt-2 p-3 text-sm break-all">
         {{ `{"p":"brc-20","op":"transfer","tick":"${asset.symbol}","amt":"${inscribeAmount}"}` }}
       </div>
       <div class="mt-8 space-y-5">
@@ -297,7 +243,7 @@ function toSuceess() {
       </button>
     </div>
 
-    <div v-if="nextStep === 2" class="text-[#141416] h-full">
+    <div v-if="nextStep === 2" class="text-black-primary h-full">
       <div class="text-center text-base text-[#909399]">Spend Amount</div>
       <div class="text-center text-3xl font-bold mt-3">{{ inscribeAmount }} {{ asset.symbol }}</div>
       <div class="mt-3 text-center text-base text-[#909399]">
@@ -307,39 +253,39 @@ function toSuceess() {
         <span
           @click="changeTabIdx(0)"
           class="inline-block pb-[2px] border-b-4 cursor-pointer"
-          :class="tabIdx === 0 ? 'border-[#141416] text-[#141416]' : 'border-white text-[#909399]'"
+          :class="tabIdx === 0 ? 'border-[#141416] text-black-primary' : 'border-white text-[#909399]'"
           >Data</span
         >
         <span
           @click="changeTabIdx(1)"
           class="inline-block pb-[2px] border-b-4 cursor-pointer"
-          :class="tabIdx === 1 ? 'border-[#141416] text-[#141416]' : 'border-white text-[#909399]'"
+          :class="tabIdx === 1 ? 'border-[#141416] text-black-primary' : 'border-white text-[#909399]'"
           >Hex</span
         >
       </div>
       <div class="space-y-[18px]" v-show="tabIdx === 0">
         <div class="space-y-2 rounded-md">
-          <div class="text-[#141416]">Inputs</div>
+          <div class="text-black-primary">Inputs</div>
           <div v-for="utxo in inputUTXOs" class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
             <span>{{ shortestAddress(utxo.address) }}</span
             ><span>{{ prettifyBalanceFixed(utxo.value, 'BTC', 8) }}</span>
           </div>
         </div>
         <div class="space-y-2 rounded-md">
-          <div class="text-[#141416]">Outputs</div>
+          <div class="text-black-primary">Outputs</div>
           <div v-for="utxo in outputUTXOs" class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
             <span>{{ shortestAddress(utxo.address) }}</span>
             <span>{{ prettifyBalanceFixed(utxo.value, 'BTC', 8) }}</span>
           </div>
         </div>
         <div class="space-y-2 rounded-md">
-          <div class="text-[#141416]">Network Fee Rate</div>
+          <div class="text-black-primary">Network Fee</div>
           <div class="w-full p-2 bg-[#F5F5F5]">{{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }}</div>
         </div>
       </div>
       <div class="space-y-[18px]" v-show="tabIdx === 1">
         <div class="space-y-2 rounded-md">
-          <div class="text-[#141416]">Outputs</div>
+          <div class="text-black-primary">Outputs</div>
           <div class="w-full px-1,5 p-3 bg-[#F5F5F5] h-40 rounded-md overflow-scroll break-all">
             {{ psbtHex }}
           </div>
@@ -349,16 +295,16 @@ function toSuceess() {
           <span class="text-sm" @click="copyHex">Copy psbt transaction data</span>
         </div>
       </div>
-      <div class="w-full left-0 flex items-center justify-between mt-3">
+      <div class="w-full left-0 flex items-center space-x-4 mt-4 justify-center">
         <button
           @click="cancel"
-          class="border w-[133px] rounded-lg py-3 text-sm font-bold text-[#141416]"
+          class="border w-[133px] rounded-lg py-3 text-sm font-bold text-black-primary"
           style="border-image: 'linear-gradient(105deg, #72F5F6 4%, #171AFF 94%) 1'"
         >
           Cancel
         </button>
         <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm font-bold text-sky-100">
-          Confirm
+          Comfirm
         </button>
       </div>
     </div>
