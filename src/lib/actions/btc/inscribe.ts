@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto'
+import randomBytes from 'randombytes'
 import { sleep } from '@/lib/helpers'
 import * as bitcoin from './bitcoinjs-lib'
 import { getBtcUtxos } from '@/queries/utxos'

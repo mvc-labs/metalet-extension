@@ -23,7 +23,6 @@ getCurrentAccount().then((acc) => {
       :current-account="currentAccount"
     />
 
-    <button>test</button>
 
     <Balance />
 
