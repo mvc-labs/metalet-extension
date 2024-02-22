@@ -95,8 +95,8 @@ const assetUSD = computed(() => {
 })
 
 watch(assetUSD, (_assetUSD) => {
-  if (_assetUSD) {
-    updateAsset({ name: asset.value!.symbol, value: _assetUSD.toNumber() })
+  if (asset.value && _assetUSD) {
+    updateAsset({ chain: asset.value.chain, name: asset.value.symbol, value: _assetUSD.toNumber() })
   }
 })
 
@@ -156,7 +156,7 @@ const toTransfer = () => {
           </div>
 
           <div class="text-[#909399] text-center">
-            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD` }}</span>
+            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber()} USD` }}</span>
             <span v-else>$-- USD</span>
           </div>
         </template>
@@ -171,7 +171,7 @@ const toTransfer = () => {
             </span>
           </div>
           <div class="text-[#909399] text-center">
-            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD` }}</span>
+            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber()} USD` }}</span>
             <span v-else>$-- USD</span>
           </div>
         </template>
