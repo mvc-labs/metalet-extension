@@ -87,7 +87,7 @@ const toResultTx = async () => {
         </div>
 
         <div class="space-y-1">
-          <div class="label">Recipient Address</div>
+          <div class="label break-all">Recipient Address</div>
           <div class="text-xs">{{ result.recipient }}</div>
         </div>
 

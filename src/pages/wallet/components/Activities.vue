@@ -22,7 +22,7 @@ const { isLoading, isError, data: activities, error } = useActivitiesQuery(addre
 <template>
   <div class="text-sm">
     <!-- label -->
-    <h4 class="py-2 uppercase" style="color: #303133">Transaction History</h4>
+    <h4 class="py-2 text-black-primary text-lg font-[600]">Transaction History</h4>
 
     <!-- list -->
     <div v-if="isLoading" class="py-4 text-center">Loading...</div>

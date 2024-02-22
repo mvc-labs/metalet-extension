@@ -71,7 +71,7 @@ export const useBalanceQuery = (
   options: { enabled: ComputedRef<boolean> }
 ) => {
   return useQuery({
-    queryKey: ['balance', { address: address.value, symbol: symbol.value }],
+    queryKey: ['balance', { address, symbol }],
     queryFn: () => {
       switch (symbol.value) {
         case 'SPACE':

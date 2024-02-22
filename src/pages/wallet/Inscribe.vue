@@ -1,10 +1,10 @@
 <script lang="ts" setup>
+import { type Psbt } from 'bitcoinjs-lib'
 import { BtcWallet } from '@/lib/wallets/btc'
 import CopyIcon from '@/assets/icons/copy.svg'
 import { ref, computed, Ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
-import bitcoinjs, { type Psbt } from 'bitcoinjs-lib'
 import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
 import { prettifyBalanceFixed, shortestAddress } from '@/lib/formatters'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
@@ -17,6 +17,7 @@ const router = useRouter()
 if (!route.params.address || !route.params.symbol) {
   router.go(-1)
 }
+
 const address = ref<string>(route.params.address as string)
 const symbol = ref<SymbolTicker>(route.params.symbol as SymbolTicker)
 
@@ -66,7 +67,6 @@ const inscribeAmount = ref<number | undefined>()
 const inscribePsbt = ref<Psbt | undefined>()
 const total = ref<number | undefined>()
 const paymentNetworkFee = ref<number | undefined>()
-const inscriptionNetworkFee = ref<number | undefined>()
 const transactionResult: Ref<undefined | TransactionResult> = ref()
 const inscribeOrder = ref<PreInscribe | undefined>()
 const psbtHex = ref('')
@@ -120,7 +120,7 @@ const popConfirm = async () => {
     isOpenResultModal.value = true
     return
   })
-  console.log({ order })
+  // console.log({ order })
   if (!order) {
     operationLock.value = false
     return
@@ -141,19 +141,16 @@ const popConfirm = async () => {
   const { fee, psbt, selecedtUTXOs } = data
   inputUTXOs.value = selecedtUTXOs.map((utxo) => ({ address: address.value, value: utxo.satoshi }))
   const tx = psbt.extractTransaction()
-  outputUTXOs.value = tx.outs.map((out) => ({
-    address: bitcoinjs.address.fromOutputScript(out.script),
+  outputUTXOs.value = psbt.txOutputs.map((out) => ({
+    address: out.address || '',
     value: out.value,
   }))
   psbtHex.value = psbt.extractTransaction().toHex()
   paymentNetworkFee.value = fee
   inscribePsbt.value = psbt
-  console.log('paymentNetworkFee', paymentNetworkFee.value, order.minerFee)
+  // console.log('paymentNetworkFee', paymentNetworkFee.value, order.minerFee)
   inscribeOrder.value = order
   total.value = paymentNetworkFee.value + order.needAmount
-  console.log('total', total.value)
-  inscriptionNetworkFee.value = total.value - order.serviceFee - 546
-  console.log('inscriptionNetworkFee', inscriptionNetworkFee.value)
   operationLock.value = false
   nextStep.value = 1
 }
@@ -333,7 +330,7 @@ function toSuceess() {
           </div>
         </div>
         <div class="space-y-2 rounded-md">
-          <div class="text-[#141416]">Network Fee Rate</div>
+          <div class="text-[#141416]">Network Fee</div>
           <div class="w-full p-2 bg-[#F5F5F5]">{{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }}</div>
         </div>
       </div>

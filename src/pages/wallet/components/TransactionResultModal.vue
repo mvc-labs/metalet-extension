@@ -1,21 +1,21 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
-import { useRouter } from 'vue-router'
-import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
-
 import { toTx } from '@/lib/helpers'
-import { prettifyTokenBalance } from '@/lib/formatters'
-import { getBrowserHost } from '@/lib/host'
-// import { type TransactionResult } from '@/global-types'
-
+import { useRouter } from 'vue-router'
 import Modal from '@/components/Modal.vue'
+import { getBrowserHost } from '@/lib/host'
+import CopyIcon from '@/assets/icons/copy.svg'
+import { prettifyTokenBalance } from '@/lib/formatters'
+import SuccessIcon from '@/assets/icons/success.svg?url'
+import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
 
 const router = useRouter()
 
 type SuccessResult = {
   status: 'success'
   txId: string
-  recipient: string
+  fromAddress: string
+  toAdddress: string
   amount: number
   token: {
     symbol: string
@@ -56,7 +56,8 @@ function ok() {
 const toResultTx = async () => {
   if (!props.result || props.result.status !== 'success') return
 
-  const host = await getBrowserHost()
+  const host = await getBrowserHost(props.result.token.symbol === 'BTC' ? 'btc' : 'mvc')
+
   toTx(props.result.txId, host as string)
 }
 </script>
@@ -76,39 +77,48 @@ const toResultTx = async () => {
       </div>
     </template>
     <template #title v-if="result && result.status === 'success'">
-      <div class="flex items-center gap-2">
-        <span class="gradient-text">Sent Successfully</span>
-        <span class="">🚀</span>
+      <div class="flex flex-col justify-center items-center gap-[18px]">
+        <img class="w-[54px] h-[54px]" :src="SuccessIcon" alt="" />
+        <span class="text-black-primary">Send Successfully</span>
       </div>
     </template>
 
     <template #body>
       <div class="mt-4 space-y-4" v-if="result && (result.status === 'failed' || result.status === 'warning')">
         <div class="space-y-1">
-          <div class="text-sm text-gray-500">{{ result.message }}</div>
+          <div class="text-sm text-gray-500 break-all">{{ result.message }}</div>
         </div>
       </div>
 
-      <div class="mt-4 space-y-4" v-if="result && result.status === 'success'">
-        <div class="space-y-1">
+      <div class="mt-[37px] space-y-4" v-if="result && result.status === 'success'">
+        <div class="flex justify-between">
           <div class="label">Amount</div>
           <div class="text-sm">
             {{ `${prettifyTokenBalance(result.amount, result.token.decimal)} ${result.token.symbol}` }}
           </div>
         </div>
 
-        <div class="space-y-1">
-          <div class="label">Recipient Address</div>
-          <div class="text-xs">{{ result.recipient }}</div>
+        <div class="flex justify-between">
+          <div class="label">From</div>
+          <div class="text-xs flex gap-2">
+            <div class="truncate w-48 cursor-pointer" :title="result.fromAddress">{{ result.fromAddress }}</div>
+            <CopyIcon class="h-4 w-4 cursor-pointer hover:text-blue-500" />
+          </div>
         </div>
 
-        <div class="space-y-1">
+        <div class="flex justify-between">
+          <div class="label">To</div>
+          <div class="text-xs flex gap-2">
+            <div class="truncate w-48 cursor-pointer" :title="result.toAdddress">{{ result.toAdddress }}</div>
+            <CopyIcon class="h-4 w-4 cursor-pointer hover:text-blue-500" />
+          </div>
+        </div>
+
+        <div class="flex justify-between">
           <div class="label">Transaction ID</div>
-          <div class="group cursor-pointer break-all text-xs" @click="toResultTx">
-            <span class="group-hover:underline">{{ result.txId }}</span>
-            <ArrowTopRightOnSquareIcon
-              class="ml-1 inline-block h-4 w-4 text-gray-500 transition duration-200 group-hover:text-blue-500"
-            ></ArrowTopRightOnSquareIcon>
+          <div class="text-xs flex gap-2">
+            <div class="hover:underline truncate w-48 cursor-pointer" @click="toResultTx">{{ result.txId }}</div>
+            <CopyIcon class="h-4 w-4 cursor-pointer text-blue-300 hover:text-blue-500" />
           </div>
         </div>
       </div>
