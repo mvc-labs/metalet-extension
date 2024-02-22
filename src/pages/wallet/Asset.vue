@@ -95,8 +95,8 @@ const assetUSD = computed(() => {
 })
 
 watch(assetUSD, (_assetUSD) => {
-  if (_assetUSD) {
-    updateAsset({ name: asset.value!.symbol, value: _assetUSD.toNumber() })
+  if (asset.value && _assetUSD) {
+    updateAsset({ chain: asset.value.chain, name: asset.value.symbol, value: _assetUSD.toNumber() })
   }
 })
 
@@ -148,21 +148,21 @@ const toTransfer = () => {
     <div class="mt-8 flex flex-col items-center self-stretch">
       <template v-if="asset?.queryable">
         <template v-if="asset.balance">
-          <div class="mb-1 text-center text-3xl text-[#141416] font-bold" v-if="asset.contract === 'BRC-20'">
+          <div class="mb-1 text-center text-3xl text-black-primary font-bold" v-if="asset.contract === 'BRC-20'">
             {{ prettifyTokenBalance(asset.balance.total, asset.decimal, false, asset.symbol) }}
           </div>
-          <div class="mb-1 text-center text-3xl text-[#141416]" v-else>
+          <div class="mb-1 text-center text-3xl text-black-primary" v-else>
             {{ asset.balance.total }} {{ asset.symbol }}
           </div>
 
           <div class="text-[#909399] text-center">
-            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD` }}</span>
+            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber()} USD` }}</span>
             <span v-else>$-- USD</span>
           </div>
         </template>
         <div v-else-if="isLoading">--</div>
         <template v-else-if="balance">
-          <div class="mb-1 text-center text-3xl text-[#141416]">
+          <div class="mb-1 text-center text-3xl text-black-primary">
             <span v-if="asset.isNative">
               {{ prettifyTokenBalance(balance.total, asset.decimal, false, asset.symbol) }}
             </span>
@@ -171,7 +171,7 @@ const toTransfer = () => {
             </span>
           </div>
           <div class="text-[#909399] text-center">
-            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD` }}</span>
+            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber()} USD` }}</span>
             <span v-else>$-- USD</span>
           </div>
         </template>
@@ -217,7 +217,7 @@ const toTransfer = () => {
               class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative"
             >
               <div class="mt-2.5 text-[#909399] text-sm">{{ ticker.ticker }}</div>
-              <div class="mt-3 text-[#141416] text-lg font-bold truncate">{{ ticker.amount }}</div>
+              <div class="mt-3 text-black-primary text-lg font-bold truncate">{{ ticker.amount }}</div>
               <div
                 class="text-white text-xs bg-[#1E2BFF] rounded-b-md absolute bottom-0 w-full text-center pt-[5px] pb-[4px]"
               >

@@ -56,7 +56,7 @@ export const useExchangeRatesQuery = (
   return useQuery({
     queryKey: ['exchangeRates', { type: getExchangeCoinType(symbolRef.value, contract) }],
     queryFn: async () => {
-      const net = await getNet()
+      const net = getNet()
       if (net === 'testnet') {
         return getTestnetRates(symbolRef.value)
       }

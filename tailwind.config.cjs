@@ -25,7 +25,7 @@ module.exports = {
         150: '37.5rem',
       },
       fontFamily: {
-        sans: ['"Geist"', ...defaultTheme.fontFamily.sans],
+        inter: ['Inter'],
       },
     },
   },

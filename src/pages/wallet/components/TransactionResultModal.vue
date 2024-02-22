@@ -3,6 +3,7 @@ import { PropType } from 'vue'
 import { toTx } from '@/lib/helpers'
 import { useRouter } from 'vue-router'
 import Modal from '@/components/Modal.vue'
+import { type Chain } from '@/lib/account'
 import { getBrowserHost } from '@/lib/host'
 import CopyIcon from '@/assets/icons/copy.svg'
 import { prettifyTokenBalance } from '@/lib/formatters'
@@ -12,6 +13,7 @@ import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
 const router = useRouter()
 
 type SuccessResult = {
+  chain: Chain
   status: 'success'
   txId: string
   fromAddress: string
@@ -79,7 +81,7 @@ const toResultTx = async () => {
     <template #title v-if="result && result.status === 'success'">
       <div class="flex flex-col justify-center items-center gap-[18px]">
         <img class="w-[54px] h-[54px]" :src="SuccessIcon" alt="" />
-        <span class="text-black-primary">Send Successfully</span>
+        <span class="text-black-primary">Sent Successfully</span>
       </div>
     </template>
 

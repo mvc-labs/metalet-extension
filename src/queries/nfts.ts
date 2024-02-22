@@ -175,7 +175,7 @@ export async function getMetaPins(
   cursor = 0,
   size = 10
 ): Promise<MetaIDPin[]> {
-  const net = await getNet()
+  const net = getNet()
   return await metaletApiV3<MetaIDPin[]>('/address/pins').get({
     // net: 'testnet',
     // address: "tb1qlwvue3swm044hqf7s3ww8um2tuh0ncx65a6yme",

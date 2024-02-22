@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import { Psbt } from 'bitcoinjs-lib'
-import { ref, computed, watch } from 'vue'
+import { ref } from 'vue'
+import type { Psbt } from 'bitcoinjs-lib'
+import CopyIcon from '@/assets/icons/copy.svg'
 import { BtcWallet } from '@/lib/wallets/btc'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
 import { useQueryClient } from '@tanstack/vue-query'
 import { getInscriptionUtxo } from '@/queries/utxos'
-import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
+import BTCRateList from './components/BTCRateList.vue'
 import { prettifyBalanceFixed, shortestAddress } from '@/lib/formatters'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
@@ -26,38 +27,9 @@ const inscriptionId = ref<string>(route.query.inscriptionId as string)
 const recipient = ref('')
 
 const operationLock = ref(false)
-
-const isCustom = ref(false)
-const currentTitle = ref<string>('')
 const currentRateFee = ref<number>()
 const calcFee = ref<number>()
 const txPsbt = ref<Psbt>()
-
-const selectRateFee = (rateFee: number) => {
-  currentRateFee.value = rateFee
-  isCustom.value = false
-}
-
-const selectCustom = () => {
-  currentTitle.value = 'Custom'
-  currentRateFee.value = undefined
-  isCustom.value = true
-}
-
-// rate list query
-const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({
-  enabled: computed(() => !!address.value),
-})
-
-watch(
-  rateList,
-  (newRateList?: FeeRate[]) => {
-    if (newRateList && newRateList[1]) {
-      selectRateFee(newRateList[1].feeRate)
-    }
-  },
-  { immediate: true }
-)
 
 const isOpenResultModal = ref(false)
 const isShowComfirm = ref(false)
@@ -124,6 +96,7 @@ async function send() {
 
   if (sentRes) {
     transactionResult.value = {
+      chain: 'btc',
       status: 'success',
       txId: sentRes.txId,
       fromAddress: address.value,
@@ -148,17 +121,17 @@ async function send() {
 </script>
 
 <template>
-  <div class="pt-[30px] space-y-[30px] h-full overflow-y-auto">
+  <div class="pt-[30px] space-y-[30px] h-full">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
 
     <!-- send page -->
-    <div v-show="!isShowComfirm">
+    <div v-show="!isShowComfirm" class="space-y-4 w-full pb-4">
       <div class="space-y-2">
-        <div class="text-[#141416] text-sm">Amount</div>
+        <div class="text-black-primary text-sm">Amount</div>
         <div class="bg-[#F5F5F5] w-full px-3 py-[15px]">{{ amount }} {{ symbol }}</div>
       </div>
       <div class="space-y-2">
-        <div class="text-[#141416] text-sm">Receiver</div>
+        <div class="text-black-primary text-sm">Receiver</div>
         <input
           v-model="recipient"
           placeholder="Recipient's address"
@@ -166,39 +139,7 @@ async function send() {
         />
       </div>
 
-      <div v-if="!rateLoading && rateList">
-        <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
-
-        <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-[#141416]">
-          <div
-            v-for="rate in rateList"
-            @click="selectRateFee(rate.feeRate)"
-            :class="rate.feeRate === currentRateFee ? 'border-[#9da1eb]' : 'border-[#D8D8D8]'"
-            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
-          >
-            <div class="tex-sm">{{ rate.title }}</div>
-            <div class="mt-1.5 text-base font-bold">{{ rate.feeRate }} sat/vB</div>
-            <div class="mt-1 text-sm text-[#999999]">About</div>
-            <div class="text-sm text-[#999999]">{{ rate.desc.replace('About', '') }}</div>
-          </div>
-          <div
-            @click="selectCustom()"
-            :class="isCustom ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
-          >
-            <div>Custom</div>
-          </div>
-        </div>
-      </div>
-
-      <input
-        min="0"
-        type="number"
-        v-if="isCustom"
-        placeholder="sat/vB"
-        v-model="currentRateFee"
-        class="main-input w-full !rounded-xl !py-4 !text-xs mt-1"
-      />
+      <BTCRateList v-model:currentRateFee="currentRateFee" />
 
       <div v-if="operationLock" class="w-full py-3 text-center text-sm font-bold text-gray-500">Loading...</div>
       <button
@@ -213,30 +154,38 @@ async function send() {
     </div>
 
     <!-- comfirm page -->
-    <div v-show="isShowComfirm">
+    <div v-show="isShowComfirm" class="h-full flex flex-col">
       <div class="text-center text-3xl font-bold">{{ amount }} {{ symbol }}</div>
-      <div class="mt-8 space-y-5">
+      <div class="mt-8 space-y-5 relative flex-1">
         <div class="flex items-center justify-between">
-          <span>From</span><span>{{ shortestAddress(address) }}</span>
+          <span>From</span>
+          <span class="flex items-center gap-x-2">
+            <span :title="address">{{ shortestAddress(address) }}</span>
+            <CopyIcon class="h-4 w-4 cursor-pointer hover:text-blue-500" />
+          </span>
         </div>
         <div class="flex items-center justify-between">
-          <span>To</span><span>{{ shortestAddress(recipient) }}</span>
+          <span>To</span>
+          <span class="flex items-center gap-x-2">
+            <span :title="recipient">{{ shortestAddress(recipient) }}</span>
+            <CopyIcon class="h-4 w-4 cursor-pointer hover:text-blue-500" />
+          </span>
         </div>
         <div class="flex items-center justify-between">
-          <span>Payment Network Fee</span><span>{{ prettifyBalanceFixed(calcFee || 0, 'BTC', 8) }}</span>
+          <span>Network Fee</span><span>{{ prettifyBalanceFixed(calcFee || 0, 'BTC', 8) }}</span>
         </div>
-      </div>
-      <div class="w-full left-0 flex items-center justify-between mt-3">
-        <button
-          @click="cancel"
-          class="border w-[133px] rounded-lg py-3 text-sm font-bold text-[#141416]"
-          style="border-image: 'linear-gradient(105deg, #72F5F6 4%, #171AFF 94%) 1'"
-        >
-          Cancel
-        </button>
-        <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm font-bold text-sky-100">
-          Confirm
-        </button>
+        <div class="w-full left-0 flex items-center justify-center gap-x-4 absolute bottom-5">
+          <button
+            @click="cancel"
+            class="border w-[133px] rounded-lg py-3 text-sm font-bold text-black-primary"
+            style="border-image: 'linear-gradient(105deg, #72F5F6 4%, #171AFF 94%) 1'"
+          >
+            Cancel
+          </button>
+          <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm font-bold text-sky-100">
+            Confirm
+          </button>
+        </div>
       </div>
     </div>
   </div>

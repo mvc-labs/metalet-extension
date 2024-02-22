@@ -1,7 +1,7 @@
 import { mvc } from 'meta-contract'
 
 import { notifyContent } from '@/lib/notify-content'
-import { getNetwork } from './network'
+import { getBtcNetwork, getNetwork } from './network'
 import { signMessage } from './crypto'
 import { fetchUtxos } from '../queries/utxos'
 import { getStorage, setStorage } from './storage'
@@ -238,8 +238,9 @@ export async function getSigner(chain: Chain = 'mvc', treehash?: string) {
 
     return node.tweak(crypto.taggedHash('TapTweak', nodeXOnlyPubkey))
   }
+  const btcNetwork = await getBtcNetwork()
   const privateKey = await getPrivateKey(chain)
-  return deriveSigner(privateKey)
+  return deriveSigner(privateKey, btcNetwork)
 }
 
 export async function getCredential(

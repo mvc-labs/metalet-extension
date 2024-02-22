@@ -4,7 +4,6 @@ import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon } from '@heroicons/v
 
 import { toTx } from '@/lib/helpers'
 import { getBrowserHost } from '@/lib/host'
-
 import Modal from '@/components/Modal.vue'
 import { useRouter } from 'vue-router'
 
@@ -87,8 +86,8 @@ const toResultTx = async () => {
         </div>
 
         <div class="space-y-1">
-          <div class="label break-all">Recipient Address</div>
-          <div class="text-xs">{{ result.recipient }}</div>
+          <div class="label">Recipient Address</div>
+          <div class="text-xs break-all">{{ result.recipient }}</div>
         </div>
 
         <div class="space-y-1">

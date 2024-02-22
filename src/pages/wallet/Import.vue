@@ -250,7 +250,7 @@ const onSubmit = async () => {
                 as="template"
               >
                 <li :class="['text-gray-900', 'relative cursor-pointer select-none py-1 pl-3 pr-4']">
-                  <span :class="[selected ? 'font-medium' : 'font-normal', 'block truncate']">{{ script.path }}</span>
+                  <span class="block truncate">{{ script.path }}</span>
                   <span
                     v-if="selected"
                     class="absolute inset-y-2 right-2 flex h-5 w-5 items-center justify-center rounded-md bg-[#1E2BFF] text-white"

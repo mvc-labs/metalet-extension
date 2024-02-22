@@ -38,7 +38,7 @@ interface TickerInfo {
 }
 
 export const getTickerInfo = async (tick: string): Promise<TickerInfo> => {
-  const net = await getNet()
+  const net = getNet()
   return await metaletApiV3<TickerInfo>(`/brc20/tick/info`).get({ net, tick })
 }
 
@@ -53,7 +53,7 @@ interface TokenBalance {
 }
 
 export const fetchBRC20Token = async (address: string): Promise<Asset[]> => {
-  const net = await getNet()
+  const net = getNet()
   return (
     await metaletApiV3<PageResult<TokenBalance>>(`/brc20/tokens`).get({ net, address, cursor: '0', size: '100000' })
   ).list.map(

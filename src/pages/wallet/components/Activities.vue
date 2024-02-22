@@ -1,11 +1,9 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import { InboxIcon } from '@heroicons/vue/24/solid'
-
-import { useActivitiesQuery } from '@/queries/activities'
-
+import { type Asset } from '@/data/assets'
 import ActivityItem from './ActivityItem.vue'
-import { Asset } from '@/data/assets'
+import { InboxIcon } from '@heroicons/vue/24/solid'
+import { useActivitiesQuery } from '@/queries/activities'
 
 const props = defineProps<{
   address: string
@@ -22,7 +20,7 @@ const { isLoading, isError, data: activities, error } = useActivitiesQuery(addre
 <template>
   <div class="text-sm">
     <!-- label -->
-    <h4 class="py-2 text-black-primary text-lg font-[600]">Transaction History</h4>
+    <h4 class="py-2 text-black-primary text-lg font-bold">Transaction History</h4>
 
     <!-- list -->
     <div v-if="isLoading" class="py-4 text-center">Loading...</div>

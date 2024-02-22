@@ -46,7 +46,7 @@ export interface BitcoinBalance {
 }
 
 export const fetchBtcBalance = async (address: string): Promise<Balance> => {
-  const net = await getNet()
+  const net = getNet()
   const data = await metaletApiV3<BTCBalance>(`/address/btc-balance`).get({ net, address })
   return {
     address,

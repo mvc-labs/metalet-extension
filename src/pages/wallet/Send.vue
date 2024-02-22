@@ -6,14 +6,13 @@ import { Wallet } from 'meta-contract'
 import { getTags } from '@/data/assets'
 import Modal from '@/components/Modal.vue'
 import { allAssets } from '@/data/assets'
-import { useQueryClient } from '@tanstack/vue-query'
-import { useBalanceQuery } from '@/queries/balance'
-import { prettifyBalance } from '@/lib/formatters'
-import type { TransactionResult } from '@/global-types'
 import { BtcWallet } from '@/lib/wallets/btc'
+import { useBalanceQuery } from '@/queries/balance'
+import { useQueryClient } from '@tanstack/vue-query'
 import { type SymbolTicker } from '@/lib/asset-symbol'
+import BTCRateList from './components/BTCRateList.vue'
+import type { TransactionResult } from '@/global-types'
 import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
-import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
 import TransactionResultModal from './components/TransactionResultModal.vue'
 
 const tags = computed(() => {
@@ -33,36 +32,9 @@ const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol.v
 const balaceEnabled = computed(() => {
   return !!address.value && !!asset.value.symbol && !asset.value.balance
 })
-const { isLoading, data: balance } = useBalanceQuery(address, symbol, { enabled: balaceEnabled })
-
-// rate list query
-const { isLoading: rateLoading, data: rateList } = useBTCRateQuery({
-  enabled: computed(() => !!address.value && asset.value.chain === 'btc'),
-})
+const { data: balance } = useBalanceQuery(address, symbol, { enabled: balaceEnabled })
 
 const currentRateFee = ref<number | undefined>()
-const isCustom = ref(false)
-const currentTitle = ref<string>('')
-const selectRateFee = (rateFee: number) => {
-  currentRateFee.value = rateFee
-  isCustom.value = false
-}
-
-const selectCustom = () => {
-  currentTitle.value = 'Custom'
-  currentRateFee.value = undefined
-  isCustom.value = true
-}
-
-watch(
-  rateList,
-  (newRateList?: FeeRate[]) => {
-    if (newRateList && newRateList[1]) {
-      selectRateFee(newRateList[1].feeRate)
-    }
-  },
-  { immediate: true }
-)
 
 // fee
 const txPsbt = ref<Psbt>()
@@ -189,6 +161,7 @@ async function send() {
   if (sentRes) {
     isOpenConfirmModal.value = false
     transactionResult.value = {
+      chain: asset.value.symbol === 'SPACE' ? 'mvc' : 'btc',
       status: 'success',
       txId: sentRes.txId,
       fromAddress: address.value,
@@ -257,41 +230,7 @@ async function send() {
         <input v-model="recipient" placeholder="Address" class="main-input w-full !rounded-xl !p-4 !text-xs" />
       </div>
 
-      <!-- fee rate -->
-      <div v-if="asset.chain === 'btc' && !rateLoading && rateList">
-        <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
-
-        <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-[#141416]">
-          <div
-            v-for="rate in rateList"
-            @click="selectRateFee(rate.feeRate)"
-            :class="rate.feeRate === currentRateFee ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-            class="flex flex-col items-center justify-center rounded-md border cursor-pointer h-[100px]"
-          >
-            <div class="text-xs">{{ rate.title }}</div>
-            <div class="mt-1.5 text-sm font-bold">{{ rate.feeRate }} sat/vB</div>
-            <div class="mt-1 text-xs text-[#999999]">About</div>
-            <div class="text-xs text-[#999999]">{{ rate.desc.replace('About', '') }}</div>
-          </div>
-          <div
-            @click="selectCustom()"
-            :class="isCustom ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-            class="flex flex-col items-center justify-center rounded-md border cursor-pointer w-[100px] h-[100px]"
-          >
-            <div>Custom</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- custom rate input -->
-      <input
-        min="0"
-        type="number"
-        v-if="isCustom"
-        placeholder="sat/vB"
-        v-model="currentRateFee"
-        class="main-input w-full !rounded-xl !p-4 !text-xs mt-1"
-      />
+      <BTCRateList v-if="asset.chain === 'btc'" v-model:currentRateFee="currentRateFee" />
     </div>
 
     <!-- send -->

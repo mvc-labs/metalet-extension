@@ -26,7 +26,7 @@ export const getBTCTRate = async (): Promise<PageResult<FeeRate>> => {
   return metaletApiV3<PageResult<FeeRate>>(`/btc/fee/summary`).get()
 }
 
-export const useBTCRateQuery = (options: { enabled: ComputedRef<boolean> }) => {
+export const useBTCRateQuery = (options?: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
     queryKey: ['BTCTRate'],
     queryFn: () => getBTCTRate(),

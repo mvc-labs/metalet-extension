@@ -103,7 +103,7 @@ export interface AddressTokenSummary {
 }
 
 export async function fetchBRC20TokenDetail(address: string, ticker: string): Promise<AddressTokenSummary> {
-  const net = await getNet()
+  const net = getNet()
   return await metaletApiV3<AddressTokenSummary>('/brc20/token-summary').get({
     net,
     address,

@@ -4,10 +4,9 @@ import { ref, computed, watch } from 'vue'
 import { updateAsset } from '@/lib/balance'
 import { isOfficialToken } from '@/lib/assets'
 import { useBalanceQuery } from '@/queries/balance'
-import { prettifyTokenBalance } from '@/lib/formatters'
+import { CheckBadgeIcon } from '@heroicons/vue/24/solid'
 import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 import { type Asset, getTagInfo, type Tag } from '@/data/assets'
-import { CheckBadgeIcon } from '@heroicons/vue/24/solid'
 
 const { asset, address } = defineProps<{
   asset: Asset
@@ -61,7 +60,7 @@ watch(
   assetUSD,
   (_assetUSD) => {
     if (_assetUSD) {
-      updateAsset({ name: asset.symbol, value: _assetUSD.toNumber() })
+      updateAsset({ chain: asset.chain, name: asset.symbol, value: _assetUSD.toNumber() })
     }
   },
   { immediate: true }
@@ -103,9 +102,9 @@ watch(
             asset?.contract === 'BRC-20' ? 'border-b border-[#D8D8D8] border-dashed pb-3' : '',
           ]"
         >
-          <div class="text-[#141416] font-bold text-base">{{ assetPrice }}</div>
+          <div class="text-black-primary font-bold text-base">{{ assetPrice }}</div>
           <div :class="['text-sm font-normal text-gray-500']">
-            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP)} USD` }}</span>
+            <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber()} USD` }}</span>
             <span v-else>$-- USD</span>
           </div>
         </div>
@@ -113,11 +112,11 @@ watch(
         <div v-if="asset?.contract === 'BRC-20'" class="w-full mt-2.5 space-y-2">
           <div class="text-xs flex items-center justify-between w-full">
             <span class="text-[#909399]">Transferable:</span>
-            <span class="text-[#141416] font-bold truncate">{{ asset.balance?.transferBalance || 0 }}</span>
+            <span class="text-black-primary font-bold truncate">{{ asset.balance?.transferBalance || 0 }}</span>
           </div>
           <div class="text-xs flex items-center justify-between w-full">
             <span class="text-[#909399]">Available:</span>
-            <span class="text-[#141416] font-bold truncate">{{ asset.balance?.availableBalance || 0 }}</span>
+            <span class="text-black-primary font-bold truncate">{{ asset.balance?.availableBalance || 0 }}</span>
           </div>
         </div>
       </div>

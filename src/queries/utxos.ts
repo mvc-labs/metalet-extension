@@ -4,15 +4,15 @@ import { mvcApi, mempoolApi, metaletApiV3 } from './request'
 
 export interface UTXO {
   txId: string
-  vout: number
-  satoshi: number
+  outputIndex: number
+  satoshis: number
   confirmed: boolean
   inscriptions:
-  | {
-    id: string
-    num: number
-  }[]
-  | null
+    | {
+        id: string
+        num: number
+      }[]
+    | null
 }
 
 export type MvcUtxo = {
@@ -25,7 +25,7 @@ export type MvcUtxo = {
 }
 
 const fetchMVCUtxos = async (address: string): Promise<MvcUtxo[]> => {
-  return await mvcApi<MvcUtxo[]>(`/address/${address}/utxo`).get()
+  return (await mvcApi<MvcUtxo[]>(`/address/${address}/utxo`)).get()
 }
 
 export type Utxo = {
@@ -68,18 +68,8 @@ export interface UnisatUTXO {
   }[]
 }
 
-function formatUnisatUTXO(utxo: UnisatUTXO & { confirmed: boolean }): UTXO {
-  return {
-    txId: utxo.txId,
-    vout: utxo.outputIndex,
-    satoshi: utxo.satoshis,
-    confirmed: utxo.confirmed,
-    inscriptions: utxo.inscriptions.map(({ id, num }) => ({ id, num })),
-  }
-}
-
 export async function getBtcUtxos(address: string): Promise<UTXO[]> {
-  const net = await getNet()
+  const net = getNet()
   return metaletApiV3<UTXO[]>('/address/btc-utxo').get({ net, address, unconfirmed: '1' })
 }
 
@@ -115,8 +105,8 @@ export interface MempoolUtxo {
 function formatMempoolUTXO(utxo: MempoolUtxo): UTXO {
   return {
     txId: utxo.txid,
-    vout: utxo.vout,
-    satoshi: utxo.value,
+    outputIndex: utxo.vout,
+    satoshis: utxo.value,
     confirmed: utxo.status.confirmed,
     inscriptions: [],
   }
