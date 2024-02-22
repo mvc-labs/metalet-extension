@@ -12,7 +12,7 @@ import {isP2SHScript, isP2TR} from "./bitcoinjs-lib/psbt/psbtutils";
 import * as bscript from "./bitcoinjs-lib/script";
 import {sha256} from "./bitcoinjs-lib/crypto";
 import {range} from "./bitcoinjs-lib/bip174/converter/tools";
-import {pbkdf2Sync, randomBytes} from "crypto";
+import randomBytes from 'randombytes'
 
 const schnorr = signUtil.schnorr.secp256k1.schnorr
 const defaultMaximumFeeRate = 5000

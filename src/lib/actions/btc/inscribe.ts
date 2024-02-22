@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto'
+import randomBytes from 'randombytes'
 import { sleep } from '@/lib/helpers'
 import * as bitcoin from './bitcoinjs-lib'
 import { getBtcUtxos } from '@/queries/utxos'
@@ -428,7 +428,7 @@ export async function process({
 }): Promise<InscribeHexResult | InscribeTxIdResult> {
   const network = await getBtcNetwork()
   const address = await getAddress('btc')
-  const utxos = await getBtcUtxos(address)
+  const utxos = await getBtcUtxos(address).then((utxos) => utxos.filter((utxo) => utxo.confirmed))
   const commitTxPrevOutputList = utxos.map((utxo) => ({
     txId: utxo.txId,
     vOut: utxo.outputIndex,

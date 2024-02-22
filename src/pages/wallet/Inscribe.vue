@@ -1,12 +1,11 @@
 <script lang="ts" setup>
+import { ref, computed, Ref } from 'vue'
 import { type Psbt } from 'bitcoinjs-lib'
 import { BtcWallet } from '@/lib/wallets/btc'
 import CopyIcon from '@/assets/icons/copy.svg'
-import { ref, computed, Ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
 import BTCRateList from './components/BTCRateList.vue'
-import { FeeRate, useBTCRateQuery } from '@/queries/transaction'
 import { prettifyBalanceFixed, shortestAddress } from '@/lib/formatters'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
 import { preInscribe, PreInscribe, getInscribeInfo } from '@/queries/inscribe'

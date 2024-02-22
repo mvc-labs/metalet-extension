@@ -1,14 +1,17 @@
 <script lang="ts" setup>
-import { FEEB } from '@/data/config'
-import EditName from './EditName.vue'
-import { useRouter } from 'vue-router'
-import { getNetwork } from '@/lib/network'
 import { Ref, computed, inject, ref } from 'vue'
-import { shortestAddress } from '@/lib/formatters'
-import { useQueryClient } from '@tanstack/vue-query'
-import { API_NET, API_TARGET, Wallet } from 'meta-contract'
-import { type Account, connectAccount, getPrivateKey } from '@/lib/account'
 import { ClipboardDocumentCheckIcon, ClipboardDocumentListIcon, PencilSquareIcon } from '@heroicons/vue/24/solid'
+import { useRouter } from 'vue-router'
+import { API_NET, API_TARGET, Wallet } from 'meta-contract'
+import { useQueryClient } from '@tanstack/vue-query'
+
+import { type Account, connectAccount, getPrivateKey } from '@/lib/account'
+import { getNetwork, network } from '@/lib/network'
+import { shortestAddress } from '@/lib/formatters'
+import { FEEB } from '@/data/config'
+
+import EditName from './EditName.vue'
+import { assetList } from '@/lib/balance'
 
 const router = useRouter()
 
@@ -19,15 +22,12 @@ const props = defineProps<{
   showConnectButton?: boolean
 }>()
 
-const network = ref()
-const mvcAddress = ref('')
-const btcAddress = ref('')
-
-getNetwork().then((_network) => {
-  network.value = _network
-  mvcAddress.value = _network === 'mainnet' ? props.account.mvc.mainnetAddress : props.account.mvc.testnetAddress
-  btcAddress.value = _network === 'mainnet' ? props.account.btc.mainnetAddress : props.account.btc.testnetAddress
-})
+const mvcAddress = ref(
+  network.value === 'mainnet' ? props.account.mvc.mainnetAddress : props.account.mvc.testnetAddress
+)
+const btcAddress = ref(
+  network.value === 'mainnet' ? props.account.btc.mainnetAddress : props.account.btc.testnetAddress
+)
 
 const isBTCCopied = ref(false)
 const isMVCCopied = ref(false)
@@ -73,6 +73,8 @@ const connect = async () => {
   const network = await getNetwork()
   const wif = await getPrivateKey()
   wallet.value = new Wallet(wif, network as API_NET, FEEB, API_TARGET.MVC)
+
+  assetList.value = []
 
   router.push('/wallet')
 }
@@ -145,9 +147,9 @@ const openEditNameModal = ref(false)
     <template v-if="showConnectButton">
       <span v-if="isCurrent" class="text-sm text-gray-500 cursor-pointer" @click="connect">active</span>
       <button
-        v-else
-        @click="connect"
         class="rounded-md bg-blue-100 px-2 py-1 text-sm text-blue-700 transition hover:bg-blue-200"
+        @click="connect"
+        v-else
       >
         Connect
       </button>

@@ -1,13 +1,14 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
+import { toTx } from '@/lib/helpers'
 import { useRouter } from 'vue-router'
 import Modal from '@/components/Modal.vue'
+import { type Chain } from '@/lib/account'
+import { getBrowserHost } from '@/lib/host'
 import CopyIcon from '@/assets/icons/copy.svg'
-import { toTx, toMempool } from '@/lib/helpers'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import SuccessIcon from '@/assets/icons/success.svg?url'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
-import { type Chain } from '@/lib/account'
 
 const router = useRouter()
 
@@ -56,13 +57,10 @@ function ok() {
 
 const toResultTx = async () => {
   if (!props.result || props.result.status !== 'success') return
-  console.log(props.result)
 
-  if (props.result.chain === 'btc') {
-    toMempool(props.result.txId)
-  } else {
-    toTx(props.result.txId)
-  }
+  const host = await getBrowserHost(props.result.token.symbol === 'BTC' ? 'btc' : 'mvc')
+
+  toTx(props.result.txId, host as string)
 }
 </script>
 

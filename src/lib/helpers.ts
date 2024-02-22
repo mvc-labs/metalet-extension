@@ -1,21 +1,8 @@
-import { getNet } from './network'
-import { getBrowserHost } from './host'
-import { MEMPOOL_HOST, MEMPOOL_TESTNET_HOST } from '@/data/hosts'
-
 export const raise = (msg: string) => {
   throw new Error(msg)
 }
 
-export const toMempool = async (txid: string) => {
-  const net = await await getNet()
-  if (net === 'testnet') {
-    window.open(`${MEMPOOL_TESTNET_HOST}/tx/${txid}`, '_blank')
-  }
-  window.open(`${MEMPOOL_HOST}/tx/${txid}`, '_blank')
-}
-
-export const toTx = async (txid: string) => {
-  const browserHost = await getBrowserHost()
+export const toTx = async (txid: string, browserHost: string) => {
   window.open(`${browserHost}/tx/${txid}`, '_blank')
 }
 

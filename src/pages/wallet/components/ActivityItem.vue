@@ -4,6 +4,8 @@ import { computed } from 'vue'
 import type { Activity } from '@/queries/activities'
 import { prettifyTimestamp, prettifyTxId } from '@/lib/formatters'
 import { toTx } from '@/lib/helpers'
+import { getBrowserHost } from '@/lib/host'
+import { type Chain } from '@/lib/account'
 import { type Asset } from '@/data/assets'
 
 const props = defineProps<{
@@ -43,7 +45,9 @@ const difference = computed(() => {
 
 const toActivityTx = async () => {
   const { txid } = props.activity
-  toTx(txid)
+  const chain = props.asset.chain as Chain
+  const host = await getBrowserHost(chain)
+  toTx(txid, host as string)
 }
 </script>
 

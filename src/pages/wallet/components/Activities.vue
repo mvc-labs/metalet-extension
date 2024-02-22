@@ -1,11 +1,9 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import { InboxIcon } from '@heroicons/vue/24/solid'
-
-import { useActivitiesQuery } from '@/queries/activities'
-
+import { type Asset } from '@/data/assets'
 import ActivityItem from './ActivityItem.vue'
-import { Asset } from '@/data/assets'
+import { InboxIcon } from '@heroicons/vue/24/solid'
+import { useActivitiesQuery } from '@/queries/activities'
 
 const props = defineProps<{
   address: string

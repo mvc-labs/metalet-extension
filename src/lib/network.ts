@@ -23,9 +23,11 @@ export async function getServiceNetwork(): Promise<Service> {
 export async function hasServiceNetwork(): Promise<boolean> {
   return !!(await storage.get(Service_Network_Key))
 }
+export const network = ref<Network>(await storage.get('network', { defaultValue: 'mainnet' }))
 
 export async function setNetwork(_network: Network) {
   await storage.set('network', _network)
+  network.value = _network
   notifyContent('networkChanged')(_network)
 }
 
@@ -33,14 +35,10 @@ export async function getNetwork(): Promise<Network> {
   return await storage.get('network', { defaultValue: 'mainnet' })
 }
 
-export async function getBtcNetwork() {
-  const network = await getNetwork()
-  return network === 'mainnet' ? networks.bitcoin : networks.testnet
+export function getBtcNetwork() {
+  return network.value === 'mainnet' ? networks.bitcoin : networks.testnet
 }
 
-type Net = 'livenet' | 'testnet'
-
-export async function getNet(): Promise<Net> {
-  const network = await getNetwork()
-  return network === 'mainnet' ? 'livenet' : network
+export function getNet(): string {
+  return network.value === 'mainnet' ? 'livenet' : network.value
 }
