@@ -73,7 +73,7 @@ setInterval(async () => {
     host: '',
     res: '',
   })
-}, 29000)
+}, 5000)
 
 const node = document.getElementsByTagName('body')[0]
 const script = document.createElement('script')
