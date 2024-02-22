@@ -1,9 +1,9 @@
+import { IS_DEV } from '@/data/config'
 import * as VueRouter from 'vue-router'
-
+import { assetList } from '@/lib/balance'
 import Wallet from './pages/wallet/Index.vue'
 import { getStorage, useStorage } from './lib/storage'
 import { getAccounts, getCurrentAccount, getLegacyAccounts, needsMigrationV2 } from './lib/account'
-import { IS_DEV } from '@/data/config'
 
 const routes = [
   { path: '/', redirect: '/wallet' },
@@ -331,6 +331,12 @@ router.beforeEach(async (to, from) => {
     if (locked) {
       return '/lock'
     }
+  }
+})
+
+router.beforeEach(async (to, from) => {
+  if (to.path === '/wallet') {
+    assetList.value = []
   }
 })
 

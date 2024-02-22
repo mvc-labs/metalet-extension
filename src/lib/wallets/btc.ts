@@ -35,7 +35,7 @@ export class BtcWallet {
     if (!utxos.length) {
       throw new Error('your account currently has no available UTXO.')
     }
-    utxos.sort((a, b) => b.satoshi - a.satoshi)
+    utxos.sort((a, b) => b.satoshis - a.satoshis)
 
     const buildPsbt = async (selectedUtxos: UTXO[], change: Decimal) => {
       const psbt = new Psbt({ network: btcNetwork })
@@ -44,7 +44,7 @@ export class BtcWallet {
 
       psbt.addInput(payInput)
       psbt.addOutput({
-        value: utxo.satoshi,
+        value: utxo.satoshis,
         address: recipient,
       })
 
@@ -104,7 +104,7 @@ export class BtcWallet {
     if (!utxos.length) {
       throw new Error('your account currently has no available UTXO.')
     }
-    utxos.sort((a, b) => b.satoshi - a.satoshi)
+    utxos.sort((a, b) => b.satoshis - a.satoshis)
 
     const buildPsbt = async (selectedUtxos: UTXO[], change: Decimal) => {
       const psbt = new Psbt({ network: btcNetwork })
@@ -112,7 +112,7 @@ export class BtcWallet {
       const payInput = await createPayInput({ utxo, payment, addressType })
       psbt.addInput(payInput)
       psbt.addOutput({
-        value: utxo.satoshi,
+        value: utxo.satoshis,
         address: recipient,
       })
 
@@ -202,7 +202,7 @@ async function getPsbtAndSelectUtxos(recipient: string, amount: Decimal, feeRate
   const addressType = await getAddressType('btc')
   const payment = await createPayment(addressType)
   const utxos = (await getBtcUtxos(address)) || []
-  utxos.sort((a, b) => b.satoshi - a.satoshi)
+  utxos.sort((a, b) => b.satoshis - a.satoshis)
 
   const buildPsbt = async (selectedUtxos: UTXO[], change: Decimal) => {
     const psbt = new Psbt({ network: btcNetwork }).addOutput({
@@ -255,7 +255,7 @@ const selectUTXOs = (utxos: UTXO[], targetAmount: Decimal): UTXO[] => {
   const selectedUtxos: typeof utxos = []
   for (const utxo of utxos) {
     selectedUtxos.push(utxo)
-    totalAmount = totalAmount.add(utxo.satoshi)
+    totalAmount = totalAmount.add(utxo.satoshis)
 
     if (totalAmount.gte(targetAmount)) {
       break
@@ -284,7 +284,7 @@ function calculateFee(psbt: Psbt, feeRate: number): number {
 }
 
 function getTotalSatoshi(utxos: UTXO[]): Decimal {
-  return utxos.reduce((total, utxo) => total.add(utxo.satoshi), new Decimal(0))
+  return utxos.reduce((total, utxo) => total.add(utxo.satoshis), new Decimal(0))
 }
 
 async function createPayInput({
@@ -301,17 +301,17 @@ async function createPayInput({
 
   const payInput: any = {
     hash: utxo.txId,
-    index: utxo.vout,
+    index: utxo.outputIndex,
   }
 
   if (['P2SH-P2WPKH', 'P2WPKH'].includes(addressType)) {
-    payInput['witnessUtxo'] = getWitnessUtxo(tx.outs[utxo.vout])
+    payInput['witnessUtxo'] = getWitnessUtxo(tx.outs[utxo.outputIndex])
   }
 
   if (['P2TR'].includes(addressType)) {
     payInput['tapInternalKey'] = await getXOnlyPublicKey()
 
-    payInput['witnessUtxo'] = { value: utxo.satoshi, script: payment.output }
+    payInput['witnessUtxo'] = { value: utxo.satoshis, script: payment.output }
   }
 
   if (['P2PKH'].includes(addressType)) {

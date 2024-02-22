@@ -117,7 +117,7 @@ const popConfirm = async () => {
     return
   }
   const { fee, psbt, selecedtUTXOs } = data
-  inputUTXOs.value = selecedtUTXOs.map((utxo) => ({ address: address.value, value: utxo.satoshi }))
+  inputUTXOs.value = selecedtUTXOs.map((utxo) => ({ address: address.value, value: utxo.satoshis }))
   const tx = psbt.extractTransaction()
   outputUTXOs.value = psbt.txOutputs.map((out) => ({
     address: out.address || '',
