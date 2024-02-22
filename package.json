@@ -1,7 +1,7 @@
 {
   "name": "metalet",
   "private": true,
-  "version": "2.4.0",
+  "version": "2.4.1",
   "type": "module",
   "scripts": {
     "dev": "vite --config ./vite-config/vite.dev.config.ts",
@@ -44,7 +44,6 @@
     "buffer": "^6.0.3",
     "check-password-strength": "^2.0.7",
     "create-hash": "^1.2.0",
-    "crypto": "^1.0.1",
     "crypto-js": "^4.1.1",
     "dayjs": "^1.11.7",
     "decimal.js": "^10.4.3",
@@ -54,6 +53,7 @@
     "mvc-std-lib": "^1.1.4",
     "object-hash": "^3.0.0",
     "qrcode": "^1.5.3",
+    "randombytes": "^2.1.0",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },
@@ -64,6 +64,7 @@
     "@types/crypto-js": "^4.1.1",
     "@types/node": "^18.15.10",
     "@types/object-hash": "^3.0.2",
+    "@types/randombytes": "^2.0.3",
     "@types/webextension-polyfill": "^0.10.0",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vitest/ui": "^0.34.2",

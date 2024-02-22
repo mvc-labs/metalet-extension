@@ -9,16 +9,10 @@ import SpaceLogoImg from '@/assets/images/space-logo.svg?url'
 import { getCurrentAccount, type Account } from '@/lib/account'
 import MvcCollectionPanel from './components/MvcCollectionPanel.vue'
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
-import {
-  Listbox,
-  ListboxButton,
-  ListboxOptions,
-  ListboxOption,
-} from '@headlessui/vue'
+import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
 
 import { Squares2X2Icon } from '@heroicons/vue/24/outline'
 import { ChevronDownIcon, CheckIcon } from '@heroicons/vue/24/solid'
-
 
 const nfts = [
   { id: 1, name: 'Ordinals', disabled: false },
@@ -54,7 +48,7 @@ function changeTab(index: number) {
   <AccountItem :account="account" :current-account="account" v-if="account" :show-network="true" class="mb-4 -mt-4" />
 
   <div class="relative">
-    <div :class="['absolute right-0 z-10', selectedTab === 1 ? '' : 'hidden']">
+    <div :class="['absolute right-0 z-10', selectedTab === 0 ? '' : 'hidden']">
       <Listbox v-model="selectedNFT">
         <ListboxButton class="flex items-center gap-x-1.5 border-2 rounded-xl py-1.5 px-[18px] ml-auto">
           <Squares2X2Icon class="w-5 h-5" />
@@ -62,12 +56,20 @@ function changeTab(index: number) {
           <ChevronDownIcon class="w-3 h-3" />
         </ListboxButton>
         <ListboxOptions class="p-[18px] bg-white rounded-xl select-box-shadow space-y-5 w-[184px]">
-          <ListboxOption v-for="nft in nfts" :key="nft.id" :value="nft"
+          <ListboxOption
+            v-for="nft in nfts"
+            :key="nft.id"
+            :value="nft"
             :class="[!nft.disabled ? 'cursor-pointer' : 'cursor-not-allowed', 'flex items-center']"
-            :disabled="nft.disabled">
+            :disabled="nft.disabled"
+          >
             <span>{{ nft.name }}</span>
             <div
-              :class="['w-5 h-5 flex items-center justify-center bg-[#1E2BFF] rounded ml-auto', selectedNFT.id !== nft.id ? 'hidden' : '']">
+              :class="[
+                'w-5 h-5 flex items-center justify-center bg-[#1E2BFF] rounded ml-auto',
+                selectedNFT.id !== nft.id ? 'hidden' : '',
+              ]"
+            >
               <CheckIcon class="text-white w-2.5" />
             </div>
           </ListboxOption>
@@ -77,17 +79,17 @@ function changeTab(index: number) {
 
     <TabGroup :selectedIndex="selectedTab" @change="changeTab">
       <TabList>
-        <Tab :class="['tab1', selectedTab === 0 ? 'active' : '']">
+        <!-- <Tab :class="['tab1', selectedTab === 0 ? 'active' : '']">
           <span>Crypto</span>
-        </Tab>
-        <Tab :class="['tab1', selectedTab === 1 ? 'active' : '']">
+        </Tab> -->
+        <Tab :class="['tab1', selectedTab === 0 ? 'active' : '']">
           <span>NFTs</span>
         </Tab>
       </TabList>
       <TabPanels class="mt-8">
-        <TabPanel>
+        <!-- <TabPanel>
           <div class="text-[#909399] mt-[58px] text-center">No collectibles yet</div>
-        </TabPanel>
+        </TabPanel> -->
         <TabPanel>
           <MvcCollectionPanel v-if="selectedNFT.name === 'MetaContract'" />
           <BRCTokenList v-else-if="selectedNFT.name === 'Ordinals'" />
@@ -125,11 +127,11 @@ function changeTab(index: number) {
   @apply flex flex-1 items-center justify-center gap-2 rounded-inherit py-2 text-sm font-bold focus:outline-none focus:ring-0 ui-selected:bg-btn-blue ui-selected:text-blue-50;
 }
 
-.tab>img {
+.tab > img {
   @apply h-6 w-6 rounded-full bg-white p-1;
 }
 
-.tab>img:nth-child(1) {
+.tab > img:nth-child(1) {
   @apply p-0;
 }
 
@@ -137,17 +139,17 @@ function changeTab(index: number) {
   padding: 10px 8px;
 }
 
-.tab1>span {
+.tab1 > span {
   color: #999999;
   font-weight: bold;
 }
 
-.tab1.active>span {
-  color: #1E2BFF;
+.tab1.active > span {
+  color: #1e2bff;
 }
 
 .tab1.active {
-  border-bottom: 2px solid #1E2BFF;
+  border-bottom: 2px solid #1e2bff;
 }
 
 .select-box-shadow {
