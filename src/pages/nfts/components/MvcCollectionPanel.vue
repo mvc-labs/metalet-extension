@@ -53,7 +53,7 @@ const toReceive = () => {
     <div class="!my-8 text-sm text-center" v-if="isLoading">MetaContract Tokens loading...</div>
     <div class="!my-8 space-y-8 text-sm" v-else>
       <NftCollectionItem v-for="collection in nftCollections" :collection="collection" v-if="nftCollections?.length"/>
-      <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">No MetaContract Tokens yet</div>
+      <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">No MetaContracts yet.</div>
     </div>
   </div>
 </template>

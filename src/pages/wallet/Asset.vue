@@ -8,8 +8,8 @@ import { useBalanceQuery } from '@/queries/balance'
 import Activities from './components/Activities.vue'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import { getTags, BTCAsset, MVCAsset } from '@/data/assets'
-import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
+import { useExchangeRatesQuery, getExchangeCoinType } from '@/queries/exchange-rates'
 import { ArrowUpRightIcon, QrCodeIcon, ArrowsRightLeftIcon } from '@heroicons/vue/20/solid'
 
 const route = useRoute()
@@ -29,13 +29,19 @@ const asset = computed(() => {
   if (symbol.value === 'SPACE') {
     return MVCAsset
   }
-  if (btcAssets.value && btcAssets.value.length > 0) {
+  if (btcAssets.value) {
     const asset = btcAssets.value.find((asset) => asset.symbol === symbol.value)
     if (!asset) {
       router.go(-1)
       return
     }
     return asset
+  }
+})
+
+const coinType = computed(() => {
+  if (asset.value) {
+    return getExchangeCoinType(asset.value.symbol, asset.value.contract)
   }
 })
 
@@ -74,7 +80,7 @@ const rateEnabled = computed(() => {
   return false
 })
 
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(symbol, asset.value?.contract, {
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(symbol, coinType, {
   enabled: rateEnabled,
 })
 
@@ -227,10 +233,14 @@ const toTransfer = () => {
           </div>
           <div v-else class="w-full h-[142px] flex items-center justify-center text-[#999999]">Empty</div>
           <div class="flex items-end justify-between text-[#303133] mt-3">
-            <span class="text-base">Available</span
-            ><span class="text-lg"
-              >{{ (tickersData && tickersData.tokenBalance.availableBalance) || 0 }} {{ asset.symbol }}</span
-            >
+            <span class="text-base">Available</span>
+            <span class="text-lg" v-if="tickersData">
+              <span>{{ tickersData.tokenBalance.availableBalanceSafe }} {{ asset.symbol }}</span>
+              <span class="text-gray-primary"
+                > + {{ Math.abs(Number(tickersData.tokenBalance.availableBalanceUnSafe)) }} {{ asset.symbol }}</span
+              >
+            </span>
+            <span class="text-lg" v-else>--</span>
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import Decimal from 'decimal.js'
 import { ref, computed, Ref } from 'vue'
 import { type Psbt } from 'bitcoinjs-lib'
 import { BtcWallet } from '@/lib/wallets/btc'
@@ -103,14 +104,16 @@ const popConfirm = async () => {
     return
   }
   const wallet = await BtcWallet.create()
-  const data = await wallet.getFeeAndPsbt(order.payAddress, order.needAmount, currentRateFee.value).catch((err) => {
-    transactionResult.value = {
-      status: 'failed',
-      message: err.message,
-    }
-    isOpenResultModal.value = true
-    return
-  })
+  const data = await wallet
+    .getFeeAndPsbt(order.payAddress, new Decimal(order.needAmount), currentRateFee.value)
+    .catch((err) => {
+      transactionResult.value = {
+        status: 'failed',
+        message: err.message,
+      }
+      isOpenResultModal.value = true
+      return
+    })
   if (!data) {
     operationLock.value = false
     return
@@ -196,7 +199,6 @@ function toSuceess() {
         />
 
         <BTCRateList v-if="asset.chain === 'btc'" v-model:currentRateFee="currentRateFee" />
-
       </div>
 
       <div

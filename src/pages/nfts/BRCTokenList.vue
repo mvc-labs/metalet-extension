@@ -14,6 +14,7 @@ const router = useRouter()
 getAddress('btc').then((address) => {
   addressRef.value = address
 })
+
 const { isLoading, data: inscriptionsData } = useBRCInscriptionsQuery(addressRef, cursorRef, sizeRef, {
   enabled: computed(() => !!addressRef.value),
 })
@@ -59,7 +60,7 @@ const toBRC20Detail = (inscription: Inscription) => {
         <span>Receive</span>
       </button>
     </div>
-    
+
     <div v-if="isLoading" class="w-full py-3 text-center text-sm font-bold text-gray-500">
       BRC Token List loading...
     </div>
@@ -72,21 +73,16 @@ const toBRC20Detail = (inscription: Inscription) => {
         @click="toBRC20Detail(inscription)"
         class="flex flex-col items-center justify-center rounded-md cursor-pointer text-[#999999]"
       >
-        <BRCToken
-          :value="inscription.outputValue"
-          :ordinalsUrl="inscription.timestamp === 0 ? inscription.preview : inscription.content"
-        />
-        <span class="text-sm text-center mt-3 truncate" :title="'# ' + inscription.inscriptionNumber"
-          ># {{ inscription.inscriptionNumber }}</span
-        >
+        <BRCToken :value="inscription.outputValue" :contentBody="inscription.contentBody" />
+        <span class="text-sm text-center mt-3 truncate" :title="'# ' + inscription.inscriptionNumber">{{
+          inscription.utxoHeight === 0 ? 'Uncomfirmed' : `# ${inscription.inscriptionNumber}`
+        }}</span>
         <span class="text-xs text-center mt-1 h-[30px]">{{
-          inscription.timestamp === 0
-            ? 'Uncomfirmed'
-            : dayjs(inscription.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
+          dayjs(inscription.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
         }}</span>
       </div>
     </div>
-    <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">No BRC Tokens yet</div>
+    <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">No Ordinals yet.</div>
   </div>
 </template>
 

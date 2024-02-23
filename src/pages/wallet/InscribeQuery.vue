@@ -27,7 +27,7 @@ function confirm() {
           <div
             class="w-full h-10 leading-10 flex-shrink-0 text-center bg-[#1E2BFF] rounded-b-md text-white absolute bottom-0"
           >
-            {{ data.inscriptionState === 4 ? 'Confirmed' : 'Unconfirmed' }}
+            {{ data.inscriptionInfos?.[0]?.confirmed ? 'Confirmed' : 'Unconfirmed' }}
           </div>
         </div>
         <div class="text-base text-[#909399] w-full text-center">

@@ -22,8 +22,8 @@ const tags = computed(() => {
 })
 
 const route = useRoute()
+const error = ref<Error>()
 const queryClient = useQueryClient()
-const error = ref<Error | undefined>()
 const address = ref(route.params.address as string)
 const symbol = ref(route.params.symbol as SymbolTicker)
 const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol.value)!)
@@ -36,16 +36,15 @@ const { data: balance } = useBalanceQuery(address, symbol, { enabled: balaceEnab
 
 const currentRateFee = ref<number | undefined>()
 
-// fee
 const txPsbt = ref<Psbt>()
 const totalFee = ref<number>()
 
-// form
 const amount = ref<number>()
 const amountInSats = computed(() => {
-  const _amount = new Decimal(amount.value || 0)
-  if (_amount.isNaN()) return new Decimal(0)
-  return _amount.times(new Decimal('1e8'))
+  if (amount.value && typeof amount.value === 'number') {
+    return new Decimal(amount.value).times(1e8)
+  }
+  return new Decimal(0)
 })
 const recipient = ref('')
 const transactionResult = ref<TransactionResult | undefined>()
@@ -101,8 +100,8 @@ const popConfirm = async () => {
   }
 }
 
-watch(amountInSats, (newAmount) => {
-  if (balance.value && newAmount.gt(balance.value.total)) {
+watch(amountInSats, (newAmountInSats) => {
+  if (balance.value && newAmountInSats && newAmountInSats.gt(balance.value.total)) {
     error.value = new Error('Insufficient balance')
   } else {
     error.value = undefined
@@ -186,7 +185,7 @@ async function send() {
 </script>
 
 <template>
-  <div class="mt-8 flex flex-col items-center gap-y-8" v-if="asset">
+  <div class="pt-[30px] flex flex-col items-center gap-y-8" v-if="asset">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
     <div class="flex flex-col gap-y-1.5 items-center">
       <img :src="asset.logo" alt="" class="h-[42px] w-[42px] rounded-xl" />
@@ -214,14 +213,17 @@ async function send() {
         </div>
         <div class="relative">
           <input
+            min="0"
+            step="0.00001"
+            type="number"
             v-model="amount"
             placeholder="Amount"
-            class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 !text-xs"
+            class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-[88px] !text-xs"
           />
-          <!-- unit -->
-          <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500">
-            <div class="border-l border-solid border-gray-500 px-4 py-1">{{ asset.symbol }}</div>
+          <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-sm text-gray-500">
+            <div class="border-l border-solid border-gray-500 w-20 py-1 text-center font-bold">{{ asset.symbol }}</div>
           </div>
+          <div class="absolute text-red-500 text-sm" v-if="error">{{ error?.message }}</div>
         </div>
       </div>
 
@@ -238,8 +240,8 @@ async function send() {
       <button
         @click="popConfirm"
         v-if="symbol === 'SPACE'"
-        :disabled="!recipient || !amount || !!error"
-        :class="!recipient || !amount || !!error ? 'opacity-50 cursor-not-allowed' : ''"
+        :disabled="!recipient || !amountInSats.toNumber() || !!error"
+        :class="!recipient || !amountInSats || !!error ? 'opacity-50 cursor-not-allowed' : ''"
         class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
       >
         Next
@@ -247,9 +249,9 @@ async function send() {
       <button
         @click="popConfirm"
         v-else-if="symbol === 'BTC'"
-        :disabled="!recipient || !amount || !currentRateFee || !!error"
+        :disabled="!recipient || !amountInSats.toNumber() || !currentRateFee || !!error"
         class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
-        :class="!recipient || !amount || !currentRateFee || !!error ? 'opacity-50 cursor-not-allowed' : ''"
+        :class="!recipient || !amountInSats || !currentRateFee || !!error ? 'opacity-50 cursor-not-allowed' : ''"
       >
         Next
       </button>
@@ -284,8 +286,8 @@ async function send() {
         </div>
         <div class="grid grid-cols-2 gap-x-4" v-else>
           <button
-            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
             @click="isOpenConfirmModal = false"
+            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
           >
             Cancel
           </button>

@@ -161,7 +161,7 @@ export class BtcWallet {
     return await this.broadcast(psbt)
   }
 
-  async send(recipient: string, amount: number | Decimal, feeRate = 2) {
+  async send(recipient: string, amount: number | Decimal, feeRate = 1) {
     if (typeof amount === 'number') {
       amount = new Decimal(amount)
     }
@@ -170,7 +170,8 @@ export class BtcWallet {
     return await this.broadcast(psbt)
   }
 
-  async getFeeAndPsbt(recipient: string, amount: number | Decimal, feeRate = 2) {
+  async getFeeAndPsbt(recipient: string, amount: Decimal, feeRate = 1) {
+
     if (typeof amount === 'number') {
       amount = new Decimal(amount)
     }

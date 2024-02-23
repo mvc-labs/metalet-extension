@@ -31,7 +31,7 @@ const toInscribe = () => {
 </script>
 
 <template>
-  <div class="mt-8 flex flex-col pt-[30px] h-full" v-if="tickersData">
+  <div class="flex flex-col pt-[30px] h-full" v-if="tickersData">
     <div class="flex flex-col gap-3">
       <div class="text-[#909399] text-base">Transfer amount</div>
       <div class="text-black-primary font-bold text-lg">{{ tickersData.tokenBalance.transferableBalance }} {{ symbol }}</div>

@@ -5,15 +5,13 @@ import { updateAsset } from '@/lib/balance'
 import { isOfficialToken } from '@/lib/assets'
 import { useBalanceQuery } from '@/queries/balance'
 import { CheckBadgeIcon } from '@heroicons/vue/24/solid'
-import { useExchangeRatesQuery } from '@/queries/exchange-rates'
 import { type Asset, getTagInfo, type Tag } from '@/data/assets'
+import { useExchangeRatesQuery, getExchangeCoinType } from '@/queries/exchange-rates'
 
 const { asset, address } = defineProps<{
   asset: Asset
   address: string
 }>()
-
-// console.log('asset', asset.symbol, asset)
 
 const tag = ref<Tag>()
 
@@ -24,14 +22,14 @@ if (asset?.contract) {
 const balaceEnabled = computed(() => !!address && !!asset.symbol && !asset.balance)
 const { data: balance } = useBalanceQuery(ref(address), ref(asset.symbol), { enabled: balaceEnabled })
 
+const coinType = computed(() => {
+  return getExchangeCoinType(asset.symbol, asset.contract)
+})
+
 const rateEnabled = computed(() => !!address && !!asset.symbol)
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(
-  ref(asset.symbol),
-  asset?.contract,
-  {
-    enabled: rateEnabled,
-  }
-)
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(ref(asset.symbol), coinType, {
+  enabled: rateEnabled,
+})
 
 const assetPrice = computed(() => {
   if (asset?.balance) {
@@ -112,11 +110,11 @@ watch(
         <div v-if="asset?.contract === 'BRC-20'" class="w-full mt-2.5 space-y-2">
           <div class="text-xs flex items-center justify-between w-full">
             <span class="text-[#909399]">Transferable:</span>
-            <span class="text-black-primary font-bold truncate">{{ asset.balance?.transferBalance || 0 }}</span>
+            <span class="text-black-primary font-bold truncate">{{ asset.balance?.transferBalance || '--' }}</span>
           </div>
           <div class="text-xs flex items-center justify-between w-full">
             <span class="text-[#909399]">Available:</span>
-            <span class="text-black-primary font-bold truncate">{{ asset.balance?.availableBalance || 0 }}</span>
+            <span class="text-black-primary font-bold truncate">{{ asset.balance?.availableBalance || '--' }}</span>
           </div>
         </div>
       </div>

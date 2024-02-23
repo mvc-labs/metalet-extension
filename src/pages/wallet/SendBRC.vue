@@ -128,7 +128,7 @@ async function send() {
     <div v-show="!isShowComfirm" class="space-y-4 w-full pb-4">
       <div class="space-y-2">
         <div class="text-black-primary text-sm">Amount</div>
-        <div class="bg-[#F5F5F5] w-full px-3 py-[15px]">{{ amount }} {{ symbol }}</div>
+        <div class="bg-[#F5F5F5] w-full px-3 py-[15px] rounded-xl text-xs">{{ amount }} {{ symbol }}</div>
       </div>
       <div class="space-y-2">
         <div class="text-black-primary text-sm">Receiver</div>

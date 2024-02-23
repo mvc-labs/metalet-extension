@@ -33,12 +33,19 @@ export const preInscribe = async (receiveAddress: string, feeRate: number, filen
   })
 }
 
+export interface InscriptionInfo {
+  inscriptionId: string
+  inscriptionNum: number
+  confirmed: boolean
+}
+
 export interface CommitInscribe {
   commitTxHash: string
   inscriptionIdList: string[]
   inscriptionState: number
   orderId: string
   revealTxHashList: string[]
+  inscriptionInfos: InscriptionInfo[]
 }
 
 export const commitInscribe = async (

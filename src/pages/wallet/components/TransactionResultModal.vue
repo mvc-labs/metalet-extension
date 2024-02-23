@@ -58,7 +58,7 @@ function ok() {
 const toResultTx = async () => {
   if (!props.result || props.result.status !== 'success') return
 
-  const host = await getBrowserHost(props.result.token.symbol === 'BTC' ? 'btc' : 'mvc')
+  const host = await getBrowserHost(props.result.chain)
 
   toTx(props.result.txId, host as string)
 }
