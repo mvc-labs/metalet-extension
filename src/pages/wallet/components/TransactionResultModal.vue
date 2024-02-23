@@ -117,9 +117,9 @@ const toResultTx = async () => {
         </div>
 
         <div class="flex justify-between">
-          <div class="label">Transaction ID</div>
+          <div class="label">TxID</div>
           <div class="text-xs flex gap-2">
-            <div class="hover:underline truncate w-48 cursor-pointer" @click="toResultTx">{{ result.txId }}</div>
+            <div class="hover:underline truncate w-48 cursor-pointer" @click="toResultTx" :title="result.txId">{{ result.txId }}</div>
             <CopyIcon class="h-4 w-4 cursor-pointer text-blue-300 hover:text-blue-500" />
           </div>
         </div>

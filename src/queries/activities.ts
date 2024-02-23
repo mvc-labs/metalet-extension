@@ -2,7 +2,7 @@ import Decimal from 'decimal.js'
 import { ComputedRef, Ref } from 'vue'
 import { type Asset } from '@/data/assets'
 import { useQuery } from '@tanstack/vue-query'
-import { metaletApi, mvcApi } from './request'
+import { metaletApi, mvcApi,metaletApiV3 } from './request'
 import { SymbolTicker } from '@/lib/asset-symbol'
 
 export type Activity = {
@@ -50,7 +50,7 @@ type BRC20RawActivity = {
 }
 
 export const fetchBtcActivities = async (address: string): Promise<Activities> => {
-  return metaletApi<{ transactionList: BtcRawActivity[] }>(`/address/activities`)
+  return metaletApiV3<{ transactionList: BtcRawActivity[] }>(`/address/activities`)
     .get({
       address,
       chain: 'btc',
@@ -72,7 +72,7 @@ export const fetchBtcActivities = async (address: string): Promise<Activities> =
 }
 
 export const fetchBRC20Activities = async (address: string, symbol: SymbolTicker): Promise<Activities> => {
-  return metaletApi<{ inscriptionsList: BRC20RawActivity[] }>(`/address/brc20/activities`)
+  return metaletApiV3<{ inscriptionsList: BRC20RawActivity[] }>(`/address/brc20/activities`)
     .get({
       address,
       chain: 'btc',
