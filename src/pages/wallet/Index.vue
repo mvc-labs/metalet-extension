@@ -16,12 +16,13 @@ getCurrentAccount().then((acc) => {
 const test = async () => {
   // const res = await process({
   //   data: {
-  //     feeRate: 1,
-  //     metaidDataList: [
-  //     ],
+  //     commitFeeRate: 1,
+  //     revealFeeRate: 1,
+  //     metaidDataList: [],
   //     revealOutValue: 546,
   //     changeAddress: 'tb1pv3efxdwc2nkck5kg8updw62kxqt8mclshk3a2ywlazqa6n225n9qm9url7',
   //   },
+  //   options: { noBroadcast: false },
   // })
   // console.log({ res })
 }
