@@ -227,7 +227,7 @@ const routes = [
   { path: '/collections/:tabIndex', component: () => import('./pages/nfts/Index.vue'), name: 'collections' },
   {
     name: 'brc20Detail',
-    path: '/nft/brc20/detail',
+    path: '/nft/brc20/detail/:address/:inscriptionId',
     component: () => import('./pages/nfts/BRCTokenDetail.vue'),
     meta: {
       secondaryHeader: true,

@@ -236,8 +236,8 @@ const toTransfer = () => {
             <span class="text-base">Available</span>
             <span class="text-lg" v-if="tickersData">
               <span>{{ tickersData.tokenBalance.availableBalanceSafe }} {{ asset.symbol }}</span>
-              <span class="text-gray-primary"
-                > + {{ Math.abs(Number(tickersData.tokenBalance.availableBalanceUnSafe)) }} {{ asset.symbol }}</span
+              <span v-if="Number(tickersData.tokenBalance.availableBalanceUnSafe)" class="text-gray-primary">
+                + {{ Math.abs(Number(tickersData.tokenBalance.availableBalanceUnSafe)) }} {{ asset.symbol }}</span
               >
             </span>
             <span class="text-lg" v-else>--</span>

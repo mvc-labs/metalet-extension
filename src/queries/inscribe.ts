@@ -110,15 +110,34 @@ export async function getBRCInscriptions(
   })
 }
 
+export async function getBRCInscriptionInfo(inscriptionId: string): Promise<Inscription> {
+  const net = getNet()
+  const {
+    inscriptions: [inscription],
+  } = await metaletApiV3<{ inscriptions: Inscription[] }>('/inscription/utxo').get({
+    net,
+    inscriptionId,
+  })
+  return inscription
+}
+
 export const useBRCInscriptionsQuery = (
   address: Ref<string>,
-  cursor: Ref<number>,
+  page: Ref<number>,
   size: Ref<number>,
   options: { enabled: ComputedRef<boolean> }
 ) => {
   return useQuery({
-    queryKey: ['BRCInscriptions', { address: address.value, cursor: cursor.value, size: size.value }],
-    queryFn: () => getBRCInscriptions(address.value, cursor.value, size.value),
+    queryKey: ['BRCInscriptions', { address, page, size }],
+    queryFn: () => getBRCInscriptions(address.value, size.value * page.value, size.value),
+    ...options,
+  })
+}
+
+export const useBRCInscriptionInfoQuery = (inscriptionId: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
+  return useQuery({
+    queryKey: ['BRCInscriptionInfo', { inscriptionId }],
+    queryFn: () => getBRCInscriptionInfo(inscriptionId.value),
     ...options,
   })
 }

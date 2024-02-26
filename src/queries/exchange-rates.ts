@@ -52,7 +52,7 @@ export const useExchangeRatesQuery = (
     queryKey: ['exchangeRates', { coinType }],
     queryFn: async () => {
       const net = getNet()
-      if (net === 'mainnet') {
+      if (net === 'testnet') {
         return doNothing(symbol.value)
       }
       if (coinType.value === 'BRC-20') {

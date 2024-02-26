@@ -86,7 +86,7 @@ export async function getBtcUtxos(address: string): Promise<UTXO[]> {
 // }
 
 export async function getInscriptionUtxo(inscriptionId: string): Promise<UTXO> {
-  const net = await getNet()
+  const net = getNet()
   return await metaletApiV3<UTXO>('/inscription/utxo').get({ net, inscriptionId })
 }
 

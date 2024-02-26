@@ -296,7 +296,7 @@ function toSuceess() {
           <span class="text-sm" @click="copyHex">Copy psbt transaction data</span>
         </div>
       </div>
-      <div class="w-full left-0 flex items-center space-x-4 mt-4 justify-center">
+      <div class="w-full left-0 flex items-center space-x-4 mt-4 pb-4 justify-center">
         <button
           @click="cancel"
           class="border w-[133px] rounded-lg py-3 text-sm font-bold text-black-primary"
