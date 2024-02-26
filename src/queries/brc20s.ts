@@ -70,6 +70,8 @@ export const fetchBRC20Token = async (address: string): Promise<Asset[]> => {
         balance: {
           total: Number(token.overallBalance),
           availableBalance: Number(token.availableBalance),
+          availableBalanceSafe: Number(token.availableBalanceSafe),
+          availableBalanceUnSafe: Number(token.availableBalanceUnSafe),
           transferBalance: Number(token.transferableBalance),
         },
       }) as Asset

@@ -34,15 +34,17 @@ const toInscribe = () => {
   <div class="flex flex-col pt-[30px] h-full" v-if="tickersData">
     <div class="flex flex-col gap-3">
       <div class="text-[#909399] text-base">Transfer amount</div>
-      <div class="text-black-primary font-bold text-lg">{{ tickersData.tokenBalance.transferableBalance }} {{ symbol }}</div>
+      <div class="text-black-primary font-bold text-lg">
+        {{ tickersData.tokenBalance.transferableBalance }} {{ symbol }}
+      </div>
     </div>
     <div class="flex flex-col gap-3 mt-[30px]">
       <div class="text-[#909399] text-base">TRANSFER Inscriptions ({{ tickersData.transferableList.length }})</div>
       <div class="grid grid-cols-3 gap-2 w-full mt-3">
         <div
           :key="ticker.inscriptionId"
-          @click="toSendBRC20(ticker.inscriptionId, Number(ticker.amount))"
           v-for="ticker in tickersData.transferableList"
+          @click="toSendBRC20(ticker.inscriptionId, Number(ticker.amount))"
           class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative cursor-pointer"
         >
           <div class="mt-2.5 text-[#909399] text-sm">{{ ticker.ticker }}</div>
@@ -50,7 +52,8 @@ const toInscribe = () => {
           <div
             class="text-white text-xs bg-[#1E2BFF] rounded-b-md absolute bottom-0 w-full text-center pt-[5px] pb-[4px]"
           >
-            #{{ ticker.inscriptionNumber }}
+            <span v-if="ticker.inscriptionNumber === -1">Uncomfirmed</span>
+            <span v-else>#{{ ticker.inscriptionNumber }}</span>
           </div>
         </div>
       </div>

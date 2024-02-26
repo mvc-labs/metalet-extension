@@ -11,6 +11,8 @@ export type Balance = {
   unconfirmed?: number
   availableBalance?: number
   transferBalance?: number
+  availableBalanceSafe?: number
+  availableBalanceUnSafe?: number
   total: number
 }
 

@@ -171,7 +171,6 @@ export class BtcWallet {
   }
 
   async getFeeAndPsbt(recipient: string, amount: Decimal, feeRate = 1) {
-
     if (typeof amount === 'number') {
       amount = new Decimal(amount)
     }
@@ -204,6 +203,8 @@ async function getPsbtAndSelectUtxos(recipient: string, amount: Decimal, feeRate
   const payment = await createPayment(addressType)
   const utxos = (await getBtcUtxos(address)) || []
   utxos.sort((a, b) => b.satoshis - a.satoshis)
+
+  console.log({ utxos })
 
   const buildPsbt = async (selectedUtxos: UTXO[], change: Decimal) => {
     const psbt = new Psbt({ network: btcNetwork }).addOutput({
@@ -248,6 +249,7 @@ async function getPsbtAndSelectUtxos(recipient: string, amount: Decimal, feeRate
 
   let change = total.minus(amount).minus(fee)
   psbt = await buildPsbt(selecedtUTXOs, change)
+  console.log({ selecedtUTXOs })
   return { psbt, selecedtUTXOs }
 }
 

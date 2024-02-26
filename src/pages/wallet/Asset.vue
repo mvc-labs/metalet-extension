@@ -227,20 +227,29 @@ const toTransfer = () => {
               <div
                 class="text-white text-xs bg-[#1E2BFF] rounded-b-md absolute bottom-0 w-full text-center pt-[5px] pb-[4px]"
               >
-                #{{ ticker.inscriptionNumber }}
+                <span v-if="ticker.inscriptionNumber === -1">Uncomfirmed</span>
+                <span v-else>#{{ ticker.inscriptionNumber }}</span>
               </div>
             </div>
           </div>
           <div v-else class="w-full h-[142px] flex items-center justify-center text-[#999999]">Empty</div>
-          <div class="flex items-end justify-between text-[#303133] mt-3">
-            <span class="text-base">Available</span>
-            <span class="text-lg" v-if="tickersData">
-              <span>{{ tickersData.tokenBalance.availableBalanceSafe }} {{ asset.symbol }}</span>
-              <span v-if="Number(tickersData.tokenBalance.availableBalanceUnSafe)" class="text-gray-primary">
-                + {{ Math.abs(Number(tickersData.tokenBalance.availableBalanceUnSafe)) }} {{ asset.symbol }}</span
-              >
-            </span>
-            <span class="text-lg" v-else>--</span>
+          <div class="text-[#303133] mt-3">
+            <div class="flex items-center justify-between">
+              <span class="text-base">Available</span>
+              <span class="text-lg" v-if="tickersData">
+                <span>{{ tickersData.tokenBalance.availableBalanceSafe }} {{ asset.symbol }}</span>
+                <span v-if="Number(tickersData.tokenBalance.availableBalanceUnSafe)" class="text-gray-primary">
+                  + {{ Math.abs(Number(tickersData.tokenBalance.availableBalanceUnSafe)) }} {{ asset.symbol }}</span
+                >
+              </span>
+              <span class="text-lg" v-else>--</span>
+            </div>
+            <div
+              v-if="tickersData && Number(tickersData.tokenBalance.availableBalanceUnSafe)"
+              class="text-right text-sm text-gray-primary"
+            >
+              (Wait to be confirmed)
+            </div>
           </div>
         </div>
 
