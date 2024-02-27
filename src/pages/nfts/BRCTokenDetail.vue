@@ -51,9 +51,12 @@ const toSendBRC20 = () => {
       </div>
     </div>
     <div class="flex flex-col p-4 gap-y-4">
-      <h4 class="text-xl text-[#303133]"># {{ inscriptionDetail.inscriptionNumber }}</h4>
+      <h4 class="text-xl text-[#303133]">
+        <span v-if="inscriptionDetail.inscriptionNumber !== -1"># {{ inscriptionDetail.inscriptionNumber }}</span>
+        <span v-else>Uncomfirmed</span>
+      </h4>
       <div class="text-xs text-[#999999]">
-        {{ dayjs(Number(inscriptionDetail.timestamp)).format('YYYY/MM/DD HH:mm:ss') }}
+        {{ dayjs(inscriptionDetail.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss') }}
       </div>
       <hr />
       <div class="flex items-center justify-between">
@@ -100,7 +103,7 @@ const toSendBRC20 = () => {
       </div>
       <div class="flex items-start justify-between">
         <span class="title">Timestamp:</span>
-        <div>{{ dayjs(Number(inscriptionDetail!.timestamp)).format('YYYY/MM/DD HH:mm:ss') }}</div>
+        <div>{{ dayjs(inscriptionDetail.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss') }}</div>
       </div>
       <div class="flex items-start justify-between">
         <div class="title">Genesis Transaction:</div>

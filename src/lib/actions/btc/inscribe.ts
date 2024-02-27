@@ -23,13 +23,13 @@ const schnorr = signUtil.schnorr.secp256k1.schnorr
 export type Operation = 'init' | 'create' | 'modify' | 'revoke'
 
 export type MetaidData = {
-  body?: string | Buffer
+  body?: string
   operation: Operation
   path?: string
   contentType?: string
   encryption?: '0' | '1' | '2'
   version?: string
-  encoding?: string
+  encoding?: BufferEncoding
   revealAddr: string
 }
 
@@ -350,7 +350,8 @@ function createMetaIdTxCtxData(
     inscriptionBuilder.push(Buffer.from(metaidData?.version ?? '1.0.0'))
     inscriptionBuilder.push(Buffer.from(metaidData?.contentType ?? 'utf-8'))
 
-    const body = Buffer.from(metaidData.body!)
+    const body = Buffer.from(metaidData.body!, metaidData?.encoding ?? 'utf8')
+
     const maxChunkSize = 520
     const bodySize = (body as Buffer).length
     for (let i = 0; i < bodySize; i += maxChunkSize) {
