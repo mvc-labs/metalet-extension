@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Inter';
-  /* set 2 weights, regular and bold */
-  src:
-    url('./assets/fonts/Inter-Regular.otf') format('opentype'),
-    url('./assets/fonts/Inter-Bold.otf') format('opentype');
-}
-
 .nicer-scrollbar::-webkit-scrollbar {
   @apply h-2 w-2;
 }

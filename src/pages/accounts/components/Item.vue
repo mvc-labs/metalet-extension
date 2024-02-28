@@ -12,6 +12,7 @@ import { FEEB } from '@/data/config'
 
 import EditName from './EditName.vue'
 import { assetList } from '@/lib/balance'
+import Avatar from '@/components/Avatar.vue'
 
 const router = useRouter()
 
@@ -40,22 +41,6 @@ const copyBTCAddress = () => {
 const copyMVCAddress = () => {
   navigator.clipboard.writeText(mvcAddress.value)
   isMVCCopied.value = true
-}
-
-const randomColor = (key: string) => {
-  const colors = [
-    'from-blue-100 to-blue-500',
-    'from-green-100 to-green-500',
-    'from-yellow-100 to-yellow-500',
-    'from-red-100 to-red-500',
-    'from-pink-100 to-pink-500',
-    'from-purple-100 to-purple-500',
-    'from-indigo-100 to-indigo-500',
-  ]
-  // 根据key的hash值取模，得到colors数组的下标
-  const index = Math.abs(key.split('').reduce((prev, curr) => prev + curr.charCodeAt(0), 0)) % colors.length
-
-  return colors[index]
 }
 
 const queryClient = useQueryClient()
@@ -95,8 +80,7 @@ const openEditNameModal = ref(false)
 
     <div class="flex items-center justify-start gap-x-2 py-4" :key="props.account.id">
       <!-- avatar -->
-      <div :class="['h-12 w-12 rounded-full bg-gradient-to-br', randomColor(props.account.mvc.mainnetAddress)]"></div>
-
+      <Avatar :address="props.account.mvc.mainnetAddress" />
       <!-- info -->
       <div class="group flex flex-col">
         <div class="flex items-center gap-x-2">
