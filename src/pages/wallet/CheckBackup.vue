@@ -51,7 +51,7 @@ const verify = async () => {
 
     <!-- buttons -->
     <div class="mt-24 grid grid-cols-2 gap-x-2">
-      <button class="rounded-md border border-primary-blue py-4 text-base leading-none" @click="router.back()">
+      <button class="rounded-md border border-blue-primary py-4 text-base leading-none" @click="router.back()">
         Back
       </button>
       <button class="gradient-bg rounded-md py-4 text-base leading-none text-white" @click="verify">Verify</button>

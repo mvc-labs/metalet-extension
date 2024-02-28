@@ -287,7 +287,7 @@ async function send() {
         <div class="grid grid-cols-2 gap-x-4" v-else>
           <button
             @click="isOpenConfirmModal = false"
-            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
+            class="w-full rounded-lg border border-blue-primary bg-white py-3 text-sm font-bold text-gray-700"
           >
             Cancel
           </button>

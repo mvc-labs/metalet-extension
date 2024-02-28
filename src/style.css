@@ -27,15 +27,15 @@
 }
 
 .gradient-text {
-  @apply bg-gradient-to-r from-primary-teal to-primary-blue bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-primary-teal to-blue-primary bg-clip-text text-transparent;
 }
 
 .hover-gradient-text:hover {
-  @apply bg-gradient-to-r from-primary-teal to-primary-blue bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-primary-teal to-blue-primary bg-clip-text text-transparent;
 }
 
 .gradient-bg {
-  @apply bg-gradient-to-r from-primary-teal to-primary-blue;
+  @apply bg-gradient-to-r from-primary-teal to-blue-primary;
 }
 
 .secondary-btn {
@@ -43,7 +43,7 @@
 }
 
 .main-btn-bg {
-  @apply bg-gradient-to-r from-primary-teal to-primary-blue;
+  @apply bg-gradient-to-r from-primary-teal to-blue-primary;
 }
 .main-btn-bg.muted {
   @apply opacity-50;
