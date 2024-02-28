@@ -1,9 +1,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { RadioGroup, RadioGroupLabel, RadioGroupDescription, RadioGroupOption } from '@headlessui/vue'
-
-import { getCurrentAccount, updateBtcPath } from '@/lib/account'
 import { scripts } from '@/lib/bip32-deriver'
+import { getCurrentAccount, updateBtcPath } from '@/lib/account'
+import { RadioGroup, RadioGroupLabel, RadioGroupDescription, RadioGroupOption } from '@headlessui/vue'
 
 const mvcPath = ref('')
 const selected = ref(scripts[0])

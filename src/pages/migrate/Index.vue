@@ -8,6 +8,7 @@ import { setNetwork } from '@/lib/network'
 import { deriveAllAddresses, type AddressType } from '@/lib/bip32-deriver'
 
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
+// import { encrypt } from '@/lib/crypto'
 
 const router = useRouter()
 

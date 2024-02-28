@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
 import MetaletWordImg from '@/assets/images/metalet-word.svg?url'
 import AccountMenu from './AccountMenu.vue'
+import ServiceMenu from './ServiceMenu.vue'
 import { VERSION } from '@/data/config'
 
 const route = useRoute()
@@ -20,8 +21,9 @@ const route = useRoute()
       <span class="text-sm">V{{ VERSION }}</span>
     </div>
 
-    <div class="">
-      <AccountMenu v-if="!route.meta.noMenu" />
+    <div v-if="!route.meta.noMenu" class="flex items-center gap-x-3">
+      <ServiceMenu />
+      <AccountMenu  />
     </div>
   </div>
 </template>

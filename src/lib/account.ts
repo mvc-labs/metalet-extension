@@ -1,33 +1,35 @@
+import useStorage from './storage'
 import { mvc } from 'meta-contract'
-
-import { notifyContent } from '@/lib/notify-content'
-import { getBtcNetwork, getNetwork } from './network'
+import { crypto } from 'bitcoinjs-lib'
 import { signMessage } from './crypto'
 import { fetchUtxos } from '../queries/utxos'
-import { getStorage, setStorage } from './storage'
+import { notifyContent } from '@/lib/notify-content'
+import { getBtcNetwork, getNetwork } from './network'
 import { generateRandomString, raise } from './helpers'
 import { fetchSpaceBalance, fetchBtcBalance, doNothing } from '@/queries/balance'
 import {
   AddressType,
   deriveAddress,
-  deriveAllAddresses,
   derivePrivateKey,
   derivePublicKey,
   inferAddressType,
   deriveSigner,
   deriveBtcPrivateKey,
 } from './bip32-deriver'
-import { crypto } from 'bitcoinjs-lib'
-import { DEBUG } from '@/data/config'
 
 const CURRENT_ACCOUNT_ID = 'currentAccountId'
-const ACCOUNT_STORAGE_CURRENT_KEY = 'accounts_v2'
-const ACCOUNT_STORAGE_HISTORY_KEYS = ['accounts']
+const V0_ACCOUNT_STORAGE_KEY = 'currentAccount'
+const V1_ACCOUNTS_STORAGE_KEY = 'accounts'
+const V2_ACCOUNTS_STORAGE_KEY = 'accounts_v2'
+// const ACCOUNTS_STORAGE_CURRENT_KEY = V3_ACCOUNTS_STORAGE_KEY
+// const ACCOUNT_STORAGE_HISTORY_KEYS = [V1_ACCOUNTS_STORAGE_KEY, V2_ACCOUNTS_STORAGE_KEY]
+
+const storage = useStorage()
 
 // TODO put in types.ts
 export type Chain = 'btc' | 'mvc'
 
-type DerivedAccountDetail = {
+export type DerivedAccountDetail = {
   path: string
   addressType: AddressType
   mainnetAddress: string
@@ -69,44 +71,91 @@ function serializeAccountMap(map: Map<string, Account>): string {
 }
 
 // Account Map Deserialization
-function deserializeAccountMap(json: string): Map<string, Account> {
-  const obj = typeof json === 'string' ? JSON.parse(json) : json
+function deserializeAccountMap(accounts: Record<string, Account>): Map<string, Account> {
   const map = new Map()
-  for (const key in obj) {
-    map.set(key, obj[key])
+  for (const key in accounts) {
+    map.set(key, accounts[key])
   }
   return map
 }
 
-export async function getAccounts(refresh = false): Promise<Map<string, Account>> {
-  const accounts = await getStorage(ACCOUNT_STORAGE_CURRENT_KEY, { defaultValue: '{}', isParse: false })
+interface SyncCurrentAccount {
+  address: string
+  mnemonicStr: string
+}
 
+export async function hasV0Account(): Promise<boolean> {
+  const storage = useStorage('sync')
+  return !!(await storage.get<SyncCurrentAccount>(V0_ACCOUNT_STORAGE_KEY))
+}
+
+export async function getV0Account(): Promise<SyncCurrentAccount | undefined> {
+  const storage = useStorage('sync')
+  return await storage.get<SyncCurrentAccount>(V0_ACCOUNT_STORAGE_KEY)
+}
+
+export async function hasLegacyAccounts(): Promise<boolean> {
+  return !!(await storage.get<Record<string, V1Account>>(V1_ACCOUNTS_STORAGE_KEY))
+}
+
+export async function getLegacyAccountsObj(): Promise<Record<string, V1Account>> {
+  return await storage.get<Record<string, V1Account>>(V1_ACCOUNTS_STORAGE_KEY, {
+    defaultValue: {},
+  })
+}
+
+export async function getLegacyAccounts(): Promise<V1Account[]> {
+  const v1Accounts = await getLegacyAccountsObj()
+  return Object.values(v1Accounts)
+}
+
+export async function hasV2Accounts(): Promise<boolean> {
+  return !!(await storage.get<Record<string, Account>>(V2_ACCOUNTS_STORAGE_KEY))
+}
+
+export async function getV2AccountsObj(): Promise<Record<string, Account>> {
+  return await storage.get<Record<string, Account>>(V2_ACCOUNTS_STORAGE_KEY, {
+    defaultValue: {},
+  })
+}
+
+export async function getV2Accounts(): Promise<Map<string, Account>> {
+  const v2Accounts = await getV2AccountsObj()
+  return deserializeAccountMap(v2Accounts)
+}
+
+export async function getAccountsVersionKey(): Promise<string> {
+  return V2_ACCOUNTS_STORAGE_KEY
+}
+
+export async function getAccounts(): Promise<Map<string, Account>> {
+  const currentKey = await getAccountsVersionKey()
+  const accounts = await storage.get<Record<string, Account>>(currentKey, {
+    defaultValue: {},
+  })
   return deserializeAccountMap(accounts)
 }
 
-export async function getAccount(accountId: string): Promise<Account | null> {
+export async function getAccount(accountId: string): Promise<Account | undefined> {
   const accounts = await getAccounts()
   if (accounts.size === 0) {
-    return null
+    return
   }
 
   const account = accounts.get(accountId)
   if (!account) {
-    return null
+    return
   }
 
   return account
 }
 
-export async function getCurrentAccount(): Promise<Account | null> {
-  const currentAccountId = await getStorage(CURRENT_ACCOUNT_ID)
+export async function getCurrentAccount(): Promise<Account | undefined> {
+  const currentAccountId = await storage.get(CURRENT_ACCOUNT_ID)
   if (!currentAccountId) {
-    return null
+    return
   }
-
-  const account = await getAccount(currentAccountId)
-
-  return account
+  return await getAccount(currentAccountId)
 }
 
 export async function removeCurrentAccount(): Promise<boolean> {
@@ -115,14 +164,17 @@ export async function removeCurrentAccount(): Promise<boolean> {
     return false
   }
 
-  const currentAccountId = await getStorage(CURRENT_ACCOUNT_ID)
+  const currentAccountId = await storage.get<string>(CURRENT_ACCOUNT_ID)
+  if (!currentAccountId) {
+    return false
+  }
   const currentAccount = accounts.get(currentAccountId)
   if (!currentAccount) {
     return false
   }
 
   accounts.delete(currentAccountId)
-  await setStorage(CURRENT_ACCOUNT_ID, '')
+  await storage.delete(CURRENT_ACCOUNT_ID)
   setAccounts(accounts)
   return true
 }
@@ -133,7 +185,7 @@ export async function connectAccount(accountId: string) {
     return false
   }
 
-  await setStorage(CURRENT_ACCOUNT_ID, accountId)
+  await storage.set(CURRENT_ACCOUNT_ID, accountId)
 
   const mvcAddress = await getAddress('mvc')
   const btcAddress = await getAddress('btc')
@@ -142,8 +194,13 @@ export async function connectAccount(accountId: string) {
   return true
 }
 
+export async function setV2Accounts(accountsMap: Map<string, Account>): Promise<void> {
+  await storage.set(V2_ACCOUNTS_STORAGE_KEY, serializeAccountMap(accountsMap))
+}
+
 export async function setAccounts(accountsMap: Map<string, Account>): Promise<void> {
-  await setStorage(ACCOUNT_STORAGE_CURRENT_KEY, serializeAccountMap(accountsMap))
+  const currentKey = await getAccountsVersionKey()
+  await storage.set(currentKey, serializeAccountMap(accountsMap))
 }
 
 export async function setAccount(account: Account) {
@@ -370,89 +427,9 @@ export async function updateBtcPath(path: string) {
   await setAccount(account)
 }
 
-export async function needsMigrationV2(): Promise<boolean> {
-  const v1Records = await getLegacyAccounts()
-  const v2Records = await getAccounts()
-
-  // find out if there are any old records that exists in v1 but not in v2, judged by mnemonic
-  const v1Mnemonics = v1Records.map((record) => record.mnemonic)
-  const v2Mnemonics = Array.from(v2Records.values()).map((record) => record.mnemonic)
-
-  return v1Mnemonics.some((mne) => !v2Mnemonics.includes(mne))
-}
-
-export async function getLegacyAccounts(): Promise<V1Account[]> {
-  const legacyAccounts = await getStorage(ACCOUNT_STORAGE_HISTORY_KEYS[0])
-  if (!legacyAccounts) {
-    return []
-  }
-
-  return Object.values(legacyAccounts)
-}
-
-export async function migrateV2(): Promise<void> {
-  const v1Accounts = await getLegacyAccounts()
-  const v2Accounts = await getAccounts()
-  const v2AccountsArr = Array.from(v2Accounts.values())
-  if (!v1Accounts) {
-    return
-  }
-  const v1AccountsIds = v1Accounts.map((account) => account.id)
-
-  // loop through v1 accounts, see if there are any accounts that are not in v2
-  for (let i = 0; i < v1AccountsIds.length; i++) {
-    const v1AccountId = v1AccountsIds[i]
-    const v1Account = v1Accounts.find((account) => account.id === v1AccountId)
-
-    if (!v1Account) {
-      continue
-    }
-
-    // check if account already exists in v2
-    const accountHasMigrated = v2AccountsArr.some((account) => account.mnemonic === v1Account.mnemonic)
-
-    if (accountHasMigrated) {
-      continue
-    }
-
-    const deriveChainPath = v1Account.path
-    const path = `m/44'/${deriveChainPath}'/0'/0/0`
-    const rndNameId = generateRandomString(4)
-
-    const allAddresses = deriveAllAddresses({
-      mnemonic: v1Account.mnemonic,
-      btcPath: path,
-      mvcPath: path,
-    })
-
-    const newAccount = {
-      id: v1AccountId,
-      name: v1Account.name || `Account ${rndNameId}`,
-      mnemonic: v1Account.mnemonic,
-      assetsDisplay: ['SPACE', 'BTC'],
-      mvc: {
-        path,
-        addressType: 'P2PKH',
-        mainnetAddress: allAddresses.mvcMainnetAddress,
-        testnetAddress: allAddresses.mvcTestnetAddress,
-      } as DerivedAccountDetail,
-      btc: {
-        path,
-        addressType: 'P2PKH',
-        mainnetAddress: allAddresses.btcMainnetAddress,
-        testnetAddress: allAddresses.btcTestnetAddress,
-      } as DerivedAccountDetail,
-    }
-    v2Accounts.set(v1AccountId, newAccount)
-  }
-
-  // set new accounts map
-  await setAccounts(v2Accounts)
-}
-
 type AccountManager = {
   all: () => Promise<Map<string, Account>>
-  getCurrent: () => Promise<Account | null>
+  getCurrent: () => Promise<Account | undefined>
   removeCurrent: () => Promise<boolean>
   set: (account: Account) => Promise<void>
   add: (account: Omit<Account, 'id' | 'name'>) => Promise<void>
@@ -480,61 +457,3 @@ accountManager.removeCurrent = removeCurrentAccount
 accountManager.updateName = updateName
 
 export default accountManager
-
-// Class
-class AccountCls {
-  mnemonic: string
-  constructor(mnemonic: string) {
-    this.mnemonic = mnemonic
-  }
-
-  async getAddress({ path }: { path?: string }) {
-    const network = await getNetwork()
-    const mneObj = mvc.Mnemonic.fromString(this.mnemonic)
-    const hdpk = mneObj.toHDPrivateKey('', network)
-    if (!(path && path.length)) {
-      const privateKey = hdpk.deriveChild(`m/44'/0'/0'/0/0`).privateKey
-      return privateKey.toAddress(network).toString()
-    }
-
-    // 根据路径导出
-    try {
-      const privateKey = hdpk.deriveChild(`m/44'/0'/0'/${path}`).privateKey
-      return privateKey.toAddress(network).toString()
-    } catch (e: any) {
-      return {
-        message: e.message,
-        status: 'failed',
-      }
-    }
-  }
-
-  async getPublicKey({ path }: { path?: string }) {
-    const network = await getNetwork()
-    const mneObj = mvc.Mnemonic.fromString(this.mnemonic)
-    const hdpk = mneObj.toHDPrivateKey('', network)
-    if (!(path && path.length)) {
-      const privateKey = hdpk.deriveChild(`m/44'/0'/0'/0/0`).privateKey
-      return privateKey.toPublicKey().toString()
-    }
-
-    // 根据路径导出
-    try {
-      const privateKey = hdpk.deriveChild(`m/44'/0'/0'/${path}`).privateKey
-      return privateKey.toPublicKey().toString()
-    } catch (e: any) {
-      return {
-        message: e.message,
-        status: 'failed',
-      }
-    }
-  }
-
-  async getXPublicKey() {
-    const network = await getNetwork()
-    const mneObj = mvc.Mnemonic.fromString(this.mnemonic)
-    const xPublicKey = mneObj.toHDPrivateKey('', network).xpubkey.toString()
-
-    return xPublicKey
-  }
-}

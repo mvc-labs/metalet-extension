@@ -20,6 +20,8 @@
     "bwi": "yarn build:injectWatch",
     "bwb": "yarn build:bg --watch",
     "bww": "yarn build:web --watch",
+    "bwim": "export NODE_OPTIONS=--max-old-space-size=6144 && yarn build:inject --watch",
+    "bwbm": "export NODE_OPTIONS=--max-old-space-size=6144 && yarn build:bg --watch",
     "bwww": "set NODE_OPTIONS=--max-old-space-size=4096 && yarn build:web --watch",
     "bwwm": "export NODE_OPTIONS=--max-old-space-size=6144 && yarn build:web --watch"
   },

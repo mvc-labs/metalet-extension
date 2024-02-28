@@ -1,9 +1,11 @@
+import useStorage from './lib/storage'
 import { IS_DEV } from '@/data/config'
 import * as VueRouter from 'vue-router'
 import { assetList } from '@/lib/balance'
 import Wallet from './pages/wallet/Index.vue'
-import { getStorage, useStorage } from './lib/storage'
-import { getAccounts, getCurrentAccount, getLegacyAccounts, needsMigrationV2 } from './lib/account'
+import { getCurrentAccount } from './lib/account'
+
+const storage = useStorage()
 
 const routes = [
   { path: '/', redirect: '/wallet' },
@@ -16,8 +18,19 @@ const routes = [
     },
   },
   {
-    path: '/migrate',
-    component: () => import('./pages/migrate/Index.vue'),
+    path: '/wallet/init-service',
+    component: () => import('./pages/wallet/InitService.vue'),
+    meta: {
+      noFooter: true,
+      noMenu: true,
+    },
+  },
+  {
+    // path: '/migrate',
+    // component: () => import('./pages/migrate/Index.vue'),
+    path: '/migrateV2',
+    component: () => import('./pages/migrateV2/Index.vue'),
+    name: 'migrateV2',
     meta: {
       noFooter: true,
       noMenu: true,
@@ -177,6 +190,15 @@ const routes = [
     },
   },
   {
+    path: '/wallet/select-network',
+    component: () => import('./pages/wallet/SelectNetwork.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Select Network',
+      noFooter: true,
+    },
+  },
+  {
     path: '/wallet/manage-assets',
     component: () => import('./pages/wallet/ManageAssets.vue'),
     meta: {
@@ -296,7 +318,6 @@ const routes = [
       noFooter: true,
     },
   },
-
   {
     path: '/settings/address-type',
     component: () => import('./pages/settings/AddressType.vue'),
@@ -306,7 +327,15 @@ const routes = [
       noFooter: true,
     },
   },
-
+  {
+    path: '/settings/security-lab',
+    component: () => import('./pages/settings/SecurityLab.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Security Lab',
+      noFooter: true,
+    },
+  },
   {
     path: '/tools/path-finder',
     component: () => import('./pages/tools/PathFinder.vue'),
@@ -324,68 +353,27 @@ const router = VueRouter.createRouter({
   routes,
 })
 
-// 检查锁定状态；如果锁定，跳转到锁定页面
-router.beforeEach(async (to, from) => {
-  if (to.path !== '/lock') {
-    const locked = await getStorage('locked')
-    if (locked) {
-      return '/lock'
+const authPages = ['/welcome', '/lock', '/accounts', '/wallet/create', '/wallet/import', '/migrateV2']
+
+router.beforeEach(async (to, _, next) => {
+  if (to.fullPath !== '/lock' && (await storage.get('locked'))) {
+    next('/lock')
+  } else if (!authPages.includes(to.path) && !(await getCurrentAccount())) {
+    next('/welcome')
+  } else {
+    if (['asset', 'token'].includes(to.name as string)) {
+      to.meta.headerTitle = to.params.symbol
     }
-  }
-})
 
-router.beforeEach(async (to, from) => {
-  if (to.path === '/wallet') {
-    assetList.value = []
-  }
-})
-
-// 检查账号状态；如果没有当前账号，跳转到账号页面
-router.beforeEach(async (to, from) => {
-  // 如果是老用户（sync存储中有助记词），且该账号在localStorage中不存在，则说明需要迁移，跳转至新版本迁移页面
-  const syncStorage = await useStorage('sync')
-  const v0Record = await syncStorage.get('currentAccount')
-  const v1Records = await getLegacyAccounts()
-  if (v0Record && v0Record.currentAccount && v1Records.length === 0) {
-    const mneStr = v0Record.currentAccount.mnemonicStr
-
-    // 比照查看有无该助记词的账号
-    const accounts = await getAccounts()
-    const accountsArr = Array.from(accounts.values())
-    const hasAccount = accountsArr.some((account) => account.mnemonic === mneStr)
-
-    if (!hasAccount && to.path !== '/migrate') {
-      return '/migrate'
+    if (to.name === 'send-token') {
+      to.meta.headerTitle = `Send ${to.params.symbol}`
     }
-  }
 
-  if (await needsMigrationV2()) {
-    if (to.path !== '/welcome') {
-      return '/welcome'
+    if (to.path === '/wallet') {
+      assetList.value = []
     }
-  }
 
-  const authPages = ['/welcome', '/lock', '/accounts', '/wallet/create', '/wallet/import', '/migrate']
-  if (!authPages.includes(to.path)) {
-    const redirect = getCurrentAccount().then(async (account) => {
-      if (!account) {
-        return '/welcome'
-      }
-    })
-
-    if (redirect) {
-      return redirect
-    }
-  }
-})
-
-router.beforeEach((to, from) => {
-  if (['asset', 'token'].includes(to.name as string)) {
-    to.meta.headerTitle = to.params.symbol
-  }
-
-  if (to.name === 'send-token') {
-    to.meta.headerTitle = `Send ${to.params.symbol}`
+    next()
   }
 })
 

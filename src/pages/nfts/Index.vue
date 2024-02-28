@@ -25,7 +25,7 @@ const selectedNFT = ref(nfts[0])
 const route = useRoute()
 const router = useRouter()
 
-const account = ref<Account | null>(null)
+const account = ref<Account | undefined>()
 getCurrentAccount().then((acc) => {
   account.value = acc
 })

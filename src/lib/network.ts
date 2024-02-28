@@ -1,11 +1,28 @@
 import { ref } from 'vue'
+import useStorage from './storage'
 import { networks } from 'bitcoinjs-lib'
-
-import storage from './storage'
+import { type Chain } from '@/lib/account'
 import { notifyContent } from '@/lib/notify-content'
+
+export type Service = Chain | 'all'
 
 export type Network = 'mainnet' | 'testnet'
 
+export const Service_Network_Key = 'service_network'
+
+const storage = useStorage()
+
+export async function setServiceNetwork(_service: Service) {
+  await storage.set(Service_Network_Key, _service)
+}
+
+export async function getServiceNetwork(): Promise<Service> {
+  return await storage.get(Service_Network_Key, { defaultValue: 'all' })
+}
+
+export async function hasServiceNetwork(): Promise<boolean> {
+  return !!(await storage.get(Service_Network_Key))
+}
 export const network = ref<Network>(await storage.get('network', { defaultValue: 'mainnet' }))
 
 export async function setNetwork(_network: Network) {

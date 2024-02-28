@@ -1,14 +1,12 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
-import { ChevronRightIcon } from '@heroicons/vue/20/solid'
 import { useRouter } from 'vue-router'
-
 import passwordManager from '@/lib/password'
 import { IS_DEV, VERSION } from '@/data/config'
-
-import SelectNetwork from './components/SelectNetwork.vue'
 import ResetModal from '@/components/ResetModal.vue'
+import SelectNetwork from './components/SelectNetwork.vue'
+import { ChevronRightIcon } from '@heroicons/vue/20/solid'
+import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 
 function openWindowMode() {
   const indexLocation = window.location.href.replace('settings', 'wallet')
@@ -56,6 +54,10 @@ const toBackup = () => {
 
 const toConnectedDapps = () => {
   router.push('/connected-dapps')
+}
+
+const toSecurityLab = () => {
+  router.push('/settings/security-lab')
 }
 
 const showResetModal = ref(false)
@@ -116,6 +118,20 @@ const showResetModal = ref(false)
 
         <div class="setting-item group cursor-pointer" @click="showResetModal = true" v-if="hasPassword">
           <div class="text-gray-500 group-hover:underline">Reset Account</div>
+          <div class="">
+            <ChevronRightIcon class="link-icon" />
+          </div>
+        </div>
+
+        <div class="setting-item group cursor-pointer" @click="toSecurityLab" v-if="false">
+          <div class="text-gray-500 group-hover:underline">Security Lab (Upgrade to account V3 version)</div>
+          <div class="">
+            <ChevronRightIcon class="link-icon" />
+          </div>
+        </div>
+
+        <div class="setting-item group cursor-pointer" @click="toSecurityLab" v-if="false">
+          <div class="text-gray-500 group-hover:underline">Migrate Error Logs</div>
           <div class="">
             <ChevronRightIcon class="link-icon" />
           </div>

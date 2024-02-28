@@ -15,8 +15,6 @@ getCurrentAccount().then((acc) => {
 
 <template>
   <div class="nicer-scrollbar">
-
-    
     <AccountItem
       :show-network="true"
       v-if="currentAccount"

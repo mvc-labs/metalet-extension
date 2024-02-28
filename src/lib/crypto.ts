@@ -1,10 +1,10 @@
-import { BN, TxComposer, mvc } from 'meta-contract'
 import { Buffer } from 'buffer'
-
-import { getMvcRootPath, type Account } from './account'
+import CryptoJS from 'crypto-js'
 import { parseLocalTransaction } from './metadata'
+import { BN, TxComposer, mvc } from 'meta-contract'
+import { getMvcRootPath, type Account } from './account'
+import { type MvcUtxo, fetchUtxos } from '@/queries/utxos'
 import { DERIVE_MAX_DEPTH, FEEB, P2PKH_UNLOCK_SIZE } from '@/data/config'
-import { MvcUtxo, fetchUtxos } from '@/queries/utxos'
 
 export function eciesEncrypt(message: string, privateKey: mvc.PrivateKey): string {
   const publicKey = privateKey.toPublicKey()
@@ -499,4 +499,40 @@ function pickUtxo(utxos: SA_utxo[], amount: number) {
     }
   }
   return candidateUtxos
+}
+
+/**
+ * Retrieves secret data.
+ * @param password The password used for encryption.
+ * @returns An object containing the secret key and initialization vector (both parsed from the password).
+ */
+export function getSecretData(password: string) {
+  return {
+    SECRET_KEY: CryptoJS.enc.Utf8.parse(password),
+    SECRET_IV: CryptoJS.enc.Utf8.parse('0000000000000000'),
+  }
+}
+
+export function encrypt(mnemonic: string, password: string) {
+  const { SECRET_KEY, SECRET_IV } = getSecretData(password)
+  const mnemonicUtf8 = CryptoJS.enc.Utf8.parse(mnemonic)
+  const encrypted = CryptoJS.AES.encrypt(mnemonicUtf8, SECRET_KEY, {
+    iv: SECRET_IV,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  })
+  return encrypted.ciphertext.toString()
+}
+
+export function decrypt(encryptedText: string, password: string) {
+  const { SECRET_KEY, SECRET_IV } = getSecretData(password)
+  const encryptedHexStr = CryptoJS.enc.Hex.parse(encryptedText)
+  const str = CryptoJS.enc.Base64.stringify(encryptedHexStr)
+  const decrypt = CryptoJS.AES.decrypt(str, SECRET_KEY, {
+    iv: SECRET_IV,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  })
+  const decryptedStr = decrypt.toString(CryptoJS.enc.Utf8)
+  return decryptedStr.toString()
 }
