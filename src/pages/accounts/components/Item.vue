@@ -80,7 +80,7 @@ const openEditNameModal = ref(false)
 
     <div class="flex items-center justify-start gap-x-2 py-4" :key="props.account.id">
       <!-- avatar -->
-      <Avatar :address="props.account.mvc.mainnetAddress" />
+      <Avatar :id="props.account.id" />
       <!-- info -->
       <div class="group flex flex-col">
         <div class="flex items-center gap-x-2">

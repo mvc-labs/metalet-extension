@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import Balance from './components/Balance.vue'
+import AccountHeader from './AccountHeader.vue'
 import AssetList from './components/AssetList.vue'
 import AccountItem from '../accounts/components/Item.vue'
 import { getCurrentAccount, type Account } from '@/lib/account'
@@ -14,17 +15,11 @@ getCurrentAccount().then((acc) => {
 </script>
 
 <template>
-  <div class="nicer-scrollbar">
-    <AccountItem
-      :show-network="true"
-      v-if="currentAccount"
-      :account="currentAccount"
-      :current-account="currentAccount"
-    />
+  <div class="nicer-scrollbar pt-3 space-y-6">
+    <AccountHeader v-if="currentAccount" :account="currentAccount"/>
 
     <Balance />
 
-    <!-- Asset List -->
     <AssetList />
   </div>
 </template>

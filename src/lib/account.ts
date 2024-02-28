@@ -150,8 +150,12 @@ export async function getAccount(accountId: string): Promise<Account | undefined
   return account
 }
 
+export async function getCurrentAccountId() {
+  return await storage.get(CURRENT_ACCOUNT_ID)
+}
+
 export async function getCurrentAccount(): Promise<Account | undefined> {
-  const currentAccountId = await storage.get(CURRENT_ACCOUNT_ID)
+  const currentAccountId = await getCurrentAccountId()
   if (!currentAccountId) {
     return
   }
@@ -164,7 +168,7 @@ export async function removeCurrentAccount(): Promise<boolean> {
     return false
   }
 
-  const currentAccountId = await storage.get<string>(CURRENT_ACCOUNT_ID)
+  const currentAccountId = await getCurrentAccountId()
   if (!currentAccountId) {
     return false
   }

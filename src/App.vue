@@ -88,7 +88,7 @@ checkMigrate().then(async () => {
       </div>
 
       <!-- footer -->
-      <TheFooter v-if="!noFooter" />
+      <!-- <TheFooter v-if="!noFooter" /> -->
     </div>
   </div>
 </template>

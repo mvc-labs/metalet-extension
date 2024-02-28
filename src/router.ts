@@ -298,7 +298,15 @@ const routes = [
 
   { path: '/tokens', component: () => import('./pages/tokens/Index.vue') },
 
-  { path: '/settings', component: () => import('./pages/settings/Index.vue') },
+  {
+    path: '/settings',
+    component: () => import('./pages/settings/Index.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Setting',
+      noFooter: true,
+    },
+  },
   {
     path: '/accounts',
     component: () => import('./pages/accounts/Index.vue'),

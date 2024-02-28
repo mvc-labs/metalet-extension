@@ -1,6 +1,11 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'
 import { totalBalance } from '@/lib/balance'
+import SendIcon from '@/assets/icons-v3/send.svg'
+import SwapIcon from '@/assets/icons-v3/swap.svg'
+import BridgeIcon from '@/assets/icons-v3/bridge.svg'
+import ReceiveIcon from '@/assets/icons-v3/receive.svg'
+
 import { ArrowUpRightIcon, QrCodeIcon } from '@heroicons/vue/20/solid'
 
 const router = useRouter()
@@ -17,22 +22,26 @@ function toSelectAsset(purpose: 'receive' | 'send') {
 </script>
 
 <template>
-  <div class="pt-4">
-    <div class="text-gray-500">Total Balance</div>
-    <div class="mt-2 text-3xl font-bold">
-      $ {{ totalBalance.toFixed(2) }} USD
-    </div>
+  <div>
+    <div class="mt-2 text-3xl font-bold">$ {{ totalBalance.toFixed(2) }} USD</div>
 
-    <!-- 接收和发送按钮 -->
-    <div class="mt-4 grid grid-cols-2 gap-2 self-stretch">
-      <button @click="toSelectAsset('send')" class="button">
-        <ArrowUpRightIcon class="mr-1 h-4 w-4" />
+    <div class="text-black-secondary flex justify-between mt-6 text-[13px]">
+      <div class="cursor-pointer flex flex-col items-center gap-y-[11px]" @click="toSelectAsset('send')">
+        <SendIcon />
         <span>Send</span>
-      </button>
-      <button @click="toSelectAsset('receive')" class="button">
-        <QrCodeIcon class="mr-1 h-4 w-4" />
+      </div>
+      <div class="cursor-pointer flex flex-col items-center gap-y-[11px]" @click="toSelectAsset('receive')">
+        <ReceiveIcon />
         <span>Receive</span>
-      </button>
+      </div>
+      <div class="cursor-not-allowed flex flex-col items-center gap-y-[11px]">
+        <SwapIcon />
+        <span>Swap</span>
+      </div>
+      <div class="cursor-not-allowed flex flex-col items-center gap-y-[11px]">
+        <BridgeIcon />
+        <span>Bridge</span>
+      </div>
     </div>
   </div>
 </template>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const { address } = defineProps<{
-  address: string
+const { id } = defineProps<{
+  id: string
 }>()
 
 const colors = [
@@ -16,7 +16,8 @@ const colors = [
 ]
 
 const computedGradientColor = computed(() => {
-  const index = Math.abs(address.split('').reduce((prev, curr) => prev + curr.charCodeAt(0), 0)) % colors.length
+  const index = Math.abs(id.split('').reduce((prev, curr) => prev + curr.charCodeAt(0), 0)) % colors.length
+
   return colors[index]
 })
 </script>
