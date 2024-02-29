@@ -3,9 +3,7 @@ import { ref } from 'vue'
 import BRCTokenList from './BRCTokenList.vue'
 import MetaIDPinList from './MetaIDPinList.vue'
 import { useRoute, useRouter } from 'vue-router'
-import BtcLogoImg from '@/assets/images/btc-logo.svg?url'
 import AccountItem from '../accounts/components/Item.vue'
-import SpaceLogoImg from '@/assets/images/space-logo.svg?url'
 import { getCurrentAccount, type Account } from '@/lib/account'
 import MvcCollectionPanel from './components/MvcCollectionPanel.vue'
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
@@ -88,7 +86,7 @@ function changeTab(index: number) {
       </TabList>
       <TabPanels class="mt-8">
         <!-- <TabPanel>
-          <div class="text-[#909399] mt-[58px] text-center">No collectibles yet</div>
+          <div class="text-gray-primary mt-[58px] text-center">No collectibles yet</div>
         </TabPanel> -->
         <TabPanel>
           <MvcCollectionPanel v-if="selectedNFT.name === 'MetaContract'" />

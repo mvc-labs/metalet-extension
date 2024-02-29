@@ -67,6 +67,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-inject": "^5.0.3",
+    "@tailwindcss/typography": "^0.5.10",
     "@types/bitcore-lib": "^0.15.3",
     "@types/chrome": "^0.0.228",
     "@types/crypto-js": "^4.1.1",
@@ -76,6 +77,7 @@
     "@types/webextension-polyfill": "^0.10.0",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vitest/ui": "^0.34.2",
+    "add": "^2.0.6",
     "autoprefixer": "^10.4.13",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.4.21",
@@ -92,6 +94,7 @@
     "vite-svg-loader": "^4.0.0",
     "vitest": "^0.34.3",
     "vue-tsc": "^1.0.24",
-    "webextension-polyfill": "^0.10.0"
+    "webextension-polyfill": "^0.10.0",
+    "yarn": "^1.22.21"
   }
 }

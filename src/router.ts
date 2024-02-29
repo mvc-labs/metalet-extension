@@ -180,9 +180,8 @@ const routes = [
     },
   },
   {
-    path: '/wallet/select-asset',
+    path: '/wallet/select-asset/:purpose',
     component: () => import('./pages/wallet/SelectAsset.vue'),
-    props: (route: any) => ({ purpose: route.query.purpose }),
     name: 'select-asset',
     meta: {
       secondaryHeader: true,

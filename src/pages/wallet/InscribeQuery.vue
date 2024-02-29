@@ -30,7 +30,7 @@ function confirm() {
             {{ data.inscriptionInfos?.[0]?.confirmed ? 'Confirmed' : 'Unconfirmed' }}
           </div>
         </div>
-        <div class="text-base text-[#909399] w-full text-center">
+        <div class="text-base text-gray-primary w-full text-center">
           <div>The transfeerable and available</div>
           <div>balance of BRC20 will be rereshed in</div>
           <div>a few minutes.</div>

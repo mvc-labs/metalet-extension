@@ -16,10 +16,13 @@ module.exports = {
         'black-primary': '#141416',
         'black-secondary': '#303133',
         'gray-primary': '#909399',
-        'gray-secondary': '#606266',
+        'gray-secondary': '#F5F7F9',
         'primary-teal': '#72F5F6',
         'blue-primary': '#171AFF',
         'btn-blue': '#1E2BFF',
+      },
+      fontSize: {
+        ss: ['0.8125rem', '1.125rem'],
       },
       borderRadius: {
         inherit: 'inherit',
@@ -27,6 +30,9 @@ module.exports = {
       spacing: {
         90: '22.5rem',
         150: '37.5rem',
+      },
+      backgroundImage: {
+        'tab-selected': 'linear-gradient(270deg, #171AFF -1%, #72F5F6 99%)',
       },
       keyframes: {
         'accordion-down': {

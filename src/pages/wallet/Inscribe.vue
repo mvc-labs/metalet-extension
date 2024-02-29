@@ -245,22 +245,22 @@ function toSuceess() {
     </div>
 
     <div v-if="nextStep === 2" class="text-black-primary h-full">
-      <div class="text-center text-base text-[#909399]">Spend Amount</div>
+      <div class="text-center text-base text-gray-primary">Spend Amount</div>
       <div class="text-center text-3xl font-bold mt-3">{{ inscribeAmount }} {{ asset.symbol }}</div>
-      <div class="mt-3 text-center text-base text-[#909399]">
+      <div class="mt-3 text-center text-base text-gray-primary">
         {{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }} (network fee)
       </div>
       <div class="border-b mt-3 space-x-3 text-base">
         <span
           @click="changeTabIdx(0)"
           class="inline-block pb-[2px] border-b-4 cursor-pointer"
-          :class="tabIdx === 0 ? 'border-[#141416] text-black-primary' : 'border-white text-[#909399]'"
+          :class="tabIdx === 0 ? 'border-[#141416] text-black-primary' : 'border-white text-gray-primary'"
           >Data</span
         >
         <span
           @click="changeTabIdx(1)"
           class="inline-block pb-[2px] border-b-4 cursor-pointer"
-          :class="tabIdx === 1 ? 'border-[#141416] text-black-primary' : 'border-white text-[#909399]'"
+          :class="tabIdx === 1 ? 'border-[#141416] text-black-primary' : 'border-white text-gray-primary'"
           >Hex</span
         >
       </div>

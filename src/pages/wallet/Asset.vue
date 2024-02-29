@@ -161,7 +161,7 @@ const toTransfer = () => {
             {{ asset.balance.total }} {{ asset.symbol }}
           </div>
 
-          <div class="text-[#909399] text-center">
+          <div class="text-gray-primary text-center">
             <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber()} USD` }}</span>
             <span v-else>$-- USD</span>
           </div>
@@ -176,7 +176,7 @@ const toTransfer = () => {
               {{ prettifyTokenBalance(balance.total, asset.decimal, true) }}
             </span>
           </div>
-          <div class="text-[#909399] text-center">
+          <div class="text-gray-primary text-center">
             <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber()} USD` }}</span>
             <span v-else>$-- USD</span>
           </div>
@@ -222,7 +222,7 @@ const toTransfer = () => {
               v-for="ticker in tickersData.transferableList"
               class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative"
             >
-              <div class="mt-2.5 text-[#909399] text-sm">{{ ticker.ticker }}</div>
+              <div class="mt-2.5 text-gray-primary text-sm">{{ ticker.ticker }}</div>
               <div class="mt-3 text-black-primary text-lg font-bold truncate">{{ ticker.amount }}</div>
               <div
                 class="text-white text-xs bg-[#1E2BFF] rounded-b-md absolute bottom-0 w-full text-center pt-[5px] pb-[4px]"
