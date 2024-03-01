@@ -93,6 +93,8 @@ export const fetchOneNft = async (params: { codehash: string; genesis: string; t
   nft.codehash = nft.codeHash
   delete nft.codeHash
 
+  console.log({ nft })
+
   return nft
 }
 
@@ -147,34 +149,30 @@ export const useOneNftQuery = (params: { codehash: string; genesis: string; toke
 }
 
 export interface MetaIDPin {
-  "id": string,
-  "number": number,
-  "rootTxId": string,
-  "address": string,
-  "output": string,
-  "outputValue": number,
-  "timestamp": number,
-  "genesisFee": number,
-  "genesisHeight": number,
-  "genesisTransaction": string,
-  "txInIndex": number,
-  "txInOffset": number,
-  "operation": string,
-  "path": string,
-  "parentPath": string,
-  "encryption": string,
-  "version": string,
-  "contentType": string,
-  "contentBody": string,
-  "contentLength": number,
-  "contentSummary": string
+  id: string
+  number: number
+  rootTxId: string
+  address: string
+  output: string
+  outputValue: number
+  timestamp: number
+  genesisFee: number
+  genesisHeight: number
+  genesisTransaction: string
+  txInIndex: number
+  txInOffset: number
+  operation: string
+  path: string
+  parentPath: string
+  encryption: string
+  version: string
+  contentType: string
+  contentBody: string
+  contentLength: number
+  contentSummary: string
 }
 
-export async function getMetaPins(
-  address: string,
-  cursor = 0,
-  size = 10
-): Promise<MetaIDPin[]> {
+export async function getMetaPins(address: string, cursor = 0, size = 10): Promise<MetaIDPin[]> {
   const net = getNet()
   return await metaletApiV3<MetaIDPin[]>('/address/pins').get({
     // net: 'testnet',
@@ -195,6 +193,73 @@ export const useMetaPinsQuery = (
   return useQuery({
     queryKey: ['MetaPins', { address: address.value, cursor: cursor.value, size: size.value }],
     queryFn: () => getMetaPins(address.value, cursor.value, size.value),
+    ...options,
+  })
+}
+
+interface MetaContract {
+  address: string
+  txId: string
+  codeHash: string
+  genesis: string
+  sensibleId: string
+  height: number
+  metaTxId: string
+  tokenSupply: number
+  tokenIndex: number
+  satoshi: number
+  satoshiString: string
+  flag: string
+  name: string
+  icon: string
+  seriesName: string
+}
+
+type ListResult<T> = {
+  list: T[]
+}
+
+export const fetchMetacontracts = async (
+  address: string,
+  size: string,
+  flag = ''
+): Promise<ListResult<MetaContract>> => {
+  const net = getNet()
+  return await metaletApiV3<ListResult<MetaContract>>('/address/contract/nft/utxo').get({
+    net,
+    address,
+    size,
+    flag,
+  })
+}
+
+export const fetchMetacontractCount = async (address: string): Promise<{ count: number }> => {
+  const net = getNet()
+  return await metaletApiV3<{ count: number }>('/address/contract/nft/count').get({
+    net,
+    address,
+  })
+}
+
+export const useMetacontractCountQuery = (address: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
+  return useQuery({
+    queryKey: ['MetacontractCount', { address }],
+    queryFn: () => fetchMetacontractCount(address.value),
+    select: (data) => data.count,
+    ...options,
+  })
+}
+
+export const useMetacontractsQuery = (
+  address: Ref<string>,
+  size: Ref<number>,
+  flag: Ref<string>,
+  options: { enabled: ComputedRef<boolean> }
+) => {
+  return useQuery({
+    queryKey: ['Metacontracts', { address, size, flag }],
+    queryFn: () => fetchMetacontracts(address.value, size.value.toString(), flag.value),
+    select: (data) => data.list,
     ...options,
   })
 }

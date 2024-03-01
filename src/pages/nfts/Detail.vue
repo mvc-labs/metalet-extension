@@ -68,10 +68,6 @@ const { data: activity, isLoading: isLoadingActivity } = useOneActivityQuery(act
   enabled: computed(() => !!nft.value?.txid),
 })
 
-const genesisTxid = computed(() => nftInfo.value?.genesisTxid) as ComputedRef<string>
-const { data: genesisTx, isLoading: isLoadingGenesisTx } = useOneActivityQuery(genesisTxid, {
-  enabled: computed(() => !!nftInfo.value?.genesisTxid),
-})
 
 const toTransferNft = () => {
   router.push(`/nfts/transfer-nft/${codehash}/${genesis}/${tokenIndex}`)

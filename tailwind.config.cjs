@@ -17,6 +17,7 @@ module.exports = {
         'black-secondary': '#303133',
         'gray-primary': '#909399',
         'gray-secondary': '#F5F7F9',
+        'gray-light': '#F5F7FA',
         'primary-teal': '#72F5F6',
         'blue-primary': '#171AFF',
         'btn-blue': '#1E2BFF',

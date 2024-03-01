@@ -1,6 +1,6 @@
 <script setup>
 import AssetList from './AssetList.vue'
-import NFTList from './NFT/NFTList.vue'
+import NFTList from './NFTs/NFTList.vue'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 </script>
 

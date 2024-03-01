@@ -82,7 +82,7 @@ checkMigrate().then(async () => {
         class="fixed left-0 top-0 isolate z-[-1] hidden h-1/2 w-full select-none bg-cover bg-center bg-no-repeat xs:block">
         <img class="z-[-1] h-full w-full select-none opacity-100" :src="BgHueImg" alt="bg-hue" />
       </div>
-      <div class="isolate grow px-4 overflow-y-auto nicer-scrollbar pb-8">
+      <div class="isolate grow px-4 py-3 overflow-y-auto nicer-scrollbar">
         <router-view></router-view>
       </div>
 

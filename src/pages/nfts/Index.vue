@@ -43,7 +43,7 @@ function changeTab(index: number) {
 
 <template>
   <!-- 账号信息 -->
-  <AccountItem :account="account" :current-account="account" v-if="account" :show-network="true" class="mb-4 -mt-4" />
+  <AccountItem :account="account" :current-account="account" v-if="account" :show-network="true" class="mb-4" />
 
   <div class="relative">
     <div :class="['absolute right-0 z-10', selectedTab === 0 ? '' : 'hidden']">

@@ -76,3 +76,7 @@
 button[aria-selected='true'] {
   outline: none;
 }
+
+[role='menuitem'] {
+  @apply cursor-pointer hover:text-blue-primary
+}

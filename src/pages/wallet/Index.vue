@@ -14,7 +14,7 @@ getCurrentAccount().then((acc) => {
 </script>
 
 <template>
-  <div class="nicer-scrollbar pt-3 space-y-6">
+  <div class="nicer-scrollbar space-y-6">
     <AccountHeader v-if="currentAccount" :account="currentAccount" />
 
     <Balance />
