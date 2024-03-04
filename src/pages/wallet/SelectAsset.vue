@@ -70,7 +70,7 @@ function selectAsset(asset: any) {
 
 <template>
   <div class="pt-2 space-y-2">
-    <SearchInput v-model="assetSearch" />
+    <SearchInput v-model:assetSearch="assetSearch" />
     <AssetItem
       :asset="asset"
       :key="asset.symbol"
