@@ -221,13 +221,17 @@ type ListResult<T> = {
 
 export const fetchMetacontracts = async (
   address: string,
-  size: string,
-  flag = ''
+  codehash?: string,
+  genesis?: string,
+  size?: string,
+  flag?: string
 ): Promise<ListResult<MetaContract>> => {
   const net = getNet()
   return await metaletApiV3<ListResult<MetaContract>>('/address/contract/nft/utxo').get({
     net,
     address,
+    codehash,
+    genesis,
     size,
     flag,
   })
@@ -251,14 +255,24 @@ export const useMetacontractCountQuery = (address: Ref<string>, options: { enabl
 }
 
 export const useMetacontractsQuery = (
-  address: Ref<string>,
-  size: Ref<number>,
-  flag: Ref<string>,
-  options: { enabled: ComputedRef<boolean> }
+  {
+    address,
+    codehash,
+    genesis,
+    size,
+    flag,
+  }: {
+    address: Ref<string>
+    codehash?: Ref<string>
+    genesis?: Ref<string>
+    size?: Ref<string>
+    flag?: Ref<string>
+  },
+  options?: { enabled: ComputedRef<boolean> }
 ) => {
   return useQuery({
-    queryKey: ['Metacontracts', { address, size, flag }],
-    queryFn: () => fetchMetacontracts(address.value, size.value.toString(), flag.value),
+    queryKey: ['Metacontracts', { address, codehash, genesis, size, flag }],
+    queryFn: () => fetchMetacontracts(address.value, codehash?.value, genesis?.value, size?.value || '10', flag?.value),
     select: (data) => data.list,
     ...options,
   })

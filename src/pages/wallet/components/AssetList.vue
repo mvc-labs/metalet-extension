@@ -5,7 +5,6 @@ import { ref, computed, onMounted } from 'vue'
 import { getAssetsDisplay } from '@/lib/assets'
 import { useBRC20AssetQuery } from '@/queries/btc'
 import { useMVCAssetsQuery } from '@/queries/tokens'
-// import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
 import { type Asset, BTCAsset, MVCAsset } from '@/data/assets'
 import { getServiceNetwork, type Service } from '@/lib/network'
 

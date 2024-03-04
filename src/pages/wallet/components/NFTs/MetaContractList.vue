@@ -14,7 +14,7 @@ getAddress('mvc').then((_address) => {
   address.value = _address
 })
 
-const { isLoading, data: metaContracts } = useMetacontractsQuery(address, ref(10), flag, {
+const { isLoading, data: metaContracts } = useMetacontractsQuery({address}, {
   enabled: computed(() => !!address.value),
 })
 
@@ -23,8 +23,6 @@ const nftItems = computed(() => {
     return
   }
   return metaContracts.value.map((metaContract) => {
-    console.log({ metaContract })
-
     return {
       id: metaContract.txId,
       metaTxId: metaContract.metaTxId,
@@ -53,8 +51,8 @@ const toNftDetail = (nft: any) => {
 </script>
 
 <template>
-  <div v-if="isLoading" class="w-full py-3 text-center text-sm font-bold text-gray-500">BRC Token List loading...</div>
-  <div v-else-if="nftItems">
+  <div v-if="isLoading" class="w-full py-24 text-center text-sm font-bold text-gray-500">Metacontracts loading...</div>
+  <div v-else-if="nftItems?.length">
     <div class="py-4 grid grid-cols-3 gap-x-1 gap-y-4">
       <NFTItem v-for="nftItem in nftItems" :key="nftItem.id" :nftItem="nftItem" @click="toNftDetail(nftItem)" />
     </div>
@@ -66,7 +64,7 @@ const toNftDetail = (nft: any) => {
       Load more MetaContracts
     </div>
   </div>
-  <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">No Ordinals yet.</div>
+  <div v-else class="w-full py-24 text-center text-sm font-bold text-gray-500">No Metacontracts yet.</div>
 </template>
 
 <style lang="less" scoped></style>

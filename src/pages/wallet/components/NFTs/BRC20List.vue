@@ -52,7 +52,7 @@ const toBRC20Detail = (inscriptionId: string) => {
 
 <template>
   <div v-if="isLoading" class="w-full py-24 text-center text-sm font-bold text-gray-500">BRC20 Tokens loading...</div>
-  <div v-else-if="nftItems">
+  <div v-else-if="nftItems.length">
     <div class="py-4 grid grid-cols-3 gap-x-1 gap-y-4">
       <NFTItem v-for="nftItem in nftItems" :key="nftItem.id" :nftItem="nftItem" @click="toBRC20Detail(nftItem.id)" />
     </div>
@@ -64,5 +64,5 @@ const toBRC20Detail = (inscriptionId: string) => {
       Load more Ordinals
     </div>
   </div>
-  <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">No Ordinals yet.</div>
+  <div v-else class="w-full py-24 text-center text-sm font-bold text-gray-500">No Ordinals yet.</div>
 </template>

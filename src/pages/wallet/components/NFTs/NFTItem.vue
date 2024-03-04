@@ -20,8 +20,8 @@ const { nftItem } = defineProps<{
       {{ nftItem.content }}
     </div>
 
-    <div class="text-sm mt-1.5 truncate">{{ nftItem.title }}</div>
-    <div class="text-xs truncate text-gray-primary">{{ nftItem.desc }}</div>
+    <div class="text-sm mt-1.5 truncate text-center">{{ nftItem.title }}</div>
+    <div class="text-xs truncate text-gray-primary text-center">{{ nftItem.desc }}</div>
   </div>
 </template>
 
