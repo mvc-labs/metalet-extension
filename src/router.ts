@@ -344,6 +344,25 @@ const routes = [
     },
   },
   {
+    path: '/settings/toolkit',
+    component: () => import('./pages/settings/Toolkit.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Toolkit',
+      noFooter: false,
+    },
+  },
+  {
+    path: '/settings/toolkit/space-merge',
+    component: () => import('./pages/settings/components/SpaceMerge.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Space Merge',
+      noFooter: false,
+    },
+  },
+
+  {
     path: '/tools/path-finder',
     component: () => import('./pages/tools/PathFinder.vue'),
     meta: {
