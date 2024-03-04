@@ -58,6 +58,10 @@ const toConnectedDapps = () => {
   router.push('/connected-dapps')
 }
 
+const toToolkit = () => {
+  router.push('/settings/toolkit')
+}
+
 const showResetModal = ref(false)
 </script>
 
@@ -81,6 +85,13 @@ const showResetModal = ref(false)
 
         <div class="setting-item group cursor-pointer" @click="toAddressType">
           <div class="text-gray-500 group-hover:underline">BTC Address Type</div>
+          <div class="">
+            <ChevronRightIcon class="link-icon" />
+          </div>
+        </div>
+
+        <div class="setting-item group cursor-pointer" @click="toToolkit">
+          <div class="text-gray-500 group-hover:underline">Toolkit</div>
           <div class="">
             <ChevronRightIcon class="link-icon" />
           </div>
