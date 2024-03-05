@@ -111,6 +111,15 @@ const toCollection = () => {
         <CheckBadgeIcon class="h-5 w-5 text-blue-500" v-if="isOfficialNft(nft.genesis)" />
       </button>
 
+      <button
+        class="flex cursor-pointer items-center gap-1 text-sm text-blue-600 hover:underline"
+        v-if="collectionInfo"
+        @click="toCollection"
+      >
+        {{ collectionInfo.name }}
+        <CheckBadgeIcon class="h-5 w-5 text-blue-500" v-if="isOfficialNft(nft.genesis)" />
+      </button>
+
       <div class="mt-1 flex items-center gap-2">
         <div class="text-lg font-bold">{{ nftInfo.name }}</div>
         <div class="text-sm text-gray-500">{{ '# ' + nft.tokenIndex }}</div>

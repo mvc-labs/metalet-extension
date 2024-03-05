@@ -93,8 +93,6 @@ export const fetchOneNft = async (params: { codehash: string; genesis: string; t
   nft.codehash = nft.codeHash
   delete nft.codeHash
 
-  console.log({ nft })
-
   return nft
 }
 

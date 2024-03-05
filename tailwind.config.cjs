@@ -20,6 +20,7 @@ module.exports = {
         'gray-light': '#F5F7FA',
         'primary-teal': '#72F5F6',
         'blue-primary': '#171AFF',
+        'blue-light': '#F3F3FF',
         'btn-blue': '#1E2BFF',
       },
       fontSize: {
@@ -34,6 +35,15 @@ module.exports = {
       },
       backgroundImage: {
         'tab-selected': 'linear-gradient(270deg, #171AFF -1%, #72F5F6 99%)',
+      },
+      width: {
+        15: '3.75rem',
+      },
+      height: {
+        15: '3.75rem',
+      },
+      lineHeight: {
+        15: '3.75rem',
       },
       keyframes: {
         'accordion-down': {

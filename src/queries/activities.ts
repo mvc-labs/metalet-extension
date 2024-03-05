@@ -2,8 +2,16 @@ import Decimal from 'decimal.js'
 import { ComputedRef, Ref } from 'vue'
 import { type Asset } from '@/data/assets'
 import { useQuery } from '@tanstack/vue-query'
-import { metaletApi, mvcApi,metaletApiV3 } from './request'
+import { metaletApi, mvcApi, metaletApiV3 } from './request'
 import { SymbolTicker } from '@/lib/asset-symbol'
+
+export type Operation = {
+  flag: string
+  time: number
+  amount: number
+  txId: string
+  comfirmed: boolean
+}
 
 export type Activity = {
   address: string
@@ -14,6 +22,7 @@ export type Activity = {
   outcome: number
   txid: string
 }
+
 export type TokenActivity = {
   codeHash: string
   genesis: string
@@ -70,6 +79,28 @@ export const fetchBtcActivities = async (address: string): Promise<Activities> =
       })
     })
 }
+
+// export const fetchBtcActivityList = async (address: string): Promise<Operation[]> => {
+//   return metaletApiV3<{ transactionList: BtcRawActivity[] }>(`/address/activities`)
+//     .get({
+//       address,
+//       chain: 'btc',
+//     })
+//     .then((data) => data.transactionList)
+//     .then((activities) => {
+//       return activities.map((activity) => {
+//         return {
+//           address: activity.from,
+//           flag: '',
+//           time: Number(activity.transactionTime),
+//           height: Number(activity.height),
+//           income: new Decimal(activity.amount).times(1e8).toNumber(),
+//           outcome: 0,
+//           txid: activity.txId,
+//         }
+//       })
+//     })
+// }
 
 export const fetchBRC20Activities = async (address: string, symbol: SymbolTicker): Promise<Activities> => {
   return metaletApiV3<{ inscriptionsList: BRC20RawActivity[] }>(`/address/brc20/activities`)
@@ -137,22 +168,18 @@ export const useOneActivityQuery = (
   })
 }
 
-export const useActivitiesQuery = (
-  addressRef: Ref<string>,
-  asset: Asset,
-  options?: { enabled: ComputedRef<boolean> }
-) => {
+export const useActivitiesQuery = (address: Ref<string>, asset: Asset, options?: { enabled: ComputedRef<boolean> }) => {
   return useQuery({
-    queryKey: ['activities', { address: addressRef.value, symbol: asset.symbol, genesis: asset.genesis }],
+    queryKey: ['activities', { address, symbol: asset.symbol, genesis: asset.genesis }],
     queryFn: async () => {
       if (asset.symbol === 'BTC') {
-        return fetchBtcActivities(addressRef.value)
+        return fetchBtcActivities(address.value)
       } else if (asset.symbol === 'SPACE') {
-        return fetchSpaceActivities(addressRef.value)
+        return fetchSpaceActivities(address.value)
       } else if (asset.contract === 'BRC-20') {
-        return fetchBRC20Activities(addressRef.value, asset.symbol)
+        return fetchBRC20Activities(address.value, asset.symbol)
       } else if (asset.contract === 'MetaContract') {
-        return fetchTokenActivities(addressRef.value, asset)
+        return fetchTokenActivities(address.value, asset)
       }
     },
     ...options,

@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import NFTItem from './NFTItem.vue'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import BRC20List from './BRC20List.vue'
 import NO_NFT_DATA from './NoNFTData.vue'
-import { getAddress } from '@/lib/account'
 import MetaContractList from './MetaContractList.vue'
 import SelectorIcon from '@/assets/icons-v3/selector.svg'
 import { type NFTType, getNftType, setNftType } from '@/lib/nft'
