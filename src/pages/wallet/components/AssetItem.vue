@@ -110,15 +110,15 @@ watch(
         <div v-if="asset?.contract === 'BRC-20'" class="w-full mt-2.5 space-y-2">
           <div class="text-xs flex items-center justify-between w-full">
             <span class="text-[#909399]">Transferable:</span>
-            <span class="text-black-primary font-bold truncate">{{ asset.balance?.transferBalance || '--' }}</span>
+            <span class="text-black-primary font-bold truncate">{{ asset.balance?.transferBalance }}</span>
           </div>
           <div class="text-xs flex items-center justify-between w-full">
             <span class="text-[#909399]">Available:</span>
-            <span class="text-black-primary font-bold truncate">{{ asset.balance?.availableBalanceSafe || '--' }}</span>
+            <span class="text-black-primary font-bold truncate">{{ asset.balance?.availableBalanceSafe }}</span>
           </div>
           <div class="text-xs flex items-center justify-between w-full" v-if="asset.balance?.availableBalanceUnSafe">
             <span class="text-[#909399]">Available(pending):</span>
-            <span class="text-black-primary font-bold truncate">{{ asset.balance?.availableBalanceUnSafe || '--' }}</span>
+            <span class="text-black-primary font-bold truncate">{{ asset.balance?.availableBalanceUnSafe }}</span>
           </div>
         </div>
       </div>
