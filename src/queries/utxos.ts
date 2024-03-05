@@ -1,5 +1,7 @@
 import { Chain } from '@/lib/account'
 import { getNet } from '@/lib/network'
+import { Ref, ComputedRef } from 'vue'
+import { useQuery } from '@tanstack/vue-query'
 import { mvcApi, mempoolApi, metaletApiV3 } from './request'
 
 export interface UTXO {
@@ -40,7 +42,7 @@ export type Utxo = {
 
 export const fetchUtxos = async (chain: Chain = 'mvc', address: string): Promise<any[]> => {
   if (chain === 'mvc') {
-    return await fetchMVCUtxos(address)
+    return (await fetchMVCUtxos(address)) || []
   } else {
     return (await getBtcUtxos(address)) || []
   }
@@ -115,4 +117,12 @@ function formatMempoolUTXO(utxo: MempoolUtxo): UTXO {
 export async function getUtxos(address: string): Promise<UTXO[]> {
   const utxos = await mempoolApi<MempoolUtxo[]>(`/address/${address}/utxo`).get()
   return utxos.map((utxo) => formatMempoolUTXO(utxo))
+}
+
+export const useMVCUTXOQuery = (address: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
+  return useQuery({
+    queryKey: ['MVCUTXOs', { address }],
+    queryFn: () => fetchMVCUtxos(address.value),
+    ...options,
+  })
 }

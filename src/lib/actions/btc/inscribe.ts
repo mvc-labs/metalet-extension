@@ -353,13 +353,13 @@ function createMetaIdTxCtxData(
     const body = Buffer.from(metaidData.body!, metaidData?.encoding ?? 'utf8')
 
     const maxChunkSize = 520
-    const bodySize = (body as Buffer).length
+    const bodySize = body.length
     for (let i = 0; i < bodySize; i += maxChunkSize) {
       let end = i + maxChunkSize
       if (end > bodySize) {
         end = bodySize
       }
-      inscriptionBuilder.push((body as Buffer).slice(i, end))
+      inscriptionBuilder.push(body.slice(i, end))
     }
   }
   inscriptionBuilder.push(ops.OP_ENDIF)

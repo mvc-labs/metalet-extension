@@ -226,7 +226,7 @@ The one-for-all transfer method.
   - `genesis?` - `string`, required when type is token
   - `codehash?` - `string`, required when type is token
   - `receivers` - `Reciever[]`
-    - `ammount` - `string`, do not pass numeric value here or Metalet will get upset.
+    - `amount` - `string`, do not pass numeric value here or Metalet will get upset.
     - `address` - `string`
 - `broadcast?` - `boolean`, default to `true`
 
