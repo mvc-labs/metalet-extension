@@ -16,12 +16,14 @@ module.exports = {
         'black-primary': '#141416',
         'black-secondary': '#303133',
         'gray-primary': '#909399',
+        'gray-soft': '#EDEFF2',
         'gray-secondary': '#F5F7F9',
         'gray-light': '#F5F7FA',
         'primary-teal': '#72F5F6',
         'blue-primary': '#171AFF',
         'blue-light': '#F3F3FF',
         'btn-blue': '#1E2BFF',
+        'orange-primary': '#FF8F1F',
       },
       fontSize: {
         ss: ['0.8125rem', '1.125rem'],
@@ -44,6 +46,9 @@ module.exports = {
       },
       lineHeight: {
         15: '3.75rem',
+      },
+      padding:{
+
       },
       keyframes: {
         'accordion-down': {

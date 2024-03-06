@@ -2,26 +2,31 @@
 import Decimal from 'decimal.js'
 import { computed, ref, watch } from 'vue'
 import { updateAsset } from '@/lib/balance'
+import Ticker from './components/Ticker.vue'
 import Loading from '@/components/Loading.vue'
 import { calcBalance } from '@/lib/formatters'
+import MintPNG from '@/assets/icons-v3/mint.png'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
 import AssetLogo from '@/components/AssetLogo.vue'
 import { useBalanceQuery } from '@/queries/balance'
+import EmptyIcon from '@/assets/icons-v3/empty.svg'
 import Activities from './components/Activities.vue'
 import FilterIcon from '@/assets/icons-v3/filter.svg'
 import SendPNG from '@/assets/icons-v3/send_detail.png'
+import TransferPNG from '@/assets/icons-v3/transfer.png'
 import SelectorIcon from '@/assets/icons-v3/selector.svg'
 import { getTags, BTCAsset, MVCAsset } from '@/data/assets'
+import ArrowDwonIcon from '@/assets/icons-v3/arrow_down.svg'
 import ReceivePNG from '@/assets/icons-v3/receive_detail.png'
-import { ArrowsRightLeftIcon } from '@heroicons/vue/20/solid'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useExchangeRatesQuery, getExchangeCoinType } from '@/queries/exchange-rates'
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 const route = useRoute()
 const router = useRouter()
+const isShowAllTransferable = ref(false)
 
 if (!route.params.address) {
   router.go(-1)
@@ -73,6 +78,29 @@ const tickerEnabled = computed(() => {
 
 const { isLoading: tickersLoading, data: tickersData } = useBRCTickerAseetQuery(address, symbol, {
   enabled: tickerEnabled,
+})
+
+const transferableList = computed(() => {
+  if (tickersData.value) {
+    if (isShowAllTransferable.value) {
+      return tickersData.value?.transferableList
+    } else {
+      return tickersData.value?.transferableList.slice(0, 3)
+    }
+  }
+})
+
+const availableBalanceSafe = computed(() => {
+  if (tickersData.value?.tokenBalance) {
+    return Number(tickersData.value?.tokenBalance.availableBalance)
+  }
+  return '--'
+})
+
+const availableBalanceUnSafe = computed(() => {
+  if (tickersData.value?.tokenBalance) {
+    return Math.abs(Number(tickersData.value?.tokenBalance.availableBalanceUnSafe))
+  }
 })
 
 const tags = computed(() => {
@@ -142,94 +170,97 @@ const toTransfer = () => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center" v-if="asset">
-    <AssetLogo :logo="asset.logo" :chain="asset.chain" :symbol="asset.symbol" type="network" />
+  <div class="flex flex-col items-center space-y-6 w-full" v-if="asset">
+    <div class="flex flex-col items-center">
+      <AssetLogo :logo="asset.logo" :chain="asset.chain" :symbol="asset.symbol" type="network" />
 
-    <div class="mt-3 text-2xl">
-      <span v-if="asset.balance"> {{ calcBalance(asset.balance.total, asset.decimal, asset.symbol) }}</span>
-      <span v-else-if="balance">{{ calcBalance(balance.total, asset.decimal, asset.symbol) }}</span>
-      <span v-else>-- {{ asset.symbol }}</span>
-    </div>
+      <div class="mt-3 text-2xl">
+        <span v-if="asset.balance"> {{ calcBalance(asset.balance.total, asset.decimal, asset.symbol) }}</span>
+        <span v-else-if="balance">{{ calcBalance(balance.total, asset.decimal, asset.symbol) }}</span>
+        <span v-else>-- {{ asset.symbol }}</span>
+      </div>
 
-    <div class="mt-0.5 text-sm text-gray-primary">$ {{ assetUSD?.toNumber() }} USD</div>
+      <div class="mt-0.5 text-sm text-gray-primary">$ {{ assetUSD?.toNumber() }} USD</div>
 
-    <div class="space-x-1">
-      <div v-for="tag in tags" :key="tag.name" :class="['text-gray-primary', 'text-xs']">
-        {{ tag.name }}
+      <div class="space-x-1">
+        <div v-for="tag in tags" :key="tag.name" :class="['text-gray-primary', 'text-xs']">
+          {{ tag.name }}
+        </div>
       </div>
     </div>
 
-    <div class="mt-6 flex items-center justify-center gap-x-2 w-full text-blue-primary">
-      <button
-        @click="toSend"
-        v-if="asset.isNative"
-        class="w-[119px] h-12 bg-blue-light rounded-3xl flex items-center justify-center gap-x-2"
-      >
-        <img :src="SendPNG" alt="Send" />
-        <span>Send</span>
-      </button>
-      <button
-        @click="toTransfer"
-        v-if="asset.contract === 'BRC-20'"
-        class="w-[119px] h-12 bg-blue-light rounded-3xl flex items-center justify-center gap-x-2"
-      >
-        <ArrowsRightLeftIcon class="mr-1 h-4 w-4" />
-        <span>Transfer</span>
-      </button>
-      <button
-        @click="toReceive"
-        class="w-[119px] h-12 bg-blue-primary text-white rounded-3xl flex items-center justify-center gap-x-2"
-      >
-        <img :src="ReceivePNG" alt="Receive" />
-        <span>Receive</span>
-      </button>
+    <div class="flex items-center justify-center gap-x-2">
+      <template v-if="asset.contract === 'BRC-20'">
+        <a href="javascript:void(0);" class="blue-light-btn">
+          <img :src="MintPNG" alt="Mint" />
+          <span>Mint</span>
+        </a>
+        <button @click="toTransfer" class="blue-primary-btn">
+          <img :src="TransferPNG" alt="Transfer" />
+          <span>Transfer</span>
+        </button>
+      </template>
+      <template v-else>
+        <button @click="toSend" v-if="asset.isNative" class="blue-light-btn">
+          <img :src="SendPNG" alt="Send" />
+          <span>Send</span>
+        </button>
+        <button @click="toReceive" class="blue-primary-btn">
+          <img :src="ReceivePNG" alt="Receive" />
+          <span>Receive</span>
+        </button>
+      </template>
     </div>
 
-    <div class="mt-6 w-full">
-      <div v-if="asset.contract === 'BRC-20'" class="mt-8 w-full">
-        <div class="flex items-end justify-between">
-          <span class="text-base">Transferable</span
-          ><span class="text-lg"
-            >{{ (tickersData && tickersData.tokenBalance.transferableBalance) || 0 }} {{ asset.symbol }}</span
-          >
-        </div>
-        <Loading text="Loading BRC Tickers..." v-if="tickersLoading" />
-        <div class="grid grid-cols-3 gap-2 w-full mt-3" v-else-if="tickersData && tickersData.transferableList.length">
-          <div
-            :key="ticker.inscriptionId"
-            v-for="ticker in tickersData.transferableList"
-            class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative"
-          >
-            <div class="mt-2.5 text-gray-primary text-sm">{{ ticker.ticker }}</div>
-            <div class="mt-3 text-black-primary text-lg font-bold truncate">{{ ticker.amount }}</div>
-            <div
-              class="text-white text-xs bg-[#1E2BFF] rounded-b-md absolute bottom-0 w-full text-center pt-[5px] pb-[4px]"
-            >
-              <span v-if="ticker.inscriptionNumber === -1">Uncomfirmed</span>
-              <span v-else>#{{ ticker.inscriptionNumber }}</span>
+    <div v-if="asset.contract === 'BRC-20'" class="border border-gray-soft rounded-lg w-full">
+      <Tabs default-value="Transferable">
+        <TabsList class="grid grid-cols-2">
+          <TabsTrigger value="Transferable">
+            <span class="text-lg">{{ tickersData?.tokenBalance.transferableBalance || '--' }}</span>
+            <span class="text-sm text-gray-primary">Transferable</span>
+          </TabsTrigger>
+          <TabsTrigger value="Available">
+            <div class="text-lg">
+              <span>{{ availableBalanceSafe }}</span>
+              <span v-if="availableBalanceUnSafe" class="text-gray-primary"> + {{ availableBalanceUnSafe }} </span>
             </div>
+            <span class="text-sm text-gray-primary">Available</span>
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="Transferable">
+          <Loading text="Transferable Token Loading..." v-if="tickersLoading" />
+          <template v-else-if="transferableList?.length">
+            <div class="grid grid-cols-3 gap-x-2 gap-y-4">
+              <Ticker
+                :ticker="ticker.ticker"
+                :amount="ticker.amount"
+                :key="ticker.inscriptionId"
+                v-for="ticker in transferableList"
+                :inscriptionNumber="ticker.inscriptionNumber"
+              />
+            </div>
+            <div
+              v-if="!isShowAllTransferable"
+              @click="isShowAllTransferable = true"
+              class="mt-4 pt-3 border-t-2 border-gray-soft text-xs cursor-pointer flex items-center justify-center text-gray-primary gap-x-0.5"
+            >
+              <span>All</span>
+              <ArrowDwonIcon />
+            </div>
+          </template>
+          <div v-else class="pt-6 pb-8">
+            <EmptyIcon class="mx-auto" />
           </div>
-        </div>
-        <div v-else class="w-full h-[142px] flex items-center justify-center text-[#999999]">Empty</div>
-        <div class="my-3">
-          <div class="flex items-center justify-between">
-            <span class="text-base">Available</span>
-            <span class="text-lg" v-if="tickersData">
-              <span>{{ tickersData.tokenBalance.availableBalanceSafe }} {{ asset.symbol }}</span>
-              <span v-if="Number(tickersData.tokenBalance.availableBalanceUnSafe)" class="text-gray-primary">
-                + {{ Math.abs(Number(tickersData.tokenBalance.availableBalanceUnSafe)) }} {{ asset.symbol }}</span
-              >
-            </span>
-            <span class="text-lg" v-else>--</span>
+        </TabsContent>
+        <TabsContent value="Available">
+          <div v-if="availableBalanceUnSafe" class="grid grid-cols-3 gap-x-2 gap-y-4">
+            <Ticker :ticker="asset.symbol" :amount="availableBalanceUnSafe" />
           </div>
-          <div
-            v-if="tickersData && Number(tickersData.tokenBalance.availableBalanceUnSafe)"
-            class="text-right text-sm text-gray-primary"
-          >
-            (Wait to be confirmed)
+          <div v-else class="pt-6 pb-8">
+            <EmptyIcon class="mx-auto" />
           </div>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
 
     <div class="w-full">
@@ -253,3 +284,33 @@ const toTransfer = () => {
   </div>
   <Loading v-else text="Asset Loading..." />
 </template>
+
+<style scoped lang="css">
+.btn {
+  @apply w-[119px] h-12 rounded-3xl flex items-center justify-center gap-x-2;
+}
+
+.blue-light-btn {
+  @apply btn bg-blue-light text-blue-primary;
+}
+
+.blue-primary-btn {
+  @apply btn bg-blue-primary text-white;
+}
+
+div[role='tablist'] {
+  @apply p-0 h-auto;
+}
+
+button[role='tab'] {
+  @apply flex flex-col items-center px-0 py-4 rounded-none border-b-2 border-transparent;
+}
+
+button[role='tab'][aria-selected='true'] {
+  @apply border-blue-primary;
+}
+
+div[role='tabpanel'] {
+  @apply px-3 py-4 mt-0;
+}
+</style>
