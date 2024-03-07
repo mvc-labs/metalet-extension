@@ -12,12 +12,12 @@ import AssetLogo from '@/components/AssetLogo.vue'
 import { useBalanceQuery } from '@/queries/balance'
 import EmptyIcon from '@/assets/icons-v3/empty.svg'
 import Activities from './components/Activities.vue'
+import TickerList from './components/TickerList.vue'
 import FilterIcon from '@/assets/icons-v3/filter.svg'
 import SendPNG from '@/assets/icons-v3/send_detail.png'
 import TransferPNG from '@/assets/icons-v3/transfer.png'
 import SelectorIcon from '@/assets/icons-v3/selector.svg'
 import { getTags, BTCAsset, MVCAsset } from '@/data/assets'
-import ArrowDwonIcon from '@/assets/icons-v3/arrow_down.svg'
 import ReceivePNG from '@/assets/icons-v3/receive_detail.png'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -26,7 +26,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 const route = useRoute()
 const router = useRouter()
-const isShowAllTransferable = ref(false)
 
 if (!route.params.address) {
   router.go(-1)
@@ -82,12 +81,15 @@ const { isLoading: tickersLoading, data: tickersData } = useBRCTickerAseetQuery(
 
 const transferableList = computed(() => {
   if (tickersData.value) {
-    if (isShowAllTransferable.value) {
-      return tickersData.value?.transferableList
-    } else {
-      return tickersData.value?.transferableList.slice(0, 3)
-    }
+    return tickersData.value?.transferableList
   }
+})
+
+const transferableBalance = computed(() => {
+  if (tickersData.value?.tokenBalance) {
+    return Number(tickersData.value?.tokenBalance.transferableBalance)
+  }
+  return '--'
 })
 
 const availableBalanceSafe = computed(() => {
@@ -160,13 +162,6 @@ const toSend = () => {
 const toReceive = () => {
   router.push(`/wallet/receive?chain=${asset.value!.chain}`)
 }
-
-const toTransfer = () => {
-  const { contract } = asset.value!
-  if (contract === 'BRC-20') {
-    router.push({ name: 'transfer', params: { address: address.value, symbol: symbol.value } })
-  }
-}
 </script>
 
 <template>
@@ -195,10 +190,10 @@ const toTransfer = () => {
           <img :src="MintPNG" alt="Mint" />
           <span>Mint</span>
         </a>
-        <button @click="toTransfer" class="blue-primary-btn">
+        <a :href="`/wallet/transfer/${asset.symbol}/${address}`" class="blue-primary-btn">
           <img :src="TransferPNG" alt="Transfer" />
           <span>Transfer</span>
-        </button>
+        </a>
       </template>
       <template v-else>
         <button @click="toSend" v-if="asset.isNative" class="blue-light-btn">
@@ -216,7 +211,7 @@ const toTransfer = () => {
       <Tabs default-value="Transferable">
         <TabsList class="grid grid-cols-2">
           <TabsTrigger value="Transferable">
-            <span class="text-lg">{{ tickersData?.tokenBalance.transferableBalance || '--' }}</span>
+            <span class="text-lg">{{ transferableBalance }}</span>
             <span class="text-sm text-gray-primary">Transferable</span>
           </TabsTrigger>
           <TabsTrigger value="Available">
@@ -228,29 +223,7 @@ const toTransfer = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="Transferable">
-          <Loading text="Transferable Token Loading..." v-if="tickersLoading" />
-          <template v-else-if="transferableList?.length">
-            <div class="grid grid-cols-3 gap-x-2 gap-y-4">
-              <Ticker
-                :ticker="ticker.ticker"
-                :amount="ticker.amount"
-                :key="ticker.inscriptionId"
-                v-for="ticker in transferableList"
-                :inscriptionNumber="ticker.inscriptionNumber"
-              />
-            </div>
-            <div
-              v-if="!isShowAllTransferable"
-              @click="isShowAllTransferable = true"
-              class="mt-4 pt-3 border-t-2 border-gray-soft text-xs cursor-pointer flex items-center justify-center text-gray-primary gap-x-0.5"
-            >
-              <span>All</span>
-              <ArrowDwonIcon />
-            </div>
-          </template>
-          <div v-else class="pt-6 pb-8">
-            <EmptyIcon class="mx-auto" />
-          </div>
+          <TickerList :list="transferableList" :loading="tickersLoading" />
         </TabsContent>
         <TabsContent value="Available">
           <div v-if="availableBalanceUnSafe" class="grid grid-cols-3 gap-x-2 gap-y-4">

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { Loading,FlexBox } from '@/components'
 import { useRouter, useRoute } from 'vue-router'
 import { useInscribeInfoQuery } from '@/queries/inscribe'
 
@@ -15,11 +16,10 @@ function confirm() {
 </script>
 
 <template>
-  <div class="flex flex-col items-center pt-[30px] relative w-full h-full gap-y-4">
-    <div v-if="isLoading" class="text-gray-500 text-center font-bold">Order Info Loading...</div>
+  <div class="pt-7.5 relative w-full h-full gap-y-4">
+    <Loading v-if="isLoading" text="Order Info Loading..." />
     <template v-else-if="data">
-      <div class="flex flex-col items-center gap-[18px] w-full">
-        <div class="text-lg text-black-primary font-bold">Inscribe Success</div>
+      <FlexBox d="col" ai="center" :gap="6">
         <div class="w-[160px] h-[168px] rounded-md relative border border-[#1E2BFF] overflow-hidden">
           <div class="break-all p-2 flex h-[128px] items-center justify-center text-black-primary">
             {{ `{"p":"brc-20","op":"transfer","tick":"${symbol}","amt":"546"}` }}
@@ -35,7 +35,7 @@ function confirm() {
           <div>balance of BRC20 will be rereshed in</div>
           <div>a few minutes.</div>
         </div>
-      </div>
+      </FlexBox>
       <button
         @click="confirm"
         class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100 absolute bottom-4 left-0"

@@ -24,6 +24,7 @@ module.exports = {
         'blue-light': '#F3F3FF',
         'btn-blue': '#1E2BFF',
         'orange-primary': '#FF8F1F',
+        'slate-light': '#606266',
       },
       fontSize: {
         ss: ['0.8125rem', '1.125rem'],
@@ -43,6 +44,7 @@ module.exports = {
       },
       height: {
         15: '3.75rem',
+        18: '4.5rem',
       },
       lineHeight: {
         15: '3.75rem',

@@ -2,14 +2,17 @@
 import Decimal from 'decimal.js'
 import { ref, computed, Ref } from 'vue'
 import { type Psbt } from 'bitcoinjs-lib'
+import Ticker from './components/Ticker.vue'
 import { BtcWallet } from '@/lib/wallets/btc'
-import CopyIcon from '@/assets/icons/copy.svg'
+import Loading from '@/components/Loading.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
-import BTCRateList from './components/BTCRateList.vue'
+import CopyIcon from '@/assets/icons-v3/copy.svg'
+import LoadingIcon from '@/assets/icons-v3/loading.svg'
 import { prettifyBalanceFixed, shortestAddress } from '@/lib/formatters'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
 import { preInscribe, PreInscribe, getInscribeInfo } from '@/queries/inscribe'
+import { FlexBox, Divider, FeeRateSelector, Button, AssetLogo } from '@/components'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
 
 const route = useRoute()
@@ -33,6 +36,13 @@ const currentRateFee = ref<number | undefined>()
 
 const { data: tokenData } = useBRCTickerAseetQuery(address, symbol, {
   enabled: computed(() => !!address.value),
+})
+
+const availableBalance = computed(() => {
+  if (tokenData.value) {
+    return tokenData.value.tokenBalance.availableBalance
+  }
+  return '--'
 })
 
 const nextStep = ref(0)
@@ -178,138 +188,167 @@ function toSuceess() {
 </script>
 
 <template>
-  <div class="pt-8 h-full" v-if="asset">
+  <div class="h-full" v-if="asset">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
-    <div v-if="nextStep === 0" class="h-full relative">
-      <div class="flex items-end justify-between w-full text-black-primary">
-        <span class="text-xs">Available</span>
-        <span class="text-sm">
-          {{ (tokenData && tokenData.tokenBalance.availableBalance) || 0 }} {{ asset.symbol }}</span
-        >
-      </div>
-
-      <div class="self-stretch mt-3">
+    <div v-if="nextStep === 0" class="h-full space-y-6 relative">
+      <Ticker :ticker="asset.symbol" :amount="inscribeAmount || 0" :block="true" class="w-[104px] mx-auto" />
+      <Divider />
+      <div>
+        <FlexBox ai="center" jc="between">
+          <span class="text-sm">Available</span>
+          <span class="text-xs text-gray-primary"> {{ availableBalance }} {{ asset.symbol }} </span>
+        </FlexBox>
         <input
           min="0"
           type="number"
+          :max="availableBalance"
           v-model="inscribeAmount"
-          placeholder="Inscribe amount"
-          :max="tokenData?.tokenBalance.availableBalance || 0"
-          class="main-input w-full !rounded-xl !p-4 !text-xs"
+          class="mt-2 w-full rounded-lg p-3 text-xs border border-gray-soft focus:border-blue-primary focus:outline-none"
         />
-
-        <BTCRateList v-if="asset.chain === 'btc'" v-model:currentRateFee="currentRateFee" />
       </div>
+      <FeeRateSelector class="mt-6" v-model:currentRateFee="currentRateFee" />
 
-      <div
-        v-if="operationLock"
-        class="w-full py-3 text-center text-sm font-bold text-gray-500 absolute bottom-4 left-0"
-      >
-        Loading...
-      </div>
-      <button
-        v-else
+      <Button
+        type="primary"
         @click="popConfirm"
         :disabled="!currentRateFee || !inscribeAmount"
-        :class="!currentRateFee || !inscribeAmount ? 'opacity-50 cursor-not-allowed' : ''"
-        class="main-btn-bg w-full rounded-lg py-3 teFxt-sm font-bold text-sky-100 absolute bottom-4 left-0"
+        class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[246px] h-12"
+        :class="!currentRateFee || !inscribeAmount || operationLock ? 'opacity-50 cursor-not-allowed' : undefined"
       >
-        Next
-      </button>
+        <FlexBox ai="center" :gap="1" v-if="operationLock">
+          <LoadingIcon />
+          <span>Loading...</span>
+        </FlexBox>
+        <span v-else>Next</span>
+      </Button>
     </div>
 
-    <div v-else-if="nextStep === 1" class="text-black-primary relative h-full">
-      <div class="text-center text-3xl font-bold">{{ inscribeAmount }} {{ asset.symbol }}</div>
-      <div class="mt-[30px] text-sm w-full">Preview</div>
-      <div class="w-full h-[76px] rounded-sm bg-[#F5F5F5] mt-2 p-3 text-sm break-all">
-        {{ `{"p":"brc-20","op":"transfer","tick":"${asset.symbol}","amt":"${inscribeAmount}"}` }}
-      </div>
-      <div class="mt-8 space-y-5">
-        <div class="flex items-center justify-between">
-          <span>Payment Network Fee</span><span>{{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }}</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span>Need Amount</span><span>{{ prettifyBalanceFixed(inscribeOrder?.needAmount || 0, 'BTC', 8) }}</span>
-        </div>
-        <hr />
-        <div class="flex items-center justify-between">
-          <span>Total</span><span>{{ prettifyBalanceFixed(total || 0, 'BTC', 8) }}</span>
+    <div v-else-if="nextStep === 1" class="relative h-full space-y-4">
+      <FlexBox d="col" ai="center" class="space-y-4 py-1">
+        <AssetLogo :logo="asset.logo" :chain="asset.chain" :symbol="asset.symbol" type="network" />
+        <div class="text-center text-base">{{ inscribeAmount }} {{ asset.symbol }}</div>
+      </FlexBox>
+      <div class="space-y-2">
+        <div class="text-sm">Preview</div>
+        <div class="w-full h-[68px] rounded-lg bg-gray-secondary px-3 py-3.5 text-sm break-all">
+          {{ `{"p":"brc-20","op":"transfer","tick":"${asset.symbol}","amt":"${inscribeAmount}"}` }}
         </div>
       </div>
-      <button
+      <Divider />
+      <div class="mt-8 space-y-4 text-ss">
+        <FlexBox ai="center" jc="between">
+          <span class="label">Payment Network Fee</span>
+          <span>{{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }}</span>
+        </FlexBox>
+        <FlexBox ai="center" jc="between">
+          <span class="label">Need Amount</span>
+          <span>{{ prettifyBalanceFixed(inscribeOrder?.needAmount || 0, 'BTC', 8) }}</span>
+        </FlexBox>
+        <Divider />
+        <FlexBox ai="center" jc="between">
+          <span class="label">Total</span>
+          <span>{{ prettifyBalanceFixed(total || 0, 'BTC', 8) }}</span>
+        </FlexBox>
+      </div>
+      <Button
+        type="primary"
+        :loading="true"
         @click="toConfirm"
-        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100 absolute bottom-4 left-0"
+        :disabled="!currentRateFee || !inscribeAmount"
+        class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[246px] h-12"
+        :class="!currentRateFee || !inscribeAmount ? 'opacity-50 cursor-not-allowed' : undefined"
       >
         Next
-      </button>
+      </Button>
     </div>
 
-    <div v-if="nextStep === 2" class="text-black-primary h-full">
-      <div class="text-center text-base text-gray-primary">Spend Amount</div>
-      <div class="text-center text-3xl font-bold mt-3">{{ inscribeAmount }} {{ asset.symbol }}</div>
-      <div class="mt-3 text-center text-base text-gray-primary">
-        {{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }} (network fee)
+    <div v-else-if="nextStep === 2" class="relative h-full space-y-6">
+      <div class="space-y-0.5">
+        <div class="text-center text-2xl pt-2">{{ inscribeAmount }} {{ asset.symbol }}</div>
+        <div class="text-center text-sm text-gray-primary">
+          {{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }} (network fee)
+        </div>
       </div>
-      <div class="border-b mt-3 space-x-3 text-base">
-        <span
-          @click="changeTabIdx(0)"
-          class="inline-block pb-[2px] border-b-4 cursor-pointer"
-          :class="tabIdx === 0 ? 'border-[#141416] text-black-primary' : 'border-white text-gray-primary'"
-          >Data</span
-        >
-        <span
-          @click="changeTabIdx(1)"
-          class="inline-block pb-[2px] border-b-4 cursor-pointer"
-          :class="tabIdx === 1 ? 'border-[#141416] text-black-primary' : 'border-white text-gray-primary'"
-          >Hex</span
-        >
-      </div>
-      <div class="space-y-[18px]" v-show="tabIdx === 0">
-        <div class="space-y-2 rounded-md">
-          <div class="text-black-primary">Inputs</div>
-          <div v-for="utxo in inputUTXOs" class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
-            <span>{{ shortestAddress(utxo.address) }}</span
-            ><span>{{ prettifyBalanceFixed(utxo.value, 'BTC', 8) }}</span>
+
+      <div class="space-y-4">
+        <!-- TODO: replace tabs with shadcn -->
+        <div class="border-b mt-3 space-x-3 text-base">
+          <span
+            @click="changeTabIdx(0)"
+            class="inline-block pb-2 border-b-2 cursor-pointer"
+            :class="tabIdx === 0 ? 'border-blue-primary text-blue-primary' : 'border-white text-black-primary'"
+            >Data</span
+          >
+          <span
+            @click="changeTabIdx(1)"
+            class="inline-block pb-2 border-b-2 cursor-pointer"
+            :class="tabIdx === 1 ? 'border-blue-primary text-blue-primary' : 'border-white text-black-primary'"
+            >Hex</span
+          >
+        </div>
+        <div class="space-y-4 text-sm" v-show="tabIdx === 0">
+          <div class="space-y-2 rounded-md">
+            <div class="text-gray-primary">Inputs</div>
+            <FlexBox
+              ai="center"
+              jc="between"
+              v-for="utxo in inputUTXOs"
+              class="w-full px-3 py-3.5 bg-gray-secondary rounded-lg"
+            >
+              <span>{{ shortestAddress(utxo.address) }}</span
+              ><span>{{ prettifyBalanceFixed(utxo.value, 'BTC', 8) }}</span>
+            </FlexBox>
+          </div>
+          <div class="space-y-2 rounded-md">
+            <div class="text-gray-primary">Outputs</div>
+            <FlexBox
+              ai="center"
+              jc="between"
+              v-for="utxo in outputUTXOs"
+              class="w-full px-3 py-3.5 bg-gray-secondary rounded-lg"
+            >
+              <span>{{ shortestAddress(utxo.address) }}</span>
+              <span>{{ prettifyBalanceFixed(utxo.value, 'BTC', 8) }}</span>
+            </FlexBox>
+          </div>
+          <div class="space-y-2 rounded-md">
+            <div class="label">Network Fee</div>
+            <FlexBox class="w-full px-3 py-3.5 bg-gray-secondary rounded-lg">{{
+              prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8)
+            }}</FlexBox>
           </div>
         </div>
-        <div class="space-y-2 rounded-md">
-          <div class="text-black-primary">Outputs</div>
-          <div v-for="utxo in outputUTXOs" class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
-            <span>{{ shortestAddress(utxo.address) }}</span>
-            <span>{{ prettifyBalanceFixed(utxo.value, 'BTC', 8) }}</span>
+        <div class="space-y-[18px]" v-show="tabIdx === 1">
+          <div class="space-y-2 rounded-md">
+            <div class="label">Outputs</div>
+            <div class="w-full p-4 bg-gray-secondary h-48 rounded-md break-all overflow-y-scroll">
+              {{ psbtHex }}
+            </div>
           </div>
-        </div>
-        <div class="space-y-2 rounded-md">
-          <div class="text-black-primary">Network Fee</div>
-          <div class="w-full p-2 bg-[#F5F5F5]">{{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }}</div>
+          <FlexBox ai="center" jc="center" :gap="2" class="cursor-pointer hover:text-blue-primary">
+            <span class="text-sm" @click="copyHex">Copy psbt transaction data</span>
+            <CopyIcon />
+          </FlexBox>
         </div>
       </div>
-      <div class="space-y-[18px]" v-show="tabIdx === 1">
-        <div class="space-y-2 rounded-md">
-          <div class="text-black-primary">Outputs</div>
-          <div class="w-full px-1,5 p-3 bg-[#F5F5F5] h-40 rounded-md overflow-scroll break-all">
-            {{ psbtHex }}
-          </div>
-        </div>
-        <div class="space-x-2.5 flex items-center justify-center">
-          <CopyIcon :class="copied ? 'text-blue-500' : ''" />
-          <span class="text-sm" @click="copyHex">Copy psbt transaction data</span>
-        </div>
-      </div>
-      <div class="w-full left-0 flex items-center space-x-4 mt-4 pb-4 justify-center">
-        <button
-          @click="cancel"
-          class="border w-[133px] rounded-lg py-3 text-sm font-bold text-black-primary"
-          style="border-image: 'linear-gradient(105deg, #72F5F6 4%, #171AFF 94%) 1'"
+
+      <FlexBox ai="center" jc="center" :gap="2" :class="[tabIdx === 1 ? 'absolute bottom-4' : 'pb-6', 'w-full']">
+        <Button type="light" @click="cancel" class="w-[119px] h-12">Cancel</Button>
+        <Button type="primary" @click="send" class="w-[119px] h-12" :class="operationLock ? 'opacity-50' : undefined">
+          <FlexBox ai="center" :gap="1" v-if="operationLock">
+            <LoadingIcon />
+            <span>Loading...</span>
+          </FlexBox>
+          <span v-else>Send</span></Button
         >
-          Cancel
-        </button>
-        <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm font-bold text-sky-100">
-          Comfirm
-        </button>
-      </div>
+      </FlexBox>
     </div>
   </div>
+  <Loading v-else text="Asset Loading..." />
 </template>
 
-<style lang="css" scoped></style>
+<style lang="css" scoped>
+.label {
+  @apply text-gray-primary text-sm;
+}
+</style>
