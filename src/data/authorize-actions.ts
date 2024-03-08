@@ -16,6 +16,7 @@ import * as ConnectBTC from '../lib/actions/btc/connect'
 import * as SignBTCPsbt from '../lib/actions/btc/sign-psbt'
 import * as SignBTCMessage from '../lib/actions/btc/sign-message'
 import * as Inscribe from '../lib/actions/btc/inscribe'
+import * as BTCTransfer from '../lib/actions/btc/transfer'
 
 function doNothing() { }
 
@@ -145,6 +146,15 @@ export default {
     title: 'Connect Account',
     description: ['Connect Account'],
     process: ConnectBTC.process,
+    estimate: doNothing,
+    closeAfterProcess: true,
+  },
+  // BTC
+  BTCTransfer: {
+    name: '',
+    title: '',
+    description: [''],
+    process: BTCTransfer.process,
     estimate: doNothing,
     closeAfterProcess: true,
   },

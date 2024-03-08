@@ -120,16 +120,12 @@ export class BtcWallet {
     }
 
     let total = getTotalSatoshi(utxos)
-    console.log({ total })
 
     let psbt = await buildPsbt(utxos, total.minus(546))
-    console.log({ psbt })
 
     let fee = calculateFee(psbt, feeRate)
-    console.log({ fee })
 
     psbt = await buildPsbt(utxos, total.minus(fee))
-    console.log('final', { psbt })
 
     return await this.broadcast(psbt)
   }

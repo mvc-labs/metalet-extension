@@ -25,6 +25,7 @@ import SignMessage from './SignMessage.vue'
 import SignBTCMessage from './SignBTCMessage.vue'
 import Merge from './Merge.vue'
 import Inscribe from './Inscribe.vue'
+import BTCTransfer from './BTCTransfer.vue'
 
 // 从query中获取数据
 const route = useRoute()
@@ -190,6 +191,7 @@ const cancelAction = async () => {
       <SignMessage v-if="actionName === 'SignMessage'" :params="params" />
       <SignBTCMessage v-if="actionName === 'SignBTCMessage'" :params="params" />
       <Inscribe v-if="actionName === 'Inscribe'" :params="params" />
+      <BTCTransfer v-if="actionName === 'BTCTransfer'" :params="params" />
     </div>
 
     <!-- buttons -->

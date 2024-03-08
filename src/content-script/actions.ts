@@ -208,6 +208,7 @@ export const btcKeys: Omit<Keys, 'event'> = {
   query: [
     { name: 'getBalance', action: 'GetBTCBalance' },
     { name: 'getAddress', action: 'GetBTCAddress' },
+    { name: 'getAddresType', action: 'GetBTCAddressType' },
     { name: 'getPublicKey', action: 'GetBTCPublicKey' },
     { name: 'getUtxos', action: 'GetBTCUtxos' },
     { name: 'pushPsbt', action: 'PushPsbt' },
@@ -217,8 +218,7 @@ export const btcKeys: Omit<Keys, 'event'> = {
     { name: 'signPsbt', action: 'SignBTCPsbt' },
     { name: 'signMessage', action: 'SignBTCMessage' },
     { name: 'inscribe', action: 'Inscribe' },
+    { name: 'transfer', action: 'BTCTransfer' },
   ],
-  inscribe: [
-    { name: 'inscribeTransfer', action: 'InscribeTransfer' }
-  ]
+  inscribe: [{ name: 'inscribeTransfer', action: 'InscribeTransfer' }],
 }
