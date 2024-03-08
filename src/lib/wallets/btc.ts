@@ -1,4 +1,3 @@
-import { Buffer } from 'buffer'
 import Decimal from 'decimal.js'
 import { raise } from '../helpers'
 import { getBtcNetwork } from '../network'
@@ -91,6 +90,48 @@ export class BtcWallet {
     psbt = await buildPsbt(selecedtUTXOs, total.minus(amount).minus(fee))
     return { fee, psbt }
     // return await this.broadcast(psbt)
+  }
+
+  async merge(feeRate: number) {
+    const btcNetwork = await getBtcNetwork()
+    const address = await getAddress('btc')
+    const addressType = await getAddressType('btc')
+    const payment = await createPayment(addressType)
+    const utxos = (await getBtcUtxos(address)) || []
+
+    const buildPsbt = async (utxos: UTXO[], amount: Decimal) => {
+      const psbt = new Psbt({ network: btcNetwork }).addOutput({
+        value: amount.toNumber(),
+        address: address,
+      })
+
+      for (const utxo of utxos) {
+        try {
+          const payInput = await createPayInput({ utxo, payment, addressType })
+          psbt.addInput(payInput)
+        } catch (e: any) {
+          throw new Error(e.message)
+        }
+      }
+
+      const signer = await getSigner('btc')
+      psbt.signAllInputs(signer).finalizeAllInputs()
+      return psbt
+    }
+
+    let total = getTotalSatoshi(utxos)
+    console.log({ total })
+
+    let psbt = await buildPsbt(utxos, total.minus(546))
+    console.log({ psbt })
+
+    let fee = calculateFee(psbt, feeRate)
+    console.log({ fee })
+
+    psbt = await buildPsbt(utxos, total.minus(fee))
+    console.log('final', { psbt })
+
+    return await this.broadcast(psbt)
   }
 
   async sendBRC(recipient: string, utxo: UTXO, feeRate: number) {
@@ -202,9 +243,6 @@ async function getPsbtAndSelectUtxos(recipient: string, amount: Decimal, feeRate
   const addressType = await getAddressType('btc')
   const payment = await createPayment(addressType)
   const utxos = (await getBtcUtxos(address)) || []
-  utxos.sort((a, b) => b.satoshis - a.satoshis)
-
-  console.log({ utxos })
 
   const buildPsbt = async (selectedUtxos: UTXO[], change: Decimal) => {
     const psbt = new Psbt({ network: btcNetwork }).addOutput({
@@ -272,12 +310,6 @@ const selectUTXOs = (utxos: UTXO[], targetAmount: Decimal): UTXO[] => {
   return selectedUtxos
 }
 
-function getWitnessUtxo(out: any): any {
-  delete out.address
-  out.script = Buffer.from(out.script, 'hex')
-  return out
-}
-
 function calculateFee(psbt: Psbt, feeRate: number): number {
   const tx = psbt.extractTransaction()
 
@@ -299,25 +331,26 @@ async function createPayInput({
   utxo: UTXO
   addressType: string
 }): Promise<any> {
-  const rawTx = await fetchBtcTxHex(utxo.txId)
-  const tx = Transaction.fromHex(rawTx)
-
   const payInput: any = {
     hash: utxo.txId,
     index: utxo.outputIndex,
   }
 
   if (['P2SH-P2WPKH', 'P2WPKH'].includes(addressType)) {
-    payInput['witnessUtxo'] = getWitnessUtxo(tx.outs[utxo.outputIndex])
+    payInput['witnessUtxo'] = {
+      script: payment.output,
+      value: utxo.satoshis,
+    }
   }
 
   if (['P2TR'].includes(addressType)) {
     payInput['tapInternalKey'] = await getXOnlyPublicKey()
-
     payInput['witnessUtxo'] = { value: utxo.satoshis, script: payment.output }
   }
 
   if (['P2PKH'].includes(addressType)) {
+    const rawTx = await fetchBtcTxHex(utxo.txId)
+    const tx = Transaction.fromHex(rawTx)
     payInput['nonWitnessUtxo'] = tx.toBuffer()
   }
 

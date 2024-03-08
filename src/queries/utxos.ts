@@ -72,7 +72,14 @@ export interface UnisatUTXO {
 
 export async function getBtcUtxos(address: string): Promise<UTXO[]> {
   const net = getNet()
-  return metaletApiV3<UTXO[]>('/address/btc-utxo').get({ net, address, unconfirmed: '1' })
+  const utxos = (await metaletApiV3<UTXO[]>('/address/btc-utxo').get({ net, address, unconfirmed: '1' })) || []
+
+  return utxos.sort((a, b) => {
+    if (a.confirmed !== b.confirmed) {
+      return b.confirmed ? 1 : -1
+    }
+    return a.satoshis - b.satoshis
+  })
 }
 
 // export async function getInscriptionUtxos(inscriptions: Inscription[]): Promise<UTXO[]> {

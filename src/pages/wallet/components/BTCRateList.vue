@@ -41,7 +41,7 @@ watch(
         v-for="(rate, index) in rateList"
         @click="selectRateFee(rate.feeRate, index)"
         :class="index === selectedIndex ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-        class="flex flex-col items-center justify-center rounded-md border cursor-pointer h-[100px]"
+        class="flex flex-col items-center justify-center rounded-md border cursor-pointer aspect-square"
       >
         <div class="text-xs">{{ rate.title }}</div>
         <div class="mt-1.5 text-sm font-bold">{{ rate.feeRate }} sat/vB</div>
@@ -51,7 +51,7 @@ watch(
       <div
         @click="selectCustom()"
         :class="isCustom ? 'border-[#1E2BFF]' : 'border-[#D8D8D8]'"
-        class="flex flex-col items-center justify-center rounded-md border cursor-pointer h-[100px]"
+        class="flex flex-col items-center justify-center rounded-md border cursor-pointer aspect-square"
       >
         <div>Custom</div>
       </div>

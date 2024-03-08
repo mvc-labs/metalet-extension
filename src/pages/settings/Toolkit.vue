@@ -4,6 +4,10 @@ import { ChevronRightIcon } from '@heroicons/vue/20/solid'
 
 const router = useRouter()
 
+const toBTCMerge = () => {
+  router.push('/settings/toolkit/btc-merge')
+}
+
 const toSpaceMerge = () => {
   router.push('/settings/toolkit/space-merge')
 }
@@ -13,6 +17,19 @@ const toSpaceMerge = () => {
   <div class="space-y-8 pt-4 text-sm">
     <!-- security -->
     <div class="space-y-2">
+      <div class="text-base font-bold">BTC</div>
+      <div class="divide-y divide-gray-100">
+        <div class="setting-item group cursor-pointer" @click="toBTCMerge">
+          <div class="text-gray-500 group-hover:underline">BTC Merge</div>
+          <div class="">
+            <ChevronRightIcon class="link-icon" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-2">
+      <div class="text-base font-bold">MVC</div>
       <div class="divide-y divide-gray-100">
         <div class="setting-item group cursor-pointer" @click="toSpaceMerge">
           <div class="text-gray-500 group-hover:underline">Space Merge</div>

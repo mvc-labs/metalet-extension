@@ -316,6 +316,15 @@ const routes = [
     },
   },
   {
+    path: '/settings/toolkit/btc-merge',
+    component: () => import('./pages/settings/components/BTCMerge.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'BTC Merge',
+      noFooter: false,
+    },
+  },
+  {
     path: '/settings/toolkit/space-merge',
     component: () => import('./pages/settings/components/SpaceMerge.vue'),
     meta: {
