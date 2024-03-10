@@ -3,13 +3,14 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { type Account, getCurrentAccount } from '@/lib/account'
+// import { encrypt } from '@/lib/crypto';
 
 const router = useRouter()
 
 const mnemonic = ref('')
 const isValid = ref(true)
 
-const account = ref<Account | null>(null)
+const account = ref<Account | undefined>()
 getCurrentAccount().then((acc) => {
   account.value = acc
 })
@@ -22,13 +23,17 @@ const verify = async () => {
 
   // 检查输入的助记词是否正确
   const mnemonicStr = mnemonic.value
+  // if (encrypt(mnemonicStr) !== account.value!.mnemonic) {
+  //   isValid.value = false
+  //   return
+  // }
   if (mnemonicStr !== account.value!.mnemonic) {
     isValid.value = false
     return
   }
 
   // 跳转至后续
-  router.push('/wallet/create-success')
+  router.push('/wallet/init-service')
 }
 </script>
 
@@ -51,7 +56,7 @@ const verify = async () => {
 
     <!-- buttons -->
     <div class="mt-24 grid grid-cols-2 gap-x-2">
-      <button class="rounded-md border border-primary-blue py-4 text-base leading-none" @click="router.back()">
+      <button class="rounded-md border border-blue-primary py-4 text-base leading-none" @click="router.back()">
         Back
       </button>
       <button class="gradient-bg rounded-md py-4 text-base leading-none text-white" @click="verify">Verify</button>

@@ -1,31 +1,46 @@
 <script lang="ts" setup>
-import { ComputedRef, computed, ref } from 'vue'
+import { toTx } from '@/lib/helpers'
+import { isOfficialNft } from '@/lib/nft'
+import { getBrowserHost } from '@/lib/host'
+import { parseMetaFile } from '@/lib/metadata'
+import { useOneNftQuery, useMetacontractsQuery } from '@/queries/nfts'
 import { useRoute, useRouter } from 'vue-router'
+import { ComputedRef, computed, ref } from 'vue'
+import { useOneActivityQuery } from '@/queries/activities'
+import { useCollectionInfoQuery, useNftInfoQuery } from '@/queries/metadata'
+import NftDetailAboutCollection from './components/NftDetailAboutCollection.vue'
+import { prettifyTimestamp, prettifyTxId, prettifyTokenGenesis } from '@/lib/formatters'
 import {
   CheckBadgeIcon,
   ClipboardDocumentCheckIcon,
   ClipboardDocumentListIcon,
   ArrowTopRightOnSquareIcon,
 } from '@heroicons/vue/24/solid'
+import { getAddress } from '@/lib/account'
 
-import { useOneNftQuery } from '@/queries/nfts'
-import { useCollectionInfoQuery, useNftInfoQuery } from '@/queries/metadata'
-import { useOneActivityQuery } from '@/queries/activities'
-import { parseMetaFile } from '@/lib/metadata'
-import { prettifyTimestamp, prettifyTxId, prettifyTokenGenesis } from '@/lib/formatters'
-import { toTx } from '@/lib/helpers'
-import { isOfficialNft } from '@/lib/nft'
-import { getBrowserHost } from '@/lib/host'
-
-import NftDetailAboutCollection from './components/NftDetailAboutCollection.vue'
-
+const route = useRoute()
 const router = useRouter()
+
 const { codehash, genesis, tokenIndex } = defineProps<{
   codehash: string
   genesis: string
   tokenIndex: number
 }>()
-const route = useRoute()
+
+const address = ref()
+
+getAddress('mvc').then((_address) => {
+  address.value = _address
+})
+
+const { data } = useMetacontractsQuery({ address, codehash: ref(codehash), genesis: ref(genesis) })
+
+const infoDetail = computed(() => {
+  if (data.value?.length) {
+    return data.value[0]
+  }
+})
+
 const { meta_txid: txid, meta_output_index: outputIndex } = route.query as {
   meta_txid: string
   meta_output_index: string
@@ -68,11 +83,6 @@ const { data: activity, isLoading: isLoadingActivity } = useOneActivityQuery(act
   enabled: computed(() => !!nft.value?.txid),
 })
 
-const genesisTxid = computed(() => nftInfo.value?.genesisTxid) as ComputedRef<string>
-const { data: genesisTx, isLoading: isLoadingGenesisTx } = useOneActivityQuery(genesisTxid, {
-  enabled: computed(() => !!nftInfo.value?.genesisTxid),
-})
-
 const toTransferNft = () => {
   router.push(`/nfts/transfer-nft/${codehash}/${genesis}/${tokenIndex}`)
 }
@@ -92,6 +102,15 @@ const toCollection = () => {
 
     <!-- info -->
     <div class="mt-8">
+      <button
+        class="flex cursor-pointer items-center gap-1 text-sm text-blue-600 hover:underline"
+        v-if="infoDetail"
+        @click="toCollection"
+      >
+        {{ infoDetail.seriesName }}
+        <CheckBadgeIcon class="h-5 w-5 text-blue-500" v-if="isOfficialNft(nft.genesis)" />
+      </button>
+
       <button
         class="flex cursor-pointer items-center gap-1 text-sm text-blue-600 hover:underline"
         v-if="collectionInfo"

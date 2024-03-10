@@ -120,7 +120,7 @@ console.log({ tx: TxComposer.deserialize(currentTransactionInfo.value.txComposer
 
     <ul class="mt-6 space-y-4">
       <li v-for="access in action.description" class="flex items-start gap-x-2">
-        <CheckBadgeIcon class="h-6 w-6 text-primary-blue shrink-0" />
+        <CheckBadgeIcon class="h-6 w-6 text-blue-primary shrink-0" />
         <div class="text-sm text-gray-700">{{ access }}</div>
       </li>
     </ul>
@@ -128,7 +128,7 @@ console.log({ tx: TxComposer.deserialize(currentTransactionInfo.value.txComposer
     <!-- a button to view detail -->
     <div class="mt-2 flex items-center justify-center">
       <button
-        class="underline decoration-primary-blue text-gray-700 px-4 py-2 mx-auto font-bold decoration underline-offset-4 hover:underline-offset-2 transition-all duration-300"
+        class="underline decoration-blue-primary text-gray-700 px-4 py-2 mx-auto font-bold decoration underline-offset-4 hover:underline-offset-2 transition-all duration-300"
         @click="isShowingDetails = true"
       >
         View Transaction Details ({{ params.transactions.length }})

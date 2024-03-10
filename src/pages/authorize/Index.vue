@@ -150,7 +150,7 @@ const cancelAction = async () => {
           <div class="label flex items-center gap-x-2">
             <div class="">Transaction ID</div>
             <button @click="getHostAndToTx(txid)" class="h-5 w-5">
-              <ArrowTopRightOnSquareIcon class="h-5 w-5 hover:text-primary-blue" />
+              <ArrowTopRightOnSquareIcon class="h-5 w-5 hover:text-blue-primary" />
             </button>
           </div>
           <div class="value break-all">{{ txid }}</div>
@@ -197,7 +197,7 @@ const cancelAction = async () => {
     <!-- buttons -->
     <div class="mt-4 grid grid-cols-2 gap-x-4 self-stretch">
       <button
-        class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-500"
+        class="w-full rounded-lg border border-blue-primary bg-white py-3 text-sm font-bold text-gray-500"
         @click="cancelAction"
       >
         Cancel

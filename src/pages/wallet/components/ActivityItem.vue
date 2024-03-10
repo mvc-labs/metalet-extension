@@ -52,7 +52,9 @@ const toActivityTx = async () => {
 </script>
 
 <template>
-  <div class="-mx-2 space-y-3 rounded-md bg-gray-100 px-2 py-4">
+  <div class="w-full py-3">
+<AssetLogo />
+
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-x-2 text-green-500" v-if="isConfirmed">
         <div class="h-2 w-2 rounded-full bg-green-500"></div>

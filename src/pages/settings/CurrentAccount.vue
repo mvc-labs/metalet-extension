@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import { getCurrentAccount, getAddress, type Account } from '@/lib/account'
 
 const address = ref<string>('')
-const account = ref<Account | null>(null)
+const account = ref<Account | undefined>()
 
 const router = useRouter()
 

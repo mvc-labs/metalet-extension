@@ -1,19 +1,18 @@
 <script lang="ts" setup>
-import { ref, computed, Ref } from 'vue'
-import { useRouter } from 'vue-router'
-
-import { getAssetsDisplay } from '@/lib/assets'
-import { allAssets } from '@/data/assets'
 import { Chain } from '@/lib/account'
+import { allAssets } from '@/data/assets'
 import { getAddress } from '@/lib/account'
-
+import { getAssetsDisplay } from '@/lib/assets'
+import { ref, computed, Ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import AssetItem from './components/AssetItem.vue'
+import SearchInput from '@/components/SearchInput.vue'
 
-const props = defineProps<{
-  purpose: 'receive' | 'send'
-}>()
+const assetSearch = ref()
 
+const route = useRoute()
 const router = useRouter()
+const { purpose } = route.params
 
 const mvcAddress = ref<string>('')
 const btcAddress = ref<string>('')
@@ -42,11 +41,17 @@ getAssetsDisplay().then((display) => {
   assetsDisplay.value = display
 })
 const displayingAssets = computed(() => {
-  return assets.value.filter((asset) => assetsDisplay.value.includes(asset.symbol))
+  return assets.value.filter(
+    (asset) =>
+      assetsDisplay.value.includes(asset.symbol) &&
+      (!assetSearch.value ||
+        asset.symbol.toLocaleLowerCase().includes(assetSearch.value) ||
+        asset.tokenName.toLocaleLowerCase().includes(assetSearch.value))
+  )
 })
 
 function selectAsset(asset: any) {
-  switch (props.purpose) {
+  switch (purpose) {
     case 'receive':
       router.push(`/wallet/receive?chain=${asset.chain}`)
       break
@@ -64,14 +69,15 @@ function selectAsset(asset: any) {
 </script>
 
 <template>
-  <div class="space-y-2 divide-y divide-gray-100 text-black">
+  <div class="pt-2 space-y-2">
+    <SearchInput v-model:assetSearch="assetSearch" />
     <AssetItem
-      v-for="asset in displayingAssets"
-      v-if="btcAddress && mvcAddress"
-      :key="asset.symbol"
       :asset="asset"
-      :address="selectAddress(asset.chain)"
+      :key="asset.symbol"
       @click="selectAsset(asset)"
+      v-if="btcAddress && mvcAddress"
+      v-for="asset in displayingAssets"
+      :address="selectAddress(asset.chain)"
     />
   </div>
 </template>

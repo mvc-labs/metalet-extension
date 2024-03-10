@@ -2,5 +2,5 @@
 
 interface Window {
   metaidwallet: any
-  browser: any
+  browser: import('webextension-polyfill').Browser
 }

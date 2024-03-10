@@ -3,9 +3,7 @@ import { ref } from 'vue'
 import BRCTokenList from './BRCTokenList.vue'
 import MetaIDPinList from './MetaIDPinList.vue'
 import { useRoute, useRouter } from 'vue-router'
-import BtcLogoImg from '@/assets/images/btc-logo.svg?url'
 import AccountItem from '../accounts/components/Item.vue'
-import SpaceLogoImg from '@/assets/images/space-logo.svg?url'
 import { getCurrentAccount, type Account } from '@/lib/account'
 import MvcCollectionPanel from './components/MvcCollectionPanel.vue'
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
@@ -25,7 +23,7 @@ const selectedNFT = ref(nfts[0])
 const route = useRoute()
 const router = useRouter()
 
-const account = ref<Account | null>(null)
+const account = ref<Account | undefined>()
 getCurrentAccount().then((acc) => {
   account.value = acc
 })
@@ -45,7 +43,7 @@ function changeTab(index: number) {
 
 <template>
   <!-- 账号信息 -->
-  <AccountItem :account="account" :current-account="account" v-if="account" :show-network="true" class="mb-4 -mt-4" />
+  <AccountItem :account="account" :current-account="account" v-if="account" :show-network="true" class="mb-4" />
 
   <div class="relative">
     <div :class="['absolute right-0 z-10', selectedTab === 0 ? '' : 'hidden']">
@@ -88,7 +86,7 @@ function changeTab(index: number) {
       </TabList>
       <TabPanels class="mt-8">
         <!-- <TabPanel>
-          <div class="text-[#909399] mt-[58px] text-center">No collectibles yet</div>
+          <div class="text-gray-primary mt-[58px] text-center">No collectibles yet</div>
         </TabPanel> -->
         <TabPanel>
           <MvcCollectionPanel v-if="selectedNFT.name === 'MetaContract'" />

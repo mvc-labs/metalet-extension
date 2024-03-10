@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
+import Loading from '@/components/Loading.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
+import TickerList from './components/TickerList.vue'
 import { useBRCTickerAseetQuery } from '@/queries/btc'
+import { FlexBox, Divider, Button } from '@/components'
 
 const route = useRoute()
 const router = useRouter()
@@ -31,45 +34,40 @@ const toInscribe = () => {
 </script>
 
 <template>
-  <div class="flex flex-col pt-[30px] h-full" v-if="tickersData">
+  <Loading :text="`${symbol} Transfer info Loading...`" v-if="isLoading" />
+  <FlexBox d="col" class="pt-1" :gap="4" v-else-if="tickersData">
     <div class="flex flex-col gap-3">
-      <div class="text-[#909399] text-base">Transfer amount</div>
-      <div class="text-black-primary font-bold text-lg">
-        {{ tickersData.tokenBalance.transferableBalance }} {{ symbol }}
-      </div>
-    </div>
-    <div class="flex flex-col gap-3 mt-[30px]">
-      <div class="text-[#909399] text-base">TRANSFER Inscriptions ({{ tickersData.transferableList.length }})</div>
-      <div class="grid grid-cols-3 gap-2 w-full mt-3">
-        <div
-          :key="ticker.inscriptionId"
-          v-for="ticker in tickersData.transferableList"
-          @click="toSendBRC20(ticker.inscriptionId, Number(ticker.amount))"
-          class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative cursor-pointer"
-        >
-          <div class="mt-2.5 text-[#909399] text-sm">{{ ticker.ticker }}</div>
-          <div class="mt-3 text-black-primary text-lg font-bold truncate">{{ ticker.amount }}</div>
-          <div
-            class="text-white text-xs bg-[#1E2BFF] rounded-b-md absolute bottom-0 w-full text-center pt-[5px] pb-[4px]"
+      <div class="text-sm">Transfer Amount</div>
+      <FlexBox d="col" class="p-4 border border-gary-soft rounded-lg">
+        <FlexBox ai="center" jc="between" class="w-full">
+          <span class="text-xl">{{ tickersData.tokenBalance.transferableBalance }} {{ symbol }}</span>
+          <!-- TODO: select all -->
+          <button class="text-xs text-blue-primary cursor-not-allowed" disabled>Select All</button>
+        </FlexBox>
+        <Divider class="border-gray-soft my-4" />
+        <FlexBox d="col" :gap="4">
+          <span class="text-sm text-slate-light"
+            >Transfer Inscriptions ({{ tickersData.transferableList.length }})</span
           >
-            <span v-if="ticker.inscriptionNumber === -1">Uncomfirmed</span>
-            <span v-else>#{{ ticker.inscriptionNumber }}</span>
-          </div>
-        </div>
-      </div>
+          <!-- TODO: select multiple-->
+          <TickerList :loading="isLoading" :list="tickersData.transferableList" :clickEvent="toSendBRC20" />
+        </FlexBox>
+      </FlexBox>
     </div>
-    <div
-      @click="toInscribe"
-      class="border border-[#D8D8D8] rounded-lg flex flex-col items-center justify-center gap-3 mt-[30px] py-[18px] cursor-pointer"
-    >
-      <div class="text-black-primary text-center text-lg font-bold">Inscribe TRANSFER</div>
-      <div class="text-[#909399] text-center text-lg">
+    <div>
+      <div class="text-sm">Inscribe Transfer</div>
+      <div class="text-gray-primary text-xs">You have to inscribe a TRANSFER inscription first.</div>
+      <FlexBox
+        ai="center"
+        jc="center"
+        class="bg-gray-secondary text-sm rounded-md h-12 mt-3 cursor-pointer"
+        @click="toInscribe"
+      >
         Available {{ tickersData.tokenBalance.availableBalance }} {{ symbol }}
-      </div>
+      </FlexBox>
     </div>
-    <div class="mt-2 text-[#909399] text-sm text-center">
-      * To send BRC-20, you have to inscribe a TRANSFER inscription first
-    </div>
-  </div>
-  <div v-else-if="isLoading" class="text-center text-sm font-bold text-gray-500">BRC20 Asset Loading...</div>
+    <!-- <div class="w-full pt-0.5">
+      <Button class="mx-auto my-6">Next</Button>
+    </div> -->
+  </FlexBox>
 </template>

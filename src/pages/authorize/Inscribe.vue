@@ -94,7 +94,7 @@ const copy = (txHex: string) => {
 
     <div class="mt-2 flex items-center justify-center" v-else>
       <button
-        class="underline decoration-primary-blue text-gray-700 px-4 py-2 mx-auto font-bold decoration underline-offset-4 hover:underline-offset-2 transition-all duration-300"
+        class="underline decoration-blue-primary text-gray-700 px-4 py-2 mx-auto font-bold decoration underline-offset-4 hover:underline-offset-2 transition-all duration-300"
         @click="isShowingDetails = true"
       >
         View Transaction Details

@@ -7,10 +7,11 @@ import passwordManager from '@/lib/password'
 import { type Account, getCurrentAccount } from '@/lib/account'
 
 import PasswordImg from '@/assets/images/password.svg?url'
+// import { decryptMnemonic } from '@/lib/crypto'
 
 const router = useRouter()
 
-const account = ref<Account | null>(null)
+const account = ref<Account | undefined>()
 getCurrentAccount().then((acc) => {
   account.value = acc
 })
@@ -22,6 +23,7 @@ const password = ref('')
 const failed = ref(false)
 
 const isCoveredMne = ref(true)
+// const mne = computed(() => decrypt(account.value?.mnemonic))
 const mne = computed(() => account.value?.mnemonic)
 
 // 按钮
@@ -125,7 +127,7 @@ const next = async () => {
 
     <!-- buttons -->
     <div class="grid grid-cols-2 gap-x-2">
-      <button class="rounded-md border border-primary-blue py-4 text-base leading-none" @click="back">Back</button>
+      <button class="rounded-md border border-blue-primary py-4 text-base leading-none" @click="back">Back</button>
       <button
         class="gradient-bg rounded-md py-4 text-base leading-none text-white"
         :class="!password && 'opacity-50 saturate-50'"

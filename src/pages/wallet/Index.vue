@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import Balance from './components/Balance.vue'
-import AssetList from './components/AssetList.vue'
-import AccountItem from '../accounts/components/Item.vue'
+import AccountHeader from './AccountHeader.vue'
+import AssetTabs from './components/AssetTabs.vue'
 import { getCurrentAccount, type Account } from '@/lib/account'
 
 const currentAccount = ref<Account>()
@@ -14,18 +14,11 @@ getCurrentAccount().then((acc) => {
 </script>
 
 <template>
-  <div class="-mt-4 nicer-scrollbar">
-    <!-- Account Info -->
-    <AccountItem
-      :show-network="true"
-      v-if="currentAccount"
-      :account="currentAccount"
-      :current-account="currentAccount"
-    />
+  <div class="nicer-scrollbar space-y-6">
+    <AccountHeader v-if="currentAccount" :account="currentAccount" />
 
     <Balance />
 
-    <!-- Asset List -->
-    <AssetList />
+    <AssetTabs />
   </div>
 </template>

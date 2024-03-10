@@ -15,7 +15,7 @@ const props = defineProps<{
   <h3 class="text-base font-bold">{{ action.title }}</h3>
 
   <div class="mt-8 flex items-start gap-x-2">
-    <CheckBadgeIcon class="h-6 w-6 text-primary-blue" />
+    <CheckBadgeIcon class="h-6 w-6 text-blue-primary" />
     <div class="text-sm text-gray-700">{{ action.description }}</div>
   </div>
 

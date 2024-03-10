@@ -52,7 +52,7 @@ action
 
     <!-- additional -->
     <div class="text-sm text-gray-500">
-      Estimated Fee: <span class="text-primary-blue">{{ fee }} sats</span>
+      Estimated Fee: <span class="text-blue-primary">{{ fee }} sats</span>
     </div>
   </ul>
 </template>

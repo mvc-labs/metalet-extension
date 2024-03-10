@@ -34,7 +34,7 @@ watch(
 <template>
   <!-- fee rate -->
   <div v-if="!rateLoading && rateList">
-    <div class="text-[#909399] mt-[30px] text-sm">Fee Rate</div>
+    <div class="text-gray-primary mt-[30px] text-sm">Fee Rate</div>
 
     <div class="grid grid-cols-3 gap-2 text-xs mt-1.5 text-black-primary">
       <div

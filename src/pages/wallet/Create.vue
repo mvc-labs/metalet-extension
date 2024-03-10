@@ -1,15 +1,16 @@
 <script lang="ts" setup>
 import { Ref, computed, ref } from 'vue'
 import { mvc } from 'meta-contract'
-import { EyeIcon } from '@heroicons/vue/24/solid'
+import useStorage from '@/lib/storage'
 import { useRouter } from 'vue-router'
-
 import { addAccount } from '@/lib/account'
+import { EyeIcon } from '@heroicons/vue/24/solid'
+import { hasServiceNetwork } from '@/lib/network'
+import LockIcon from '@/assets/icons/lock.svg?component'
 import { deriveAllAddresses, type AddressType } from '@/lib/bip32-deriver'
 
-import LockIcon from '@/assets/icons/lock.svg?component'
-
 const router = useRouter()
+const storage = useStorage()
 
 const words: Ref<string[]> = ref(Array(12).fill(''))
 const wordsDisplay = computed(() => words.value.join(' '))
@@ -57,7 +58,12 @@ const saveAccount = async (backup: boolean) => {
     await addAccount(account)
 
     if (!backup) {
-      router.push('/wallet/create-success')
+      const flag = await hasServiceNetwork()
+      if (flag) {
+        router.push('/wallet/create-success')
+      } else {
+        router.push('/wallet/init-service')
+      }
     } else {
       router.push('/wallet/check-backup')
     }
@@ -101,7 +107,7 @@ const saveAccount = async (backup: boolean) => {
 
     <!-- buttons -->
     <div class="mt-24 grid grid-cols-2 gap-x-2">
-      <button class="rounded-md border border-primary-blue py-4 text-base leading-none" @click="saveAccount(false)">
+      <button class="rounded-md border border-blue-primary py-4 text-base leading-none" @click="saveAccount(false)">
         Backup Later
       </button>
       <button class="gradient-bg rounded-md py-4 text-base leading-none text-white" @click="saveAccount(true)">

@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Inter';
-  /* set 2 weights, regular and bold */
-  src:
-    url('./assets/fonts/Inter-Regular.otf') format('opentype'),
-    url('./assets/fonts/Inter-Bold.otf') format('opentype');
-}
-
 .nicer-scrollbar::-webkit-scrollbar {
   @apply h-2 w-2;
 }
@@ -27,15 +19,15 @@
 }
 
 .gradient-text {
-  @apply bg-gradient-to-r from-primary-teal to-primary-blue bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-primary-teal to-blue-primary bg-clip-text text-transparent;
 }
 
 .hover-gradient-text:hover {
-  @apply bg-gradient-to-r from-primary-teal to-primary-blue bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-primary-teal to-blue-primary bg-clip-text text-transparent;
 }
 
 .gradient-bg {
-  @apply bg-gradient-to-r from-primary-teal to-primary-blue;
+  @apply bg-gradient-to-r from-primary-teal to-blue-primary;
 }
 
 .secondary-btn {
@@ -43,7 +35,7 @@
 }
 
 .main-btn-bg {
-  @apply bg-gradient-to-r from-primary-teal to-primary-blue;
+  @apply bg-gradient-to-r from-primary-teal to-blue-primary;
 }
 .main-btn-bg.muted {
   @apply opacity-50;
@@ -79,4 +71,12 @@
   .rounded-inherit {
     border-radius: inherit;
   }
+}
+
+button[aria-selected='true'] {
+  outline: none;
+}
+
+[role='menuitem'] {
+  @apply cursor-pointer hover:text-blue-primary
 }

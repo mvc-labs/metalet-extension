@@ -12,7 +12,7 @@ import {
   UNISAT_TESTNET_HOST,
 } from '@/data/hosts'
 
-type OptionParams = Record<string, string>
+type OptionParams = Record<string, string | undefined>
 
 interface OptionData {
   [key: string]: unknown
@@ -38,12 +38,15 @@ async function request<T = any>(url: string, options: RequestOption): Promise<T>
     options.headers.set('X-Public-Key', publicKey)
   }
   if (options?.params) {
+    let cleanedParams = Object.entries(options.params ?? {})
+      .filter(([, value]) => value !== undefined)
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: value!.toString() }), {})
     if (options.method === 'GET') {
-      const params = new URLSearchParams(options.params)
+      const params = new URLSearchParams(cleanedParams)
       url = `${url}?${params.toString()}`
     } else {
       // UNUSED: Params will not be processed in POST request
-      options.body = new URLSearchParams(options.params)
+      options.body = new URLSearchParams(cleanedParams)
     }
     delete options.params
     options.headers.set('Content-Type', 'application/x-www-form-urlencoded')

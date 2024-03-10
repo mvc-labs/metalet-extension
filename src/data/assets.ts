@@ -1,7 +1,7 @@
+import { Balance } from '@/queries/balance'
 import { SymbolTicker } from '@/lib/asset-symbol'
 import BtcLogoImg from '../assets/images/btc-logo.svg?url'
-import { Balance } from '@/queries/balance'
-import SpaceLogoImg from '../assets/images/space-circle.svg?url'
+import SpaceLogoImg from '../assets/icons-v3/space.svg?url'
 
 export type Asset = {
   symbol: SymbolTicker
@@ -52,10 +52,6 @@ function getTagInfo(name: string): Tag | undefined {
 
 function getTags(asset: Asset): Tag[] {
   const tagList: Tag[] = []
-  const chainTag = getTagInfo(asset.chain.toUpperCase())
-  if (chainTag) {
-    tagList.push(chainTag)
-  }
   if (asset.contract) {
     const contractTag = getTagInfo(asset.contract)
     if (contractTag) {
