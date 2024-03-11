@@ -30,8 +30,10 @@ const router = useRouter()
 if (!route.params.address) {
   router.go(-1)
 }
+const refresh = computed(() => route.query.refresh)
 const address = ref<string>(route.params.address as string)
 const symbol = ref<SymbolTicker>(route.params.symbol as SymbolTicker)
+
 const { data: btcAssets } = useBRC20AssetQuery(address, { enabled: computed(() => !!address.value) })
 
 const asset = computed(() => {
@@ -69,21 +71,23 @@ const { isLoading, data: balance } = useBalanceQuery(address, symbol, {
 })
 
 const tickerEnabled = computed(() => {
+  if (refresh.value) {
+    return true
+  }
   if (asset.value) {
-    return !!address.value && !!symbol.value && asset.value.contract === 'BRC-20'
+    return !(!address.value && !!symbol.value && asset.value.contract === 'BRC-20')
   }
   return false
 })
 
+
+// TODO：修复useBRCTickerAseetQuery重新请求刷新
 const { isLoading: tickersLoading, data: tickersData } = useBRCTickerAseetQuery(address, symbol, {
   enabled: tickerEnabled,
 })
 
-const transferableList = computed(() => {
-  if (tickersData.value) {
-    return tickersData.value?.transferableList
-  }
-})
+// TODO: 修复tickersData请求得到结果后transferableList初次不加载数据
+const transferableList = computed(() => tickersData.value?.transferableList)
 
 const transferableBalance = computed(() => {
   if (tickersData.value?.tokenBalance) {
@@ -186,21 +190,21 @@ const toReceive = () => {
 
     <div class="flex items-center justify-center gap-x-2">
       <template v-if="asset.contract === 'BRC-20'">
-        <a href="javascript:void(0);" class="blue-light-btn">
+        <RouterLink to="javascript:void(0);" class="btn-blue-light">
           <img :src="MintPNG" alt="Mint" />
           <span>Mint</span>
-        </a>
-        <a :href="`/wallet/transfer/${asset.symbol}/${address}`" class="blue-primary-btn">
+        </RouterLink>
+        <RouterLink :to="`/wallet/transfer/${asset.symbol}/${address}`" class="btn-blue-primary">
           <img :src="TransferPNG" alt="Transfer" />
           <span>Transfer</span>
-        </a>
+        </RouterLink>
       </template>
       <template v-else>
-        <button @click="toSend" v-if="asset.isNative" class="blue-light-btn">
+        <button @click="toSend" v-if="asset.isNative" class="btn-blue-light">
           <img :src="SendPNG" alt="Send" />
           <span>Send</span>
         </button>
-        <button @click="toReceive" class="blue-primary-btn">
+        <button @click="toReceive" class="btn-blue-primary">
           <img :src="ReceivePNG" alt="Receive" />
           <span>Receive</span>
         </button>
@@ -263,11 +267,11 @@ const toReceive = () => {
   @apply w-[119px] h-12 rounded-3xl flex items-center justify-center gap-x-2;
 }
 
-.blue-light-btn {
+.btn-blue-light {
   @apply btn bg-blue-light text-blue-primary;
 }
 
-.blue-primary-btn {
+.btn-blue-primary {
   @apply btn bg-blue-primary text-white;
 }
 

@@ -14,6 +14,7 @@ import BTCRateList from './components/BTCRateList.vue'
 import type { TransactionResult } from '@/global-types'
 import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
 import TransactionResultModal from './components/TransactionResultModal.vue'
+import { AssetLogo, Divider, FlexBox, FeeRateSelector, Button, Loading } from '@/components'
 
 const tags = computed(() => {
   if (asset.value) {
@@ -185,55 +186,67 @@ async function send() {
 </script>
 
 <template>
-  <div class="pt-[30px] flex flex-col items-center gap-y-8" v-if="asset">
+  <FlexBox d="col" ai="center" v-if="asset" class="w-full h-full relative space-y-6">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
-    <div class="flex flex-col gap-y-1.5 items-center">
-      <img :src="asset.logo" alt="" class="h-[42px] w-[42px] rounded-xl" />
-      <div class="mt-1.5 flex items-center gap-x-1.5" v-if="tags">
-        <span
-          :key="tag.name"
-          v-for="tag in tags"
-          class="px-1.5 py-0.5 rounded text-xs"
-          :style="`color: ${tag.color};background: ${tag.bg};`"
-        >
-          {{ tag.name }}
-        </span>
-      </div>
-    </div>
 
-    <div class="space-y-[30px] self-stretch">
-      <div class="space-y-2">
-        <div class="text-black-primary flex justify-between text-sm">
-          <span>Amount</span>
-          <span>
-            <span>Balance: </span>
-            <span v-if="balance">{{ balance.total / 10 ** asset.decimal }} {{ symbol }}</span>
-            <span v-else>--</span>
-          </span>
-        </div>
-        <div class="relative">
-          <input
-            min="0"
-            step="0.00001"
-            type="number"
-            v-model="amount"
-            placeholder="Amount"
-            class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-[88px] !text-xs"
-          />
-          <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-sm text-gray-500">
-            <div class="border-l border-solid border-gray-500 w-20 py-1 text-center font-bold">{{ asset.symbol }}</div>
+    <div class="space-y-4 w-full">
+      <FlexBox d="col" ai="center">
+        <AssetLogo :logo="asset?.logo" :symbol="symbol" :chain="asset.chain" type="network" />
+
+        <div class="mt-3 text-base">{{ symbol }}</div>
+
+        <div class="space-x-1">
+          <div v-for="tag in tags" :key="tag.name" :class="['text-gray-primary', 'text-xs']">
+            {{ tag.name }}
           </div>
-          <div class="absolute text-red-500 text-sm" v-if="error">{{ error?.message }}</div>
         </div>
-      </div>
+      </FlexBox>
 
-      <div class="space-y-2">
-        <div class="text-black-primary flex justify-between text-sm">Recipient</div>
-        <input v-model="recipient" placeholder="Address" class="main-input w-full !rounded-xl !p-4 !text-xs" />
-      </div>
-
-      <BTCRateList v-if="asset.chain === 'btc'" v-model:currentRateFee="currentRateFee" />
+      <Divider />
     </div>
+
+    <div class="space-y-2 w-full">
+      <FlexBox ai="center" jc="between">Receiver</FlexBox>
+      <textarea
+        v-model="recipient"
+        class="w-full rounded-lg p-3 text-xs border border-gray-soft focus:border-blue-primary focus:outline-none break-all"
+      />
+    </div>
+
+    <div class="space-y-2 w-full">
+      <FlexBox ai="center" jc="between">
+        <span>Amount</span>
+        <span class="text-gray-primary text-xs">
+          <span>Balance: </span>
+          <span v-if="balance">{{ balance.total / 10 ** asset.decimal }} {{ symbol }}</span>
+          <span v-else>--</span>
+        </span>
+      </FlexBox>
+      <input
+        min="0"
+        step="0.00001"
+        type="number"
+        v-model="amount"
+        :max="balance.total / 10 ** asset.decimal"
+        class="mt-2 w-full rounded-lg p-3 text-xs border border-gray-soft focus:border-blue-primary focus:outline-none"
+      />
+    </div>
+
+    <FeeRateSelector class="w-full" v-model:currentRateFee="currentRateFee" v-if="asset.chain === 'btc'" />
+
+    <Button
+      type="primary"
+      @click="next"
+      :disabled="!currentRateFee || !recipient"
+      class="absolute bottom-4 left-1/2 -translate-x-1/2 w-61.5 h-12"
+      :class="!currentRateFee || !recipient || operationLock ? 'opacity-50 cursor-not-allowed' : undefined"
+    >
+      <FlexBox ai="center" :gap="1" v-if="operationLock">
+        <LoadingIcon />
+        <span>Loading...</span>
+      </FlexBox>
+      <span v-else>Next</span>
+    </Button>
 
     <!-- send -->
     <template v-if="!operationLock">
@@ -297,7 +310,8 @@ async function send() {
         </div>
       </template>
     </Modal>
-  </div>
+  </FlexBox>
+  <Loading text="Asset Loading..." v-else />
 </template>
 
 <style lang="css" scoped>

@@ -9,14 +9,27 @@ import { useRoute, useRouter } from 'vue-router'
 import { SymbolTicker } from '@/lib/asset-symbol'
 import CopyIcon from '@/assets/icons-v3/copy.svg'
 import LoadingIcon from '@/assets/icons-v3/loading.svg'
+import InscribeSuccessPNG from '@/assets/icons-v3/inscribe-success.png'
 import { prettifyBalanceFixed, shortestAddress } from '@/lib/formatters'
 import { useBRCTickerAseetQuery, useBRC20AssetQuery } from '@/queries/btc'
 import { preInscribe, PreInscribe, getInscribeInfo } from '@/queries/inscribe'
 import { FlexBox, Divider, FeeRateSelector, Button, AssetLogo } from '@/components'
 import TransactionResultModal, { type TransactionResult } from './components/TransactionResultModal.vue'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const route = useRoute()
 const router = useRouter()
+
+const orderId = ref()
+const open = ref(false)
 
 if (!route.params.address || !route.params.symbol) {
   router.go(-1)
@@ -140,6 +153,7 @@ const popConfirm = async () => {
   inscribePsbt.value = psbt
   // console.log('paymentNetworkFee', paymentNetworkFee.value, order.minerFee)
   inscribeOrder.value = order
+  orderId.value = order.orderId
   total.value = paymentNetworkFee.value + order.needAmount
   operationLock.value = false
   nextStep.value = 1
@@ -161,11 +175,11 @@ async function send() {
     isOpenResultModal.value = true
   })
   if (resStatus) {
-    const timer = setInterval(async () => {
+    const timerId = setInterval(async () => {
       if (resStatus!.inscriptionState === 4) {
-        clearInterval(timer)
+        clearInterval(timerId)
         operationLock.value = false
-        toSuceess()
+        open.value = true
         return
       }
       resStatus = await getInscribeInfo(inscribeOrder.value!.orderId)
@@ -177,14 +191,18 @@ function cancel() {
   nextStep.value = 1
 }
 
+function toOrder() {
+  router.push({
+    name: 'inscribe-query',
+    params: { orderId: orderId.value, symbol: symbol.value },
+  })
+}
+
 const tabIdx = ref<number>(0)
 const changeTabIdx = (idx: number) => {
   tabIdx.value = idx
 }
 
-function toSuceess() {
-  router.push({ name: 'inscribe-success', params: { orderId: inscribeOrder.value!.orderId, symbol: symbol.value } })
-}
 </script>
 
 <template>
@@ -212,7 +230,7 @@ function toSuceess() {
         type="primary"
         @click="popConfirm"
         :disabled="!currentRateFee || !inscribeAmount"
-        class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[246px] h-12"
+        class="absolute bottom-4 left-1/2 -translate-x-1/2 w-61.5 h-12"
         :class="!currentRateFee || !inscribeAmount || operationLock ? 'opacity-50 cursor-not-allowed' : undefined"
       >
         <FlexBox ai="center" :gap="1" v-if="operationLock">
@@ -255,7 +273,7 @@ function toSuceess() {
         :loading="true"
         @click="toConfirm"
         :disabled="!currentRateFee || !inscribeAmount"
-        class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[246px] h-12"
+        class="absolute bottom-4 left-1/2 -translate-x-1/2 w-61.5 h-12"
         :class="!currentRateFee || !inscribeAmount ? 'opacity-50 cursor-not-allowed' : undefined"
       >
         Next
@@ -339,9 +357,33 @@ function toSuceess() {
             <LoadingIcon />
             <span>Loading...</span>
           </FlexBox>
-          <span v-else>Send</span></Button
-        >
+          <span v-else>Send</span>
+        </Button>
       </FlexBox>
+      <AlertDialog :open="open">
+        <AlertDialogContent class="w-82 h-[344px] bg-white rounded-lg">
+          <AlertDialogHeader>
+            <FlexBox d="col" ai="center">
+              <img :src="InscribeSuccessPNG" alt="Inscribe Success" class="w-22.5 mx-auto" />
+              <AlertDialogTitle class="pt-3"> Payment Sent </AlertDialogTitle>
+              <AlertDialogDescription class="pt-1 text-center text-gray-primary">
+                Your Transaction Has Been <br />Succesfully Sent
+              </AlertDialogDescription>
+            </FlexBox>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>
+              <Button
+                type="primary"
+                @click="toOrder"
+                class="absolute bottom-6 left-1/2 -translate-x-1/2 w-61.5 h-12"
+              >
+                Confirm
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   </div>
   <Loading v-else text="Asset Loading..." />

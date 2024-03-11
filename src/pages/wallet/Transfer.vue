@@ -24,7 +24,7 @@ const { isLoading, data: tickersData } = useBRCTickerAseetQuery(address, symbol,
 const toSendBRC20 = (inscriptionId: string, amount: number) => {
   router.push({
     name: 'sendBRC20',
-    query: { address: address.value, symbol: symbol.value, inscriptionId, amount },
+    params: { address: address.value, symbol: symbol.value, inscriptionId, amount },
   })
 }
 
@@ -66,8 +66,5 @@ const toInscribe = () => {
         Available {{ tickersData.tokenBalance.availableBalance }} {{ symbol }}
       </FlexBox>
     </div>
-    <!-- <div class="w-full pt-0.5">
-      <Button class="mx-auto my-6">Next</Button>
-    </div> -->
   </FlexBox>
 </template>

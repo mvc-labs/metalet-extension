@@ -41,16 +41,26 @@ module.exports = {
       },
       width: {
         15: '3.75rem',
+        22.5: '5.625rem',
+        30: '7.5rem',
+        61.5: '15.375rem',
+        82: '20.5rem',
       },
       height: {
+        15: '3.75rem',
+        18: '4.5rem',
+        85: '22.5rem',
+      },
+      maxWidth: {
         15: '3.75rem',
         18: '4.5rem',
       },
       lineHeight: {
         15: '3.75rem',
       },
-      padding:{
-
+      padding: {
+        7.5: '1.875rem',
+        22.5: '5.625rem',
       },
       keyframes: {
         'accordion-down': {

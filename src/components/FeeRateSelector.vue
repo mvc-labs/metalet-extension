@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import CloseIcon from '@/assets/icons-v3/close.svg'
+import { useBTCRateQuery } from '@/queries/transaction'
+import { FlexBox, Button, Loading } from '@/components'
 import SelectIcon from '@/assets/icons-v3/select_active.svg'
 import ArrowRightIcon from '@/assets/icons-v3/arrow_right.svg'
-import { FlexBox, Divider, Button, Loading } from '@/components'
-import { type FeeRate, useBTCRateQuery } from '@/queries/transaction'
 import {
   Drawer,
   DrawerClose,
@@ -16,6 +16,7 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer'
 
+const open = ref(false)
 const isCustom = ref(false)
 const selectedIndex = ref(-1)
 const feeRate = ref<number>()
@@ -56,14 +57,14 @@ const selectCustom = () => {
 
 <template>
   <FlexBox ai="center" jc="between">
-    <span class="text-sm">Fee Rate</span>
-    <Drawer>
-      <DrawerTrigger>
-        <FlexBox ai="center" jc="center" class="text-xs text-gray-primary">
-          <span>{{ feeRate }} sat/vB</span>
-          <ArrowRightIcon />
-        </FlexBox>
-      </DrawerTrigger>
+    <FlexBox ai="center" jc="between" @click="open = true" class="w-full cursor-pointer">
+      <div class="text-sm">Fee Rate</div>
+      <FlexBox ai="center" jc="center" class="text-xs text-gray-primary">
+        <span>{{ feeRate }} sat/vB</span>
+        <ArrowRightIcon />
+      </FlexBox>
+    </FlexBox>
+    <Drawer v-model:open="open">
       <DrawerContent class="bg-white">
         <DrawerHeader class="pt-1.5 pb-3.5">
           <DrawerTitle class="text-center text-sm relative">
@@ -113,7 +114,7 @@ const selectCustom = () => {
           </FlexBox>
         </div>
         <DrawerFooter>
-          <DrawerClose><Button type="primary" class="mx-auto w-[246px] h-12">Comfirm</Button></DrawerClose>
+          <DrawerClose><Button type="primary" class="mx-auto w-61.5 h-12">Confirm</Button></DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

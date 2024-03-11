@@ -8,8 +8,14 @@ import { PencilSquareIcon } from '@heroicons/vue/24/solid'
 import ServiceMenu from '@/components/headers/ServiceMenu.vue'
 import SettingMenu from '@/components/headers/SettingMenu.vue'
 import EditName from '@/pages/accounts/components/EditName.vue'
+import { getNetwork } from '@/lib/network'
+import { FlexBox } from '@/components'
 
+const network = ref()
 const router = useRouter()
+
+getNetwork().then((_network) => (network.value = _network))
+
 
 const { account } = defineProps<{
   account: Account
@@ -28,11 +34,8 @@ const toAccountList = () => {
       <Avatar :id="account.id" />
       <div class="flex items-center gap-x-2">
         <span class="text-black-primary text-sm">{{ account.name }}</span>
-        <PencilSquareIcon
-          @click.stop
-          @click="openEditNameModal = true"
-          class="h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-500 group-hover:inline"
-        />
+        <PencilSquareIcon @click.stop @click="openEditNameModal = true"
+          class="h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-500 group-hover:inline" />
       </div>
       <EditName v-model:open="openEditNameModal" :account="account" />
     </div>

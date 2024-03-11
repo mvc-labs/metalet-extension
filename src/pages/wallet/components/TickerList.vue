@@ -15,8 +15,6 @@ const { loading, list } = defineProps<{
 const showAll = ref(false)
 
 const tickerList = computed(() => {
-  console.log({ list })
-
   if (list) {
     if (showAll.value) {
       return list

@@ -120,13 +120,22 @@ const routes = [
     },
   },
   {
-    path: '/wallet/sendBRC20',
+    path: '/wallet/sendBRC20/:symbol/:amount/:address/:inscriptionId',
     component: () => import('./pages/wallet/SendBRC.vue'),
     name: 'sendBRC20',
     meta: {
       secondaryHeader: true,
       headerTitle: 'Send',
       noFooter: true,
+    },
+  },
+  {
+    path: '/wallet/sendBRC20Success/:symbol/:amount/:address',
+    component: () => import('./pages/wallet/SendBRCSuccess.vue'),
+    name: 'SendBRC20Success',
+    meta: {
+      secondaryHeader: false,
+      noFooter: false,
     },
   },
   {
@@ -164,7 +173,6 @@ const routes = [
     component: () => import('./pages/wallet/InscribeQuery.vue'),
     name: 'inscribe-query',
     meta: {
-      secondaryHeader: true,
       headerTitle: '',
       noFooter: true,
     },
@@ -217,7 +225,7 @@ const routes = [
     },
   },
   {
-    path: '/wallet/assets/:symbol/:address',
+    path: '/wallet/asset/:symbol/:address',
     component: () => import('./pages/wallet/Asset.vue'),
     name: 'asset',
     props: true,

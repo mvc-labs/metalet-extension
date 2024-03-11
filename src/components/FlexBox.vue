@@ -4,8 +4,8 @@ type PixelValue = `${number}px`
 const { d, jc } = defineProps<{
   d?: 'row' | 'col' | 'row-reverse' | 'column-reverse'
   ai?: 'start' | 'center' | 'end'
-  gap?: number | PixelValue
   jc?: 'start' | 'center' | 'end' | 'between' | 'around'
+  gap?: number | PixelValue
 }>()
 </script>
 
