@@ -22,8 +22,8 @@ export async function process(params: TransferParameters): Promise<{ txId: strin
   feeRate = Number(feeRate)
 
   if (params.options?.noBroadcast) {
-    return await wallet.send(params.toAddress, new Decimal(params.satoshis), feeRate)
+    const { psbt } = await wallet.getFeeAndPsbt(params.toAddress, new Decimal(params.satoshis), feeRate)
+    return { txHex: psbt.extractTransaction().toHex() }
   }
-  const { psbt } = await wallet.getFeeAndPsbt(params.toAddress, new Decimal(params.satoshis), feeRate)
-  return { txHex: psbt.extractTransaction().toHex() }
+  return await wallet.send(params.toAddress, new Decimal(params.satoshis), feeRate)
 }
