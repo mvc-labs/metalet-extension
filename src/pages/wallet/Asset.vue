@@ -267,11 +267,19 @@ const toReceive = () => {
   @apply w-[119px] h-12 rounded-3xl flex items-center justify-center gap-x-2;
 }
 
+<<<<<<< HEAD
 .btn-blue-light {
   @apply btn bg-blue-light text-blue-primary;
 }
 
 .btn-blue-primary {
+=======
+.blue-light-btn {
+  @apply btn bg-blue-light text-blue-primary;
+}
+
+.blue-primary-btn {
+>>>>>>> 91c8393a46fc535d308c052698e4cd45f194b6fa
   @apply btn bg-blue-primary text-white;
 }
 

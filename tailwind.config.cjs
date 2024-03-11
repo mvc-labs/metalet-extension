@@ -61,7 +61,6 @@ module.exports = {
       padding: {
         7.5: '1.875rem',
         22.5: '5.625rem',
-      },
       keyframes: {
         'accordion-down': {
           from: { height: 0 },

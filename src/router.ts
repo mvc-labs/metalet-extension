@@ -361,6 +361,7 @@ const routes = [
     },
   },
   {
+<<<<<<< HEAD
     path: '/settings/toolkit/btc-merge',
     component: () => import('./pages/settings/components/BTCMerge.vue'),
     meta: {
@@ -370,6 +371,8 @@ const routes = [
     },
   },
   {
+=======
+>>>>>>> 91c8393a46fc535d308c052698e4cd45f194b6fa
     path: '/settings/toolkit/space-merge',
     component: () => import('./pages/settings/components/SpaceMerge.vue'),
     meta: {
