@@ -1,3 +1,8 @@
+import { type Chain } from '@/lib/account'
+
+import BtcLogoImg from '../assets/images/btc-logo.svg?url'
+import SpaceLogoImg from '../assets/icons-v3/space.svg?url'
+
 import MetaletLogo from '../assets/images/metalet-logo.png?url'
 import MvcSwapLogo from '../assets/images/mvcswap-logo.png?url'
 import MVCUSDTLogo from '../assets/images/usdt-logo.jpg?url'
@@ -25,6 +30,22 @@ import OXBTLogo from '../assets/images/oxbt.png'
 const logos = {
   'localhost:3000': MetaletLogo,
   'mvcswap.com/': MvcSwapLogo,
+}
+
+export const getLogo = (name: string, chain: Chain) => {
+  if (chain === 'btc') {
+    if (name === 'BTC') {
+      return BtcLogoImg
+    } else {
+      return getBRC20Logo(name)
+    }
+  } else if (chain === 'mvc') {
+    if (name === 'SPACE') {
+      return SpaceLogoImg
+    } else {
+      return getFTLogo(name)
+    }
+  }
 }
 
 export const getFTLogo = (name: string) => {

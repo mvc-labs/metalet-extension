@@ -6,6 +6,7 @@ import { computed, Ref, inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQueryClient } from '@tanstack/vue-query'
 import BgHueImg from './assets/images/bg-hue.png?url'
+import Toaster from '@/components/ui/toast/Toaster.vue'
 import TheFooter from './components/the-footer/Index.vue'
 import TheHeader from './components/headers/TheHeader.vue'
 import { API_NET, API_TARGET, Wallet } from 'meta-contract'
@@ -40,10 +41,10 @@ const secondaryHeaderTitle = computed(() => {
 
 async function checkMigrate() {
   if (!(await storage.get(ACCOUNT_Sync_Migrated_KEY))) {
-    const result= await migrationSync()
+    const result = await migrationSync()
   }
   if (!(await storage.get(ACCOUNT_V2_Migrated_KEY)) && (await needMigrationV2())) {
-   await migrateV2()
+    await migrateV2()
     await storage.set(ACCOUNT_V2_Migrated_KEY, true)
   }
 }
@@ -66,8 +67,10 @@ checkMigrate().then(async () => {
     id="app"
     class="ext-app relative flex h-150 w-90 items-center justify-center overflow-y-auto xs:h-screen xs:w-screen xs:bg-gray-200/10 text-black-secondary"
   >
+    <Toaster  />
     <div
-      class="ext-app flex h-full w-full flex-col xs:relative xs:aspect-[1/2] xs:h-3/4 xs:w-auto xs:min-w-[25rem] xs:rounded-lg xs:border xs:border-gray-100 xs:bg-white xs:shadow-lg">
+      class="ext-app flex h-full w-full flex-col xs:relative xs:aspect-[1/2] xs:h-3/4 xs:w-auto xs:min-w-[25rem] xs:rounded-lg xs:border xs:border-gray-100 xs:bg-white xs:shadow-lg"
+    >
       <!-- Header -->
       <SecondaryHeader v-if="route.meta.secondaryHeader">
         <template #title>
@@ -75,11 +78,12 @@ checkMigrate().then(async () => {
         </template>
       </SecondaryHeader>
 
-      <!-- <TheHeader v-else /> -->
+      <TheHeader v-if="false" />
 
       <!-- bg -->
       <div
-        class="fixed left-0 top-0 isolate z-[-1] hidden h-1/2 w-full select-none bg-cover bg-center bg-no-repeat xs:block">
+        class="fixed left-0 top-0 isolate z-[-1] hidden h-1/2 w-full select-none bg-cover bg-center bg-no-repeat xs:block"
+      >
         <img class="z-[-1] h-full w-full select-none opacity-100" :src="BgHueImg" alt="bg-hue" />
       </div>
       <div class="isolate grow px-4 py-3 overflow-y-auto nicer-scrollbar">
@@ -87,7 +91,7 @@ checkMigrate().then(async () => {
       </div>
 
       <!-- footer -->
-      <!-- <TheFooter v-if="!noFooter" /> -->
+      <TheFooter v-if="!noFooter" />
     </div>
   </div>
 </template>

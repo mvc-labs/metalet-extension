@@ -61,10 +61,6 @@ const txPsbt = ref<Psbt>()
 
 const isOpenResultModal = ref(false)
 
-function cancel() {
-  isShowComfirm.value = false
-}
-
 const transactionResult = ref<TransactionResult | undefined>()
 
 async function next() {
@@ -128,8 +124,9 @@ async function send() {
   })
 
   router.push({
-    name: 'SendBRC20Success',
+    name: 'SendSuccess',
     params: {
+      chain: 'btc',
       symbol: symbol.value,
       amount: amount.value,
       address: recipient.value,
@@ -217,7 +214,7 @@ async function send() {
         <DrawerFooter>
           <FlexBox ai="center" jc="center" :gap="2">
             <DrawerClose>
-              <Button type="light" class="w-[119px] h-12" @click="cancel">Cancel</Button>
+              <Button type="light" class="w-[119px] h-12">Cancel</Button>
             </DrawerClose>
             <Button type="primary" class="w-[119px] h-12" @click="send">Confirm</Button>
           </FlexBox>

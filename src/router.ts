@@ -130,9 +130,9 @@ const routes = [
     },
   },
   {
-    path: '/wallet/sendBRC20Success/:symbol/:amount/:address',
-    component: () => import('./pages/wallet/SendBRCSuccess.vue'),
-    name: 'SendBRC20Success',
+    path: '/wallet/sendSuccess/:chain/:symbol/:amount/:address',
+    component: () => import('./pages/wallet/SendSuccess.vue'),
+    name: 'SendSuccess',
     meta: {
       secondaryHeader: false,
       noFooter: false,

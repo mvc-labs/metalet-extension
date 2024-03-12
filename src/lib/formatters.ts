@@ -21,11 +21,9 @@ export const prettifyBalance = (balance: number, symbol: string = 'SPACE'): stri
   return `${new Decimal(balance).dividedBy(1e8).toDecimalPlaces(8, Decimal.ROUND_HALF_UP).toNumber()} ${symbol}`
 }
 
-export const prettifyBalanceFixed = (balance: number, symbol: string = 'SPACE', toFixedNum: number): string => {
-  if (!balance) return `0 ${symbol}`
-
+export const prettifyBalanceFixed = (balance = 0, symbol: string, decimal = 0, toFixedNum = 8): string => {
   return `${new Decimal(balance)
-    .dividedBy(1e8)
+    .div(10 ** decimal)
     .toDecimalPlaces(8, Decimal.ROUND_HALF_UP)
     .toFixed(toFixedNum)} ${symbol}`
 }

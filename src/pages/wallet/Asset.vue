@@ -44,13 +44,9 @@ const asset = computed(() => {
     return MVCAsset
   }
   if (btcAssets.value) {
-    const asset = btcAssets.value.find((asset) => asset.symbol === symbol.value)
-    if (!asset) {
-      router.go(-1)
-      return
-    }
-    return asset
+    return btcAssets.value.find((asset) => asset.symbol === symbol.value!)
   }
+  console.log({ asset })
 })
 
 const coinType = computed(() => {
@@ -79,7 +75,6 @@ const tickerEnabled = computed(() => {
   }
   return false
 })
-
 
 // TODO：修复useBRCTickerAseetQuery重新请求刷新
 const { isLoading: tickersLoading, data: tickersData } = useBRCTickerAseetQuery(address, symbol, {

@@ -1,56 +1,64 @@
 <script lang="ts" setup>
 import Decimal from 'decimal.js'
 import { Psbt } from 'bitcoinjs-lib'
-import { useRoute } from 'vue-router'
 import { Wallet } from 'meta-contract'
-import { getTags } from '@/data/assets'
-import Modal from '@/components/Modal.vue'
 import { allAssets } from '@/data/assets'
 import { BtcWallet } from '@/lib/wallets/btc'
+import { useRoute, useRouter } from 'vue-router'
 import { useBalanceQuery } from '@/queries/balance'
 import { useQueryClient } from '@tanstack/vue-query'
 import { type SymbolTicker } from '@/lib/asset-symbol'
-import BTCRateList from './components/BTCRateList.vue'
+import { prettifyBalanceFixed } from '@/lib/formatters'
+import LoadingIcon from '@/assets/icons-v3/loading.svg'
 import type { TransactionResult } from '@/global-types'
 import { ref, computed, Ref, inject, toRaw, watch } from 'vue'
 import TransactionResultModal from './components/TransactionResultModal.vue'
 import { AssetLogo, Divider, FlexBox, FeeRateSelector, Button, Loading } from '@/components'
-
-const tags = computed(() => {
-  if (asset.value) {
-    return getTags(asset.value)
-  }
-})
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader } from '@/components/ui/drawer'
 
 const route = useRoute()
+const recipient = ref('')
 const error = ref<Error>()
+const router = useRouter()
+const txPsbt = ref<Psbt>()
+const totalFee = ref<number>()
 const queryClient = useQueryClient()
+const currentRateFee = ref<number>()
+const isOpenConfirmModal = ref(false)
+const transactionResult = ref<TransactionResult>()
 const address = ref(route.params.address as string)
 const symbol = ref(route.params.symbol as SymbolTicker)
 const asset = computed(() => allAssets.find((asset) => asset.symbol === symbol.value)!)
 
-// balance
-const balaceEnabled = computed(() => {
-  return !!address.value && !!asset.value.symbol && !asset.value.balance
-})
-const { data: balance } = useBalanceQuery(address, symbol, { enabled: balaceEnabled })
-
-const currentRateFee = ref<number | undefined>()
-
-const txPsbt = ref<Psbt>()
-const totalFee = ref<number>()
-
+// amount
 const amount = ref<number>()
 const amountInSats = computed(() => {
-  if (amount.value && typeof amount.value === 'number') {
-    return new Decimal(amount.value).times(1e8)
+  if (amount.value) {
+    return new Decimal(amount.value).mul(10 ** asset.value.decimal)
   }
   return new Decimal(0)
 })
-const recipient = ref('')
-const transactionResult = ref<TransactionResult | undefined>()
 
-const isOpenConfirmModal = ref(false)
+// balance
+const balaceQueryEnabled = computed(() => {
+  return !asset.value.balance && !!address.value && !!symbol.value
+})
+
+const { data: balanceData } = useBalanceQuery(address, symbol, { enabled: balaceQueryEnabled })
+
+const balance = computed(() => {
+  if (balanceData.value) {
+    return new Decimal(balanceData.value.total).div(10 ** asset.value.decimal).toNumber()
+  }
+})
+
+// btn disabled
+const btnDisabled = computed(() => {
+  return (
+    !recipient.value || !amount.value || operationLock.value || (asset.value.chain === 'btc' && !currentRateFee.value)
+  )
+})
+
 const popConfirm = async () => {
   if (!recipient.value) {
     transactionResult.value = {
@@ -102,7 +110,7 @@ const popConfirm = async () => {
 }
 
 watch(amountInSats, (newAmountInSats) => {
-  if (balance.value && newAmountInSats && newAmountInSats.gt(balance.value.total)) {
+  if (balance.value && newAmountInSats && newAmountInSats.gt(balance.value || 0)) {
     error.value = new Error('Insufficient balance')
   } else {
     error.value = undefined
@@ -156,32 +164,22 @@ async function send() {
   operationLock.value = true
 
   const sendProcessor = asset.value.symbol === 'SPACE' ? sendSpace : sendBTC
-  const sentRes = await sendProcessor()
+  await sendProcessor()
 
-  if (sentRes) {
-    isOpenConfirmModal.value = false
-    transactionResult.value = {
-      chain: asset.value.symbol === 'SPACE' ? 'mvc' : 'btc',
-      status: 'success',
-      txId: sentRes.txId,
-      fromAddress: address.value,
-      toAdddress: recipient.value,
-      amount: amountInSats.value.toNumber(),
-      token: {
-        symbol: asset.value.symbol,
-        decimal: asset.value.decimal,
-      },
-    }
-
-    isOpenResultModal.value = true
-
-    // 刷新query
-    queryClient.invalidateQueries({
-      queryKey: ['balance', { address: address.value, symbol: asset.value.symbol }],
-    })
-  }
-
+  isOpenConfirmModal.value = false
   operationLock.value = false
+  queryClient.invalidateQueries({
+    queryKey: ['balance', { address: address.value, symbol: symbol.value }],
+  })
+  router.push({
+    name: 'SendSuccess',
+    params: {
+      chain: asset.value.chain,
+      symbol: symbol.value,
+      amount: amount.value,
+      address: recipient.value,
+    },
+  })
 }
 </script>
 
@@ -190,16 +188,10 @@ async function send() {
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
 
     <div class="space-y-4 w-full">
-      <FlexBox d="col" ai="center">
+      <FlexBox d="col" ai="center" :gap="3">
         <AssetLogo :logo="asset?.logo" :symbol="symbol" :chain="asset.chain" type="network" />
 
-        <div class="mt-3 text-base">{{ symbol }}</div>
-
-        <div class="space-x-1">
-          <div v-for="tag in tags" :key="tag.name" :class="['text-gray-primary', 'text-xs']">
-            {{ tag.name }}
-          </div>
-        </div>
+        <div class="text-base">{{ symbol }}</div>
       </FlexBox>
 
       <Divider />
@@ -218,16 +210,16 @@ async function send() {
         <span>Amount</span>
         <span class="text-gray-primary text-xs">
           <span>Balance: </span>
-          <span v-if="balance">{{ balance.total / 10 ** asset.decimal }} {{ symbol }}</span>
+          <span v-if="balance">{{ balance }} {{ symbol }}</span>
           <span v-else>--</span>
         </span>
       </FlexBox>
       <input
         min="0"
-        step="0.00001"
         type="number"
+        step="0.00001"
+        :max="balance"
         v-model="amount"
-        :max="balance.total / 10 ** asset.decimal"
         class="mt-2 w-full rounded-lg p-3 text-xs border border-gray-soft focus:border-blue-primary focus:outline-none"
       />
     </div>
@@ -236,10 +228,10 @@ async function send() {
 
     <Button
       type="primary"
-      @click="next"
+      @click="popConfirm"
       :disabled="!currentRateFee || !recipient"
       class="absolute bottom-4 left-1/2 -translate-x-1/2 w-61.5 h-12"
-      :class="!currentRateFee || !recipient || operationLock ? 'opacity-50 cursor-not-allowed' : undefined"
+      :class="btnDisabled ? 'opacity-50 cursor-not-allowed' : undefined"
     >
       <FlexBox ai="center" :gap="1" v-if="operationLock">
         <LoadingIcon />
@@ -248,68 +240,43 @@ async function send() {
       <span v-else>Next</span>
     </Button>
 
-    <!-- send -->
-    <template v-if="!operationLock">
-      <button
-        @click="popConfirm"
-        v-if="symbol === 'SPACE'"
-        :disabled="!recipient || !amountInSats.toNumber() || !!error"
-        :class="!recipient || !amountInSats || !!error ? 'opacity-50 cursor-not-allowed' : ''"
-        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
-      >
-        Next
-      </button>
-      <button
-        @click="popConfirm"
-        v-else-if="symbol === 'BTC'"
-        :disabled="!recipient || !amountInSats.toNumber() || !currentRateFee || !!error"
-        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
-        :class="!recipient || !amountInSats || !currentRateFee || !!error ? 'opacity-50 cursor-not-allowed' : ''"
-      >
-        Next
-      </button>
-    </template>
-    <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">Loading...</div>
-
-    <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
-      <template #title>
-        <div class="text-black-primary font-bold text-center">Confirm Send</div>
-      </template>
-
-      <template #body>
-        <div class="mt-4 space-y-4">
-          <div class="space-y-1">
-            <div class="label">Amount</div>
-            <div class="value">{{ amount }} {{ asset.symbol }}</div>
-          </div>
-          <div class="space-y-1">
-            <div class="label">Recipient Address</div>
-            <div class="value break-all text-sm">{{ recipient }}</div>
-          </div>
-          <div class="space-y-1" v-if="totalFee">
-            <div class="label">BTC Total Fee</div>
-            <div class="value break-all text-sm">{{ totalFee / 10 ** 8 }} BTC</div>
-          </div>
+    <Drawer v-model:open="isOpenConfirmModal">
+      <DrawerContent class="bg-white">
+        <DrawerHeader>
+          <FlexBox d="col" ai="center" :gap="4">
+            <AssetLogo :logo="asset.logo" :symbol="symbol" :chain="asset.chain" type="network" />
+            <div class="text-base">{{ amount }} {{ symbol }}</div>
+          </FlexBox>
+        </DrawerHeader>
+        <Divider class="mt-2" />
+        <div class="p-4 space-y-4 text-ss">
+          <FlexBox ai="center" jc="between">
+            <div class="text-gray-primary">From</div>
+            <div class="break-all w-[228px]">{{ address }}</div>
+          </FlexBox>
+          <FlexBox ai="center" jc="between">
+            <div class="text-gray-primary">To</div>
+            <div class="break-all w-[228px]">{{ recipient }}</div>
+          </FlexBox>
+          <FlexBox ai="center" jc="between">
+            <div class="text-gray-primary">Amount</div>
+            <div class="break-all">{{ prettifyBalanceFixed(amount, symbol) }}</div>
+          </FlexBox>
+          <FlexBox ai="center" jc="between">
+            <div class="text-gray-primary">Fees (Estimated)</div>
+            <div>{{ prettifyBalanceFixed(totalFee, symbol, asset.decimal) }}</div>
+          </FlexBox>
         </div>
-      </template>
-
-      <template #control>
-        <div class="" v-if="operationLock">
-          <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Operating...</div>
-        </div>
-        <div class="grid grid-cols-2 gap-x-4" v-else>
-          <button
-            @click="isOpenConfirmModal = false"
-            class="w-full rounded-lg border border-blue-primary bg-white py-3 text-sm font-bold text-gray-700"
-          >
-            Cancel
-          </button>
-          <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="send">
-            Confirm
-          </button>
-        </div>
-      </template>
-    </Modal>
+        <DrawerFooter>
+          <FlexBox ai="center" jc="center" :gap="2">
+            <DrawerClose>
+              <Button type="light" class="w-[119px] h-12">Cancel</Button>
+            </DrawerClose>
+            <Button type="primary" class="w-[119px] h-12" @click="send">Confirm</Button>
+          </FlexBox>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   </FlexBox>
   <Loading text="Asset Loading..." v-else />
 </template>
