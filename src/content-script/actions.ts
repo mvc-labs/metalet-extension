@@ -212,6 +212,7 @@ export const btcKeys: Omit<Keys, 'event'> = {
     { name: 'getPublicKey', action: 'GetBTCPublicKey' },
     { name: 'getUtxos', action: 'GetBTCUtxos' },
     { name: 'pushPsbt', action: 'PushPsbt' },
+    { name: 'verifyMessage', action: 'BTCVerifyMessage' },
   ],
   authorize: [
     { name: 'connect', action: 'ConnectBTC' },
