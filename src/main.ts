@@ -3,7 +3,7 @@ import { VueQueryPlugin } from '@tanstack/vue-query'
 import * as Sentry from '@sentry/vue'
 
 import './style.css'
-import App from './App.vue'
+import Main from './Main.vue'
 import router from './router'
 import Notification from './components/Notification.vue'
 import { IS_DEV } from '@/data/config'
@@ -12,7 +12,7 @@ import { Buffer } from 'buffer'
 // @ts-ignore
 globalThis.Buffer = Buffer
 
-const app = createApp(App)
+const app = createApp(Main)
 
 // 全局组件
 app.component('Notification', Notification)

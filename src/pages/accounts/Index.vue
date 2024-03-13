@@ -17,6 +17,11 @@ getCurrentAccount().then((acc) => {
 
   currentAccount.value = acc
 })
+
+const gotoWelcome = () => {
+  const indexLocation = window.location.href.replace('accounts', 'welcome')
+  window.open(indexLocation, '_blank')
+}
 </script>
 
 <template>
@@ -31,8 +36,8 @@ getCurrentAccount().then((acc) => {
 
     <!-- create -->
     <div
+      @click="gotoWelcome"
       class="group group -mx-2 flex cursor-pointer items-center justify-start gap-x-2 rounded-md px-2 py-4 transition hover:bg-blue-100"
-      @click="() => $router.push('/welcome')"
     >
       <!-- icon -->
       <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 group-hover:bg-blue-200">

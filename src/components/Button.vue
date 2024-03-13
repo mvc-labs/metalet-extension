@@ -3,7 +3,7 @@ const { type } = defineProps<{ type: 'primary' | 'light' }>()
 </script>
 
 <template>
-  <button :class="`btn-${type}`">
+  <button :class="`btn-${type} h-12`">
     <slot />
   </button>
 </template>

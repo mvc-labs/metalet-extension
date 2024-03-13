@@ -16,6 +16,7 @@ module.exports = {
         'black-primary': '#141416',
         'black-secondary': '#303133',
         'gray-primary': '#909399',
+        'gray-line': '#BFC2CC',
         'gray-soft': '#EDEFF2',
         'gray-secondary': '#F5F7F9',
         'gray-light': '#F5F7FA',
@@ -40,15 +41,18 @@ module.exports = {
         'tab-selected': 'linear-gradient(270deg, #171AFF -1%, #72F5F6 99%)',
       },
       width: {
+        7.5: '1.875rem',
         15: '3.75rem',
         22.5: '5.625rem',
         30: '7.5rem',
+        32.5: '8.125rem',
         61.5: '15.375rem',
         82: '20.5rem',
       },
       height: {
         15: '3.75rem',
         18: '4.5rem',
+        45: '11.25rem',
         85: '22.5rem',
       },
       maxWidth: {
@@ -58,9 +62,15 @@ module.exports = {
       lineHeight: {
         15: '3.75rem',
       },
+      margin: {
+        15: '3.75rem',
+      },
       padding: {
         7.5: '1.875rem',
         22.5: '5.625rem',
+      },
+      gap: {
+        15: '3.75rem',
       },
       keyframes: {
         'accordion-down': {

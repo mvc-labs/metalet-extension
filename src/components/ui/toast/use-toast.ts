@@ -3,6 +3,8 @@ import type { Component, VNode } from 'vue'
 import type { ToastProps } from '.'
 
 const TOAST_LIMIT = 1
+
+// TODO: fix the delay not working
 const TOAST_REMOVE_DELAY = 1000000
 
 export type StringOrVNode = string | VNode | (() => VNode)
