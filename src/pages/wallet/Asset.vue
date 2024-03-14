@@ -176,10 +176,13 @@ const toReceive = () => {
 
       <div class="mt-0.5 text-sm text-gray-primary">$ {{ assetUSD?.toNumber() }} USD</div>
 
-      <div class="space-x-1">
-        <div v-for="tag in tags" :key="tag.name" :class="['text-gray-primary', 'text-xs']">
-          {{ tag.name }}
-        </div>
+      <div
+        v-for="tag in tags"
+        :key="tag.name"
+        :style="`background-color:${tag.bg};color:${tag.color};`"
+        :class="['px-1.5', 'py-0.5', 'rounded', 'text-xs', 'inline-block', 'scale-75']"
+      >
+        {{ tag.name }}
       </div>
     </div>
 

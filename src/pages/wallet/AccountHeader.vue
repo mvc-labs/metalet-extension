@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
+import { ref } from 'vue'
 import { FlexBox } from '@/components'
 import { useRouter } from 'vue-router'
 import { getNetwork } from '@/lib/network'
@@ -18,11 +18,8 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from '@/components/ui/drawer'
 
 const { toast } = useToast()

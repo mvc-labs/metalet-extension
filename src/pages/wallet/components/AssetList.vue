@@ -57,7 +57,7 @@ function toToken(token: Asset, address: string) {
   router.push({
     name: 'token',
     params: { genesis: token.genesis, symbol: token.symbol, address },
-    query: { genesis: token.genesis, symbol: token.symbol, address },
+    // query: { genesis: token.genesis, symbol: token.symbol, address },
   })
 }
 </script>

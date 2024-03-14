@@ -239,6 +239,7 @@ const routes = [
         meta: {
           secondaryHeader: true,
           headerTitle: 'ASSET',
+          noFooter: true,
         },
       },
       {
@@ -412,14 +413,7 @@ const router = VueRouter.createRouter({
   routes,
 })
 
-const authPages = [
-  '/welcome',
-  '/welcome/import',
-  '/welcome/create',
-  '/lock',
-  '/accounts',
-  '/migrateV2',
-]
+const authPages = ['/welcome', '/welcome/import', '/welcome/create', '/lock', '/accounts', '/migrateV2']
 
 router.beforeEach(async (to, _, next) => {
   if (to.fullPath !== '/lock' && (await storage.get('locked'))) {
