@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { getLogo } from '@/data/logos'
+import { type Chain } from '@/lib/account'
 import { useRouter, useRoute } from 'vue-router'
 import { FlexBox, Divider, Button } from '@/components'
 import SuccessPNG from '@/assets/icons-v3/send-success.png'
-import { getLogo } from '@/data/logos'
-import { type Chain } from '@/lib/account'
 
 const route = useRoute()
 const router = useRouter()

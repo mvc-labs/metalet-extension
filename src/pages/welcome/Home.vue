@@ -1,18 +1,11 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { getAccounts } from '@/lib/account'
 import { FlexBox, Button } from '@/components'
 import { Checkbox } from '@/components/ui/checkbox'
 import WelcomeLogo from '@/assets/icons-v3/welcome-logo.svg'
 
-const router = useRouter()
-
 const checked = ref(false)
-
-const createWallet = () => {
-  router.push('/wallet/create')
-}
 
 const accountsCount = ref(0)
 getAccounts().then((accounts) => {
@@ -21,7 +14,7 @@ getAccounts().then((accounts) => {
 </script>
 
 <template>
-  <FlexBox ai="center" jc="center" :gap="12">
+  <FlexBox ai="center" jc="center" :gap="12" class="w-full h-full">
     <FlexBox d="col" class="gap-y-15">
       <FlexBox d="col" :gap="3">
         <div class="text-2xl font-semibold">Metalet —— <br />The portal to exploring the Web3 blockchain world.</div>
