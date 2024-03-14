@@ -1,17 +1,24 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-
-import type { Activity } from '@/queries/activities'
-import { prettifyTimestamp, prettifyTxId } from '@/lib/formatters'
 import { toTx } from '@/lib/helpers'
-import { getBrowserHost } from '@/lib/host'
+import { FlexBox } from '@/components'
 import { type Chain } from '@/lib/account'
 import { type Asset } from '@/data/assets'
+import { getBrowserHost } from '@/lib/host'
+import AssetLogo from '@/components/AssetLogo.vue'
+import type { Activity } from '@/queries/activities'
+import LoadingIcon from '@/assets/icons-v3/loading.svg'
+import { prettifyTimestamp, prettifyTxId } from '@/lib/formatters'
 
 const props = defineProps<{
   asset: Asset
   activity: Activity
 }>()
+
+const flow = computed(() => {
+  const { outcome, income } = props.activity
+  return outcome > income ? 'Send' : 'Receive'
+})
 
 const isConfirmed = computed(() => {
   if (props.asset?.contract === 'BRC-20') {
@@ -52,8 +59,30 @@ const toActivityTx = async () => {
 </script>
 
 <template>
-  <div class="w-full py-3">
-<AssetLogo />
+  <FlexBox ai="center" jc="between" class="py-3">
+    <FlexBox ai="center" :gap="3">
+      <AssetLogo
+        :symbol="asset.symbol"
+        :chain="asset.chain"
+        :logo="asset.logo"
+        type="activity"
+        class="w-[38px] text-lg"
+        :flow="flow"
+      />
+      <div>
+        <div :class="['text-sm space-x-2', !isConfirmed ? 'text-orange-primary' : undefined]">
+          <LoadingIcon v-if="!isConfirmed" />
+          <span>{{ flow }}</span>
+        </div>
+        <div class="text-gray-primary text-xs">{{ prettifyTimestamp(activity.time) }}</div>
+      </div>
+    </FlexBox>
+    <FlexBox d="col" ai="end">
+      <div class="text-sm">{{ difference.display }}</div>
+      <div class="text-xs text-gray-primary"> {{ prettifyTxId(activity.txid) }}</div>
+    </FlexBox>
+  </FlexBox>
+  <!-- <div class="w-full py-3">
 
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-x-2 text-green-500" v-if="isConfirmed">
@@ -75,5 +104,5 @@ const toActivityTx = async () => {
         {{ prettifyTxId(activity.txid) }}
       </div>
     </div>
-  </div>
+  </div> -->
 </template>

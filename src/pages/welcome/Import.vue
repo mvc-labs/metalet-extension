@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 
 const step = ref(1)
 const stepLen = ref(3)
-const successed = ref(true)
+const successed = ref(false)
 const hasPassword = ref(false)
 
 const selectableScripts = scripts.slice(0, -1)

@@ -166,7 +166,7 @@ const toReceive = () => {
 <template>
   <div class="flex flex-col items-center space-y-6 w-full" v-if="asset">
     <div class="flex flex-col items-center">
-      <AssetLogo :logo="asset.logo" :chain="asset.chain" :symbol="asset.symbol" type="network" />
+      <AssetLogo :logo="asset.logo" :chain="asset.chain" :symbol="asset.symbol" type="network" class="w-15" />
 
       <div class="mt-3 text-2xl">
         <span v-if="asset.balance"> {{ calcBalance(asset.balance.total, asset.decimal, asset.symbol) }}</span>

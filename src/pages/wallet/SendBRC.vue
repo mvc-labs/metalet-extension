@@ -141,7 +141,7 @@ async function send() {
 
     <div class="space-y-4">
       <FlexBox d="col" ai="center">
-        <AssetLogo :logo="asset?.logo" :symbol="symbol" chain="btc" type="network" />
+        <AssetLogo :logo="asset?.logo" :symbol="symbol" chain="btc" type="network" class="w-15"/>
 
         <div class="mt-3 text-base">{{ symbol }}</div>
 
@@ -188,7 +188,7 @@ async function send() {
       <DrawerContent class="bg-white">
         <DrawerHeader>
           <FlexBox d="col" ai="center" :gap="4">
-            <AssetLogo :logo="asset?.logo" :symbol="symbol" chain="btc" type="network" />
+            <AssetLogo :logo="asset?.logo" :symbol="symbol" chain="btc" type="network" class="w-15"/>
             <div class="text-base">{{ amount }} {{ symbol }}</div>
           </FlexBox>
         </DrawerHeader>

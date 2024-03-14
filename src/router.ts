@@ -229,6 +229,7 @@ const routes = [
         meta: {
           secondaryHeader: true,
           headerTitle: 'Asset',
+          noFooter: true,
         },
       },
       {
