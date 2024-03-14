@@ -31,7 +31,7 @@ export const signMessage = (
   privateKey: mvc.PrivateKey,
   encoding?: 'utf-8' | 'base64' | 'hex' | 'utf8'
 ) => {
-  const messageHash = mvc.crypto.Hash.sha256(Buffer.from(message))
+  const messageHash = mvc.crypto.Hash.sha256(Buffer.from('MVC Signed Message:\n' + message))
 
   let sigBuf = mvc.crypto.ECDSA.sign(messageHash, privateKey).toBuffer()
 
@@ -61,7 +61,7 @@ export const verifySignature = (
   publicKey: mvc.PublicKey,
   encoding?: 'utf-8' | 'base64' | 'hex' | 'utf8'
 ) => {
-  const messageHash = mvc.crypto.Hash.sha256(Buffer.from(message))
+  const messageHash = mvc.crypto.Hash.sha256(Buffer.from('MVC Signed Message:\n' + message))
 
   const sigDER = Buffer.from(signature, encoding || 'hex')
   const sigObj = mvc.crypto.Signature.fromDER(sigDER)
