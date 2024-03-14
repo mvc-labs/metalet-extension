@@ -3,6 +3,7 @@ import useStorage from './lib/storage'
 import { IS_DEV } from '@/data/config'
 import * as VueRouter from 'vue-router'
 import { assetList } from '@/lib/balance'
+import { gotoWelcome } from '@/lib/utils'
 import Wallet from './pages/wallet/Index.vue'
 import { getCurrentAccount } from './lib/account'
 
@@ -419,6 +420,7 @@ router.beforeEach(async (to, _, next) => {
   if (to.fullPath !== '/lock' && (await storage.get('locked'))) {
     next('/lock')
   } else if (!authPages.includes(to.path) && !(await getCurrentAccount())) {
+    gotoWelcome('/welcome')
     next('/welcome')
   } else {
     if (['asset', 'token'].includes(to.name as string)) {

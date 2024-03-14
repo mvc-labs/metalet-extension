@@ -20,10 +20,6 @@ onMounted(async () => {
   mvcAddress.value = await getAddress('mvc')
   btcAddress.value = await getAddress('btc')
 
-  if (!btcAddress.value || !mvcAddress.value) {
-    router.push('/welcome')
-  }
-
   getServiceNetwork().then((_serviceNetwork) => {
     serviceNetwork.value = _serviceNetwork
   })

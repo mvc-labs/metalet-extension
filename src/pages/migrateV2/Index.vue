@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { getCurrentAccount } from '@/lib/account'
 import { migrateV2, needMigrationV2 } from '@/lib/migrate'
 import MetaletLogoImg from '@/assets/images/metalet-logo.png?url'
+import { gotoWelcome } from '@/lib/utils'
 
 const router = useRouter()
 needMigrationV2().then(async (needsMigration: boolean) => {
@@ -15,7 +16,7 @@ needMigrationV2().then(async (needsMigration: boolean) => {
   if (await getCurrentAccount()) {
     router.push('/wallet')
   } else {
-    router.push('/welcome')
+    gotoWelcome('/welcome')
   }
 })
 </script>

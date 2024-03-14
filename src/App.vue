@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { FEEB } from './data/config'
 import useStorage from '@/lib/storage'
+import { gotoWelcome } from '@/lib/utils'
 import { getNetwork } from './lib/network'
 import { computed, Ref, inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -12,6 +13,7 @@ import TheHeader from './components/headers/TheHeader.vue'
 import { API_NET, API_TARGET, Wallet } from 'meta-contract'
 import { getCurrentAccount, getPrivateKey } from './lib/account'
 import SecondaryHeader from './components/headers/SecondaryHeader.vue'
+
 import {
   migrateV2,
   migrationSync,
@@ -57,7 +59,7 @@ checkMigrate().then(async () => {
     const wif = await getPrivateKey()
     wallet.value = new Wallet(wif, network as API_NET, FEEB, API_TARGET.MVC)
   } else {
-    router.push('/welcome')
+    gotoWelcome('/welcome')
   }
 })
 </script>
