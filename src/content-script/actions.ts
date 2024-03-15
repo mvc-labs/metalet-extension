@@ -47,7 +47,7 @@ export async function createAction(
           callback(event.data)
         }
       }
-      return true
+      // return true
     }
     window.addEventListener('message', actionListener)
   }

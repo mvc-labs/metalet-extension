@@ -16,7 +16,7 @@ const listenToMetalet = () => {
       window.postMessage(msg, '*')
     }
 
-    return true
+    // return true
   })
 }
 

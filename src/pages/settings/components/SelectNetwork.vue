@@ -3,6 +3,7 @@ import { ref, Ref } from 'vue'
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
 import { ChevronRightIcon } from '@heroicons/vue/20/solid'
 import { getNetwork, setNetwork } from '@/lib/network'
+import { sleep } from '@/lib/helpers';
 
 type Network = {
   id: number
@@ -23,6 +24,8 @@ const select = async (network: Network) => {
 
   // 存入存储
   await setNetwork(network.type)
+
+  await sleep(200)
 
   // force a reload
   window.location.reload()

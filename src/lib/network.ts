@@ -9,9 +9,9 @@ export type Network = 'mainnet' | 'testnet'
 export const network = ref<Network>(await storage.get('network', { defaultValue: 'mainnet' }))
 
 export async function setNetwork(_network: Network) {
-  await storage.set('network', _network)
   network.value = _network
   notifyContent('networkChanged')(_network)
+  await storage.set('network', _network)
 }
 
 export async function getNetwork(): Promise<Network> {
