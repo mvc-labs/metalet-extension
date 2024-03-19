@@ -23,6 +23,7 @@ public/content.js
 *.njsproj
 *.sln
 *.sw?
+*.lock
 
 # Sentry Config File
 .env.sentry-build-plugin
