@@ -33,7 +33,6 @@ actions.Inscribe.process({ ...props.params, options: { noBroadcast: true } })
       commitCost: number
       revealCost: number
     }) => {
-      console.log('Inscribe', [commitTxHex, ...revealTxsHex])
       txHexs.value = [commitTxHex, ...revealTxsHex]
       commitCost.value = _commitCost
       revealCost.value = _revealCost

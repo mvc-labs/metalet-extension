@@ -112,9 +112,9 @@ export class InscriptionTool {
     request.metaidDataList.forEach((metaidData) => {
       tool.inscriptionTxCtxDataList.push(createMetaIdTxCtxData(network, metaidData, randomKeyPairs.publicKey))
     })
+    
 
     const totalRevealPrevOutputValue = tool.buildEmptyRevealTx(network, revealOutValue, request.feeRate)
-    console.log('buildEmptyRevealTx')
 
     const insufficient = tool.buildCommitTx(
       network,
@@ -125,16 +125,14 @@ export class InscriptionTool {
       minChangeValue,
       keyPairs.privateKey!
     )
-    console.log('buildCommitTx', insufficient)
 
     if (insufficient) {
       return tool
     }
 
     tool.signCommitTx(request.commitTxPrevOutputList, keyPairs.privateKey!)
-    console.log('signCommitTx')
     tool.completeRevealTx(randomKeyPairs.privateKey!)
-    console.log('completeRevealTx')
+
     return tool
   }
 
@@ -217,6 +215,9 @@ export class InscriptionTool {
       txForEstimate.outs = txForEstimate.outs.slice(0, txForEstimate.outs.length - 1)
       const feeWithoutChange = Math.floor(txForEstimate.virtualSize() * commitFeeRate)
       if (totalSenderAmount - totalRevealPrevOutputValue - feeWithoutChange < 0) {
+        throw new Error(
+          `Insufficient funds. Sender amount: ${totalSenderAmount} sats, Required amount: ${totalRevealPrevOutputValue + feeWithoutChange} sats`
+        )
         this.mustCommitTxFee = fee
         return true
       }
@@ -457,16 +458,24 @@ export async function process({
   }))
   const signer = (await getSigner('btc')) as BIP32Interface
 
-  const { commitTx, revealTxs, commitCost, revealCost } = inscribe(network, { ...data, commitTxPrevOutputList }, signer)
-  if (commitTx === '') {
-    throw new Error('Insufficient funds')
-  }
+  try {
+    const { commitTx, revealTxs, commitCost, revealCost } = inscribe(
+      network,
+      { ...data, commitTxPrevOutputList },
+      signer
+    )
+    if (commitTx === '') {
+      throw new Error('Insufficient funds')
+    }
 
-  if (!options.noBroadcast) {
-    const commitTxId = await broadcastBTCTx(commitTx)
-    await sleep(1000)
-    const [...revealTxIds] = await Promise.all([...revealTxs.map((revealTx) => broadcastBTCTx(revealTx))])
-    return { commitTxId, revealTxIds, commitCost, revealCost }
+    if (!options.noBroadcast) {
+      const commitTxId = await broadcastBTCTx(commitTx)
+      await sleep(1000)
+      const [...revealTxIds] = await Promise.all([...revealTxs.map((revealTx) => broadcastBTCTx(revealTx))])
+      return { commitTxId, revealTxIds, commitCost, revealCost }
+    }
+    return { commitTxHex: commitTx, revealTxsHex: revealTxs, commitCost, revealCost }
+  } catch (error) {
+    throw error
   }
-  return { commitTxHex: commitTx, revealTxsHex: revealTxs, commitCost, revealCost }
 }
