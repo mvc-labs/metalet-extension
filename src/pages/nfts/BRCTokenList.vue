@@ -69,7 +69,7 @@ const toBRC20Detail = (inscriptionId: string) => {
       BRC Token List loading...
     </div>
     <div v-else-if="inscriptions.length">
-      <div class="px-3 py-4 grid grid-cols-3 gap-x-1 gap-y-7">
+      <div class="px-3 py-4 grid grid-cols-3 gap-x-3 gap-y-7">
         <div
           v-for="inscription in inscriptions"
           @click="toBRC20Detail(inscription.inscriptionId)"

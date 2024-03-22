@@ -42,10 +42,10 @@ const toBRC20Detail = (metaIDPin: MetaIDPin) => {
     <div v-if="isLoading" class="w-full py-3 text-center text-sm  text-gray-500">
       MetaID Pin List loading...
     </div>
-    <div v-else-if="metaPins?.length" class="mt-12 px-3 py-4 grid grid-cols-3 gap-x-1 gap-y-7">
+    <div v-else-if="metaPins?.length" class="mt-12 px-3 py-4 grid grid-cols-3 gap-x-3 gap-y-7">
       <div v-for="metaPin in metaPins" @click="toBRC20Detail(metaPin)"
         class="flex flex-col items-center justify-center rounded-md cursor-pointer text-[#999999]">
-        <MetaPin :value="metaPin.outputValue" :content="metaPin.contentSummary" />
+        <MetaPin :value="metaPin.outputValue" :content="metaPin.contentSummary" :contentType="metaPin.contentType" />
         <span class="text-sm text-center mt-3 truncate" :title="'# ' + metaPin.number"># {{
           metaPin.number }}</span>
         <span class="text-xs text-center mt-1 h-[30px]">{{
