@@ -8,7 +8,7 @@ import { useBRCInscriptionInfoQuery } from '@/queries/inscribe'
 const router = useRouter()
 const { params } = useRoute()
 
-const address = ref(params.address as string)
+const address = params.address as string
 const inscriptionId = ref(params.inscriptionId as string)
 
 const {
@@ -25,15 +25,14 @@ watch(error, () => {
   }
 })
 
-const toSendBRC20 = () => {
-  const content = JSON.parse(inscriptionDetail.value!.contentBody)
+const toSendNFT = (id: string) => {
   router.push({
-    name: 'sendBRC20',
+    name: 'sendNFT',
+    params: { id, nftType: 'brc20' },
     query: {
-      inscriptionId: inscriptionId.value,
-      address: address.value,
-      symbol: content.tick,
-      amount: content.amt,
+      amount: inscriptionDetail.value?.outputValue,
+      satoshis: inscriptionDetail.value?.outputValue,
+      content: inscriptionDetail.value?.contentBody,
     },
   })
 }
@@ -113,7 +112,7 @@ const toSendBRC20 = () => {
       </div>
     </div>
 
-    <button @click="toSendBRC20" class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100">
+    <button @click="toSendNFT(inscriptionId)" class="main-btn-bg w-full rounded-lg py-3 text-sm text-sky-100">
       Transfers
     </button>
   </div>

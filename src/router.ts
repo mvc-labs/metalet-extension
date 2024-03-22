@@ -108,7 +108,7 @@ const routes = [
   },
   {
     path: '/wallet/sendBRC20',
-    component: () => import('./pages/wallet/SendBRC.vue'),
+    component: () => import('./pages/wallet/SendBRC20.vue'),
     name: 'sendBRC20',
     meta: {
       secondaryHeader: true,
@@ -237,11 +237,21 @@ const routes = [
   },
   {
     name: 'metaPinDetail',
-    path: '/nft/metaPin/detail',
+    path: '/nft/metaPin/detail/:address/:metaPinId',
     component: () => import('./pages/nfts/MetaPinDetail.vue'),
     meta: {
       secondaryHeader: true,
       headerTitle: '',
+      noFooter: true,
+    },
+  },
+  {
+    name: 'sendNFT',
+    path: '/nft/sendNFT/:nftType/:address/:id',
+    component: () => import('./pages/nfts/SendNFT.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: 'Send NFT',
       noFooter: true,
     },
   },
