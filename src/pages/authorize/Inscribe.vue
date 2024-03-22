@@ -57,7 +57,7 @@ const copy = (txHex: string) => {
         </button>
       </div>
 
-      <div class="col-span-4 font-bold text-center">Transaction Details</div>
+      <div class="col-span-4  text-center">Transaction Details</div>
     </div>
 
     <!-- detail body -->
@@ -85,7 +85,7 @@ const copy = (txHex: string) => {
     </div>
   </div>
   <template v-else>
-    <h3 class="text-base font-bold">{{ action.title }}</h3>
+    <h3 class="text-base ">{{ action.title }}</h3>
 
     <div class="value">{{ params.message }}</div>
 
@@ -93,7 +93,7 @@ const copy = (txHex: string) => {
 
     <div class="mt-2 flex items-center justify-center" v-else>
       <button
-        class="underline decoration-primary-blue text-gray-700 px-4 py-2 mx-auto font-bold decoration underline-offset-4 hover:underline-offset-2 transition-all duration-300"
+        class="underline decoration-primary-blue text-gray-700 px-4 py-2 mx-auto  decoration underline-offset-4 hover:underline-offset-2 transition-all duration-300"
         @click="isShowingDetails = true"
       >
         View Transaction Details

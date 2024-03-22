@@ -45,8 +45,8 @@ const toCollection = () => {
   <div class="space-y-4">
     <!-- title -->
     <div class="flex cursor-pointer items-center justify-between" @click="toCollection">
-      <div class="font-bold" v-if="collectionInfo?.name">{{ collectionInfo.name }}</div>
-      <div class="font-bold text-gray-700" v-else>{{ collection.genesis.slice(0, 8) + '...' }}</div>
+      <div class="" v-if="collectionInfo?.name">{{ collectionInfo.name }}</div>
+      <div class=" text-gray-700" v-else>{{ collection.genesis.slice(0, 8) + '...' }}</div>
       <div class="flex items-center gap-x-1">
         <span class="text-gray-500">{{ collection.count }}</span>
         <ChevronRightIcon class="h-4 w-4" />

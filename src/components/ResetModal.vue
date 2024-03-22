@@ -40,7 +40,7 @@ const disconnect = async () => {
     <div class="fixed inset-0 isolate z-50 flex items-end bg-black/20 backdrop-blur-sm" v-show="show">
       <div class="grow rounded-t-xl bg-white p-4 pb-8">
         <div class="flex items-center justify-between border-b border-gray-100 pb-4">
-          <span class="text-base font-bold">Reset Account</span>
+          <span class="text-base ">Reset Account</span>
           <button class="text-gray-400 hover:text-gray-500" @click="$emit('update:show', false)" type="button">
             <XMarkIcon class="h-5 w-5" />
           </button>
@@ -94,6 +94,6 @@ const disconnect = async () => {
 
 <style scoped lang="css">
 .reset-button {
-  @apply rounded-lg border-2 py-3 text-sm font-bold;
+  @apply rounded-lg border-2 py-3 text-sm ;
 }
 </style>

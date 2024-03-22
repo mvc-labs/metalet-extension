@@ -43,7 +43,7 @@ const qrcode = useQRCode(address)
       <div class="truncate pl-2 text-sm">{{ address }}</div>
       <!-- copy button -->
       <button
-        class="w-20 shrink-0 rounded-lg bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 py-3 text-xs font-bold text-sky-100 transition-all hover:saturate-150"
+        class="w-20 shrink-0 rounded-lg bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 py-3 text-xs  text-sky-100 transition-all hover:saturate-150"
         :class="{ 'opacity-50 hover:!saturate-100': isCopied }"
         @click="copyAddress"
         :disabled="isCopied"

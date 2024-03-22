@@ -19,7 +19,7 @@ function toSelectAsset(purpose: 'receive' | 'send') {
 <template>
   <div class="pt-4">
     <div class="text-gray-500">Total Balance</div>
-    <div class="mt-2 text-3xl font-bold">
+    <div class="mt-2 text-3xl ">
       $ {{ totalBalance.toFixed(2) }} USD
     </div>
 

@@ -25,9 +25,6 @@ module.exports = {
         90: '22.5rem',
         150: '37.5rem',
       },
-      fontFamily: {
-        inter: ['Inter'],
-      },
     },
   },
   plugins: [require('@headlessui/tailwindcss')],

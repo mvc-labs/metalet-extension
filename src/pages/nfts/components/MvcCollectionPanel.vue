@@ -40,7 +40,7 @@ const toReceive = () => {
   <div class="space-y-4">
     <div class="space-y-1" v-if="false">
       <div class="text-sm text-gray-500">collectibles</div>
-      <div class="text-xl font-bold">{{ nftsCountDisplay }}</div>
+      <div class="text-xl ">{{ nftsCountDisplay }}</div>
     </div>
 
     <div v-if="false">
@@ -53,7 +53,7 @@ const toReceive = () => {
     <div class="!my-8 text-sm text-center" v-if="isLoading">MetaContract Tokens loading...</div>
     <div class="!my-8 space-y-8 text-sm" v-else>
       <NftCollectionItem v-for="collection in nftCollections" :collection="collection" v-if="nftCollections?.length"/>
-      <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">No MetaContracts yet.</div>
+      <div v-else class="w-full py-3 text-center text-sm  text-gray-500">No MetaContracts yet.</div>
     </div>
   </div>
 </template>

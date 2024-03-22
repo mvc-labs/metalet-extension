@@ -59,7 +59,7 @@ function toToken(token: Asset, address: string) {
 
 <template>
   <div class="mt-8 space-y-5 text-black">
-    <div class="text-base font-bold text-gray-900">BTC</div>
+    <div class="text-base  text-gray-900">BTC</div>
     <div class="space-y-2" v-if="btcAddress">
       <AssetItem :asset="BTCAsset" :address="btcAddress" @click="toNative(BTCAsset, btcAddress)" />
       <AssetItem
@@ -73,7 +73,7 @@ function toToken(token: Asset, address: string) {
     </div>
     <div v-else class="text-center text-gray-500 text-sm">BTC Asset Loading...</div>
 
-    <div class="text-base font-bold text-gray-900">MVC</div>
+    <div class="text-base  text-gray-900">MVC</div>
     <div class="space-y-2" v-if="mvcAddress">
       <AssetItem :asset="MVCAsset" :address="mvcAddress" @click="toNative(MVCAsset, mvcAddress)" />
       <AssetItem

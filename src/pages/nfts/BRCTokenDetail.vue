@@ -113,7 +113,7 @@ const toSendBRC20 = () => {
       </div>
     </div>
 
-    <button @click="toSendBRC20" class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100">
+    <button @click="toSendBRC20" class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100">
       Transfers
     </button>
   </div>

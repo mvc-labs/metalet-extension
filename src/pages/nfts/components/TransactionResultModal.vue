@@ -80,7 +80,7 @@ const toResultTx = async () => {
           </div>
 
           <div class="">
-            <h3 class="text-sm font-bold">{{ result.nft.name }}</h3>
+            <h3 class="text-sm ">{{ result.nft.name }}</h3>
             <div class="text-xs text-gray-500">{{ '# ' + result.nft.tokenIndex }}</div>
           </div>
         </div>
@@ -105,7 +105,7 @@ const toResultTx = async () => {
     <template #control>
       <div class="">
         <button
-          class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100 outline-none"
+          class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100 outline-none"
           @click="closeModal"
         >
           OK

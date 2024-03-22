@@ -23,7 +23,7 @@ action
 
 <template>
   <ul class="space-y-4 rounded-lg bg-gray-100 p-4 text-sm">
-    <h3 class="text-base font-bold">{{ action.title }}</h3>
+    <h3 class="text-base ">{{ action.title }}</h3>
     <div class="space-y-2">
       <div class="">
         <div class="label">codehash</div>

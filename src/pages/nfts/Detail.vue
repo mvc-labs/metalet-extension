@@ -102,7 +102,7 @@ const toCollection = () => {
       </button>
 
       <div class="mt-1 flex items-center gap-2">
-        <div class="text-lg font-bold">{{ nftInfo.name }}</div>
+        <div class="text-lg ">{{ nftInfo.name }}</div>
         <div class="text-sm text-gray-500">{{ '# ' + nft.tokenIndex }}</div>
       </div>
     </div>

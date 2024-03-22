@@ -45,4 +45,4 @@ if (!IS_DEV) {
 
 app.use(router)
 app.use(VueQueryPlugin)
-app.mount('body')
+app.mount('#app')

@@ -38,7 +38,7 @@ const toNftDetail = () => {
     <img :src="iconUrl" class="aspect-square h-full w-full rounded-lg bg-gray-200 object-contain" v-if="iconUrl" />
 
     <div
-      class="flex aspect-square items-center justify-center rounded-lg bg-gray-200 text-lg font-bold italic text-gray-400"
+      class="flex aspect-square items-center justify-center rounded-lg bg-gray-200 text-lg  italic text-gray-400"
       v-else
     >
       NFT

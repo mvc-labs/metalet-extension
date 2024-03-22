@@ -66,7 +66,7 @@ const toActivityTx = async () => {
       <div :class="['text-sm text-gray-500']">{{ prettifyTimestamp(activity.time) }}</div>
     </div>
 
-    <div :class="[difference.displayClass, 'text-right  text-lg font-bold']">{{ difference.display }}</div>
+    <div :class="[difference.displayClass, 'text-right  text-lg ']">{{ difference.display }}</div>
 
     <div class="flex items-center justify-end gap-x-2">
       <div class="cursor-pointer text-xs text-gray-400 hover:underline" @click="toActivityTx">

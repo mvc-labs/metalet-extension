@@ -174,11 +174,11 @@ async function send() {
     </div>
 
     <!-- send -->
-    <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="popConfirm">Send</button>
+    <button class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100" @click="popConfirm">Send</button>
 
     <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
       <template #title>
-        <div class="text-black-primary font-bold text-center">Confirm Send</div>
+        <div class="text-black-primary  text-center">Confirm Send</div>
       </template>
 
       <template #body>
@@ -200,16 +200,16 @@ async function send() {
 
       <template #control>
         <div class="" v-if="operationLock">
-          <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Operating...</div>
+          <div class="w-full py-3 text-center text-sm  text-gray-500">Operating...</div>
         </div>
         <div class="grid grid-cols-2 gap-x-4" v-else>
           <button
-            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
+            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm  text-gray-700"
             @click="isOpenConfirmModal = false"
           >
             Cancel
           </button>
-          <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="send">
+          <button class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100" @click="send">
             Confirm
           </button>
         </div>

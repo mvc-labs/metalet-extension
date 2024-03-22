@@ -91,6 +91,6 @@ const toAccountList = () => {
 }
 
 .reset-button {
-  @apply rounded-lg border-2 py-3 text-sm font-bold;
+  @apply rounded-lg border-2 py-3 text-sm ;
 }
 </style>

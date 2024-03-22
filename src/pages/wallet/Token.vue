@@ -65,7 +65,7 @@ const copyGenesis = () => {
 
 <template>
   <div class="mt-8 flex flex-col items-center">
-    <div v-if="isLoading" class="text-center text-gray-500 font-bold">Token Asset Loading...</div>
+    <div v-if="isLoading" class="text-center text-gray-500 ">Token Asset Loading...</div>
 
     <template v-else-if="!!asset && !!token">
       <!-- logo -->
@@ -110,7 +110,7 @@ const copyGenesis = () => {
       </div>
     </template>
 
-    <div v-else class="text-center text-gray-500 font-bold">No Token Asset.</div>
+    <div v-else class="text-center text-gray-500 ">No Token Asset.</div>
   </div>
 </template>
 

@@ -203,7 +203,7 @@ function toSuceess() {
 
       <div
         v-if="operationLock"
-        class="w-full py-3 text-center text-sm font-bold text-gray-500 absolute bottom-4 left-0"
+        class="w-full py-3 text-center text-sm  text-gray-500 absolute bottom-4 left-0"
       >
         Loading...
       </div>
@@ -212,14 +212,14 @@ function toSuceess() {
         @click="popConfirm"
         :disabled="!currentRateFee || !inscribeAmount"
         :class="!currentRateFee || !inscribeAmount ? 'opacity-50 cursor-not-allowed' : ''"
-        class="main-btn-bg w-full rounded-lg py-3 teFxt-sm font-bold text-sky-100 absolute bottom-4 left-0"
+        class="main-btn-bg w-full rounded-lg py-3 teFxt-sm  text-sky-100 absolute bottom-4 left-0"
       >
         Next
       </button>
     </div>
 
     <div v-else-if="nextStep === 1" class="text-black-primary relative h-full">
-      <div class="text-center text-3xl font-bold">{{ inscribeAmount }} {{ asset.symbol }}</div>
+      <div class="text-center text-3xl ">{{ inscribeAmount }} {{ asset.symbol }}</div>
       <div class="mt-[30px] text-sm w-full">Preview</div>
       <div class="w-full h-[76px] rounded-sm bg-[#F5F5F5] mt-2 p-3 text-sm break-all">
         {{ `{"p":"brc-20","op":"transfer","tick":"${asset.symbol}","amt":"${inscribeAmount}"}` }}
@@ -238,7 +238,7 @@ function toSuceess() {
       </div>
       <button
         @click="toConfirm"
-        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100 absolute bottom-4 left-0"
+        class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100 absolute bottom-4 left-0"
       >
         Next
       </button>
@@ -246,7 +246,7 @@ function toSuceess() {
 
     <div v-if="nextStep === 2" class="text-black-primary h-full">
       <div class="text-center text-base text-[#909399]">Spend Amount</div>
-      <div class="text-center text-3xl font-bold mt-3">{{ inscribeAmount }} {{ asset.symbol }}</div>
+      <div class="text-center text-3xl  mt-3">{{ inscribeAmount }} {{ asset.symbol }}</div>
       <div class="mt-3 text-center text-base text-[#909399]">
         {{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }} (network fee)
       </div>
@@ -299,12 +299,12 @@ function toSuceess() {
       <div class="w-full left-0 flex items-center space-x-4 mt-4 pb-4 justify-center">
         <button
           @click="cancel"
-          class="border w-[133px] rounded-lg py-3 text-sm font-bold text-black-primary"
+          class="border w-[133px] rounded-lg py-3 text-sm  text-black-primary"
           style="border-image: 'linear-gradient(105deg, #72F5F6 4%, #171AFF 94%) 1'"
         >
           Cancel
         </button>
-        <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm font-bold text-sky-100">
+        <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm  text-sky-100">
           Comfirm
         </button>
       </div>

@@ -14,9 +14,6 @@ const env = loadEnv('', process.cwd())
 // https://vitejs.dev/config/
 export default defineConfig({
   ...baseConfig,
-  test: {
-    globals: true,
-  },
 
   plugins: [alias(), vue(), nodePolyfills(), wasm(), topLevelAwait(), svgLoader()],
   build: {

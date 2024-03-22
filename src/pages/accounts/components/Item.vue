@@ -100,7 +100,7 @@ const openEditNameModal = ref(false)
       <!-- info -->
       <div class="group flex flex-col">
         <div class="flex items-center gap-x-2">
-          <div class="text-sm font-bold" :class="isCurrent && showConnectButton && 'text-blue-500'">
+          <div class="text-sm " :class="isCurrent && showConnectButton && 'text-blue-500'">
             {{ account.name }}
           </div>
 

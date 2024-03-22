@@ -8,7 +8,7 @@ const accesses = ['View your wallet address, balance and activity', 'Request app
 </script>
 
 <template>
-  <h3 class="text-base font-bold">{{ action.title }}</h3>
+  <h3 class="text-base ">{{ action.title }}</h3>
 
   <ul class="mt-6 space-y-4">
     <li v-for="access in accesses" class="flex items-start gap-x-2">

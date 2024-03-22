@@ -11,7 +11,7 @@ const cursorRef = ref(0)
 const sizeRef = ref(10)
 const router = useRouter()
 
-getAddress('mvc').then((address) => {
+getAddress('btc').then((address) => {
   addressRef.value = address
 })
 const { isLoading, data: metaPins } = useMetaPinsQuery(addressRef, cursorRef, sizeRef, {
@@ -39,7 +39,7 @@ const toBRC20Detail = (metaIDPin: MetaIDPin) => {
 
 <template>
   <div class="space-y-4">
-    <div v-if="isLoading" class="w-full py-3 text-center text-sm font-bold text-gray-500">
+    <div v-if="isLoading" class="w-full py-3 text-center text-sm  text-gray-500">
       MetaID Pin List loading...
     </div>
     <div v-else-if="metaPins?.length" class="mt-12 px-3 py-4 grid grid-cols-3 gap-x-1 gap-y-7">
@@ -55,7 +55,7 @@ const toBRC20Detail = (metaIDPin: MetaIDPin) => {
         }}</span>
       </div>
     </div>
-    <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">No MetaID Pins yet</div>
+    <div v-else class="w-full py-3 text-center text-sm  text-gray-500">No MetaID Pins yet</div>
   </div>
 </template>
 

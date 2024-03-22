@@ -13,7 +13,7 @@ import { WalletIcon, Cog6ToothIcon } from '@heroicons/vue/24/solid'
       <router-link class="link" active-class="!text-blue-600" to="/wallet">
         <WalletIcon class="icon" />
       </router-link>
-      <router-link class="link font-bold tracking-tighter" to="/collections/0" active-class="!text-blue-600">
+      <router-link class="link  tracking-tighter" to="/collections/0" active-class="!text-blue-600">
         NFT
       </router-link>
 

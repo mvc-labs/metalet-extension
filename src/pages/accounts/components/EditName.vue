@@ -43,12 +43,12 @@ async function onUpdateName() {
     <template #control>
       <div class="grid grid-cols-2 gap-x-4">
         <button
-          class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
+          class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm  text-gray-700"
           @click="$emit('update:open', false)"
         >
           Cancel
         </button>
-        <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="onUpdateName">
+        <button class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100" @click="onUpdateName">
           Confirm
         </button>
       </div>

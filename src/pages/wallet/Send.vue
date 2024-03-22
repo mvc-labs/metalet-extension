@@ -221,7 +221,7 @@ async function send() {
             class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-[88px] !text-xs"
           />
           <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-sm text-gray-500">
-            <div class="border-l border-solid border-gray-500 w-20 py-1 text-center font-bold">{{ asset.symbol }}</div>
+            <div class="border-l border-solid border-gray-500 w-20 py-1 text-center ">{{ asset.symbol }}</div>
           </div>
           <div class="absolute text-red-500 text-sm" v-if="error">{{ error?.message }}</div>
         </div>
@@ -242,7 +242,7 @@ async function send() {
         v-if="symbol === 'SPACE'"
         :disabled="!recipient || !amountInSats.toNumber() || !!error"
         :class="!recipient || !amountInSats || !!error ? 'opacity-50 cursor-not-allowed' : ''"
-        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
+        class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100"
       >
         Next
       </button>
@@ -250,17 +250,17 @@ async function send() {
         @click="popConfirm"
         v-else-if="symbol === 'BTC'"
         :disabled="!recipient || !amountInSats.toNumber() || !currentRateFee || !!error"
-        class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100"
+        class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100"
         :class="!recipient || !amountInSats || !currentRateFee || !!error ? 'opacity-50 cursor-not-allowed' : ''"
       >
         Next
       </button>
     </template>
-    <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">Loading...</div>
+    <div v-else class="w-full py-3 text-center text-sm  text-gray-500">Loading...</div>
 
     <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
       <template #title>
-        <div class="text-black-primary font-bold text-center">Confirm Send</div>
+        <div class="text-black-primary  text-center">Confirm Send</div>
       </template>
 
       <template #body>
@@ -282,16 +282,16 @@ async function send() {
 
       <template #control>
         <div class="" v-if="operationLock">
-          <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Operating...</div>
+          <div class="w-full py-3 text-center text-sm  text-gray-500">Operating...</div>
         </div>
         <div class="grid grid-cols-2 gap-x-4" v-else>
           <button
             @click="isOpenConfirmModal = false"
-            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
+            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm  text-gray-700"
           >
             Cancel
           </button>
-          <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="send">
+          <button class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100" @click="send">
             Confirm
           </button>
         </div>

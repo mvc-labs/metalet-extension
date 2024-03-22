@@ -136,7 +136,7 @@ async function transfer() {
           </div>
 
           <div class="">
-            <h3 class="text-sm font-bold">{{ nftInfo.name }}</h3>
+            <h3 class="text-sm ">{{ nftInfo.name }}</h3>
             <div class="text-xs text-gray-500">{{ '# ' + nft.tokenIndex }}</div>
           </div>
         </div>
@@ -173,7 +173,7 @@ async function transfer() {
               </div>
 
               <div class="">
-                <h3 class="text-sm font-bold">{{ nftInfo.name }}</h3>
+                <h3 class="text-sm ">{{ nftInfo.name }}</h3>
                 <div class="text-xs text-gray-500">{{ '# ' + nft.tokenIndex }}</div>
               </div>
             </div>
@@ -188,16 +188,16 @@ async function transfer() {
 
       <template #control>
         <div class="" v-if="operationLock">
-          <div class="w-full py-3 text-center text-sm font-bold text-gray-500">Operating...</div>
+          <div class="w-full py-3 text-center text-sm  text-gray-500">Operating...</div>
         </div>
         <div class="grid grid-cols-2 gap-x-4" v-else>
           <button
-            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm font-bold text-gray-700"
+            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm  text-gray-700"
             @click="isOpenConfirmModal = false"
           >
             Cancel
           </button>
-          <button class="main-btn-bg w-full rounded-lg py-3 text-sm font-bold text-sky-100" @click="transfer">
+          <button class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100" @click="transfer">
             Confirm
           </button>
         </div>

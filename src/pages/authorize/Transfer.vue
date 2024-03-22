@@ -13,7 +13,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <h3 class="text-base font-bold">Transfer</h3>
+  <h3 class="text-base ">Transfer</h3>
 
   <div class="mt-4">
     <table class="w-full border-collapse rounded-lg text-center">
@@ -40,6 +40,6 @@ const props = defineProps<{
 
 <style scoped>
 .th-cell {
-  @apply border border-gray-200 px-4 py-2 font-bold text-gray-500;
+  @apply border border-gray-200 px-4 py-2  text-gray-500;
 }
 </style>

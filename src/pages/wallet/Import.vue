@@ -153,7 +153,7 @@ const onSubmit = async () => {
           v-for="(word, index) in words"
           :key="index"
           type="text"
-          class="pit-input gradient-text font-bold"
+          class="pit-input gradient-text "
           :placeholder="(index + 1).toString()"
           v-model="words[index]"
           @paste.prevent="onPasteWords"
@@ -178,11 +178,11 @@ const onSubmit = async () => {
           leave-to-class="transform scale-95 opacity-0"
         >
           <DisclosurePanel class="mt-1 space-y-2 rounded-lg bg-gray-100 p-4 text-sm text-gray-500 shadow-inner">
-            <h3 class="text-sm font-bold text-gray-900">What is a derivation path?</h3>
+            <h3 class="text-sm  text-gray-900">What is a derivation path?</h3>
             <p class="">
               A derivation path is used to generate your wallet address. You can use the default path or customize it.
             </p>
-            <p>The default path used by Metalet is <span class="font-bold">m/44'/10001'/0'</span></p>
+            <p>The default path used by Metalet is <span class="">m/44'/10001'/0'</span></p>
           </DisclosurePanel>
         </transition>
       </Disclosure>
@@ -268,7 +268,7 @@ const onSubmit = async () => {
     <!-- ok -->
     <div class="mt-32 flex items-center justify-center">
       <button
-        class="main-btn-bg mt-8 grow rounded-md py-3 text-sm font-bold text-sky-50"
+        class="main-btn-bg mt-8 grow rounded-md py-3 text-sm  text-sky-50"
         :class="[!finished && 'muted']"
         :disabled="!finished"
         @click="onSubmit"

@@ -154,7 +154,7 @@ const toTransfer = () => {
     <div class="mt-8 flex flex-col items-center self-stretch">
       <template v-if="asset?.queryable">
         <template v-if="asset.balance">
-          <div class="mb-1 text-center text-3xl text-black-primary font-bold" v-if="asset.contract === 'BRC-20'">
+          <div class="mb-1 text-center text-3xl text-black-primary " v-if="asset.contract === 'BRC-20'">
             {{ prettifyTokenBalance(asset.balance.total, asset.decimal, false, asset.symbol) }}
           </div>
           <div class="mb-1 text-center text-3xl text-black-primary" v-else>
@@ -210,7 +210,7 @@ const toTransfer = () => {
               >{{ (tickersData && tickersData.tokenBalance.transferableBalance) || 0 }} {{ asset.symbol }}</span
             >
           </div>
-          <div class="w-full py-3 text-center text-sm font-bold text-gray-500" v-if="tickersLoading">
+          <div class="w-full py-3 text-center text-sm  text-gray-500" v-if="tickersLoading">
             Loading BRC Tickers...
           </div>
           <div
@@ -223,7 +223,7 @@ const toTransfer = () => {
               class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative"
             >
               <div class="mt-2.5 text-[#909399] text-sm">{{ ticker.ticker }}</div>
-              <div class="mt-3 text-black-primary text-lg font-bold truncate">{{ ticker.amount }}</div>
+              <div class="mt-3 text-black-primary text-lg  truncate">{{ ticker.amount }}</div>
               <div
                 class="text-white text-xs bg-[#1E2BFF] rounded-b-md absolute bottom-0 w-full text-center pt-[5px] pb-[4px]"
               >
@@ -259,5 +259,5 @@ const toTransfer = () => {
       <div class="text-gray-500" v-else>No Service for {{ symbol }} yet.</div>
     </div>
   </div>
-  <div v-else class="w-full py-3 text-center text-sm font-bold text-gray-500">Asset Loading...</div>
+  <div v-else class="w-full py-3 text-center text-sm  text-gray-500">Asset Loading...</div>
 </template>

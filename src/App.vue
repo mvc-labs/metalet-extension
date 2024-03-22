@@ -44,7 +44,6 @@ const secondaryHeaderTitle = computed(() => {
 
 <template>
   <div
-    id="app"
     class="ext-app relative flex h-150 w-90 items-center justify-center overflow-y-auto xs:h-screen xs:w-screen xs:bg-gray-200/10 font-inter"
   >
     <div

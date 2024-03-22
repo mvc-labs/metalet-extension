@@ -6,7 +6,7 @@ const action = actions.Merge
 </script>
 
 <template>
-  <h3 class="text-base font-bold">{{ action.title }}</h3>
+  <h3 class="text-base ">{{ action.title }}</h3>
 
   <div class="mt-8 flex items-start gap-x-2">
     <CheckBadgeIcon class="h-6 w-6 text-primary-blue" />

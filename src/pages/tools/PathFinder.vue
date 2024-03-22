@@ -56,7 +56,7 @@ async function find() {
 
 <template>
   <div>
-    <h3 class="gradient-text font-bold text-lg">MVC Path Finder</h3>
+    <h3 class="gradient-text  text-lg">MVC Path Finder</h3>
     <p class="text-sm text-gray-600">
       This tool is designed to help you find the correct derivation path for your wallet.
     </p>
@@ -87,7 +87,7 @@ async function find() {
           You can then use this derivation path to recover your wallet.
         </p>
         <p class="mt-1">
-          <span class="font-bold">Note:</span> This tool will not require you to enter your mnemonic phrase. It only
+          <span class="">Note:</span> This tool will not require you to enter your mnemonic phrase. It only
           tries to find out your old address using existing accounts in your wallet. All calculations are done locally
           in the extension.
         </p>
@@ -96,7 +96,7 @@ async function find() {
 
     <div class="mt-8">
       <div class="">
-        <label class="label font-bold">Target Address</label>
+        <label class="label ">Target Address</label>
         <input
           type="text"
           class="pit-input block w-full mt-1"
@@ -106,14 +106,14 @@ async function find() {
       </div>
 
       <div class="mt-4">
-        <label class="label font-bold">Found Derivation Path</label>
+        <label class="label ">Found Derivation Path</label>
         <div class="h-10">
-          <span v-if="foundPath" class="text-green-500 font-bold">{{ foundPath }}</span>
+          <span v-if="foundPath" class="text-green-500 ">{{ foundPath }}</span>
           <div class="flex items-center gap-2" v-else-if="isFinding">
             <SparklesIcon class="block w-8 h-8 m-1 text-gray-500 animate-pulse" />
             <div class="">
               <div class="text-gray-500">Searching path (0 - 20000)</div>
-              <div class="font-bold">{{ searchingPath }}</div>
+              <div class="">{{ searchingPath }}</div>
             </div>
           </div>
           <span v-else>-</span>
@@ -122,7 +122,7 @@ async function find() {
 
       <div class="mt-4 flex items-center gap-2">
         <button
-          class="border border-gray-300 rounded-md px-8 py-1 enabled:shadow-md font-bold enabled:hover-gradient-text disabled:opacity-30"
+          class="border border-gray-300 rounded-md px-8 py-1 enabled:shadow-md  enabled:hover-gradient-text disabled:opacity-30"
           :disabled="!isValidAddress || isFinding"
           @click="find"
         >
@@ -130,7 +130,7 @@ async function find() {
         </button>
 
         <button
-          class="border border-gray-300 rounded-md px-8 py-1 shadow-md font-bold hover-gradient-text"
+          class="border border-gray-300 rounded-md px-8 py-1 shadow-md  hover-gradient-text"
           v-if="isFinding"
           @click="isFinding = false"
         >

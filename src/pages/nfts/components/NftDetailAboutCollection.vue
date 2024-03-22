@@ -14,7 +14,7 @@ const { collectionInfo } = defineProps<{
 
 <template>
   <Disclosure v-slot="{ open }">
-    <DisclosureButton class="flex items-center gap-2 font-bold text-gray-700 hover:underline">
+    <DisclosureButton class="flex items-center gap-2  text-gray-700 hover:underline">
       {{ `About ${collectionInfo.name}` }}
       <ChevronDownIcon
         :class="['h-5 w-5 transition duration-300', open ? 'rotate-180 text-gray-700' : 'text-gray-300']"

@@ -48,7 +48,7 @@ getNetwork().then(async networkType => {
         </button>
       </div>
 
-      <div class="col-span-4 font-bold text-center">PSBT Details</div>
+      <div class="col-span-4  text-center">PSBT Details</div>
     </div>
 
     <!-- detail body -->
@@ -56,7 +56,7 @@ getNetwork().then(async networkType => {
       <div class="label mt-4">PSBT Structure</div>
       <div class="grid grid-cols-11 items-center mt-1">
         <div class="col-span-5 bg-sky-50 border-2 border-sky-300 border-dashed py-2 px-1 rounded-lg">
-          <div class="text-center text-sm font-bold text-sky-900">Inputs</div>
+          <div class="text-center text-sm  text-sky-900">Inputs</div>
           <div class="mt-2 space-2 text-xs">
             <div class="border-2 border-sky-300 bg-sky-300 rounded p-1" v-for="input in inputs">
               <div class="">Address</div>
@@ -76,7 +76,7 @@ getNetwork().then(async networkType => {
         </div>
 
         <div class="col-span-5 bg-teal-50 border-2 border-teal-300 border-dashed py-2 px-1 rounded-lg">
-          <div class="text-center text-sm font-bold text-teal-900">Outputs</div>
+          <div class="text-center text-sm  text-teal-900">Outputs</div>
           <div class="mt-2 space-2 text-xs">
             <div class="border-2 border-teal-300 bg-teal-100 rounded p-1" v-for="output in outputs">
               <div class="">Address</div>
@@ -95,7 +95,7 @@ getNetwork().then(async networkType => {
   </div>
 
   <template v-else>
-    <h3 class="text-base font-bold">{{ action.title }}</h3>
+    <h3 class="text-base ">{{ action.title }}</h3>
 
     <ul class="mt-6 space-y-4">
       <li v-for="access in action.description" class="flex items-start gap-x-2">
@@ -107,7 +107,7 @@ getNetwork().then(async networkType => {
     <!-- a button to view detail -->
     <div class="mt-2 flex items-center justify-center">
       <button
-        class="underline decoration-primary-blue text-gray-700 px-4 py-2 mx-auto font-bold decoration underline-offset-4 hover:underline-offset-2 transition-all duration-300"
+        class="underline decoration-primary-blue text-gray-700 px-4 py-2 mx-auto  decoration underline-offset-4 hover:underline-offset-2 transition-all duration-300"
         @click="isShowingDetails = true">
         View PSBT Details
       </button>

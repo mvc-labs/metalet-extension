@@ -141,13 +141,13 @@ async function send() {
 
       <BTCRateList v-model:currentRateFee="currentRateFee" />
 
-      <div v-if="operationLock" class="w-full py-3 text-center text-sm font-bold text-gray-500">Loading...</div>
+      <div v-if="operationLock" class="w-full py-3 text-center text-sm  text-gray-500">Loading...</div>
       <button
         v-else
         @click="next"
         :disabled="!recipient"
         :class="!recipient ? 'opacity-50 cursor-not-allowed' : ''"
-        class="main-btn-bg w-full rounded-lg py-3 mt-3 text-sm font-bold text-sky-100"
+        class="main-btn-bg w-full rounded-lg py-3 mt-3 text-sm  text-sky-100"
       >
         Next
       </button>
@@ -155,7 +155,7 @@ async function send() {
 
     <!-- comfirm page -->
     <div v-show="isShowComfirm" class="h-full flex flex-col">
-      <div class="text-center text-3xl font-bold">{{ amount }} {{ symbol }}</div>
+      <div class="text-center text-3xl ">{{ amount }} {{ symbol }}</div>
       <div class="mt-8 space-y-5 relative flex-1">
         <div class="flex items-center justify-between">
           <span>From</span>
@@ -177,12 +177,12 @@ async function send() {
         <div class="w-full left-0 flex items-center justify-center gap-x-4 absolute bottom-5">
           <button
             @click="cancel"
-            class="border w-[133px] rounded-lg py-3 text-sm font-bold text-black-primary"
+            class="border w-[133px] rounded-lg py-3 text-sm  text-black-primary"
             style="border-image: 'linear-gradient(105deg, #72F5F6 4%, #171AFF 94%) 1'"
           >
             Cancel
           </button>
-          <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm font-bold text-sky-100">
+          <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm  text-sky-100">
             Confirm
           </button>
         </div>

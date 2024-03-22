@@ -38,7 +38,7 @@ const { isLoading, data: nfts } = useNftsQuery(
 <template>
   <!-- Info -->
   <div class="my-4 border-b border-gray-100 pb-4 text-sm" v-if="collectionInfo">
-    <h3 class="gradient-text text-xl font-bold">{{ collectionInfo.name }}</h3>
+    <h3 class="gradient-text text-xl ">{{ collectionInfo.name }}</h3>
     <div class="text-gray-500">Total Supply: {{ collectionInfo.totalSupply }}</div>
     <div class="mt-4 text-xs">{{ collectionInfo.description }}</div>
   </div>

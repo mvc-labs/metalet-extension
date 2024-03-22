@@ -58,7 +58,7 @@ onMounted(async () => {
 
 <style lang="css" scoped>
 .label {
-  @apply text-sm font-bold text-gray-500;
+  @apply text-sm  text-gray-500;
 }
 
 .value {

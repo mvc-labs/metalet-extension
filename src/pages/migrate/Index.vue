@@ -102,7 +102,7 @@ const importWallet = async () => {
       <div class="mt-4">
         <div class="flex items-end justify-center gap-x-2">
           <h1 class="text-3xl font-extrabold leading-none">Metalet</h1>
-          <span class="text-base font-bold leading-none text-amber-500">v2.0</span>
+          <span class="text-base  leading-none text-amber-500">v2.0</span>
         </div>
 
         <p class="mt-2 text-gray-500">Welcome Back!</p>
@@ -112,7 +112,7 @@ const importWallet = async () => {
     <div class="flex flex-col items-stretch pb-4">
       <p class="mb-2 text-sm text-red-500" v-if="error">{{ error }}</p>
       <button
-        class="gradient-bg rounded-md py-4 text-base font-bold leading-none tracking-wide text-blue-50"
+        class="gradient-bg rounded-md py-4 text-base  leading-none tracking-wide text-blue-50"
         @click="importWallet"
       >
         OK

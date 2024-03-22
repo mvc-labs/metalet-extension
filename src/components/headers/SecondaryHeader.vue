@@ -15,7 +15,7 @@ const router = useRouter()
     </div>
 
     <!-- title -->
-    <div class="col-span-3 justify-self-center font-bold text-lg">
+    <div class="col-span-3 justify-self-center  text-lg">
       <slot name="title"></slot>
     </div>
   </div>
