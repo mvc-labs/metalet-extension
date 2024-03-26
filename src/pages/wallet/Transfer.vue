@@ -40,12 +40,12 @@ const toInscribe = () => {
     </div>
     <div class="flex flex-col gap-3 mt-[30px]">
       <div class="text-[#909399] text-base">TRANSFER Inscriptions ({{ tickersData.transferableList.length }})</div>
-      <div class="grid grid-cols-3 gap-2 w-full mt-3">
+      <div class="grid grid-cols-3 gap-2 mt-3">
         <div
           :key="ticker.inscriptionId"
           v-for="ticker in tickersData.transferableList"
           @click="toSendBRC20(ticker.inscriptionId, Number(ticker.amount))"
-          class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative cursor-pointer"
+          class="flex flex-col items-center rounded-md bg-white aspect-square border border-[#D8D8D8] relative cursor-pointer"
         >
           <div class="mt-2.5 text-[#909399] text-sm">{{ ticker.ticker }}</div>
           <div class="mt-3 text-black-primary text-lg  truncate">{{ ticker.amount }}</div>

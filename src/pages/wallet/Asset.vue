@@ -220,7 +220,7 @@ const toTransfer = () => {
             <div
               :key="ticker.inscriptionId"
               v-for="ticker in tickersData.transferableList"
-              class="flex flex-col items-center rounded-md bg-white w-[100px] h-[100px] border border-[#D8D8D8] relative"
+              class="flex flex-col items-center rounded-md bg-white aspect-square border border-[#D8D8D8] relative"
             >
               <div class="mt-2.5 text-[#909399] text-sm">{{ ticker.ticker }}</div>
               <div class="mt-3 text-black-primary text-lg  truncate">{{ ticker.amount }}</div>
@@ -234,19 +234,27 @@ const toTransfer = () => {
           </div>
           <div v-else class="w-full h-[142px] flex items-center justify-center text-[#999999]">Empty</div>
           <div class="text-[#303133] mt-3">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-2">
               <span class="text-base">Available</span>
-              <span class="text-lg" v-if="tickersData">
+              <span
+                class="text-lg truncate"
+                v-if="tickersData"
+                :title="
+                  Number(tickersData.tokenBalance.availableBalanceUnSafe)
+                    ? `${tickersData.tokenBalance.availableBalanceSafe} ${asset.symbol} + ${tickersData.tokenBalance.availableBalanceUnSafe} ${asset.symbol}`
+                    : `${tickersData.tokenBalance.availableBalanceSafe} ${asset.symbol}`
+                "
+              >
                 <span>{{ tickersData.tokenBalance.availableBalanceSafe }} {{ asset.symbol }}</span>
                 <span v-if="Number(tickersData.tokenBalance.availableBalanceUnSafe)" class="text-gray-primary">
-                  + {{ Math.abs(Number(tickersData.tokenBalance.availableBalanceUnSafe)) }} {{ asset.symbol }}</span
+                  + {{ Number(tickersData.tokenBalance.availableBalanceUnSafe) }} {{ asset.symbol }}</span
                 >
               </span>
               <span class="text-lg" v-else>--</span>
             </div>
             <div
-              v-if="tickersData && Number(tickersData.tokenBalance.availableBalanceUnSafe)"
               class="text-right text-sm text-gray-primary"
+              v-if="tickersData && Number(tickersData.tokenBalance.availableBalanceUnSafe)"
             >
               (Wait to be confirmed)
             </div>
