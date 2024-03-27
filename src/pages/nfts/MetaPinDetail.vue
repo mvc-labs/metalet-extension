@@ -33,10 +33,22 @@ const toSendNFT = (id: string) => {
   <div class="w-full text-gray-primary text-center" v-if="isLoading">MetaPin Info Loading...</div>
   <div class="w-full" v-else-if="metaPin">
     <div class="w-full flex items-center justify-center">
-      <div class="w-64 h-64 bg-[#1E2BFF] flex items-center justify-center rounded-xl relative p-2 text-white">
-        <img alt="" class="w-full h-full" :src="metaPin.contentSummary" v-if="metaPin.contentType === 'image/jpeg'" />
+      <div
+        :class="[
+          metaPin.contentType !== 'image/jpeg' ? 'p-2 bg-[#1E2BFF]' : undefined,
+          'w-64 h-64  flex items-center justify-center rounded-xl relative text-white',
+        ]"
+      >
+        <img
+          alt=""
+          :src="metaPin.content"
+          v-if="metaPin.contentType === 'image/jpeg'"
+          class="w-full h-full border-2 border-gray-soft rounded-xl"
+        />
         <div class="overflow-hidden line-clamp-6 break-all" v-else>{{ metaPin.contentSummary }}</div>
-        <span class="absolute rounded right-3 bottom-3 py-3px px-1.5 bg-[rgb(235,236,255,0.2)] text-[#EBECFF] text-xs"
+        <span
+          :title="`${metaPin.outputValue} sat`"
+          class="absolute rounded right-3 bottom-3 py-3px px-1.5 bg-[rgb(235,236,255,0.2)] text-[#EBECFF] text-xs"
           >{{ metaPin.outputValue }} sat</span
         >
       </div>

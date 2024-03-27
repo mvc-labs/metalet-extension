@@ -35,7 +35,12 @@ const toMetaPinDetail = (metaPinId: string) => {
         @click="toMetaPinDetail(metaPin.id)"
         class="flex flex-col items-center justify-center rounded-md cursor-pointer text-[#999999]"
       >
-        <MetaPin :value="metaPin.outputValue" :content="metaPin.contentSummary" :contentType="metaPin.contentType" />
+        <MetaPin
+          :content="metaPin.content"
+          :value="metaPin.outputValue"
+          :contentType="metaPin.contentType"
+          :contentSummary="metaPin.contentSummary"
+        />
         <span class="text-sm text-center mt-3 truncate" :title="'# ' + metaPin.number"># {{ metaPin.number }}</span>
         <span class="text-xs text-center mt-1 h-[30px]">{{
           metaPin.timestamp === 0 ? 'Uncomfirmed' : dayjs(metaPin.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
