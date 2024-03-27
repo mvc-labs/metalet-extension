@@ -4,47 +4,64 @@ import { ref, computed } from 'vue'
 import MetaPin from './MetaPin.vue'
 import { useRouter } from 'vue-router'
 import { getAddress } from '@/lib/account'
-import { useMetaPinsQuery } from '@/queries/nfts'
+import LoadingIcon from '@/components/LoadingIcon.vue'
+import { useMetaPinsInfiniteQuery } from '@/queries/metaPin'
 
-const addressRef = ref()
-const cursorRef = ref(0)
-const sizeRef = ref(10)
+const size = ref(2)
+const address = ref()
 const router = useRouter()
 
-getAddress('btc').then((address) => {
-  addressRef.value = address
+getAddress('btc').then((_address) => {
+  address.value = _address
 })
-const { isLoading, data: metaPins } = useMetaPinsQuery(addressRef, cursorRef, sizeRef, {
-  enabled: computed(() => !!addressRef.value),
+
+const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useMetaPinsInfiniteQuery(address, size, {
+  enabled: computed(() => !!address.value),
 })
+
+const metaPins = computed(() => (data.value ? data.value.pages.flatMap((page) => page.metaPins) : []))
 
 const toMetaPinDetail = (metaPinId: string) => {
   router.push({
     name: 'metaPinDetail',
-    params: { metaPinId, address: addressRef.value },
+    params: { metaPinId, address: address.value },
   })
 }
 </script>
 
 <template>
   <div class="space-y-4">
-    <div v-if="isLoading" class="w-full py-3 text-center text-sm text-gray-500">MetaID Pin List loading...</div>
-    <div v-else-if="metaPins?.length" class="mt-12 px-3 py-4 grid grid-cols-3 gap-x-3 gap-y-7">
+    <div v-if="isLoading" class="w-full py-3 text-center text-sm text-gray-500">MetaID Pins loading...</div>
+    <div v-else-if="metaPins?.length">
+      <div class="mt-12 px-3 py-4 grid grid-cols-3 gap-x-3 gap-y-7">
+        <div
+          v-for="metaPin in metaPins"
+          @click="toMetaPinDetail(metaPin.id)"
+          class="flex flex-col items-center justify-center rounded-md cursor-pointer text-[#999999]"
+        >
+          <MetaPin
+            :content="metaPin.content"
+            :value="metaPin.outputValue"
+            :contentType="metaPin.contentType"
+            :contentSummary="metaPin.contentSummary"
+          />
+          <span class="text-sm text-center mt-3 truncate" :title="'# ' + metaPin.number"># {{ metaPin.number }}</span>
+          <span class="text-xs text-center mt-1 h-[30px]">{{
+            metaPin.timestamp === 0 ? 'Uncomfirmed' : dayjs(metaPin.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
+          }}</span>
+        </div>
+      </div>
       <div
-        v-for="metaPin in metaPins"
-        @click="toMetaPinDetail(metaPin.id)"
-        class="flex flex-col items-center justify-center rounded-md cursor-pointer text-[#999999]"
+        v-if="hasNextPage"
+        :disabled="isFetchingNextPage"
+        @click="() => fetchNextPage()"
+        :class="[
+          'text-gray-primary flex items-center gap-2 justify-center',
+          !isFetchingNextPage ? 'cursor-pointer hover:text-blue-500 hover:underline' : 'cursor-not-allowed',
+        ]"
       >
-        <MetaPin
-          :content="metaPin.content"
-          :value="metaPin.outputValue"
-          :contentType="metaPin.contentType"
-          :contentSummary="metaPin.contentSummary"
-        />
-        <span class="text-sm text-center mt-3 truncate" :title="'# ' + metaPin.number"># {{ metaPin.number }}</span>
-        <span class="text-xs text-center mt-1 h-[30px]">{{
-          metaPin.timestamp === 0 ? 'Uncomfirmed' : dayjs(metaPin.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
-        }}</span>
+        <span>Load more MetaPins</span>
+        <LoadingIcon v-if="isFetchingNextPage" class="!text-gray-primary" />
       </div>
     </div>
     <div v-else class="w-full py-3 text-center text-sm text-gray-500">No MetaID Pins yet</div>

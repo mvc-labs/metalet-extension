@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import { computed, ref } from 'vue'
-import { useMetaPinQuery } from '@/queries/nfts'
 import { useRoute, useRouter } from 'vue-router'
 import { shortestAddress } from '@/lib/formatters'
+import { useMetaPinQuery } from '@/queries/metaPin'
 
 const { params } = useRoute()
 const router = useRouter()

@@ -2,7 +2,7 @@ import { Buffer } from 'buffer'
 import { getNet } from '@/lib/network'
 import { Ref, ComputedRef } from 'vue'
 import { metaletApiV3 } from './request'
-import { useQuery } from '@tanstack/vue-query'
+import { useQuery, useInfiniteQuery } from '@tanstack/vue-query'
 
 export interface PreInscribe {
   count: number
@@ -110,6 +110,27 @@ export async function getBRCInscriptions(
   })
 }
 
+export async function fetchCInscriptions(
+  address: string,
+  cursor: number,
+  size: number
+): Promise<{ list: Inscription[]; nextCursor: number | null }> {
+  const net = getNet()
+  const { list, total } = await metaletApiV3<{ list: Inscription[]; total: number }>('/address/inscriptions').get({
+    net,
+    address,
+    cursor: `${cursor}`,
+    size: `${size}`,
+  })
+
+  cursor += size
+
+  return {
+    list,
+    nextCursor: cursor > total ? null : cursor,
+  }
+}
+
 export async function getBRCInscriptionInfo(inscriptionId: string): Promise<Inscription> {
   const net = getNet()
   const {
@@ -119,6 +140,21 @@ export async function getBRCInscriptionInfo(inscriptionId: string): Promise<Insc
     inscriptionId,
   })
   return inscription
+}
+
+export const useInscriptionsInfiniteQuery = (
+  address: Ref<string>,
+  size: Ref<number>,
+  options: { enabled: ComputedRef<boolean> }
+) => {
+  return useInfiniteQuery(
+    ['Inscriptions', { address, size }],
+    ({ pageParam: cursor = 0 }) => fetchCInscriptions(address.value, cursor, size.value),
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      ...options,
+    }
+  )
 }
 
 export const useBRCInscriptionsQuery = (

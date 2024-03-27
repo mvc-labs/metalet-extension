@@ -3,7 +3,6 @@ import { ComputedRef, Ref } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { metaletApiV3, mvcApi } from './request'
 import { bannedCollections } from '../data/nfts'
-import { UTXO } from './utxos'
 
 export type NftCollection = {
   codehash: string
@@ -144,70 +143,6 @@ export const useOneNftQuery = (params: { codehash: string; genesis: string; toke
   return useQuery({
     queryKey: ['nft', { ...params }],
     queryFn: () => fetchOneNft(params),
-  })
-}
-
-export interface MetaIDPin {
-  id: string
-  number: number
-  rootTxId: string
-  address: string
-  output: string
-  outputValue: number
-  timestamp: number
-  genesisFee: number
-  genesisHeight: number
-  genesisTransaction: string
-  txInIndex: number
-  txInOffset: number
-  operation: string
-  path: string
-  parentPath: string
-  encryption: string
-  version: string
-  preview: string
-  content: string
-  contentType: string
-  contentBody: string
-  contentLength: number
-  contentSummary: string
-}
-
-export async function getMetaPins(address: string, cursor = 0, size = 10): Promise<MetaIDPin[]> {
-  const net = getNet()
-  return await metaletApiV3<MetaIDPin[]>('/address/pins').get({
-    net,
-    address,
-    cursor: `${cursor}`,
-    size: `${size}`,
-  })
-}
-
-export async function getMetaPin(pinId: string): Promise<MetaIDPin> {
-  const net = getNet()
-  return await metaletApiV3<MetaIDPin>('/pin/utxo').get({
-    net,
-    pinId,
-  })
-}
-
-export const useMetaPinQuery = (pinId: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
-  return useQuery({
-    queryKey: ['MetaPin', { pinId }],
-    queryFn: () => getMetaPin(pinId.value),
-    ...options,
-  })
-}
-export const useMetaPinsQuery = (
-  address: Ref<string>,
-  cursor: Ref<number>,
-  size: Ref<number>,
-  options: { enabled: ComputedRef<boolean> }
-) => {
-  return useQuery({
-    queryKey: ['MetaPins', { address: address.value, cursor: cursor.value, size: size.value }],
-    queryFn: () => getMetaPins(address.value, cursor.value, size.value),
-    ...options,
   })
 }
 

@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import BRCTokenList from './BRCTokenList.vue'
 import MetaIDPinList from './MetaIDPinList.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { nftStore } from '@/stores/nftTypeStore'
+import InscriptionList from './InscriptionList.vue'
 import AccountItem from '../accounts/components/Item.vue'
 import { Squares2X2Icon } from '@heroicons/vue/24/outline'
 import { getCurrentAccount, type Account } from '@/lib/account'
@@ -82,7 +82,7 @@ function changeTab(index: number) {
         </TabPanel> -->
         <TabPanel>
           <MvcCollectionPanel v-if="nftStore.selectedNFT.name === 'MetaContract'" />
-          <BRCTokenList v-else-if="nftStore.selectedNFT.name === 'Ordinals'" />
+          <InscriptionList v-else-if="nftStore.selectedNFT.name === 'Ordinals'" />
           <MetaIDPinList v-else-if="nftStore.selectedNFT.name === 'MetaID Pin'" />
         </TabPanel>
       </TabPanels>
