@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 import { getAddress } from '@/lib/account'
 import LoadingIcon from '@/components/LoadingIcon.vue'
 import { useInscriptionsInfiniteQuery } from '@/queries/inscribe'
+import { formatTimestamp } from '@/lib/formatters'
 
 const size = ref(10)
 const address = ref()
@@ -50,9 +51,7 @@ const toBRC20Detail = (inscriptionId: string) => {
           <span class="text-sm text-center mt-3 truncate" :title="'# ' + inscription.inscriptionNumber">{{
             inscription.utxoHeight === 0 ? 'Uncomfirmed' : `# ${inscription.inscriptionNumber}`
           }}</span>
-          <span class="text-xs text-center mt-1 h-[30px]">{{
-            dayjs(inscription.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
-          }}</span>
+          <span class="text-xs text-center mt-1 h-[30px]">{{ formatTimestamp(inscription.timestamp) }}</span>
         </div>
       </div>
       <div

@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 import { getAddress } from '@/lib/account'
 import LoadingIcon from '@/components/LoadingIcon.vue'
 import { useMetaPinsInfiniteQuery } from '@/queries/metaPin'
+import { formatTimestamp } from '@/lib/formatters'
 
 const size = ref(2)
 const address = ref()
@@ -46,9 +47,7 @@ const toMetaPinDetail = (metaPinId: string) => {
             :contentSummary="metaPin.contentSummary"
           />
           <span class="text-sm text-center mt-3 truncate" :title="'# ' + metaPin.number"># {{ metaPin.number }}</span>
-          <span class="text-xs text-center mt-1 h-[30px]">{{
-            metaPin.timestamp === 0 ? 'Uncomfirmed' : dayjs(metaPin.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
-          }}</span>
+          <span class="text-xs text-center mt-1 h-[30px]">{{ formatTimestamp(metaPin.timestamp) }}</span>
         </div>
       </div>
       <div

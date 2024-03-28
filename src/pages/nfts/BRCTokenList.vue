@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 import { getAddress } from '@/lib/account'
 import { ArrowDownLeftIcon } from '@heroicons/vue/20/solid'
 import { type Inscription, useBRCInscriptionsQuery } from '@/queries/inscribe'
+import { formatTimestamp } from '@/lib/formatters'
 
 const size = ref(10)
 const address = ref()
@@ -55,7 +56,7 @@ const toBRC20Detail = (inscriptionId: string) => {
   <div class="space-y-4">
     <div class="space-y-1" v-if="false">
       <div class="text-sm text-gray-500">NUMBER OF COLLECTIBLES</div>
-      <div class="text-xl ">{{ inscriptionsCountDisplay }}</div>
+      <div class="text-xl">{{ inscriptionsCountDisplay }}</div>
     </div>
 
     <div v-if="false">
@@ -65,9 +66,7 @@ const toBRC20Detail = (inscriptionId: string) => {
       </button>
     </div>
 
-    <div v-if="isLoading" class="w-full py-3 text-center text-sm  text-gray-500">
-      BRC Token List loading...
-    </div>
+    <div v-if="isLoading" class="w-full py-3 text-center text-sm text-gray-500">BRC Token List loading...</div>
     <div v-else-if="inscriptions.length">
       <div class="px-3 py-4 grid grid-cols-3 gap-x-3 gap-y-7">
         <div
@@ -79,9 +78,7 @@ const toBRC20Detail = (inscriptionId: string) => {
           <span class="text-sm text-center mt-3 truncate" :title="'# ' + inscription.inscriptionNumber">{{
             inscription.utxoHeight === 0 ? 'Uncomfirmed' : `# ${inscription.inscriptionNumber}`
           }}</span>
-          <span class="text-xs text-center mt-1 h-[30px]">{{
-            dayjs(inscription.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss')
-          }}</span>
+          <span class="text-xs text-center mt-1 h-[30px]">{{ formatTimestamp(inscription.timestamp) }}</span>
         </div>
       </div>
       <div
@@ -92,7 +89,7 @@ const toBRC20Detail = (inscriptionId: string) => {
         Load more Ordinals
       </div>
     </div>
-    <div v-else class="w-full py-3 text-center text-sm  text-gray-500">No Ordinals yet.</div>
+    <div v-else class="w-full py-3 text-center text-sm text-gray-500">No Ordinals yet.</div>
   </div>
 </template>
 

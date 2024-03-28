@@ -54,3 +54,16 @@ export const prettifyTokenGenesis = (genesis: string) => {
 export const shortestAddress = (address: string) => {
   return `${address.slice(0, 4)}...${address.slice(-4)}`
 }
+
+export const formatTimestamp = (timestamp: number | string) => {
+  timestamp = Number(timestamp)
+
+  if (timestamp === 0 || isNaN(timestamp)) {
+    return '--'
+  }
+
+  if (String(timestamp).length === 10) {
+    timestamp *= 1000
+  }
+  return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
+}

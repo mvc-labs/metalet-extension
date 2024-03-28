@@ -2,7 +2,7 @@
 import dayjs from 'dayjs'
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { shortestAddress } from '@/lib/formatters'
+import { formatTimestamp, shortestAddress } from '@/lib/formatters'
 import { useBRCInscriptionInfoQuery } from '@/queries/inscribe'
 
 const router = useRouter()
@@ -54,9 +54,7 @@ const toSendNFT = (id: string) => {
         <span v-if="inscriptionDetail.inscriptionNumber !== -1"># {{ inscriptionDetail.inscriptionNumber }}</span>
         <span v-else>Uncomfirmed</span>
       </h4>
-      <div class="text-xs text-[#999999]">
-        {{ dayjs(inscriptionDetail.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss') }}
-      </div>
+      <div class="text-xs text-[#999999]">{{ formatTimestamp(inscriptionDetail.timestamp) }}</div>
       <hr />
       <div class="flex items-center justify-between">
         <span class="title">ID:</span>
@@ -102,7 +100,7 @@ const toSendNFT = (id: string) => {
       </div>
       <div class="flex items-start justify-between">
         <span class="title">Timestamp:</span>
-        <div>{{ dayjs(inscriptionDetail.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss') }}</div>
+        <div>{{ formatTimestamp(inscriptionDetail.timestamp) }}</div>
       </div>
       <div class="flex items-start justify-between">
         <div class="title">Genesis Transaction:</div>
