@@ -3,7 +3,6 @@ const props = defineProps<{
   class?: string
 }>()
 
-console.log(props)
 </script>
 
 <template>

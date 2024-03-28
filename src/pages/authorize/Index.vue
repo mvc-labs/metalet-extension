@@ -167,7 +167,7 @@ const cancelAction = async () => {
 
     <!-- logo -->
     <div class="mt-4 flex h-24 w-24 items-center justify-center rounded-xl bg-gray-50 p-3 shadow-inner shadow-gray-300">
-      <img class="h-full w-full" :src="logo" alt="logo" v-if="logo" />
+      <img class="object-contain" :src="logo" alt="logo" v-if="logo" />
       <LinkIcon class="h-16 w-16 text-gray-300" v-else />
     </div>
 

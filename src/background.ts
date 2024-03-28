@@ -12,7 +12,6 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
   if (msg.channel === 'to-bg') {
     if (msg.eventName === 'networkChanged') {
       network.value = msg.args[0]
-      console.log('network', network.value)
     }
     return
   }

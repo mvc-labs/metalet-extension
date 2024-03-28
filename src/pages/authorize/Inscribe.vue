@@ -49,7 +49,6 @@ actions.Inscribe.process({ ...props.params, options: { noBroadcast: true } })
       commitCost: number
       revealCost: number
     }) => {
-      loading.value = false
       commitCost.value = _commitCost
       revealCost.value = _revealCost
       commitTxHex.value = _commitTxHex
@@ -58,6 +57,8 @@ actions.Inscribe.process({ ...props.params, options: { noBroadcast: true } })
   )
   .catch((err: Error) => {
     error.value = err
+  }).finally(() => {
+    loading.value = false
   })
 
 const copy = (txHex: string) => {
