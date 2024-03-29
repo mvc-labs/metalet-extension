@@ -67,7 +67,7 @@ const toInscribe = () => {
         Available {{ tickersData.tokenBalance.availableBalance }} {{ symbol }}
       </div>
     </div>
-    <div class="mt-2 text-[#909399] text-sm text-center">
+    <div class="py-2 text-[#909399] text-sm text-center">
       * To send BRC-20, you have to inscribe a TRANSFER inscription first
     </div>
   </div>

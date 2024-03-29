@@ -56,8 +56,8 @@ interface SimpleUTXO {
 const inputUTXOs = ref<SimpleUTXO[]>()
 const outputUTXOs = ref<SimpleUTXO[]>()
 const copyHex = () => {
-  navigator.clipboard.writeText(psbtHex.value)
   copied.value = true
+  navigator.clipboard.writeText(psbtHex.value)
 }
 const popConfirm = async () => {
   if (!address.value) {
@@ -178,7 +178,7 @@ function toSuceess() {
 </script>
 
 <template>
-  <div class="pt-8 h-full" v-if="asset">
+  <div class="pt-4 h-full" v-if="asset">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
     <div v-if="nextStep === 0" class="h-full relative">
       <div class="flex items-end justify-between w-full text-black-primary">
@@ -201,10 +201,7 @@ function toSuceess() {
         <BTCRateList v-if="asset.chain === 'btc'" v-model:currentRateFee="currentRateFee" />
       </div>
 
-      <div
-        v-if="operationLock"
-        class="w-full py-3 text-center text-sm  text-gray-500 absolute bottom-4 left-0"
-      >
+      <div v-if="operationLock" class="w-full py-3 text-center text-sm text-gray-500 absolute bottom-4 left-0">
         Loading...
       </div>
       <button
@@ -212,16 +209,16 @@ function toSuceess() {
         @click="popConfirm"
         :disabled="!currentRateFee || !inscribeAmount"
         :class="!currentRateFee || !inscribeAmount ? 'opacity-50 cursor-not-allowed' : ''"
-        class="main-btn-bg w-full rounded-lg py-3 teFxt-sm  text-sky-100 absolute bottom-4 left-0"
+        class="main-btn-bg w-full rounded-lg py-3 teFxt-sm text-sky-100 absolute bottom-4 left-0"
       >
         Next
       </button>
     </div>
 
     <div v-else-if="nextStep === 1" class="text-black-primary relative h-full">
-      <div class="text-center text-3xl ">{{ inscribeAmount }} {{ asset.symbol }}</div>
+      <div class="text-center text-3xl">{{ inscribeAmount }} {{ asset.symbol }}</div>
       <div class="mt-[30px] text-sm w-full">Preview</div>
-      <div class="w-full h-[76px] rounded-sm bg-[#F5F5F5] mt-2 p-3 text-sm break-all">
+      <div class="w-full h-[76px] rounded-xl bg-[#F5F5F5] mt-2 p-3 text-sm break-all">
         {{ `{"p":"brc-20","op":"transfer","tick":"${asset.symbol}","amt":"${inscribeAmount}"}` }}
       </div>
       <div class="mt-8 space-y-5">
@@ -238,7 +235,7 @@ function toSuceess() {
       </div>
       <button
         @click="toConfirm"
-        class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100 absolute bottom-4 left-0"
+        class="main-btn-bg w-full rounded-lg py-3 text-sm text-sky-100 absolute bottom-4 left-0"
       >
         Next
       </button>
@@ -246,11 +243,11 @@ function toSuceess() {
 
     <div v-if="nextStep === 2" class="text-black-primary h-full">
       <div class="text-center text-base text-[#909399]">Spend Amount</div>
-      <div class="text-center text-3xl  mt-3">{{ inscribeAmount }} {{ asset.symbol }}</div>
+      <div class="text-center text-3xl mt-3">{{ inscribeAmount }} {{ asset.symbol }}</div>
       <div class="mt-3 text-center text-base text-[#909399]">
         {{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }} (network fee)
       </div>
-      <div class="border-b mt-3 space-x-3 text-base">
+      <div class="border-b my-4 space-x-3 text-base">
         <span
           @click="changeTabIdx(0)"
           class="inline-block pb-[2px] border-b-4 cursor-pointer"
@@ -265,48 +262,59 @@ function toSuceess() {
         >
       </div>
       <div class="space-y-[18px]" v-show="tabIdx === 0">
-        <div class="space-y-2 rounded-md">
+        <div class="space-y-4 rounded-md">
           <div class="text-black-primary">Inputs</div>
-          <div v-for="utxo in inputUTXOs" class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
+          <div
+            v-for="utxo in inputUTXOs"
+            class="w-full px-4 py-2 bg-[#F5F5F5] flex items-center justify-between rounded-lg"
+          >
             <span>{{ shortestAddress(utxo.address) }}</span
             ><span>{{ prettifyBalanceFixed(utxo.value, 'BTC', 8) }}</span>
           </div>
         </div>
-        <div class="space-y-2 rounded-md">
+        <div class="space-y-4 rounded-md">
           <div class="text-black-primary">Outputs</div>
-          <div v-for="utxo in outputUTXOs" class="w-full p-2 bg-[#F5F5F5] flex items-center justify-between">
+          <div
+            v-for="utxo in outputUTXOs"
+            class="w-full px-4 py-2 bg-[#F5F5F5] flex items-center justify-between rounded-lg"
+          >
             <span>{{ shortestAddress(utxo.address) }}</span>
             <span>{{ prettifyBalanceFixed(utxo.value, 'BTC', 8) }}</span>
           </div>
         </div>
-        <div class="space-y-2 rounded-md">
+        <div class="space-y-4 rounded-md">
           <div class="text-black-primary">Network Fee</div>
-          <div class="w-full p-2 bg-[#F5F5F5]">{{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }}</div>
+          <div class="w-full px-4 py-2 bg-[#F5F5F5] rounded-lg">
+            {{ prettifyBalanceFixed(paymentNetworkFee || 0, 'BTC', 8) }}
+          </div>
         </div>
       </div>
       <div class="space-y-[18px]" v-show="tabIdx === 1">
         <div class="space-y-2 rounded-md">
           <div class="text-black-primary">Outputs</div>
-          <div class="w-full px-1,5 p-3 bg-[#F5F5F5] h-40 rounded-md overflow-scroll break-all">
+          <div class="w-full p-3 -mr-3 bg-[#F5F5F5] h-40 overflow-y-auto break-all rounded-lg">
             {{ psbtHex }}
           </div>
         </div>
-        <div class="space-x-2.5 flex items-center justify-center">
-          <CopyIcon :class="copied ? 'text-blue-500' : ''" />
+        <div
+          :class="[
+            copied ? 'text-blue-500' : 'text-gray-500',
+            'space-x-2.5 flex items-center justify-center cursor-pointer hover:text-blue-500 text-sm',
+          ]"
+        >
+          <CopyIcon />
           <span class="text-sm" @click="copyHex">Copy psbt transaction data</span>
         </div>
       </div>
-      <div class="w-full left-0 flex items-center space-x-4 mt-4 pb-4 justify-center">
+      <div class="w-full left-0 flex items-center space-x-4 mt-8 pb-4 justify-center">
         <button
           @click="cancel"
-          class="border w-[133px] rounded-lg py-3 text-sm  text-black-primary"
+          class="border w-[133px] rounded-lg py-3 text-sm text-black-primary"
           style="border-image: 'linear-gradient(105deg, #72F5F6 4%, #171AFF 94%) 1'"
         >
           Cancel
         </button>
-        <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm  text-sky-100">
-          Comfirm
-        </button>
+        <button @click="send" class="main-btn-bg w-[133px] rounded-lg py-3 text-sm text-sky-100">Comfirm</button>
       </div>
     </div>
   </div>

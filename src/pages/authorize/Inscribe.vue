@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import actions from '@/data/authorize-actions'
+import CopyIcon from '@/assets/icons/copy.svg'
 import LoadingIcon from '@/components/LoadingIcon.vue'
 import { MetaidData } from '@/lib/actions/btc/inscribe'
-import { ChevronLeftIcon, ClipboardDocumentIcon } from '@heroicons/vue/24/outline'
+import { ChevronLeftIcon } from '@heroicons/vue/24/outline'
 
 const action = actions.Inscribe
 
@@ -57,7 +58,8 @@ actions.Inscribe.process({ ...props.params, options: { noBroadcast: true } })
   )
   .catch((err: Error) => {
     error.value = err
-  }).finally(() => {
+  })
+  .finally(() => {
     loading.value = false
   })
 
@@ -98,27 +100,27 @@ const copy = (txHex: string) => {
         <div class="label">Fee Rate</div>
         <div class="text-xs flex gap-2">{{ params.data.feeRate }} sat/vB</div>
       </div>
-      <div class="flex justify-between">
+      <div class="flex justify-between text-gray-500">
         <div class="label">CommitTx Hex</div>
-        <ClipboardDocumentIcon
+        <CopyIcon
           @click="copy(commitTxHex!)"
           :class="[pastedText === commitTxHex ? 'text-blue-500' : '', 'h-4 w-4 cursor-pointer hover:text-blue-500']"
         />
       </div>
-      <div class="flex justify-between" v-for="(txHex, i) in revealTxsHex">
+      <div class="flex justify-between text-gray-500" v-for="(txHex, i) in revealTxsHex">
         <div class="label">{{ `RevealTx${i + 1} Hex` }}</div>
-        <ClipboardDocumentIcon
+        <CopyIcon
           @click="copy(txHex!)"
           :class="[pastedText === txHex ? 'text-blue-500' : '', 'h-4 w-4 cursor-pointer hover:text-blue-500']"
         />
       </div>
     </div>
   </div>
-  <div class="space-y-2" v-else>
-    <h3 class="text-base">{{ action.title }}</h3>
 
+  <div class="space-y-4" v-else>
+    <h3 class="text-base">{{ action.title }}</h3>
     <div class="value">{{ params.message }}</div>
-    <div></div>
+
     <div class="value grid grid-cols-3 gap-4 justify-items-center">
       <template v-for="metaidData in metaidDataList">
         <template v-if="metaidData.body">
@@ -138,9 +140,8 @@ const copy = (txHex: string) => {
       <LoadingIcon class="!text-gray-primary" />
       <span>Data Loading...</span>
     </div>
-
     <div v-else-if="error" class="text-red-500 text-xs">{{ error.message }}</div>
-    <div class="mt-2 flex flex-col items-center justify-center gap-y-2" v-else>
+    <div v-else class="mt-2 flex flex-col items-center justify-center gap-y-2">
       <div class="flex flex-col w-full gap-y-2">
         <div class="flex justify-between">
           <div class="label">Total Cost</div>
