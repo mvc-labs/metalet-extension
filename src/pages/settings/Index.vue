@@ -22,10 +22,6 @@ passwordManager.has().then((has) => {
   hasPassword.value = has
 })
 
-const toDiscord = () => {
-  window.open('https://discord.gg/4FDEq8cJHj', '_blank')
-}
-
 const toGithub = () => {
   window.open('https://github.com/mvc-labs/metalet-extension', '_blank')
 }
@@ -69,7 +65,7 @@ const showResetModal = ref(false)
   <div class="space-y-8 pt-4 text-sm">
     <!-- general -->
     <div class="space-y-2">
-      <div class="text-base ">General</div>
+      <div class="text-base">General</div>
       <div class="divide-y divide-gray-100">
         <div class="setting-item">
           <div class="text-gray-500">Network</div>
@@ -108,7 +104,7 @@ const showResetModal = ref(false)
 
     <!-- security -->
     <div class="space-y-2">
-      <div class="text-base ">Security</div>
+      <div class="text-base">Security</div>
 
       <div class="divide-y divide-gray-100">
         <div class="setting-item group cursor-pointer" @click="toBackup" v-if="hasPassword">
@@ -143,7 +139,7 @@ const showResetModal = ref(false)
 
     <!-- about -->
     <div class="space-y-2">
-      <div class="text-base ">About</div>
+      <div class="text-base">About</div>
       <div class="divide-y divide-gray-100">
         <div class="setting-item group cursor-pointer" @click="toTerms">
           <div class="text-gray-500 group-hover:underline">Terms of Service</div>
@@ -157,12 +153,7 @@ const showResetModal = ref(false)
             <ArrowTopRightOnSquareIcon class="link-icon" />
           </div>
         </div>
-        <div class="setting-item group cursor-pointer" @click="toDiscord">
-          <div class="text-gray-500 group-hover:underline">Get Help at Discord</div>
-          <div class="">
-            <ArrowTopRightOnSquareIcon class="link-icon" />
-          </div>
-        </div>
+
         <div class="setting-item group cursor-pointer" @click="toGithub">
           <div class="text-gray-500 group-hover:underline">Source Code at Github</div>
           <div class="">
