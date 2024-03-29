@@ -49,7 +49,7 @@ needsMigrationV2().then(async (needsMigration: boolean) => {
       <div class="mt-12">
         <img class="mx-auto h-20 w-20" :src="MetaletLogoImg" alt="metalet-logo" />
       </div>
-      <div class="text-2xl  mt-16">Migrating to new version...</div>
+      <div class="text-2xl mt-16">Migrating to new version...</div>
       <div class="text-lg text-gray-500">Please wait a moment.</div>
     </div>
   </div>
@@ -62,7 +62,7 @@ needsMigrationV2().then(async (needsMigration: boolean) => {
 
       <div class="mt-4">
         <h1 class="text-3xl font-extrabold">Metalet</h1>
-        <p class="mt-4 text-lg text-gray-400">Wallet for MVC & Bitcoin</p>
+        <p class="mt-4 text-base text-gray-400">One Wallet for All Bitcoin Ecosystems</p>
       </div>
     </div>
 
