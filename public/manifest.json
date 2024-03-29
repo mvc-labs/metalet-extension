@@ -1,6 +1,6 @@
 {
   "name": "Metalet",
-  "description": "An MVC Crypto Wallet Extension",
+  "description": "A cross-chain crypto wallet extension",
   "version": "2.6.0",
   "manifest_version": 3,
   "action": {
