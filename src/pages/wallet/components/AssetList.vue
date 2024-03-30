@@ -5,7 +5,6 @@ import { ref, computed, onMounted } from 'vue'
 import { getAssetsDisplay } from '@/lib/assets'
 import { useBRC20AssetQuery } from '@/queries/btc'
 import { useMVCAssetsQuery } from '@/queries/tokens'
-import { SquaresPlusIcon } from '@heroicons/vue/24/outline'
 import { type Asset, BTCAsset, MVCAsset } from '@/data/assets'
 
 import AssetItem from './AssetItem.vue'
@@ -52,7 +51,6 @@ function toToken(token: Asset, address: string) {
   router.push({
     name: 'token',
     params: { genesis: token.genesis, symbol: token.symbol, address },
-    query: { genesis: token.genesis, symbol: token.symbol, address },
   })
 }
 </script>

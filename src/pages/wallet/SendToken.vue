@@ -1,56 +1,37 @@
 <script lang="ts" setup>
-import { ref, computed, Ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { API_NET, FtManager } from 'meta-contract'
-import { CircleStackIcon } from '@heroicons/vue/24/solid'
-import { useQueryClient } from '@tanstack/vue-query'
-
-import { getNetwork } from '@/lib/network'
-import { prettifyTokenBalance } from '@/lib/formatters'
-import { getAddress, getCurrentAccount, getPrivateKey } from '@/lib/account'
-import type { TransactionResult } from '@/global-types'
-import { useMVCTokenQuery } from '@/queries/tokens'
-import { type Asset } from '@/data/assets'
-
-import Modal from '@/components/Modal.vue'
-import TransactionResultModal from './components/TransactionResultModal.vue'
 import Decimal from 'decimal.js'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
+import Modal from '@/components/Modal.vue'
+import { getNetwork } from '@/lib/network'
+import {  getPrivateKey } from '@/lib/account'
+import { API_NET, FtManager } from 'meta-contract'
+import { useMVCTokenQuery } from '@/queries/tokens'
+import { useQueryClient } from '@tanstack/vue-query'
+import { prettifyTokenBalance } from '@/lib/formatters'
+import type { TransactionResult } from '@/global-types'
+import { CircleStackIcon } from '@heroicons/vue/24/solid'
+import TransactionResultModal from './components/TransactionResultModal.vue'
 
 const route = useRoute()
-const genesis = route.params.genesis as string
+const symbol = ref(route.params.symbol as string)
+const genesis = ref(route.params.genesis as string)
+const address = ref(route.params.address as string)
 
 const queryClient = useQueryClient()
 
-const address = ref('')
 const error = ref<Error>()
-getCurrentAccount()
-getAddress().then((addr) => {
-  address.value = addr!
-})
 
 // 用户拥有的代币资产
-const { isLoading, data: token } = useMVCTokenQuery(address, genesis, { enabled: computed(() => !!address.value) })
-
-const asset = computed(() => {
-  if (token.value) {
-    return {
-      symbol: token.value.symbol,
-      tokenName: token.value.name,
-      isNative: false,
-      chain: 'mvc',
-      queryable: true,
-      decimal: token.value.decimal,
-      contract: 'MetaContract',
-      codeHash: token.value.codeHash,
-    } as Asset
-  }
+const { isLoading, data: asset } = useMVCTokenQuery(address, genesis, {
+  enabled: computed(() => !!address.value && !genesis.value),
 })
 
 // form
 const amount = ref('')
 const amountInSats = computed(() => {
-  if (amount.value && typeof amount.value === 'number' && token.value) {
-    return new Decimal(amount.value).times(10 ** token.value.decimal)
+  if (amount.value && typeof amount.value === 'number' && asset.value) {
+    return new Decimal(amount.value).times(10 ** asset.value.decimal)
   }
   return new Decimal(0)
 })
@@ -97,8 +78,8 @@ async function send() {
 
   const transferRes = await ftManager
     .transfer({
-      codehash: token.value?.codeHash!,
-      genesis: token.value?.genesis!,
+      codehash: asset.value?.codeHash!,
+      genesis: asset.value?.genesis!,
       senderWif: privateKey,
       receivers: [
         {
@@ -128,8 +109,8 @@ async function send() {
       toAdddress: recipient.value,
       amount: amountInSats.value.toNumber(),
       token: {
-        symbol: token.value!.symbol,
-        decimal: token.value!.decimal,
+        symbol: asset.value!.symbol,
+        decimal: asset.value!.decimal,
       },
     }
 
@@ -146,7 +127,7 @@ async function send() {
 </script>
 
 <template>
-  <div class="mt-8 flex flex-col items-center gap-y-8" v-if="token">
+  <div class="mt-8 flex flex-col items-center gap-y-8" v-if="asset && genesis">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
     <img :src="asset?.logo" alt="" class="h-16 w-16 rounded-xl" v-if="asset?.logo" />
     <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
@@ -167,7 +148,7 @@ async function send() {
             class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-[88px] !text-xs"
           />
           <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-sm text-gray-500">
-            <div class="border-l border-solid border-gray-500 w-20 py-1 text-center">{{ token?.symbol }}</div>
+            <div class="border-l border-solid border-gray-500 w-20 py-1 text-center">{{ symbol }}</div>
           </div>
           <div class="absolute text-red-500 text-sm" v-if="error">{{ error?.message }}</div>
         </div>
@@ -177,8 +158,8 @@ async function send() {
       <div class="flex items-center gap-x-2 text-xs text-gray-500">
         <div class="">Your Balance:</div>
         <div class="" v-if="isLoading">--</div>
-        <div class="" v-else-if="token">
-          {{ prettifyTokenBalance(token.confirmed + token.unconfirmed, token.decimal) + ' ' + token.symbol }}
+        <div class="" v-else-if="asset.balance">
+          {{ prettifyTokenBalance(asset.balance.total, asset.decimal, false, symbol) }}
         </div>
       </div>
     </div>
@@ -195,7 +176,7 @@ async function send() {
         <div class="mt-4 space-y-4">
           <div class="space-y-1">
             <div class="label">Amount</div>
-            <div class="value">{{ amount }} {{ token.symbol }}</div>
+            <div class="value">{{ amount }} {{ symbol }}</div>
           </div>
           <div class="space-y-1">
             <div class="label">Recipient Address</div>

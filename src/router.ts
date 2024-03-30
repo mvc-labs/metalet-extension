@@ -157,7 +157,7 @@ const routes = [
     },
   },
   {
-    path: '/wallet/send-token/:symbol/:genesis',
+    path: '/wallet/send-token/:address/:symbol/:genesis',
     component: () => import('./pages/wallet/SendToken.vue'),
     name: 'send-token',
     meta: {
@@ -206,7 +206,7 @@ const routes = [
     },
   },
   {
-    path: '/wallet/tokens/:address/:symbol/:genesis',
+    path: '/wallet/token/:address/:symbol/:genesis',
     component: () => import('./pages/wallet/Token.vue'),
     name: 'token',
     meta: {
