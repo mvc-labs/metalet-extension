@@ -54,13 +54,13 @@ export const useMVCAssetsQuery = (address: Ref<string>, options: { enabled: Comp
 }
 
 export const useMVCTokenQuery = (
-  addressRef: Ref<string>,
+  address: Ref<string>,
   genesis: string,
   options: { enabled: ComputedRef<boolean> }
 ) => {
   return useQuery({
-    queryKey: ['MVCTokens', { address: addressRef.value, genesis }],
-    queryFn: () => fetchMVCTokens(addressRef.value),
+    queryKey: ['MVCTokens', { address, genesis }],
+    queryFn: () => fetchMVCTokens(address.value),
     select: (tokens: Token[]) => tokens.find((token) => token.genesis === genesis),
     ...options,
   })

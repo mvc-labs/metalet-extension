@@ -14,6 +14,7 @@ import { type Asset } from '@/data/assets'
 
 import Modal from '@/components/Modal.vue'
 import TransactionResultModal from './components/TransactionResultModal.vue'
+import Decimal from 'decimal.js'
 
 const route = useRoute()
 const genesis = route.params.genesis as string
@@ -21,30 +22,14 @@ const genesis = route.params.genesis as string
 const queryClient = useQueryClient()
 
 const address = ref('')
+const error = ref<Error>()
 getCurrentAccount()
 getAddress().then((addr) => {
   address.value = addr!
 })
 
-// form
-const amount = ref('')
-const amountInSats = computed(() => {
-  const _amount = Number(amount.value)
-  if (Number.isNaN(amount)) return 0
-  return _amount * 10 ** token.value!.decimal
-})
-const recipient = ref('')
-
-const isOpenConfirmModal = ref(false)
-const popConfirm = () => {
-  isOpenConfirmModal.value = true
-}
-const isOpenResultModal = ref(false)
-const transactionResult: Ref<undefined | TransactionResult> = ref()
-
-const enabled = computed(() => !!address.value)
 // 用户拥有的代币资产
-const { isLoading, data: token } = useMVCTokenQuery(address, genesis, { enabled })
+const { isLoading, data: token } = useMVCTokenQuery(address, genesis, { enabled: computed(() => !!address.value) })
 
 const asset = computed(() => {
   if (token.value) {
@@ -60,6 +45,24 @@ const asset = computed(() => {
     } as Asset
   }
 })
+
+// form
+const amount = ref('')
+const amountInSats = computed(() => {
+  if (amount.value && typeof amount.value === 'number' && token.value) {
+    return new Decimal(amount.value).times(10 ** token.value.decimal)
+  }
+  return new Decimal(0)
+})
+const recipient = ref('')
+
+const isOpenConfirmModal = ref(false)
+const popConfirm = () => {
+  isOpenConfirmModal.value = true
+}
+const isOpenResultModal = ref(false)
+const transactionResult = ref<TransactionResult>()
+
 const operationLock = ref(false)
 async function send() {
   if (operationLock.value) return
@@ -100,13 +103,14 @@ async function send() {
       receivers: [
         {
           address: recipient.value,
-          amount: amountInSats.value.toString(),
+          amount: amountInSats.value.toNumber().toString(),
         },
       ],
       utxos: [largestUtxo],
     })
     .catch((err) => {
       isOpenConfirmModal.value = false
+      error.value = err.message
       transactionResult.value = {
         status: 'failed',
         message: err.message,
@@ -122,7 +126,7 @@ async function send() {
       txId: transferRes.txid,
       fromAddress: address.value,
       toAdddress: recipient.value,
-      amount: amountInSats.value,
+      amount: amountInSats.value.toNumber(),
       token: {
         symbol: token.value!.symbol,
         decimal: token.value!.decimal,
@@ -142,7 +146,7 @@ async function send() {
 </script>
 
 <template>
-  <div class="mt-8 flex flex-col items-center gap-y-8">
+  <div class="mt-8 flex flex-col items-center gap-y-8" v-if="token">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
     <img :src="asset?.logo" alt="" class="h-16 w-16 rounded-xl" v-if="asset?.logo" />
     <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
@@ -152,14 +156,20 @@ async function send() {
       <input class="main-input w-full !rounded-xl !p-4 text-sm" placeholder="Recipient's address" v-model="recipient" />
 
       <!-- amount input -->
-      <div class="relative">
-        <input class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-12 text-sm" placeholder="Amount" v-model="amount" />
-        <!-- unit -->
-        <div
-          class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-xs text-gray-500"
-          v-if="token?.symbol"
-        >
-          <div class="border-l border-solid border-gray-500 px-4 py-1">{{ token.symbol }}</div>
+      <div class="space-y-2">
+        <div class="relative">
+          <input
+            min="0"
+            step="0.00001"
+            type="number"
+            v-model="amount"
+            placeholder="Amount"
+            class="main-input w-full !rounded-xl !py-4 !pl-4 !pr-[88px] !text-xs"
+          />
+          <div class="absolute right-0 top-0 flex h-full items-center justify-center text-right text-sm text-gray-500">
+            <div class="border-l border-solid border-gray-500 w-20 py-1 text-center">{{ token?.symbol }}</div>
+          </div>
+          <div class="absolute text-red-500 text-sm" v-if="error">{{ error?.message }}</div>
         </div>
       </div>
 
@@ -174,18 +184,18 @@ async function send() {
     </div>
 
     <!-- send -->
-    <button class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100" @click="popConfirm">Send</button>
+    <button class="main-btn-bg w-full rounded-lg py-3 text-sm text-sky-100" @click="popConfirm">Send</button>
 
     <Modal v-model:is-open="isOpenConfirmModal" title="Confirm">
       <template #title>
-        <div class="text-black-primary  text-center">Confirm Send</div>
+        <div class="text-black-primary text-center">Confirm Send</div>
       </template>
 
       <template #body>
         <div class="mt-4 space-y-4">
           <div class="space-y-1">
             <div class="label">Amount</div>
-            <div class="value">{{ amount }} {{ token?.symbol }}</div>
+            <div class="value">{{ amount }} {{ token.symbol }}</div>
           </div>
           <div class="space-y-1">
             <div class="label">Recipient Address</div>
@@ -200,22 +210,21 @@ async function send() {
 
       <template #control>
         <div class="" v-if="operationLock">
-          <div class="w-full py-3 text-center text-sm  text-gray-500">Operating...</div>
+          <div class="w-full py-3 text-center text-sm text-gray-500">Operating...</div>
         </div>
         <div class="grid grid-cols-2 gap-x-4" v-else>
           <button
-            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm  text-gray-700"
+            class="w-full rounded-lg border border-primary-blue bg-white py-3 text-sm text-gray-700"
             @click="isOpenConfirmModal = false"
           >
             Cancel
           </button>
-          <button class="main-btn-bg w-full rounded-lg py-3 text-sm  text-sky-100" @click="send">
-            Confirm
-          </button>
+          <button class="main-btn-bg w-full rounded-lg py-3 text-sm text-sky-100" @click="send">Confirm</button>
         </div>
       </template>
     </Modal>
   </div>
+  <div v-else class="text-center text-gray-primary w-full py-3 text-base">Token can not found.</div>
 </template>
 
 <style lang="css" scoped>
