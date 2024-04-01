@@ -166,7 +166,7 @@ const cancelAction = async () => {
     <div class="gradient-text mt-6 text-lg  tracking-wide">AUTHORIZE</div>
 
     <!-- logo -->
-    <div class="mt-4 flex h-24 w-24 items-center justify-center rounded-xl bg-gray-50 p-3 shadow-inner shadow-gray-300">
+    <div class="mt-4 flex h-24 w-24 items-center justify-center rounded-xl bg-gray-50 shadow-inner shadow-gray-300">
       <img class="object-contain rounded-xl" :src="logo" alt="logo" v-if="logo" />
       <LinkIcon class="h-16 w-16 text-gray-300" v-else />
     </div>
