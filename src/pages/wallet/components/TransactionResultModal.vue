@@ -2,10 +2,10 @@
 import { PropType } from 'vue'
 import { toTx } from '@/lib/helpers'
 import { useRouter } from 'vue-router'
+import Copy from '@/components/Copy.vue'
 import Modal from '@/components/Modal.vue'
 import { type Chain } from '@/lib/account'
 import { getBrowserHost } from '@/lib/host'
-import CopyIcon from '@/assets/icons/copy.svg'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import SuccessIcon from '@/assets/icons/success.svg?url'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
@@ -104,7 +104,7 @@ const toResultTx = async () => {
           <div class="label">From</div>
           <div class="text-xs flex gap-2">
             <div class="truncate w-48 cursor-pointer" :title="result.fromAddress">{{ result.fromAddress }}</div>
-            <CopyIcon class="h-4 w-4 cursor-pointer text-gray-primary hover:text-blue-500" />
+            <Copy :text="result.fromAddress" />
           </div>
         </div>
 
@@ -112,7 +112,7 @@ const toResultTx = async () => {
           <div class="label">To</div>
           <div class="text-xs flex gap-2">
             <div class="truncate w-48 cursor-pointer" :title="result.toAdddress">{{ result.toAdddress }}</div>
-            <CopyIcon class="h-4 w-4 cursor-pointer text-gray-primary hover:text-blue-500" />
+            <Copy :text="result.toAdddress" />
           </div>
         </div>
 
@@ -122,7 +122,7 @@ const toResultTx = async () => {
             <div class="hover:underline truncate w-48 cursor-pointer" @click="toResultTx" :title="result.txId">
               {{ result.txId }}
             </div>
-            <CopyIcon class="h-4 w-4 cursor-pointer text-gray-primary hover:text-blue-500" />
+            <Copy :text="result.txId" />"
           </div>
         </div>
       </div>

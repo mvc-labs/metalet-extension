@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import actions from '@/data/authorize-actions'
-import CopyIcon from '@/assets/icons/copy.svg'
+import Copy from '@/components/Copy.vue'
 import LoadingIcon from '@/components/LoadingIcon.vue'
 import { MetaidData } from '@/lib/actions/btc/inscribe'
 import { ChevronLeftIcon } from '@heroicons/vue/24/outline'
@@ -20,7 +20,6 @@ const props = defineProps<{
 
 const loading = ref(true)
 const error = ref<Error>()
-const pastedText = ref<string>()
 const commitCost = ref<number>(0)
 const revealCost = ref<number>(0)
 const commitTxHex = ref<string>()
@@ -62,11 +61,6 @@ actions.Inscribe.process({ ...props.params, options: { noBroadcast: true } })
   .finally(() => {
     loading.value = false
   })
-
-const copy = (txHex: string) => {
-  pastedText.value = txHex
-  navigator.clipboard.writeText(txHex)
-}
 </script>
 
 <template>
@@ -102,17 +96,11 @@ const copy = (txHex: string) => {
       </div>
       <div class="flex justify-between text-gray-500">
         <div class="label">CommitTx Hex</div>
-        <CopyIcon
-          @click="copy(commitTxHex!)"
-          :class="[pastedText === commitTxHex ? 'text-blue-500' : '', 'h-4 w-4 cursor-pointer hover:text-blue-500']"
-        />
+        <Copy :text="commitTxHex!" />
       </div>
       <div class="flex justify-between text-gray-500" v-for="(txHex, i) in revealTxsHex">
         <div class="label">{{ `RevealTx${i + 1} Hex` }}</div>
-        <CopyIcon
-          @click="copy(txHex!)"
-          :class="[pastedText === txHex ? 'text-blue-500' : '', 'h-4 w-4 cursor-pointer hover:text-blue-500']"
-        />
+        <Copy :text="txHex" />
       </div>
     </div>
   </div>

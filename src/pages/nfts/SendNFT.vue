@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
+import Copy from '@/components/Copy.vue'
 import type { Psbt } from 'bitcoinjs-lib'
 import { BtcWallet } from '@/lib/wallets/btc'
 import { getMetaPin } from '@/queries/metaPin'
-import CopyIcon from '@/assets/icons/copy.svg'
 import { useQueryClient } from '@tanstack/vue-query'
 import { UTXO, getInscriptionUtxo } from '@/queries/utxos'
 import BTCRateList from '../wallet/components/BTCRateList.vue'
@@ -202,14 +202,14 @@ async function send() {
           <span>From</span>
           <span class="flex items-center gap-x-2">
             <span :title="address">{{ shortestAddress(address) }}</span>
-            <CopyIcon class="h-4 w-4 cursor-pointer hover:text-blue-500" />
+            <Copy :text="address" />
           </span>
         </div>
         <div class="flex items-center justify-between">
           <span>To</span>
           <span class="flex items-center gap-x-2">
             <span :title="recipient">{{ shortestAddress(recipient) }}</span>
-            <CopyIcon class="h-4 w-4 cursor-pointer hover:text-blue-500" />
+            <Copy :text="recipient" />
           </span>
         </div>
         <div class="flex items-center justify-between">
