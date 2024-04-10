@@ -1,1 +1,1 @@
-export const Balance_QUERY_INTERVAL = 15000;
+export const Balance_QUERY_INTERVAL = 30000;

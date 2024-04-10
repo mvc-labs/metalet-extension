@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
+import { UseImage } from '@vueuse/components'
 import { isOfficialToken } from '@/lib/assets'
 import { useRoute, useRouter } from 'vue-router'
 import { useMVCTokenQuery } from '@/queries/tokens'
@@ -26,7 +27,7 @@ const { isLoading, data: asset } = useMVCTokenQuery(ref(address), ref(genesis), 
 const toSend = () => {
   router.push({
     name: 'send-token',
-    params: { symbol, genesis,address },
+    params: { symbol, genesis, address },
   })
 }
 const toReceive = () => {
@@ -46,7 +47,13 @@ const copyGenesis = () => {
 
     <template v-else-if="!!asset">
       <!-- logo -->
-      <img v-if="asset?.logo" :src="asset.logo" alt="" class="h-20 w-20 rounded-full" />
+      <UseImage :src="asset.logo" v-if="asset.logo && asset.codeHash" class="h-20 w-20 rounded-xl">
+        <template #error>
+          <div style="line-height: 80px" class="h-20 w-20 text-center rounded-full text-white text-3xl bg-[#1E2BFF]">
+            {{ symbol[0].toLocaleUpperCase() }}
+          </div>
+        </template>
+      </UseImage>
       <div v-else style="line-height: 80px" class="h-20 w-20 text-center rounded-full text-white text-3xl bg-[#1E2BFF]">
         {{ symbol[0].toLocaleUpperCase() }}
       </div>

@@ -1,7 +1,7 @@
 {
   "name": "Metalet",
   "description": "A cross-chain crypto wallet extension",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "manifest_version": 3,
   "action": {
     "default_popup": "popup.html",

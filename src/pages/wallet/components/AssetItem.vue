@@ -2,6 +2,7 @@
 import Decimal from 'decimal.js'
 import { ref, computed, watch } from 'vue'
 import { updateAsset } from '@/lib/balance'
+import { UseImage } from '@vueuse/components'
 import { isOfficialToken } from '@/lib/assets'
 import { useBalanceQuery } from '@/queries/balance'
 import { CheckBadgeIcon } from '@heroicons/vue/24/solid'
@@ -70,7 +71,13 @@ watch(
     <div class="flex gap-2 cursor-pointer items-center justify-between rounded-md bg-gray-100 px-4 py-4">
       <!-- left part -->
       <div class="flex flex-shrink-0 items-center gap-x-3">
-        <img class="h-10 w-10" :src="asset.logo" v-if="asset.logo && asset.codeHash" />
+        <UseImage :src="asset.logo" v-if="asset.logo && asset.codeHash" class="h-10 w-10 rounded-md">
+          <template #error>
+            <div class="h-10 w-10 text-center leading-10 rounded-full text-white text-base bg-[#1E2BFF]">
+              {{ asset.symbol[0].toLocaleUpperCase() }}
+            </div>
+          </template>
+        </UseImage>
         <img class="h-10 w-10 rounded-full" :src="asset.logo" v-else-if="asset.logo" />
         <div v-else class="h-10 w-10 text-center leading-10 rounded-full text-white text-base bg-[#1E2BFF]">
           {{ asset.symbol[0].toLocaleUpperCase() }}
