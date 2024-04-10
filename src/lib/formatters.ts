@@ -28,7 +28,7 @@ export const prettifyTokenBalance = (balance: number, decimal: number, useRound 
   // If useRound is true, then round the balance
   let numberPart
   if (useRound) {
-    const roundedBalance = Math.round(balance / 10 ** decimal)
+    const roundedBalance = Math.floor(balance / 10 ** decimal)
     if (roundedBalance === 0) {
       numberPart = '< 1'
     } else {
