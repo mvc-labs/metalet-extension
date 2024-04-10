@@ -1,7 +1,6 @@
 import { mvcApi } from './request'
 import { Balance } from './balance'
 import { ComputedRef, Ref } from 'vue'
-import { getFTLogo } from '@/data/logos'
 import { type Asset } from '@/data/assets'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker } from '@/lib/asset-symbol'
@@ -41,7 +40,7 @@ export const useMVCAssetsQuery = (address: Ref<string>, options: { enabled: Comp
             contract: 'MetaContract',
             codeHash: token.codeHash,
             genesis: token.genesis,
-            logo: getFTLogo(token.name),
+            logo: `https://y8u3ysgqmvgb0tsg.public.blob.vercel-storage.com/wrapt-coins/${token.symbol}.png`,
             balance: {
               total: token.confirmed + token.unconfirmed,
               confirmed: token.confirmed,
@@ -74,7 +73,7 @@ export const useMVCTokenQuery = (
           contract: 'MetaContract',
           codeHash: token.codeHash,
           genesis: token.genesis,
-          logo: getFTLogo(token.name),
+          logo: `https://y8u3ysgqmvgb0tsg.public.blob.vercel-storage.com/wrapt-coins/${token.symbol}.png`,
           balance: {
             confirmed: token.confirmed,
             unconfirmed: token.unconfirmed,

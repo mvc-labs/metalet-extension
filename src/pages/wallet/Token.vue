@@ -1,7 +1,5 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { getFTLogo } from '@/data/logos'
-import { type Asset } from '@/data/assets'
 import { isOfficialToken } from '@/lib/assets'
 import { useRoute, useRouter } from 'vue-router'
 import { useMVCTokenQuery } from '@/queries/tokens'

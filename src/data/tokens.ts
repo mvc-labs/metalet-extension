@@ -25,4 +25,79 @@ export default [
     genesis: 'fad7b10812fa76718127e084bb71cdb87853261c',
     logo: vemspLogoImage,
   },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
+  {
+    genesis: 'c9cc7bbd1010b44873959a8b1a2bcedeb62302b7',
+  },
 ]
