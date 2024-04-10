@@ -3,6 +3,7 @@ import { Ref, ComputedRef } from 'vue'
 import { getNet } from '@/lib/network'
 import { fetchBRC20Token } from './brc20s'
 import { useQuery } from '@tanstack/vue-query'
+import { Balance_QUERY_INTERVAL } from './constants'
 import { ordersApi, metaletApiV3 } from '@/queries/request'
 
 interface Tick {
@@ -69,6 +70,7 @@ export const useBRC20AssetQuery = (address: Ref<string>, options: { enabled: Com
   return useQuery({
     queryKey: ['BRC20Assets', { address }],
     queryFn: () => fetchBRC20Token(address.value),
+    refetchInterval: Balance_QUERY_INTERVAL,
     ...options,
   })
 }

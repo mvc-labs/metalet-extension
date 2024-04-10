@@ -4,6 +4,7 @@ import { getNet } from '@/lib/network'
 import { useQuery } from '@tanstack/vue-query'
 import { metaletApiV3, mvcApi } from './request'
 import { SymbolTicker } from '@/lib/asset-symbol'
+import { Balance_QUERY_INTERVAL } from './constants'
 
 export type Balance = {
   address: string
@@ -85,6 +86,7 @@ export const useBalanceQuery = (
         }
       }
     },
+    refetchInterval: Balance_QUERY_INTERVAL,
     ...options,
   })
 }

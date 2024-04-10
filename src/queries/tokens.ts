@@ -4,6 +4,7 @@ import { ComputedRef, Ref } from 'vue'
 import { type Asset } from '@/data/assets'
 import { useQuery } from '@tanstack/vue-query'
 import { SymbolTicker } from '@/lib/asset-symbol'
+import { Balance_QUERY_INTERVAL } from './constants'
 
 export type Token = {
   codeHash: string
@@ -48,6 +49,7 @@ export const useMVCAssetsQuery = (address: Ref<string>, options: { enabled: Comp
             },
           }) as Asset
       ),
+    refetchInterval: Balance_QUERY_INTERVAL,
     ...options,
   })
 }
@@ -82,6 +84,7 @@ export const useMVCTokenQuery = (
         } as Asset
       }
     },
+    refetchInterval: Balance_QUERY_INTERVAL,
     ...options,
   })
 }
