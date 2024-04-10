@@ -70,13 +70,14 @@ watch(
     <div class="flex gap-2 cursor-pointer items-center justify-between rounded-md bg-gray-100 px-4 py-4">
       <!-- left part -->
       <div class="flex flex-shrink-0 items-center gap-x-3">
-        <img class="h-10 w-10 rounded-full" :src="asset.logo" v-if="asset.logo" />
+        <img class="h-10 w-10" :src="asset.logo" v-if="asset.logo && asset.codeHash" />
+        <img class="h-10 w-10 rounded-full" :src="asset.logo" v-else-if="asset.logo" />
         <div v-else class="h-10 w-10 text-center leading-10 rounded-full text-white text-base bg-[#1E2BFF]">
           {{ asset.symbol[0].toLocaleUpperCase() }}
         </div>
         <div class="flex flex-col gap-y-1 items-start">
           <div :title="asset.tokenName" class="flex items-center gap-x-0.5 text-base">
-            <span class=" max-w-[100px] truncate overflow-hidden">{{ asset.tokenName }}</span>
+            <span class="max-w-[100px] truncate overflow-hidden">{{ asset.tokenName }}</span>
             <CheckBadgeIcon
               class="h-4 w-4 shrink-0 text-blue-500"
               v-if="asset?.genesis && isOfficialToken(asset.genesis)"
@@ -100,7 +101,7 @@ watch(
             asset?.contract === 'BRC-20' ? 'border-b border-[#D8D8D8] border-dashed pb-3' : '',
           ]"
         >
-          <div class="text-black-primary  text-base">{{ assetPrice }}</div>
+          <div class="text-black-primary text-base">{{ assetPrice }}</div>
           <div :class="['text-sm font-normal text-gray-500']">
             <span v-if="assetUSD">{{ `$${assetUSD.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber()} USD` }}</span>
             <span v-else>$-- USD</span>
@@ -110,15 +111,15 @@ watch(
         <div v-if="asset?.contract === 'BRC-20'" class="w-full mt-2.5 space-y-2">
           <div class="text-xs flex items-center justify-between w-full">
             <span class="text-[#909399]">Transferable:</span>
-            <span class="text-black-primary  truncate">{{ asset.balance?.transferBalance }}</span>
+            <span class="text-black-primary truncate">{{ asset.balance?.transferBalance }}</span>
           </div>
           <div class="text-xs flex items-center justify-between w-full">
             <span class="text-[#909399]">Available:</span>
-            <span class="text-black-primary  truncate">{{ asset.balance?.availableBalanceSafe }}</span>
+            <span class="text-black-primary truncate">{{ asset.balance?.availableBalanceSafe }}</span>
           </div>
           <div class="text-xs flex items-center justify-between w-full" v-if="asset.balance?.availableBalanceUnSafe">
             <span class="text-[#909399]">Available(pending):</span>
-            <span class="text-black-primary  truncate">{{ asset.balance?.availableBalanceUnSafe }}</span>
+            <span class="text-black-primary truncate">{{ asset.balance?.availableBalanceUnSafe }}</span>
           </div>
         </div>
       </div>
