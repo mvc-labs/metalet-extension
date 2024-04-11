@@ -9,36 +9,43 @@ import { CheckBadgeIcon } from '@heroicons/vue/24/solid'
 import { type Asset, getTagInfo, type Tag } from '@/data/assets'
 import { useExchangeRatesQuery, getExchangeCoinType } from '@/queries/exchange-rates'
 
-const { asset, address } = defineProps<{
+const props = defineProps<{
   asset: Asset
   address: string
 }>()
 
+const asset = computed(() => props.asset)
+const address = computed(() => props.address)
+
 const tag = ref<Tag>()
 
-if (asset?.contract) {
-  tag.value = getTagInfo(asset.contract)
+if (props.asset?.contract) {
+  tag.value = getTagInfo(props.asset.contract)
 }
 
-const balaceEnabled = computed(() => !!address && !!asset.symbol && !asset.balance)
-const { data: balance } = useBalanceQuery(ref(address), ref(asset.symbol), { enabled: balaceEnabled })
+const balaceEnabled = computed(() => !!address && !!asset.value.symbol && !asset.value.balance)
+const { data: balance } = useBalanceQuery(ref(address), ref(asset.value.symbol), { enabled: balaceEnabled })
 
 const coinType = computed(() => {
-  return getExchangeCoinType(asset.symbol, asset.contract)
+  return getExchangeCoinType(asset.value.symbol, asset.value.contract)
 })
 
-const rateEnabled = computed(() => !!address && !!asset.symbol)
-const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(ref(asset.symbol), coinType, {
-  enabled: rateEnabled,
-})
+const rateEnabled = computed(() => !!address && !!asset.value.symbol)
+const { isLoading: isExchangeRateLoading, data: exchangeRate } = useExchangeRatesQuery(
+  ref(asset.value.symbol),
+  coinType,
+  {
+    enabled: rateEnabled,
+  }
+)
 
 const assetPrice = computed(() => {
-  if (asset?.balance) {
-    return `${new Decimal(asset.balance.total).dividedBy(10 ** asset.decimal).toNumber()} ${asset.symbol}`
+  if (asset.value?.balance) {
+    return `${new Decimal(asset.value.balance.total).dividedBy(10 ** asset.value.decimal).toNumber()} ${asset.value.symbol}`
   } else if (balance.value) {
-    return `${new Decimal(balance.value.total).dividedBy(10 ** asset.decimal).toNumber()} ${asset.symbol}`
+    return `${new Decimal(balance.value.total).dividedBy(10 ** asset.value.decimal).toNumber()} ${asset.value.symbol}`
   }
-  return `-- ${asset.symbol}`
+  return `-- ${asset.value.symbol}`
 })
 
 const assetUSD = computed(() => {
@@ -46,11 +53,11 @@ const assetUSD = computed(() => {
     return
   }
   const usdRate = new Decimal(exchangeRate.value?.price || 0)
-  if (asset?.balance) {
-    const balanceInStandardUnit = new Decimal(asset.balance?.total || 0).dividedBy(10 ** asset.decimal)
+  if (asset.value?.balance) {
+    const balanceInStandardUnit = new Decimal(asset.value.balance?.total || 0).dividedBy(10 ** asset.value.decimal)
     return usdRate.mul(balanceInStandardUnit)
   } else if (balance.value && exchangeRate.value) {
-    const balanceInStandardUnit = new Decimal(balance.value.total).dividedBy(10 ** asset.decimal)
+    const balanceInStandardUnit = new Decimal(balance.value.total).dividedBy(10 ** asset.value.decimal)
     return usdRate.mul(balanceInStandardUnit)
   }
 })
@@ -59,7 +66,7 @@ watch(
   assetUSD,
   (_assetUSD) => {
     if (_assetUSD) {
-      updateAsset({ chain: asset.chain, name: asset.symbol, value: _assetUSD.toNumber() })
+      updateAsset({ chain: asset.value.chain, name: asset.value.symbol, value: _assetUSD.toNumber() })
     }
   },
   { immediate: true }

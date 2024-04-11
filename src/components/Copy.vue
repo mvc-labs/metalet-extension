@@ -13,9 +13,9 @@ const { text } = defineProps<{
     @click="ClipboardStore.copy(text)"
     :class="
       twMerge(
-        'hover:text-blue-primary cursor-pointer',
+        'hover:text-primary-blue cursor-pointer',
         $attrs.class as string,
-        ClipboardStore.copiedText === text ? 'text-blue-primary' : 'text-gray-primary'
+        ClipboardStore.copiedText === text ? 'text-primary-blue' : 'text-gray-primary'
       )
     "
   />

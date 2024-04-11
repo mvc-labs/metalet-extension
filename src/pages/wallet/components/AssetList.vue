@@ -34,6 +34,7 @@ const { isLoading: btcAssetsLoading, data: btcAssets } = useBRC20AssetQuery(btcA
 
 const { isFetching: mvcAssetsLoading, data: mvcAssets } = useMVCAssetsQuery(mvcAddress, {
   enabled: computed(() => !!mvcAddress.value),
+  autoRefresh: true,
 })
 
 function toManageAssets() {
@@ -57,28 +58,26 @@ function toToken(token: Asset, address: string) {
 
 <template>
   <div class="mt-8 space-y-5 text-black">
-    <div class="text-base  text-gray-900">BTC</div>
+    <div class="text-base text-gray-900">BTC</div>
     <div class="space-y-2" v-if="btcAddress">
       <AssetItem :asset="BTCAsset" :address="btcAddress" @click="toNative(BTCAsset, btcAddress)" />
       <AssetItem
         :asset="asset"
         :key="asset.symbol"
         :address="btcAddress"
-        v-show="!btcAssetsLoading"
         v-for="asset in btcAssets"
         @click="toNative(asset, btcAddress)"
       />
     </div>
     <div v-else class="text-center text-gray-500 text-sm">BTC Asset Loading...</div>
 
-    <div class="text-base  text-gray-900">MVC</div>
+    <div class="text-base text-gray-900">MVC</div>
     <div class="space-y-2" v-if="mvcAddress">
       <AssetItem :asset="MVCAsset" :address="mvcAddress" @click="toNative(MVCAsset, mvcAddress)" />
       <AssetItem
         :asset="asset"
         :key="asset.genesis"
         :address="mvcAddress"
-        v-show="!mvcAssetsLoading"
         v-for="asset in mvcAssets"
         @click="toToken(asset, mvcAddress)"
       />

@@ -24,7 +24,10 @@ export const fetchMVCTokens = async (address: string): Promise<Token[]> => {
   return await mvcApi<Token[]>(`/contract/ft/address/${address}/balance`).get()
 }
 
-export const useMVCAssetsQuery = (address: Ref<string>, options: { enabled: ComputedRef<boolean> }) => {
+export const useMVCAssetsQuery = (
+  address: Ref<string>,
+  options: { enabled: ComputedRef<boolean>; autoRefresh?: boolean }
+) => {
   return useQuery({
     queryKey: ['MVCTokens', { address }],
     queryFn: () => fetchMVCTokens(address.value),
@@ -49,7 +52,7 @@ export const useMVCAssetsQuery = (address: Ref<string>, options: { enabled: Comp
             },
           }) as Asset
       ),
-    refetchInterval: Balance_QUERY_INTERVAL,
+    refetchInterval: options.autoRefresh ? Balance_QUERY_INTERVAL : undefined,
     ...options,
   })
 }

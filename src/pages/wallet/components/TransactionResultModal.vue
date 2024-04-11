@@ -24,6 +24,11 @@ type SuccessResult = {
     decimal: number
   }
 }
+type SuccessTxsResult = {
+  chain: Chain
+  status: 'successTxs'
+  txIds: string[]
+}
 type FailedResult = {
   status: 'failed'
   message: string
@@ -32,7 +37,7 @@ type WarningResult = {
   status: 'warning'
   message: string
 }
-export type TransactionResult = SuccessResult | FailedResult | WarningResult
+export type TransactionResult = SuccessTxsResult | SuccessResult | FailedResult | WarningResult
 const props = defineProps({
   isOpenResult: {
     type: Boolean,
@@ -61,6 +66,14 @@ const toResultTx = async () => {
   const host = await getBrowserHost(props.result.chain)
 
   toTx(props.result.txId, host as string)
+}
+
+const toResultTxs = async (txId: string) => {
+  if (!props.result || props.result.status !== 'successTxs') return
+
+  const host = await getBrowserHost(props.result.chain)
+
+  toTx(txId, host as string)
 }
 </script>
 
@@ -122,7 +135,19 @@ const toResultTx = async () => {
             <div class="hover:underline truncate w-48 cursor-pointer" @click="toResultTx" :title="result.txId">
               {{ result.txId }}
             </div>
-            <Copy :text="result.txId" />"
+            <Copy :text="result.txId" />
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-[37px] space-y-4" v-if="result && result.status === 'successTxs'">
+        <div class="flex justify-between" v-for="(txId, index) in result.txIds" :key="index">
+          <div class="label">TxID{{ index + 1 }}</div>
+          <div class="text-xs flex gap-2">
+            <div class="hover:underline truncate w-48 cursor-pointer" @click="toResultTxs(txId)" :title="txId">
+              {{ txId }}
+            </div>
+            <Copy :text="txId" />
           </div>
         </div>
       </div>

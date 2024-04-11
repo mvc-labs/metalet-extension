@@ -343,7 +343,15 @@ const routes = [
       noFooter: false,
     },
   },
-
+  {
+    path: '/settings/toolkit/ft-merge',
+    component: () => import('./pages/settings/components/FTMerge.vue'),
+    meta: {
+      secondaryHeader: true,
+      headerTitle: '',
+      noFooter: false,
+    },
+  },
   {
     path: '/tools/path-finder',
     component: () => import('./pages/tools/PathFinder.vue'),

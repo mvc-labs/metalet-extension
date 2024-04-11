@@ -4,13 +4,13 @@ import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import Modal from '@/components/Modal.vue'
 import { getNetwork } from '@/lib/network'
-import {  getPrivateKey } from '@/lib/account'
+import { UseImage } from '@vueuse/components'
+import { getPrivateKey } from '@/lib/account'
 import { API_NET, FtManager } from 'meta-contract'
 import { useMVCTokenQuery } from '@/queries/tokens'
 import { useQueryClient } from '@tanstack/vue-query'
 import { prettifyTokenBalance } from '@/lib/formatters'
 import type { TransactionResult } from '@/global-types'
-import { CircleStackIcon } from '@heroicons/vue/24/solid'
 import TransactionResultModal from './components/TransactionResultModal.vue'
 
 const route = useRoute()
@@ -129,8 +129,16 @@ async function send() {
 <template>
   <div class="mt-8 flex flex-col items-center gap-y-8" v-if="asset && genesis">
     <TransactionResultModal v-model:is-open-result="isOpenResultModal" :result="transactionResult" />
-    <img :src="asset?.logo" alt="" class="h-16 w-16 rounded-xl" v-if="asset?.logo" />
-    <CircleStackIcon class="h-10 w-10 text-gray-300 transition-all group-hover:text-blue-500" v-else />
+    <UseImage :src="asset.logo" v-if="asset.logo && asset.codeHash" class="h-20 w-20 rounded-xl">
+      <template #error>
+        <div style="line-height: 80px" class="h-20 w-20 text-center rounded-full text-white text-3xl bg-[#1E2BFF]">
+          {{ symbol[0].toLocaleUpperCase() }}
+        </div>
+      </template>
+    </UseImage>
+    <div v-else style="line-height: 80px" class="h-20 w-20 text-center rounded-full text-white text-3xl bg-[#1E2BFF]">
+      {{ symbol[0].toLocaleUpperCase() }}
+    </div>
 
     <div class="space-y-3 self-stretch">
       <!-- address input -->
