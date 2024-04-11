@@ -349,7 +349,7 @@ const routes = [
     meta: {
       secondaryHeader: true,
       headerTitle: '',
-      noFooter: false,
+      noFooter: true,
     },
   },
   {

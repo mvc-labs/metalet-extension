@@ -23,8 +23,8 @@ const isOpenResultModal = ref(false)
 const transactionResult = ref<TransactionResult>()
 const ftAsssets = ref<(Asset & { utxoCount: number })[]>([])
 
-const NeedToMergeCount = 3
 const testSplit = false
+const NeedToMergeCount = 3
 
 type Receiver = {
   address: string
@@ -47,7 +47,7 @@ const split = async (genesis: string, codehash: string, symbol: string, decimal:
       apiHost,
     })
     let receivers: Receiver[] = []
-    for (let i = 0; i < 99; i++) {
+    for (let i = 0; i < 10; i++) {
       receivers.push({ address: address.value, amount: '1' })
     }
     loading.value = true
@@ -201,8 +201,8 @@ onMounted(async () => {
     </div>
     <div class="-mx-5 px-5 bg-gray-light py-3">Token</div>
     <div class="py-16 text-center" v-if="isLoading">Token List Loading...</div>
-    <div class="py-3" v-for="(asset, index) in ftAsssets" :key="index" v-else-if="hasMergeToken">
-      <div class="flex items-center justify-between" v-if="asset.utxoCount > NeedToMergeCount">
+    <div v-for="(asset, index) in ftAsssets" :key="index" v-else-if="hasMergeToken">
+      <div class="flex items-center justify-between py-3" v-if="asset.utxoCount > NeedToMergeCount">
         <div class="flex items-center gap-3">
           <UseImage :src="asset.logo" v-if="asset.logo && asset.codeHash" class="h-10 w-10 rounded-md">
             <template #error>
