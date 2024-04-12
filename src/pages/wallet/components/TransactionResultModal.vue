@@ -91,7 +91,7 @@ const toResultTxs = async (txId: string) => {
         <ExclamationTriangleIcon class="h-5 w-5 text-yellow-500"></ExclamationTriangleIcon>
       </div>
     </template>
-    <template #title v-if="(result && result.status === 'success') || result?.status === 'successTxs'">
+    <template #title v-if="result && (result.status === 'success' || result.status === 'successTxs')">
       <div class="flex flex-col justify-center items-center gap-[18px]">
         <img class="w-[54px] h-[54px]" :src="SuccessIcon" alt="" />
         <span class="text-black-primary">Sent Successfully</span>
