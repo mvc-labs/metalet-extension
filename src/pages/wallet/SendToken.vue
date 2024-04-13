@@ -92,9 +92,19 @@ async function send() {
     .catch((err) => {
       isOpenConfirmModal.value = false
       error.value = err.message
-      transactionResult.value = {
-        status: 'failed',
-        message: err.message,
+      if (err instanceof Error) {
+        if (err.message === 'Too many token-utxos, should merge them to continue.') {
+          transactionResult.value = {
+            router: 'ft-merge',
+            status: 'failed',
+            message: err.message,
+          }
+        }
+      } else {
+        transactionResult.value = {
+          status: 'failed',
+          message: err.message,
+        }
       }
 
       isOpenResultModal.value = true

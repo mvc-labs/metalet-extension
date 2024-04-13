@@ -15,6 +15,7 @@ type SuccessResult = {
 type FailedResult = {
   status: 'failed'
   message: string
+  router?: string
 }
 type WarningResult = {
   status: 'warning'

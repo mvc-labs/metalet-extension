@@ -32,6 +32,7 @@ type SuccessTxsResult = {
 type FailedResult = {
   status: 'failed'
   message: string
+  router?: string
 }
 type WarningResult = {
   status: 'warning'
@@ -56,7 +57,7 @@ function closeModal() {
 function ok() {
   closeModal()
   if (props.result?.status === 'success') {
-    router.push('/')
+    router.replace('/')
   }
 }
 
@@ -154,9 +155,29 @@ const toResultTxs = async (txId: string) => {
     </template>
 
     <template #control>
-      <div class="">
-        <button class="main-btn-bg w-full rounded-lg py-3 text-sm text-sky-100 outline-none" @click="ok">OK</button>
+      <div class="flex items-center justify-center gap-4" v-if="result && result.status === 'failed' && result.router">
+        <button
+          @click="closeModal"
+          class="box-border border border-gray-primary w-[133px] rounded-lg py-2.5 text-sm text-black-primary"
+        >
+          Cancel
+        </button>
+        <button
+          class="main-btn-bg rounded-lg py-3 text-sm text-sky-100 px-4"
+          @click="$router.push({ name: (result as FailedResult).router })"
+        >
+          Go To
+          {{
+            (result as FailedResult)
+              .router!.split('-')
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ')
+          }}
+        </button>
       </div>
+      <button v-else class="main-btn-bg w-full rounded-lg py-3 text-sm text-sky-100 outline-none" @click="ok">
+        OK
+      </button>
     </template>
   </Modal>
 </template>

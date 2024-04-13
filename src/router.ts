@@ -345,6 +345,7 @@ const routes = [
   },
   {
     path: '/settings/toolkit/ft-merge',
+    name: 'ft-merge',
     component: () => import('./pages/settings/components/FTMerge.vue'),
     meta: {
       secondaryHeader: true,

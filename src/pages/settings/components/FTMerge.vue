@@ -17,12 +17,14 @@ const ftManager = ref()
 const operation = ref('')
 const loading = ref(false)
 const isRefresh = ref(true)
+const assetLoading = ref(true)
 const currentGenesis = ref('')
 const currentCodehash = ref('')
 const isOpenResultModal = ref(false)
 const transactionResult = ref<TransactionResult>()
 const ftAsssets = ref<(Asset & { utxoCount: number })[]>([])
 
+const splitCount = 10
 const testSplit = false
 const NeedToMergeCount = 3
 
@@ -33,9 +35,10 @@ type Receiver = {
 
 const split = async (genesis: string, codehash: string, symbol: string, decimal: number) => {
   try {
+    loading.value = true
+    operation.value = 'split'
     currentGenesis.value = genesis
     currentCodehash.value = codehash
-    operation.value = 'split'
     const network: API_NET = (await getNetwork()) as API_NET
     const purse = await getPrivateKey('mvc')
     const apiHost = await getApiHost()
@@ -47,10 +50,9 @@ const split = async (genesis: string, codehash: string, symbol: string, decimal:
       apiHost,
     })
     let receivers: Receiver[] = []
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < splitCount; i++) {
       receivers.push({ address: address.value, amount: '1' })
     }
-    loading.value = true
     let { txid: splitTxId } = await ftManager
       .transfer({
         genesis,
@@ -59,11 +61,6 @@ const split = async (genesis: string, codehash: string, symbol: string, decimal:
         senderWif: purse,
       })
       .catch((e) => {
-        isOpenResultModal.value = true
-        transactionResult.value = {
-          status: 'failed',
-          message: e,
-        }
         throw e
       })
     isRefresh.value = true
@@ -81,12 +78,13 @@ const split = async (genesis: string, codehash: string, symbol: string, decimal:
       },
     }
   } catch (error) {
+    isOpenResultModal.value = true
     transactionResult.value = {
       status: 'failed',
       message: error as string,
     }
   } finally {
-    loading.value = true
+    loading.value = false
   }
 }
 
@@ -149,19 +147,23 @@ const { isLoading, data: mvcAssets } = useMVCAssetsQuery(address, {
 // TODO: Change computed
 watch(
   [mvcAssets, ftManager, isRefresh],
-  ([assets, manager, _isRefresh]) => {
+  async ([assets, manager, _isRefresh]) => {
     if (manager && assets && _isRefresh) {
-      ftAsssets.value = []
+      assetLoading.value = true
+      const _assets: (Asset & { utxoCount: number })[] = []
       for (let asset of assets || []) {
         const { codeHash, genesis } = asset
-        manager.api.getFungibleTokenUnspents(codeHash, genesis, address.value).then((data: any) => {
-          ftAsssets.value.push({
+        await manager.api.getFungibleTokenUnspents(codeHash, genesis, address.value).then((data: any) => {
+          _assets.push({
             ...asset,
             utxoCount: data.length,
           })
           isRefresh.value = false
         })
       }
+      _assets.sort((a, b) => b.tokenName.localeCompare(a.tokenName))
+      ftAsssets.value = _assets
+      assetLoading.value = false
     }
   },
   { immediate: true }
@@ -200,11 +202,16 @@ onMounted(async () => {
       </div>
     </div>
     <div class="-mx-5 px-5 bg-gray-light py-3">Token</div>
-    <div class="py-16 text-center" v-if="isLoading">Token List Loading...</div>
-    <div v-for="(asset, index) in ftAsssets" :key="index" v-else-if="hasMergeToken">
-      <div class="flex items-center justify-between py-3" v-if="asset.utxoCount > NeedToMergeCount">
+    <div class="py-16 text-center" v-if="isLoading || assetLoading">Token List Loading...</div>
+    <div v-for="(asset, index) in ftAsssets" :key="index" v-else-if="hasMergeToken || testSplit">
+      <div class="flex items-center justify-between py-3" v-if="asset.utxoCount > NeedToMergeCount || testSplit">
         <div class="flex items-center gap-3">
           <UseImage :src="asset.logo" v-if="asset.logo && asset.codeHash" class="h-10 w-10 rounded-md">
+            <template #loading>
+              <div class="h-10 w-10 text-center leading-10 rounded-full text-white text-base bg-[#1E2BFF]">
+                {{ asset.symbol[0].toLocaleUpperCase() }}
+              </div>
+            </template>
             <template #error>
               <div class="h-10 w-10 text-center leading-10 rounded-full text-white text-base bg-[#1E2BFF]">
                 {{ asset.symbol[0].toLocaleUpperCase() }}
