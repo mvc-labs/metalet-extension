@@ -98,6 +98,7 @@ async function send() {
             router: 'ft-merge',
             status: 'failed',
             message: err.message,
+            confirmText: 'Merge',
           }
         }
       } else {

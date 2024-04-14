@@ -19,6 +19,7 @@ type SuccessResult = {
   fromAddress: string
   toAdddress: string
   amount: number
+  confirmText?: string
   token: {
     symbol: string
     decimal: number
@@ -28,15 +29,18 @@ type SuccessTxsResult = {
   chain: Chain
   status: 'successTxs'
   txIds: string[]
+  confirmText?: string
 }
 type FailedResult = {
   status: 'failed'
   message: string
   router?: string
+  confirmText?: string
 }
 type WarningResult = {
   status: 'warning'
   message: string
+  confirmText?: string
 }
 export type TransactionResult = SuccessTxsResult | SuccessResult | FailedResult | WarningResult
 const props = defineProps({
@@ -163,20 +167,14 @@ const toResultTxs = async (txId: string) => {
           Cancel
         </button>
         <button
-          class="main-btn-bg rounded-lg py-3 text-sm text-sky-100 px-4"
+          class="main-btn-bg rounded-lg py-3 text-sm w-[133px] text-sky-100 px-4"
           @click="$router.push({ name: (result as FailedResult).router })"
         >
-          Go To
-          {{
-            (result as FailedResult)
-              .router!.split('-')
-              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ')
-          }}
+          {{ result?.confirmText || 'Confirm' }}
         </button>
       </div>
       <button v-else class="main-btn-bg w-full rounded-lg py-3 text-sm text-sky-100 outline-none" @click="ok">
-        OK
+        {{ result?.confirmText || 'Confirm' }}
       </button>
     </template>
   </Modal>
