@@ -112,7 +112,6 @@ export class InscriptionTool {
     request.metaidDataList.forEach((metaidData) => {
       tool.inscriptionTxCtxDataList.push(createMetaIdTxCtxData(network, metaidData, randomKeyPairs.publicKey))
     })
-    
 
     const totalRevealPrevOutputValue = tool.buildEmptyRevealTx(network, revealOutValue, request.feeRate)
 
@@ -394,7 +393,12 @@ function createMetaIdTxCtxData(
   }
 }
 
-export function inscribe(network: bitcoin.Network, request: InscriptionRequest, keyPairs: BIP32Interface) {
+export function inscribe(
+  network: bitcoin.Network,
+  request: InscriptionRequest,
+  keyPairs: BIP32Interface,
+  address: string
+) {
   const tool = InscriptionTool.newInscriptionTool(network, request, keyPairs)
   if (tool.mustCommitTxFee > 0) {
     return {
@@ -405,20 +409,33 @@ export function inscribe(network: bitcoin.Network, request: InscriptionRequest, 
       commitAddrs: tool.commitAddrs,
       commitCost: 0,
       revealCost: 0,
+      totalCost: 0,
     }
   }
+
+  const commitCost =
+    tool.commitTxPrevOutputFetcher.reduce((accumulator, currentValue) => {
+      return accumulator + currentValue
+    }, 0) -
+    tool.commitTx.outs
+      .filter((out) => bitcoin.address.fromOutputScript(out.script, network) === address)
+      .reduce((total, out) => {
+        return total + out.value
+      }, 0)
+
+  const revealTotalOutput = (request.revealOutValue || defaultRevealOutValue) * tool.revealTxs.length
 
   return {
     commitTx: tool.commitTx.toHex(),
     revealTxs: tool.revealTxs.map((revealTx) => revealTx.toHex()),
     ...tool.calculateFee(),
     commitAddrs: tool.commitAddrs,
-    commitCost: tool.commitTxPrevOutputFetcher.reduce((accumulator, currentValue) => {
-      return accumulator + currentValue
-    }, 0),
-    revealCost: tool.revealTxPrevOutputFetcher.reduce((accumulator, currentValue) => {
-      return accumulator + currentValue
-    }, 0),
+    commitCost,
+    revealCost:
+      tool.revealTxPrevOutputFetcher.reduce((accumulator, currentValue) => {
+        return accumulator + currentValue
+      }, 0) - revealTotalOutput,
+    totalCost: commitCost - revealTotalOutput,
   }
 }
 
@@ -431,6 +448,7 @@ interface InscribeHexResult {
   revealTxsHex: string[]
   commitCost: number
   revealCost: number
+  totalCost: number
 }
 
 interface InscribeTxIdResult {
@@ -438,6 +456,7 @@ interface InscribeTxIdResult {
   revealTxIds: string[]
   commitCost: number
   revealCost: number
+  totalCost: number
 }
 
 export async function process({
@@ -459,10 +478,11 @@ export async function process({
   const signer = (await getSigner('btc')) as BIP32Interface
 
   try {
-    const { commitTx, revealTxs, commitCost, revealCost } = inscribe(
+    const { commitTx, revealTxs, commitCost, revealCost, totalCost } = inscribe(
       network,
       { ...data, commitTxPrevOutputList },
-      signer
+      signer,
+      address
     )
     if (commitTx === '') {
       throw new Error('Insufficient funds')
@@ -472,9 +492,9 @@ export async function process({
       const commitTxId = await broadcastBTCTx(commitTx)
       await sleep(1000)
       const [...revealTxIds] = await Promise.all([...revealTxs.map((revealTx) => broadcastBTCTx(revealTx))])
-      return { commitTxId, revealTxIds, commitCost, revealCost }
+      return { commitTxId, revealTxIds, commitCost, revealCost, totalCost }
     }
-    return { commitTxHex: commitTx, revealTxsHex: revealTxs, commitCost, revealCost }
+    return { commitTxHex: commitTx, revealTxsHex: revealTxs, commitCost, revealCost, totalCost }
   } catch (error) {
     throw error
   }

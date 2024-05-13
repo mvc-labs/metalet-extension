@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import actions from '@/data/authorize-actions'
 import Copy from '@/components/Copy.vue'
+import actions from '@/data/authorize-actions'
 import LoadingIcon from '@/components/LoadingIcon.vue'
 import { MetaidData } from '@/lib/actions/btc/inscribe'
 import { ChevronLeftIcon } from '@heroicons/vue/24/outline'
@@ -22,6 +22,7 @@ const loading = ref(true)
 const error = ref<Error>()
 const commitCost = ref<number>(0)
 const revealCost = ref<number>(0)
+const totalCost = ref<number>(0)
 const commitTxHex = ref<string>()
 const revealTxsHex = ref<string[]>([])
 const metaidDataList = props.params.data.metaidDataList
@@ -43,16 +44,19 @@ actions.Inscribe.process({ ...props.params, options: { noBroadcast: true } })
       revealTxsHex: _revealTxsHex,
       commitCost: _commitCost,
       revealCost: _revealCost,
+      totalCost: _totalCost,
     }: {
       commitTxHex: string
       revealTxsHex: string[]
       commitCost: number
       revealCost: number
+      totalCost: number
     }) => {
       commitCost.value = _commitCost
       revealCost.value = _revealCost
       commitTxHex.value = _commitTxHex
       revealTxsHex.value = _revealTxsHex
+      totalCost.value = _totalCost
     }
   )
   .catch((err: Error) => {
@@ -88,7 +92,7 @@ actions.Inscribe.process({ ...props.params, options: { noBroadcast: true } })
       </div>
       <div class="flex justify-between">
         <div class="label">Total Cost</div>
-        <div class="text-xs flex gap-2">{{ (commitCost + revealCost) / 1e8 }} BTC</div>
+        <div class="text-xs flex gap-2">{{ totalCost / 1e8 }} BTC</div>
       </div>
       <div class="flex justify-between">
         <div class="label">Fee Rate</div>
@@ -133,7 +137,7 @@ actions.Inscribe.process({ ...props.params, options: { noBroadcast: true } })
       <div class="flex flex-col w-full gap-y-2">
         <div class="flex justify-between">
           <div class="label">Total Cost</div>
-          <div class="text-xs flex gap-2">{{ (commitCost + revealCost) / 1e8 }} BTC</div>
+          <div class="text-xs flex gap-2">{{ totalCost / 1e8 }} BTC</div>
         </div>
         <div class="flex justify-between">
           <div class="label">Fee Rate</div>

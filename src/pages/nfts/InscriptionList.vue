@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import dayjs from 'dayjs'
 import { ref, computed } from 'vue'
 import BRCToken from './BRCToken.vue'
 import { useRouter } from 'vue-router'
 import { getAddress } from '@/lib/account'
+import { formatTimestamp } from '@/lib/formatters'
 import LoadingIcon from '@/components/LoadingIcon.vue'
 import { useInscriptionsInfiniteQuery } from '@/queries/inscribe'
-import { formatTimestamp } from '@/lib/formatters'
 
 const size = ref(10)
 const address = ref()
